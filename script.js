@@ -387,8 +387,9 @@ const DANCE_GOLD_SPRITES = Object.freeze({
   })
 });
 const DANCE_YEAH_FINAL_SOURCE = "minigames/just-dance/hud/yeah/FinishYeah.mp4";
-const DANCE_GOLD_DEFAULTS = Object.freeze({ prepareMs: 2300, loopRestartMs: 0, finishOffsetMs: 0, finalDelayMs: 0, finalScalePct: 100 });
-const DANCE_YEAH_DEV_STORAGE_KEY = "jdYeahDevSettingsV1";
+const DANCE_IPK_GOLD_BASE = "minigames/just-dance/hud/ipk-gold";
+const DANCE_GOLD_DEFAULTS = Object.freeze({ prepareMs: 3250, loopRestartMs: 0, finishOffsetMs: 0, finalDelayMs: 0, finalScalePct: 100 });
+const DANCE_YEAH_DEV_STORAGE_KEY = "jdYeahDevSettingsIpkV1";
 const DANCE_GOLD_FINISH_WINDOW_MS = 850;
 let danceGoldPrepareMs = DANCE_GOLD_DEFAULTS.prepareMs;
 let danceGoldLoopRestartMs = DANCE_GOLD_DEFAULTS.loopRestartMs;
@@ -2223,13 +2224,21 @@ function updateDancePlayerControls() {
   if (danceSeek && !dancePlayerSeeking && duration > 0) danceSeek.value = String(Math.max(0, Math.min(1000, Math.round(current / duration * 1000))));
 }
 
+function danceHudSoundSource(name) {
+  const ipk = {
+    "gold-intro-ipk": `${DANCE_IPK_GOLD_BASE}/hud_goldmove_intro.wav`,
+    "gold-impact-ipk": `${DANCE_IPK_GOLD_BASE}/hud_goldmove_explo.wav`
+  };
+  return ipk[name] || `minigames/just-dance/hud/sounds/${name}.mp3`;
+}
+
 function unlockDanceHudAudio() {
-  const urls = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah", "start-loop-first"];
-  for (const name of urls) {
+  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah", "gold-intro-ipk", "gold-impact-ipk"];
+  for (const name of names) {
     if (danceHudSounds.has(name)) continue;
-    const audio = new Audio(`minigames/just-dance/hud/sounds/${name}.mp3`);
+    const audio = new Audio(danceHudSoundSource(name));
     audio.preload = "auto";
-    audio.volume = name === "yeah" ? 0.86 : (name === "start-loop-first" ? 0.82 : 0.72);
+    audio.volume = name.startsWith("gold-") ? 0.794 : (name === "yeah" ? 0.86 : 0.72);
     danceHudSounds.set(name, audio);
   }
 }
@@ -2344,10 +2353,10 @@ function preloadDanceImage(url) {
 async function preloadDanceHudSounds(onProgress = null) {
   if (danceHudSoundsPreloaded) { onProgress?.(1, 1, 1); return; }
   unlockDanceHudAudio();
-  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah", "start-loop-first"];
+  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah", "gold-intro-ipk", "gold-impact-ipk"];
   for (let index = 0; index < names.length; index += 1) {
     const name = names[index];
-    const blob = await fetchDanceBlob(`minigames/just-dance/hud/sounds/${name}.mp3`);
+    const blob = await fetchDanceBlob(danceHudSoundSource(name));
     const url = replaceDanceManagedBlobUrl(`hud-sound-${name}`, blob);
     const audio = danceHudSounds.get(name);
     if (audio) { audio.src = url; audio.preload = "auto"; audio.load(); }
@@ -2441,17 +2450,13 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
         const audioBlob = await fetchDanceBlob(DANCE_AUDIO_SOURCE, ratio => setDancePreloadUi(70 + ratio * 14, "Carregando áudio principal…"));
         await installDanceMediaBlob("audio", audioBlob, danceSongAudio);
 
-        setDancePreloadUi(84, "Carregando FX do Gold Move em quadros…");
-        await preloadDanceGoldSpriteAtlases(ratio => setDancePreloadUi(84 + ratio * 10, "Carregando FX do Gold Move em quadros…"));
-
-        setDancePreloadUi(94, "Carregando FinishYeah…");
-        const finalYeahBlob = await fetchDanceBlob(DANCE_YEAH_FINAL_SOURCE, ratio => setDancePreloadUi(94 + ratio * 3, "Carregando FinishYeah…"));
-        await installDanceMediaBlob("yeah-final-video", finalYeahBlob, danceYeahFinalVideo);
+        // O Gold Move agora usa somente a HUD nativa do IPK (tapes/texturas + dois WAVs pequenos).
+        // Nada de MP4, canvas de frames ou troca de mídia durante a música.
         danceCoreMediaPreloaded = true;
       }
 
-      const hudStart = coreNeeded ? 97 : 95;
-      const imageStart = coreNeeded ? 99 : 98;
+      const hudStart = coreNeeded ? 84 : 95;
+      const imageStart = coreNeeded ? 96 : 98;
       setDancePreloadUi(hudStart, "Carregando sons da HUD…");
       await preloadDanceHudSounds(ratio => setDancePreloadUi(hudStart + ratio * (imageStart - hudStart), "Carregando sons da HUD…"));
       setDancePreloadUi(imageStart, "Preparando HUD, pictos e julgamentos…");
@@ -3115,6 +3120,140 @@ function updateDanceGoldMoveFx(timeMs) {
   else if (danceStartLoopGoldIndex >= 0) stopDanceGoldStartLoop();
 }
 
+// ---------- Gold Move nativo do patch_pc.ipk ----------
+// patch_pc.ipk contém hud_pregoldmove/hud_goldmove, feedback_gold.tape,
+// feedback_gold_bad.tape, feedbacks_move.tape e as texturas de YEAH/flare.
+// A implementação abaixo substitui integralmente o pipeline StartLoop/FinishLoop/FinishYeah.
+const danceIpkGoldIntroMoves = new Set();
+let danceIpkGoldIntroAudio = null;
+let danceIpkGoldImpactAudio = null;
+let danceIpkGoldLastImpactAt = 0;
+
+function stopDanceIpkGoldIntroAudio() {
+  if (!danceIpkGoldIntroAudio) return;
+  try { danceIpkGoldIntroAudio.pause(); danceIpkGoldIntroAudio.currentTime = 0; } catch {}
+  danceIpkGoldIntroAudio = null;
+}
+
+function playDanceIpkGoldIntroAudio() {
+  stopDanceIpkGoldIntroAudio();
+  unlockDanceHudAudio();
+  const base = danceHudSounds.get("gold-intro-ipk");
+  if (!base) return;
+  try {
+    const sound = base.cloneNode(true);
+    sound.volume = base.volume;
+    sound.currentTime = 0;
+    danceIpkGoldIntroAudio = sound;
+    sound.onended = () => { if (danceIpkGoldIntroAudio === sound) danceIpkGoldIntroAudio = null; };
+    sound.play().catch(() => { if (danceIpkGoldIntroAudio === sound) danceIpkGoldIntroAudio = null; });
+  } catch {}
+}
+
+function playDanceIpkGoldImpactAudio() {
+  const now = performance.now();
+  if (now - danceIpkGoldLastImpactAt < 260) return;
+  danceIpkGoldLastImpactAt = now;
+  unlockDanceHudAudio();
+  const base = danceHudSounds.get("gold-impact-ipk");
+  if (!base) return;
+  try {
+    if (danceIpkGoldImpactAudio) { danceIpkGoldImpactAudio.pause(); danceIpkGoldImpactAudio.currentTime = 0; }
+    const sound = base.cloneNode(true);
+    sound.volume = base.volume;
+    sound.currentTime = 0;
+    danceIpkGoldImpactAudio = sound;
+    sound.onended = () => { if (danceIpkGoldImpactAudio === sound) danceIpkGoldImpactAudio = null; };
+    sound.play().catch(() => { if (danceIpkGoldImpactAudio === sound) danceIpkGoldImpactAudio = null; });
+  } catch {}
+}
+
+function renderDanceYeahDevSettings() {
+  if (danceYeahPrepareMsInput) danceYeahPrepareMsInput.value = String(danceGoldPrepareMs);
+  if (danceYeahFinishOffsetMsInput) danceYeahFinishOffsetMsInput.value = String(danceGoldFinishOffsetMs);
+  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `IPK nativo • Pré -${danceGoldPrepareMs} ms • Impacto ${formatDanceSyncOffset(danceGoldFinishOffsetMs)} • tape 69/60 = 1,15 s`;
+}
+
+function saveDanceYeahDevSettings() {
+  try { localStorage.setItem(DANCE_YEAH_DEV_STORAGE_KEY, JSON.stringify({ prepareMs: danceGoldPrepareMs, finishOffsetMs: danceGoldFinishOffsetMs })); } catch {}
+}
+
+function loadDanceYeahDevSettings() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(DANCE_YEAH_DEV_STORAGE_KEY) || "null"); } catch {}
+  danceGoldPrepareMs = clampDanceYeahSetting(saved?.prepareMs, 500, 6000, DANCE_GOLD_DEFAULTS.prepareMs);
+  danceGoldFinishOffsetMs = clampDanceYeahSetting(saved?.finishOffsetMs, -1500, 1500, DANCE_GOLD_DEFAULTS.finishOffsetMs);
+  renderDanceYeahDevSettings();
+}
+
+function applyDanceYeahDevSettings(announce = true) {
+  danceGoldPrepareMs = clampDanceYeahSetting(danceYeahPrepareMsInput?.value, 500, 6000, DANCE_GOLD_DEFAULTS.prepareMs);
+  danceGoldFinishOffsetMs = clampDanceYeahSetting(danceYeahFinishOffsetMsInput?.value, -1500, 1500, DANCE_GOLD_DEFAULTS.finishOffsetMs);
+  saveDanceYeahDevSettings();
+  renderDanceYeahDevSettings();
+  resetDanceGoldMoveFx(false);
+  if (announce && danceLabMessage) danceLabMessage.textContent = "Gold Move IPK aplicado. Nenhum vídeo/loop é usado.";
+}
+
+function resetDanceYeahDevSettings() {
+  danceGoldPrepareMs = DANCE_GOLD_DEFAULTS.prepareMs;
+  danceGoldFinishOffsetMs = DANCE_GOLD_DEFAULTS.finishOffsetMs;
+  saveDanceYeahDevSettings();
+  renderDanceYeahDevSettings();
+  resetDanceGoldMoveFx(false);
+  if (danceLabMessage) danceLabMessage.textContent = "Gold Move restaurado para o timing nativo do IPK.";
+}
+
+function resetDanceGoldMoveFx(clearHistory = true) {
+  stopDanceIpkGoldIntroAudio();
+  if (danceYeahPreviewTimer) window.clearTimeout(danceYeahPreviewTimer);
+  danceYeahPreviewTimer = 0;
+  if (clearHistory) danceIpkGoldIntroMoves.clear();
+}
+
+function queueDanceYeahFinalFx() { playDanceIpkGoldImpactAudio(); }
+function stopDanceYeahFx() {}
+function playDanceYeahFx() { playDanceIpkGoldImpactAudio(); }
+function stopDanceGoldStartLoop() { stopDanceIpkGoldIntroAudio(); }
+function stopDanceGoldFinishLoop() {}
+function playDanceGoldStartLoop() {}
+function playDanceGoldFinishLoop() {}
+
+function updateDanceGoldMoveFx(timeMs) {
+  if (!danceTestMoves.length || !isDanceMediaPlaying()) return;
+  for (let index = 0; index < danceTestMoves.length; index += 1) {
+    const move = danceTestMoves[index];
+    if (!move?.goldMove || danceIpkGoldIntroMoves.has(index)) continue;
+    const impactTime = Number(move.time || 0) + danceGoldFinishOffsetMs;
+    const delta = impactTime - timeMs;
+    if (delta <= danceGoldPrepareMs && delta > 0) {
+      danceIpkGoldIntroMoves.add(index);
+      playDanceIpkGoldIntroAudio();
+      break;
+    }
+    if (delta <= 0) danceIpkGoldIntroMoves.add(index);
+  }
+}
+
+function previewDanceYeahSequence() {
+  applyDanceYeahDevSettings(false);
+  if (!dancePreloadReady) {
+    if (danceLabMessage) danceLabMessage.textContent = "Espere o carregamento chegar a 100% antes de testar o Gold Move.";
+    return;
+  }
+  resetDanceGoldMoveFx(false);
+  playDanceIpkGoldIntroAudio();
+  if (danceLabMessage) danceLabMessage.textContent = `Prévia IPK: hud_pregoldmove; impacto em ${danceGoldPrepareMs} ms.`;
+  danceYeahPreviewTimer = window.setTimeout(() => {
+    danceYeahPreviewTimer = 0;
+    const slot = danceVideoJudgements?.querySelector(".dance-video-player-judge");
+    const playerId = slot?.dataset?.playerId;
+    if (playerId) showDanceVideoJudgement(playerId, "YEAH", true);
+    else playDanceIpkGoldImpactAudio();
+    if (danceLabMessage) danceLabMessage.textContent = "Prévia IPK concluída: feedback_gold + hud_goldmove.";
+  }, Math.max(0, danceGoldPrepareMs));
+}
+
 async function initializeDancePlayerSettings() {
   loadDanceYeahDevSettings();
   danceQualityPreference = safeLocalStorageGet(DANCE_QUALITY_STORAGE_KEY, "auto");
@@ -3238,7 +3377,7 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
   void feedback.offsetWidth;
   feedback.classList.add("active");
 
-  if (String(judgement || "").toUpperCase().startsWith("YEAH")) queueDanceYeahFinalFx();
+  if (String(judgement || "").toUpperCase().startsWith("YEAH")) playDanceIpkGoldImpactAudio();
 }
 
 function pictoAtlasPosition(name) {

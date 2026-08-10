@@ -505,8 +505,6 @@
           <div id="danceVideoStage" class="dance-video-stage" data-lyrics-size="small" data-video-fit="contain">
             <video id="danceTestVideo" class="dance-test-video" playsinline preload="none" poster="minigames/just-dance/songs/RainOverMe/RainOverMe.jpg" muted></video>
             <audio id="danceSongAudio" preload="none"></audio>
-            <canvas id="danceGoldCanvas" class="dance-gold-frame-canvas" width="960" height="540" aria-hidden="true"></canvas>
-            <video id="danceYeahFinalVideo" class="dance-yeah-final-video" playsinline preload="none" muted aria-hidden="true"></video>
             <div id="danceScoreBar" class="dance-score-bar" aria-hidden="true"><img id="danceScoreBarFill" src="minigames/just-dance/hud/images/scorebars/1P_bar.png" alt=""></div>
             <div id="dancePreloadOverlay" class="dance-preload-overlay" role="status" aria-live="polite">
               <div class="dance-preload-card">
@@ -575,37 +573,28 @@
           </div>
           <p>O erro anterior era de <b>2.812 ms</b>: o <code>videoOffset</code> foi subtraído de uma timeline que já começava nesse tempo. Para <b>Rain Over Me</b>, a calibração confirmada agora é <b>-1725 ms</b> e esse passa a ser o padrão da música. Se ainda notar diferença no aparelho/tela, use os botões durante o vídeo; <kbd>[</kbd>/<kbd>]</kbd> ajustam 25 ms e <kbd>Shift</kbd> + essas teclas ajusta 250 ms.</p>
         </div>
-        <div class="dance-yeah-calibrator" aria-label="Configuração DEV do YEAH">
+        <div class="dance-yeah-calibrator" aria-label="Configuração DEV do Gold Move do IPK">
           <div class="dance-yeah-dev-head">
             <div>
-              <span class="tiny-label">YEAH! DEV</span>
-              <strong>Sequência do Gold Move</strong>
+              <span class="tiny-label">GOLD MOVE DEV</span>
+              <strong>HUD nativa do patch_pc.ipk</strong>
             </div>
-            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">Padrão do IPK</span>
+            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">IPK nativo</span>
           </div>
           <div class="dance-yeah-dev-grid">
-            <label>Start Loop começa
-              <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="250" max="6000" step="25" value="2300" /><b>ms antes</b></span>
+            <label>Pré-aviso Gold Move
+              <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="500" max="6000" step="25" value="3250" /><b>ms antes</b></span>
             </label>
-            <label>Depois da 1ª volta, repetir a partir de
-              <span class="dance-yeah-dev-input"><input id="danceYeahLoopRestartMs" type="number" min="0" max="1600" step="25" value="0" /><b>ms da animação</b></span>
-            </label>
-            <label>Finish Loop
+            <label>Impacto do Gold Move
               <span class="dance-yeah-dev-input"><input id="danceYeahFinishOffsetMs" type="number" min="-1500" max="1500" step="25" value="0" /><b>ms do Gold</b></span>
-            </label>
-            <label>FinishYeah depois do Finish Loop
-              <span class="dance-yeah-dev-input"><input id="danceYeahFinalDelayMs" type="number" min="0" max="2000" step="25" value="0" /><b>ms</b></span>
-            </label>
-            <label>Escala do FinishYeah
-              <span class="dance-yeah-dev-input"><input id="danceYeahScalePct" type="number" min="60" max="160" step="5" value="100" /><b>%</b></span>
             </label>
           </div>
           <div class="dance-yeah-dev-actions">
             <button id="danceYeahApplyBtn" class="secondary compact-button" type="button">Aplicar</button>
-            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar sequência</button>
+            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar Gold Move IPK</button>
             <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrão</button>
           </div>
-          <p>Use este painel para acertar visualmente o Gold Move. <b>Start Loop e Finish Loop não usam mais vídeo:</b> os quadros originais são reproduzidos diretamente no canvas, evitando a quebra do fluxo ao reiniciar um MP4. O Start toca a primeira volta com som; depois repete mudo a partir do ponto configurado. O <b>FinishYeah</b> usa o MP4 original somente uma vez no final, sem loop, enquanto o áudio continua separado para não interferir na música.</p>
+          <p>Esta versão não usa <b>Start Loop, Finish Loop, canvas de quadros nem FinishYeah em vídeo</b>. O pré-aviso usa o áudio original <code>hud_pregoldmove</code> do IPK e o acerto usa <code>feedback_gold.tape</code> + <code>feedback_gold.tga</code> + <code>feedback_gold_flare.tga</code>, com o impacto <code>hud_goldmove</code>. Assim o Gold Move fica no mesmo fluxo da HUD e não precisa trocar de mídia.</p>
         </div>
         <div class="dance-score-rules" aria-label="Sistema de pontuação">
           <div class="dance-judgement-legend">

@@ -2638,3 +2638,30 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   transition:opacity .05s linear,transform .10s ease;
 }
 .dance-yeah-final-video.active{opacity:1;visibility:visible}
+
+
+/* ---------- Gold Move nativo do patch_pc.ipk ---------- */
+/* feedbacks_move.tape: 69 ticks. No PC essa HUD trabalha a 60 ticks/s => 1,15 s.
+   Escala 0,95 -> 1,10 nos 6 primeiros ticks, depois volta a 0,95; fade começa no tick 18. */
+.dance-video-feedback.feedback-yeah.active .dance-video-judge-image{
+  animation:jdIpkGoldTape 1.15s linear both !important;
+  transform-origin:50% 50%;
+}
+.dance-video-feedback.feedback-yeah.active .dance-video-judge-flare:not([hidden]){
+  animation:jdIpkGoldFlareTape 1.15s linear both !important;
+  transform-origin:50% 50%;
+}
+@keyframes jdIpkGoldTape{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.95) rotate(10deg)}
+  8.6957%{opacity:1;transform:translate(-50%,-50%) scale(1.10) rotate(10deg)}
+  26.087%{opacity:1;transform:translate(-50%,-50%) scale(1.075) rotate(10deg)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.95) rotate(10deg)}
+}
+@keyframes jdIpkGoldFlareTape{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.95) rotate(0deg)}
+  8.6957%{opacity:1;transform:translate(-50%,-50%) scale(1.10) rotate(0deg)}
+  26.087%{opacity:.92;transform:translate(-50%,-50%) scale(1.075) rotate(0deg)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.95) rotate(0deg)}
+}
+/* Elementos antigos de vídeo/canvas do Gold Move ficam definitivamente desativados. */
+.dance-gold-frame-canvas,.dance-yeah-final-video,.dance-gold-loop{display:none!important}
