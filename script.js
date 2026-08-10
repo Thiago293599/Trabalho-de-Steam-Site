@@ -469,6 +469,40 @@ let danceYeahFinalTimer = 0;
 let danceYeahPreviewTimer = 0;
 
 
+/* ---------- Compatibilidade: Gold Move global experimental desativado ---------- */
+function stopDanceGoldStartLoop() {
+  stopDanceStartLoopFirstAudio();
+}
+
+function stopDanceGoldFinishLoop() {
+  // O Finish Loop antigo por vídeo/frames está desativado nesta base estável.
+}
+
+function resetDanceGoldMoveFx(clearState = false) {
+  stopDanceGoldStartLoop();
+  stopDanceGoldFinishLoop();
+  if (danceYeahFinalTimer) {
+    window.clearTimeout(danceYeahFinalTimer);
+    danceYeahFinalTimer = 0;
+  }
+  if (danceYeahPreviewTimer) {
+    window.clearTimeout(danceYeahPreviewTimer);
+    danceYeahPreviewTimer = 0;
+  }
+  danceIpkGoldStageFx?.classList.remove("active", "miss");
+  danceIpkGoldStageFx?.setAttribute("aria-hidden", "true");
+  if (clearState) {
+    danceActiveGoldMoveIndex = -1;
+    danceStartLoopGoldIndex = -1;
+    dancePendingYeahAfterFinish = false;
+    danceFinishedGoldIntroMoves.clear();
+  }
+}
+
+function updateDanceGoldMoveFx(_timeMs) {
+  // O overlay global experimental está desativado nesta base estável.
+}
+
 const ONLINE_SESSION_KEY = "corridaTabuleiroOnlineSessionV1";
 
 function showOnly(screen) {
