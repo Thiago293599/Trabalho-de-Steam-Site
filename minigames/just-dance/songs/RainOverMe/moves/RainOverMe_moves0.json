@@ -1,0 +1,594 @@
+[
+  {
+    "name": "rainoverme_strtpush",
+    "time": 3984,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 7265,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 9140,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_strtpush",
+    "time": 11484,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 14765,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 16640,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_strtaie",
+    "time": 18515,
+    "duration": 469
+  },
+  {
+    "name": "rainoverme_aieaie",
+    "time": 18984,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_str",
+    "time": 22265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_mid",
+    "time": 23203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_end",
+    "time": 24140,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_strtaie",
+    "time": 26015,
+    "duration": 469
+  },
+  {
+    "name": "rainoverme_aieaie",
+    "time": 26484,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_str",
+    "time": 29765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_mid",
+    "time": 30703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_end",
+    "time": 31640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfesse",
+    "time": 37265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfessend",
+    "time": 38203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 41015,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 41953,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 42890,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 44765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 45703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 46640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfesse",
+    "time": 48515,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfessend",
+    "time": 49453,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfesse",
+    "time": 52265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfessend",
+    "time": 53203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 56015,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 56953,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 57890,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 59765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 60703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 61640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_strtpush",
+    "time": 63984,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 67265,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 69140,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_strtpush",
+    "time": 71484,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 74765,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 76640,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_strtaie",
+    "time": 78515,
+    "duration": 469
+  },
+  {
+    "name": "rainoverme_aieaie",
+    "time": 78984,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_str",
+    "time": 82265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_mid",
+    "time": 83203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_end",
+    "time": 84140,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_strtaie",
+    "time": 86015,
+    "duration": 469
+  },
+  {
+    "name": "rainoverme_aieaie",
+    "time": 86484,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_str",
+    "time": 89765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_mid",
+    "time": 90703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_end",
+    "time": 91640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfesse",
+    "time": 97265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfessend",
+    "time": 98203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 101015,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 101953,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 102890,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 104765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 105703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 106640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfesse",
+    "time": 108515,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfessend",
+    "time": 109453,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfesse",
+    "time": 112265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_tapfessend",
+    "time": 113203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 116015,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 116953,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 117890,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 119765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulderpunch",
+    "time": 120703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_shoulders",
+    "time": 121640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_strtpush",
+    "time": 123984,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 127265,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 129140,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_strtpush",
+    "time": 131484,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 134765,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 136640,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 142265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 143203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 144140,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 145078,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_moveback_up",
+    "time": 146015,
+    "duration": 1172
+  },
+  {
+    "name": "rainoverme_moveback_down",
+    "time": 147187,
+    "duration": 1172
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 149765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 150703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 151640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follslow",
+    "time": 152578,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_moveback_up",
+    "time": 153515,
+    "duration": 1172
+  },
+  {
+    "name": "rainoverme_moveback_down",
+    "time": 154687,
+    "duration": 1172
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 157265,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 158203,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 159140,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 160078,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_punch",
+    "time": 161015,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_punch",
+    "time": 161953,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_punch",
+    "time": 162890,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_punch",
+    "time": 163828,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 164765,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 165703,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 166640,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_follfast",
+    "time": 167578,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_punch",
+    "time": 168515,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_punch",
+    "time": 169453,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showoff",
+    "time": 170390,
+    "duration": 937,
+    "goldMove": 1
+  },
+  {
+    "name": "rainoverme_strtpush",
+    "time": 172734,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 176015,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 177890,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_strtpush",
+    "time": 180234,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_turnhead",
+    "time": 183515,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_letfall",
+    "time": 185390,
+    "duration": 1406
+  },
+  {
+    "name": "rainoverme_strtaie",
+    "time": 187265,
+    "duration": 469
+  },
+  {
+    "name": "rainoverme_aieaie",
+    "time": 187734,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_str",
+    "time": 191015,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_mid",
+    "time": 191953,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_end",
+    "time": 192890,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_strtaie",
+    "time": 194765,
+    "duration": 469
+  },
+  {
+    "name": "rainoverme_aieaie",
+    "time": 195234,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_str",
+    "time": 198515,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_mid",
+    "time": 199453,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_showrain_end",
+    "time": 200390,
+    "duration": 937
+  },
+  {
+    "name": "rainoverme_fame",
+    "time": 202031,
+    "duration": 937,
+    "goldMove": 1
+  }
+]

@@ -1,0 +1,276 @@
+{
+	"__class": "Actor_Template",
+	"WIP": 0,
+	"LOWUPDATE": 0,
+	"UPDATE_LAYER": 0,
+	"PROCEDURAL": 0,
+	"star_hud_playersTPAUSED": 0,
+	"FORCEISENVIRONMENT": 0,
+	"COMPONENTS": [
+		{
+			"__class": "UIRootComponent_Template"
+		},
+		{
+			"__class": "PropertyPatcher_Template"
+		},
+		{
+			"__class": "MaterialGraphicComponent_Template",
+			"patchLevel": 0,
+			"patchHLevel": 2,
+			"patchVLevel": 2,
+			"visualAABB": {
+				"__class": "AABB",
+				"MIN": [
+					0,
+					0
+				],
+				"MAX": [
+					0,
+					0
+				]
+			},
+			"renderintarget": 0,
+			"posOffset": [
+				0,
+				0
+			],
+			"angleOffset": 0,
+			"blendmode": 2,
+			"materialtype": 0,
+			"selfIllumColor": [
+				0,
+				0,
+				0,
+				0
+			],
+			"disableLight": 0,
+			"forceDisableLight": 0,
+			"useShadow": 0,
+			"useRootBone": 0,
+			"shadowSize": [
+				1.8,
+				0.3
+			],
+			"shadowMaterial": {
+				"__class": "GFXMaterialSerializable",
+				"textureSet": {
+					"__class": "GFXMaterialTexturePathSet",
+					"diffuse": "",
+					"back_light": "",
+					"normal": "",
+					"separateAlpha": "",
+					"diffuse_2": "",
+					"back_light_2": "",
+					"anim_impostor": "",
+					"diffuse_3": "",
+					"diffuse_4": ""
+				},
+				"ATL_Channel": 0,
+				"ATL_Path": "",
+				"shaderPath": "",
+				"materialParams": {
+					"__class": "GFXMaterialSerializableParam",
+					"Reflector_factor": 0
+				},
+				"outlinedMaskParams": {
+					"__class": "OutlinedMaskMaterialParams",
+					"maskColor": [
+						0,
+						0,
+						0,
+						0
+					],
+					"outlineColor": [
+						0,
+						0,
+						0,
+						0
+					],
+					"thickness": 1
+				},
+				"alphaTest": 4294967295,
+				"alphaRef": 4294967295
+			},
+			"shadowAttenuation": 1,
+			"shadowDist": 4,
+			"shadowOffsetPos": [
+				0,
+				0,
+				0
+			],
+			"angleLimit": 0,
+			"material": {
+				"__class": "GFXMaterialSerializable",
+				"textureSet": {
+					"__class": "GFXMaterialTexturePathSet",
+					"diffuse": "",
+					"back_light": "",
+					"normal": "",
+					"separateAlpha": "",
+					"diffuse_2": "",
+					"back_light_2": "",
+					"anim_impostor": "",
+					"diffuse_3": "",
+					"diffuse_4": ""
+				},
+				"ATL_Channel": 0,
+				"ATL_Path": "",
+				"shaderPath": "",
+				"materialParams": {
+					"__class": "GFXMaterialSerializableParam",
+					"Reflector_factor": 0
+				},
+				"outlinedMaskParams": {
+					"__class": "OutlinedMaskMaterialParams",
+					"maskColor": [
+						0,
+						0,
+						0,
+						0
+					],
+					"outlineColor": [
+						0,
+						0,
+						0,
+						0
+					],
+					"thickness": 1
+				},
+				"alphaTest": 4294967295,
+				"alphaRef": 4294967295
+			},
+			"defaultColor": [
+				1,
+				1,
+				1,
+				1
+			],
+			"zOffset": 0
+		},
+		{
+			"__class": "TapeCase_Template",
+			"TapesRack": [
+				{
+					"__class": "TapeGroup",
+					"Entries": [
+						{
+							"__class": "TapeEntry",
+							"Label": "off",
+							"Path": "world/ui/objects/star_hud_players/animations/off.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "empty",
+							"Path": "world/ui/objects/star_hud_players/animations/empty.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on",
+							"Path": "world/ui/objects/star_hud_players/animations/on.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_plus",
+							"Path": "world/ui/objects/star_hud_players/animations/on_plus.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_plus_more",
+							"Path": "world/ui/objects/star_hud_players/animations/on_plus_more.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_1",
+							"Path": "world/ui/objects/star_hud_players/animations/win_1.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_2",
+							"Path": "world/ui/objects/star_hud_players/animations/win_2.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_3",
+							"Path": "world/ui/objects/star_hud_players/animations/win_3.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_4",
+							"Path": "world/ui/objects/star_hud_players/animations/win_4.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_5",
+							"Path": "world/ui/objects/star_hud_players/animations/win_5.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_6",
+							"Path": "world/ui/objects/star_hud_players/animations/win_6.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_7",
+							"Path": "world/ui/objects/star_hud_players/animations/win_7.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "win_5_recap",
+							"Path": "world/ui/objects/star_hud_players/animations/win_5_recap.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_sound_1",
+							"Path": "world/ui/objects/star_hud_players/animations/on_with_sound_1.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_sound_2",
+							"Path": "world/ui/objects/star_hud_players/animations/on_with_sound_2.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_sound_3",
+							"Path": "world/ui/objects/star_hud_players/animations/on_with_sound_3.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_sound_4",
+							"Path": "world/ui/objects/star_hud_players/animations/on_with_sound_4.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_sound_5",
+							"Path": "world/ui/objects/star_hud_players/animations/on_with_sound_5.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "on_sound_6",
+							"Path": "world/ui/objects/star_hud_players/animations/on_with_sound_6.tape"
+						}
+					]
+				},
+				{
+					"__class": "TapeGroup",
+					"Entries": [
+						{
+							"__class": "TapeEntry",
+							"Label": "pulse_loop",
+							"Path": "world/ui/objects/star_hud_players/animations/pulse_loop.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "pulse_loop_plus",
+							"Path": "world/ui/objects/star_hud_players/animations/pulse_loop_plus.tape"
+						},
+						{
+							"__class": "TapeEntry",
+							"Label": "pulse_loop_plus_more",
+							"Path": "world/ui/objects/star_hud_players/animations/pulse_loop_plus_more.tape"
+						}
+					]
+				}
+			]
+		}
+	]
+}

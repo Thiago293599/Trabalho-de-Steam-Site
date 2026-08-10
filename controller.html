@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f4f4f7" />
+  <title>Controles • Corrida de Tabuleiro</title>
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("corridaTabuleiroTheme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = saved || (prefersDark ? "dark" : "light");
+      } catch {}
+    })();
+  </script>
+  <link rel="stylesheet" href="controller.css?v=024-jd-yeah-pictos" />
+</head>
+<body class="site-loading">
+
+  <div id="siteLoader" class="site-loader" role="status" aria-live="polite" aria-label="Carregando o jogo">
+    <div class="site-loader-spinner" aria-hidden="true">
+      <span class="loader-ring loader-ring-outer"></span>
+      <span class="loader-ring loader-ring-middle"></span>
+      <span class="loader-ring loader-ring-inner"></span>
+      <span class="loader-core"></span>
+    </div>
+    <div class="site-loader-progress">
+      <div class="site-loader-meta">
+        <span id="loaderStatus" class="site-loader-status">Preparando o jogo…</span>
+        <strong id="loaderPercent" class="site-loader-percent">0%</strong>
+      </div>
+      <div class="site-loader-bar" aria-hidden="true">
+        <span id="loaderBarFill" class="site-loader-fill"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const startedAt = performance.now();
+      const minimumVisibleMs = 500;
+      let progress = 0;
+      let pageLoaded = false;
+      let appReady = false;
+      let finished = false;
+
+      function render(value, status) {
+        progress = Math.max(progress, Math.max(0, Math.min(100, Math.round(Number(value) || 0))));
+        const loader = document.getElementById("siteLoader");
+        const percent = document.getElementById("loaderPercent");
+        const statusText = document.getElementById("loaderStatus");
+        const fill = document.getElementById("loaderBarFill");
+        if (loader) loader.style.setProperty("--loader-progress", `${progress}%`);
+        if (percent) percent.textContent = `${progress}%`;
+        if (statusText && status) statusText.textContent = status;
+        if (fill) fill.style.width = `${progress}%`;
+      }
+
+      function finish() {
+        if (finished || !pageLoaded || !appReady) return;
+        finished = true;
+        render(100, "Pronto!");
+        const loader = document.getElementById("siteLoader");
+        const wait = Math.max(160, minimumVisibleMs - (performance.now() - startedAt));
+        window.setTimeout(() => {
+          document.body.classList.remove("site-loading");
+          if (!loader) return;
+          loader.classList.add("is-leaving");
+          window.setTimeout(() => loader.remove(), 420);
+        }, wait);
+      }
+
+      window.ControllerLoader = {
+        report: render,
+        markReady() {
+          appReady = true;
+          render(96, "Finalizando controle…");
+          finish();
+        }
+      };
+
+      render(5, "Preparando controle…");
+      document.addEventListener("DOMContentLoaded", () => render(12, "Carregando interface…"), { once: true });
+      window.addEventListener("load", () => {
+        pageLoaded = true;
+        finish();
+      }, { once: true });
+      window.setTimeout(() => {
+        if (!appReady) window.ControllerLoader.markReady();
+      }, 15000);
+    })();
+  </script>
+
+<button id="themeToggle" class="theme-toggle" type="button" aria-label="Ativar modo escuro" title="Alternar tema">
+    <span id="themeToggleIcon" aria-hidden="true">☾</span>
+    <span id="themeToggleText">Escuro</span>
+  </button>
+
+  <main class="controller-shell">
+    <section id="joinScreen" class="controller-card">
+      <button id="controllerBackBtn" class="controller-back" type="button" aria-label="Voltar">
+        <span aria-hidden="true">‹</span> Voltar
+      </button>
+      <p class="eyebrow">Controle do jogador</p>
+      <h1>Usar este dispositivo como controle</h1>
+      <p class="subtitle">Digite o código mostrado no computador. Este dispositivo será usado como seu controle durante a partida.</p>
+
+      <div class="form-stack">
+        <label>
+          Seu nome
+          <input id="playerName" maxlength="18" placeholder="Jogador" autocomplete="nickname" />
+        </label>
+        <label>
+          Código da sala
+          <input id="roomCode" maxlength="6" placeholder="ABC123" autocomplete="off" />
+        </label>
+        <button id="joinBtn" class="primary" type="button">Conectar como controle</button>
+      </div>
+
+      <p id="joinMessage" class="message hidden"></p>
+    </section>
+
+    <section id="controlScreen" class="controller-card hidden">
+      <div class="player-top">
+        <div class="player-identity">
+          <span id="playerColor" class="player-color"></span>
+          <div>
+            <span class="tiny-label">Você é</span>
+            <strong id="playerLabel">Jogador</strong>
+          </div>
+        </div>
+        <span id="connectionBadge" class="connection-badge">Conectado</span>
+      </div>
+
+      <div class="turn-area">
+        <p id="turnKicker" class="eyebrow">Aguardando partida</p>
+        <h1 id="turnTitle">Espere o computador iniciar</h1>
+        <p id="turnDescription" class="subtitle">Seu botão será liberado automaticamente quando chegar a sua vez.</p>
+      </div>
+
+      <section id="sensorModePanel" class="sensor-mode-panel hidden" aria-live="polite">
+        <div class="sensor-mode-head">
+          <div>
+            <p class="eyebrow">Just Dance • Sensor</p>
+            <h2 id="sensorModeTitle">Sensores aguardando</h2>
+          </div>
+          <span id="sensorModeBadge" class="sensor-mode-badge idle">Inativo</span>
+        </div>
+        <p id="sensorModeText" class="subtitle">O computador ainda não pediu acesso aos sensores.</p>
+        <button id="enableSensorsBtn" class="primary sensor-enable-button" type="button">Ativar sensores deste celular</button>
+        <div class="sensor-live-grid">
+          <div><span>Movimento</span><strong id="sensorMovementValue">0%</strong></div>
+          <div><span>Giro</span><strong id="sensorGyroValue">0°/s</strong></div>
+          <div><span>Pacotes</span><strong id="sensorPacketValue">0</strong></div>
+          <div><span>Fonte</span><strong id="sensorSourceValue">—</strong></div>
+        </div>
+        <div class="sensor-motion-meter" aria-hidden="true"><span id="sensorMotionFill"></span></div>
+        <div class="mobile-dance-score" aria-live="polite">
+          <div class="mobile-dance-score-head"><div><span>Score</span><strong id="sensorDanceScore">0</strong><small>/ 13.333</small></div><b id="sensorDanceRank">SEM ESTRELAS</b></div>
+          <div id="sensorDanceStars" class="mobile-dance-stars" aria-label="Estrelas"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <div id="sensorDanceJudgement" class="mobile-dance-judgement">—</div>
+          <p id="sensorDanceProgress">0 movimentos julgados</p>
+        </div>
+        <p id="sensorNotice" class="sensor-notice">O sensor só é enviado enquanto esta tela estiver ativa.</p>
+      </section>
+
+      <div id="boardControllerArea">
+      <div id="mobileDice" class="mobile-dice" aria-live="polite">?</div>
+
+
+      <button id="mobileRollBtn" class="roll-button" type="button" disabled>Jogar dado</button>
+      <div id="mobileDeckArea" class="mobile-deck-area hidden">
+        <p id="mobileDeckHint" class="deck-instruction">Você caiu em uma casa de carta. Toque no baralho.</p>
+        <button id="mobileDeckBtn" class="mobile-deck" type="button">
+          <span class="mobile-deck-layer back" aria-hidden="true"></span><span class="mobile-deck-layer mid" aria-hidden="true"></span>
+          <span class="mobile-deck-top"><span>? ★ !</span><strong>BARALHO</strong></span>
+        </button>
+      </div>
+      <div class="mini-status">
+        <span>Casa atual</span>
+        <strong id="playerPosition">1</strong>
+      </div>
+
+      <p id="gameMessage" class="message hidden"></p>
+      </div>
+    </section>
+  </main>
+
+  <div id="mobileCardModal" class="mobile-card-modal hidden" role="dialog" aria-modal="true" aria-labelledby="mobileCardTitle">
+    <article id="mobileDrawnCard" class="mobile-drawn-card card-question">
+      <div class="mobile-card-back" aria-hidden="true"><span>? ★ !</span><strong>CORRIDA</strong></div>
+      <div class="mobile-card-front"><div class="mobile-card-head"><span id="mobileCardBadge" class="mobile-card-badge">Pergunta</span><span id="mobileCardIcon" class="mobile-card-icon">?</span></div><h2 id="mobileCardTitle">Carta</h2><p id="mobileCardText">Escolha uma resposta.</p><div id="mobileCardAnswers" class="mobile-card-answers hidden"></div><p id="mobileCardFeedback" class="mobile-card-feedback hidden"></p><p id="mobileCardEffect" class="mobile-card-effect"></p><button id="mobileCardContinue" class="primary hidden" type="button">Continuar</button></div>
+    </article>
+  </div>
+
+  <script src="config.js?v=024-jd-yeah-pictos" onload="window.ControllerLoader?.report(32, 'Configuração carregada…')"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous" onload="window.ControllerLoader?.report(67, 'Conexão carregada…')"></script>
+  <script src="controller.js?v=024-jd-yeah-pictos" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
+  <span class="version-badge" data-version>V. 0.2.2 (Teste)</span>
+</body>
+</html>

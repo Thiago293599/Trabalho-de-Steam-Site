@@ -1,0 +1,22 @@
+{
+  "source": "patch_pc.ipk (arquivo fornecido pelo usuário)",
+  "hudObject": "world/ui/objects/star_hud_players/star_hud_players.isc",
+  "stateMapping": {
+    "normal": "star / on",
+    "superstar": "starplus / on_plus / win_6",
+    "megastar": "starplus_more / on_plus_more / win_7"
+  },
+  "starThresholds": [
+    2000,
+    4000,
+    6000,
+    8000,
+    10000
+  ],
+  "rankThresholds": {
+    "superstar": 11000,
+    "megastar": 12000,
+    "maxScore": 13333
+  },
+  "notes": "O frontend usa estes estados/tapes do IPK como referência visual e de transição. Os PNGs Star/Superstar/Megastar enviados na HUD são usados como filled-star, e o outline vazio vem diretamente do IPK."
+}

@@ -1,0 +1,315 @@
+{
+    "__class": "Tape",
+    "Clips": [
+        {
+            "__class": "AlphaClip",
+            "Id": 3617592927,
+            "TrackId": 2604763784,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 3,
+            "ActorIndices": [
+                0
+            ],
+            "Curve": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatLinear",
+                    "ValueLeft": [
+                        0,
+                        1
+                    ],
+                    "NormalLeftOut": [
+                        0.6,
+                        1
+                    ],
+                    "ValueRight": [
+                        3,
+                        1
+                    ],
+                    "NormalRightIn": [
+                        2.4,
+                        1
+                    ]
+                }
+            }
+        },
+        {
+            "__class": "ActorEnableClip",
+            "Id": 2414425100,
+            "TrackId": 663116294,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                1,
+				13
+            ],
+            "ActorEnable": 1
+        },
+        {
+            "__class": "ActorEnableClip",
+            "Id": 1646057989,
+            "TrackId": 2164011843,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+				10,
+				11,
+				12,
+				14,
+				15
+            ],
+            "ActorEnable": 0
+        },
+        {
+            "__class": "ActorEnableClip",
+            "Id": 1197651141,
+            "TrackId": 477840682,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                8
+            ],
+            "ActorEnable": 1
+        },
+        {
+            "__class": "ProportionClip",
+            "Id": 1267846804,
+            "TrackId": 312714909,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 9,
+            "ActorIndices": [
+                9
+            ],
+            "CurveX": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 1
+                }
+            },
+            "CurveY": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 1
+                }
+            }
+        },
+        {
+            "__class": "MaterialGraphicDiffuseColorClip",
+            "Id": 3764387030,
+            "TrackId": 242157744,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 15,
+            "ActorIndices": [
+                8
+            ],
+            "LayerIdx": 1,
+            "UVModifierIdx": 0,
+            "CurveR": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 1
+                }
+            },
+            "CurveG": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0
+                }
+            },
+            "CurveB": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0.723179
+                }
+            }
+        },
+        {
+            "__class": "MaterialGraphicDiffuseColorClip",
+            "Id": 872819777,
+            "TrackId": 755691369,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 15,
+            "ActorIndices": [
+                8
+            ],
+            "LayerIdx": 2,
+            "UVModifierIdx": 0,
+            "CurveR": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 1
+                }
+            },
+            "CurveG": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0
+                }
+            },
+            "CurveB": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0.721854
+                }
+            }
+        },
+        {
+            "__class": "ProportionClip",
+            "Id": 2521082197,
+            "TrackId": 1743080,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 36,
+            "ActorIndices": [
+                8
+            ],
+            "CurveX": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatMulti",
+                    "Keys": [
+                        {
+                            "__class": "KeyFloat",
+                            "Value": [
+                                0,
+                                0.45454
+                            ],
+                            "NormalIn": [
+                                0,
+                                0.45454
+                            ],
+                            "NormalOut": [
+                                0.441018,
+                                0.503848
+                            ]
+                        },
+                        {
+                            "__class": "KeyFloat",
+                            "Value": [
+                                2.205088,
+                                0.701084
+                            ],
+                            "NormalIn": [
+                                1.76407,
+                                0.651775
+                            ],
+                            "NormalOut": [
+                                2.205088,
+                                0.651084
+                            ]
+                        },
+                        {
+                            "__class": "KeyFloat",
+                            "Value": [
+                                36,
+                                0.601082
+                            ],
+                            "NormalIn": [
+                                19.102541,
+                                0.601082
+                            ],
+                            "NormalOut": [
+                                36,
+                                0.601082
+                            ]
+                        }
+                    ]
+                }
+            },
+            "CurveY": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0.8
+                }
+            }
+        },
+        {
+            "__class": "TapeReferenceClip",
+            "Id": 1333656936,
+            "TrackId": 3669076033,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 69,
+            "Path": "world/ui/animations/feedbacks/feedbacks_move.tape",
+            "Loop": 0
+        },
+        {
+            "__class": "AlphaClip",
+            "Id": 968152138,
+            "TrackId": 2604763784,
+            "IsActive": 1,
+            "StartTime": 18,
+            "Duration": 30,
+            "ActorIndices": [
+                0
+            ],
+            "Curve": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatLinear",
+                    "ValueLeft": [
+                        0,
+                        1
+                    ],
+                    "NormalLeftOut": [
+                        6,
+                        0.8
+                    ],
+                    "ValueRight": [
+                        30,
+                        0
+                    ],
+                    "NormalRightIn": [
+                        23.999998,
+                        0.2
+                    ]
+                }
+            }
+        }
+    ],
+    "ActorPaths": [
+        "feedbacks_dummy",
+        "feedback_ok",
+        "feedback_bad",
+        "feedback_gold",
+        "feedback_gold_bad",
+        "feedback_perfect",
+        "feedback_good",
+        "feedback_perfect+",
+        "feedback_color",
+        "fx_feedbacks",
+		"feedback_perfect+_flare",
+		"feedback_perfect_flare",
+		"feedback_good_flare",
+		"feedback_ok_flare",
+		"feedback_gold_back",
+		"feedback_gold_flare"
+    ],
+    "TapeClock": 2,
+    "TapeBarCount": 1,
+    "FreeResourcesAfterPlay": 0,
+    "MapName": "",
+    "SoundwichEvent": ""
+}

@@ -1,0 +1,198 @@
+{
+    "__class": "Tape",
+    "Clips": [
+        {
+            "__class": "AlphaClip",
+            "Id": 3855647319,
+            "TrackId": 242157744,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 2,
+            "ActorIndices": [
+                0
+            ],
+            "Curve": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 1
+                }
+            }
+        },
+        {
+            "__class": "AlphaClip",
+            "Id": 184280122,
+            "TrackId": 663116294,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                1
+            ],
+            "Curve": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0
+                }
+            }
+        },
+        {
+            "__class": "TapeLauncherClip",
+            "Id": 161671656,
+            "TrackId": 309086039,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                2
+            ],
+            "Action": 0,
+            "TapeChoice": 1,
+            "TapeLabels": [
+                "pulse_loop_plus_more"
+            ]
+        },
+        {
+            "__class": "AlphaClip",
+            "Id": 3122524899,
+            "TrackId": 2247982434,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                3,
+                4,
+                5
+            ],
+            "Curve": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0
+                }
+            }
+        },
+        {
+            "__class": "AlphaClip",
+            "Id": 2382341787,
+            "TrackId": 2604763784,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                2
+            ],
+            "Curve": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 1
+                }
+            }
+        },
+        {
+            "__class": "AlphaClip",
+            "Id": 2931709350,
+            "TrackId": 1738369344,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                6,
+                7
+            ],
+            "Curve": {
+                "__class": "BezierCurveFloat",
+                "Curve": {
+                    "__class": "BezierCurveFloatConstant",
+                    "Value": 0.004211
+                }
+            }
+        },
+        {
+            "__class": "ActorEnableClip",
+            "Id": 4143894739,
+            "TrackId": 312714909,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                1
+            ],
+            "ActorEnable": 0
+        },
+        {
+            "__class": "ActorEnableClip",
+            "Id": 4092442250,
+            "TrackId": 1743080,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                8
+            ],
+            "ActorEnable": 0
+        },
+        {
+            "__class": "TapeLauncherClip",
+            "Id": 792797231,
+            "TrackId": 3544600212,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                2
+            ],
+            "Action": 1,
+            "TapeChoice": 1,
+            "TapeLabels": [
+                "pulse_loop"
+            ]
+        },
+        {
+            "__class": "ActorEnableClip",
+            "Id": 4215918146,
+            "TrackId": 1554559886,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                0
+            ],
+            "ActorEnable": 1
+        },
+        {
+            "__class": "TapeLauncherClip",
+            "Id": 3296906283,
+            "TrackId": 3669076033,
+            "IsActive": 1,
+            "StartTime": 0,
+            "Duration": 6,
+            "ActorIndices": [
+                2
+            ],
+            "Action": 1,
+            "TapeChoice": 1,
+            "TapeLabels": [
+                "pulse_loop_plus"
+            ]
+        }
+    ],
+    "ActorPaths": [
+        "starplus",
+        "star",
+        "root",
+        "lens_reflect",
+        "#particles",
+        "lens_reflect_bright",
+        "star_outline",
+        "star_empty",
+        "starplus_more"
+    ],
+    "TapeClock": 2,
+    "TapeBarCount": 1,
+    "FreeResourcesAfterPlay": 0,
+    "MapName": "objects",
+    "SoundwichEvent": ""
+}

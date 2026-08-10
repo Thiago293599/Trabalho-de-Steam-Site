@@ -1,0 +1,116 @@
+{
+  "source": "patch_pc.ipk",
+  "archiveMagic": "50EC12BA",
+  "judgements": {
+    "X": {
+      "image": "feedback_bad.png",
+      "flare": null,
+      "tape": "feedback_bad.json",
+      "profile": "bad"
+    },
+    "GOLD_X": {
+      "image": "feedback_gold_bad.png",
+      "flare": "feedback_gold_flare.png",
+      "tape": "feedback_gold_bad.json",
+      "profile": "gold-bad"
+    },
+    "OK": {
+      "image": "feedback_ok.png",
+      "flare": "feedback_ok_flare.png",
+      "tape": "feedback_ok.json",
+      "profile": "ok"
+    },
+    "GOOD": {
+      "image": "feedback_good.png",
+      "flare": "feedback_good_flare.png",
+      "tape": "feedback_good.json",
+      "profile": "good"
+    },
+    "SUPER": {
+      "image": "feedback_super.png",
+      "flare": "feedback_perfect_flare.png",
+      "tape": "feedback_perfect.json",
+      "profile": "super"
+    },
+    "PERFECT": {
+      "image": "feedback_perfect.png",
+      "flare": "feedback_perfectplus_flare.png",
+      "tape": "feedback_perfectplus.json",
+      "profile": "perfect"
+    },
+    "YEAH": {
+      "image": "feedback_gold.png",
+      "flare": "feedback_gold_flare.png",
+      "tape": "feedback_gold.json",
+      "profile": "yeah"
+    }
+  },
+  "textures": {
+    "feedback_bad": {
+      "width": 128,
+      "height": 128,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_bad.tga.ckd"
+    },
+    "feedback_gold": {
+      "width": 512,
+      "height": 128,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_gold.tga.ckd"
+    },
+    "feedback_gold_bad": {
+      "width": 128,
+      "height": 128,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_gold_bad.tga.ckd"
+    },
+    "feedback_gold_flare": {
+      "width": 512,
+      "height": 512,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_gold_flare.tga.ckd"
+    },
+    "feedback_good": {
+      "width": 512,
+      "height": 128,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_good.tga.ckd"
+    },
+    "feedback_good_flare": {
+      "width": 512,
+      "height": 512,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_good_flare.tga.ckd"
+    },
+    "feedback_ok": {
+      "width": 256,
+      "height": 128,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_ok.tga.ckd"
+    },
+    "feedback_ok_flare": {
+      "width": 512,
+      "height": 512,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_ok_flare.tga.ckd"
+    },
+    "feedback_perfect": {
+      "width": 512,
+      "height": 128,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_perfect.tga.ckd"
+    },
+    "feedback_perfect_flare": {
+      "width": 512,
+      "height": 512,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_perfect_flare.tga.ckd"
+    },
+    "feedback_perfectplus_flare": {
+      "width": 512,
+      "height": 512,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_perfectplus_flare.tga.ckd"
+    },
+    "feedback_super": {
+      "width": 512,
+      "height": 128,
+      "source": "cache/itf_cooked/pc/world/ui/textures/feedback_super.tga.ckd"
+    }
+  },
+  "notes": [
+    "Exact textures extracted from the supplied UbiArt IPK.",
+    "SUPER maps to the UbiArt actor named feedback_perfect, whose diffuse texture is feedback_super.tga.",
+    "PERFECT maps to the UbiArt actor named feedback_perfect+, whose diffuse texture is feedback_perfect.tga.",
+    "Web FX timings are based on the original feedback tapes using 60 tape ticks per second."
+  ]
+}

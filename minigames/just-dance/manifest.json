@@ -1,0 +1,32 @@
+{
+  "id": "just-dance",
+  "name": "Just Dance",
+  "status": "sensor-fallbacks-first-song",
+  "input": {
+    "source": "phone-motion",
+    "targetSampleRateHz": 20,
+    "fallbacks": [
+      "DeviceMotion",
+      "DeviceOrientation-derived rotation",
+      "Generic Sensor Gyroscope/Accelerometer"
+    ]
+  },
+  "songs": [
+    {
+      "id": "RainOverMe",
+      "mapName": "RainOverMe",
+      "title": "Rain Over Me",
+      "artist": "Pitbull Ft. Marc Anthony",
+      "jdVersion": 2020,
+      "coaches": 1,
+      "video": "songs/RainOverMe/RainOverMe_Low.mp4",
+      "map": "songs/RainOverMe/RainOverMe.json",
+      "metadata": "songs/RainOverMe/metadata.json",
+      "moves": "songs/RainOverMe/moves/RainOverMe_moves0.json",
+      "classifiers": "songs/RainOverMe/classifiers_WIIU/",
+      "pictosAtlas": "songs/RainOverMe/pictos-atlas.png",
+      "pictosAtlasData": "songs/RainOverMe/pictos-atlas.json",
+      "cover": "songs/RainOverMe/rainoverme_cover@2x.jpg"
+    }
+  ]
+}

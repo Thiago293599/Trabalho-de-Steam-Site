@@ -1,0 +1,2307 @@
+{
+  "MapName": "RainOverMe",
+  "JDVersion": 2020,
+  "OriginalJDVersion": 2020,
+  "Artist": "Pitbull Ft. Marc Anthony",
+  "Title": "Rain Over Me",
+  "Credits": "Written by Marc Anthony, Rachis Aziz, Bilal Hajji, Achraf Jannusi, Nadir Khayat, Armando Christian Perez and Jimmy Thornfeldt. Published by Jamz Music Group Inc. (BMI) / Sony/ATV Songs LLC (BMI) / Abuela Y Tia Songs (BMI) / The Wheel Tunes Group Inc. (BMI) / Songs Of Redone (BMI) / Sony/ATV Tunes LLC (ASCAP) / Ole 2101 Songs (BMI). Administered by Anthem Entertainment. All rights reserved. Used with permission. Courtesy of RCA Records. By arrangement with Sony Music Entertainment.",
+  "NumCoach": 1,
+  "CountInProgression": 1,
+  "DancerName": "Unknown Dancer",
+  "LocaleID": 4294967295,
+  "MojoValue": 0,
+  "Mode": 6,
+  "Status": 3,
+  "LyricsType": 0,
+  "BackgroundType": 0,
+  "Difficulty": 1,
+  "DefaultColors": {
+    "lyrics": "0xFFFF584A",
+    "theme": "0xFFFFFFFF",
+    "songColor_1A": "0xFF68000D",
+    "songColor_1B": "0xFF180427",
+    "songColor_2A": "0xFF480C9C",
+    "songColor_2B": "0xFF411982"
+  },
+  "lyricsColor": "#FF584A",
+  "videoOffset": 2812,
+  "beats": [
+    2812,
+    3280,
+    3749,
+    4218,
+    4687,
+    5155,
+    5624,
+    6093,
+    6562,
+    7030,
+    7499,
+    7968,
+    8437,
+    8905,
+    9374,
+    9843,
+    10312,
+    10780,
+    11249,
+    11718,
+    12187,
+    12655,
+    13124,
+    13593,
+    14062,
+    14530,
+    14999,
+    15468,
+    15937,
+    16405,
+    16874,
+    17343,
+    17812,
+    18280,
+    18749,
+    19218,
+    19687,
+    20155,
+    20624,
+    21093,
+    21562,
+    22030,
+    22499,
+    22968,
+    23437,
+    23905,
+    24374,
+    24843,
+    25312,
+    25780,
+    26249,
+    26718,
+    27187,
+    27655,
+    28124,
+    28593,
+    29062,
+    29530,
+    29999,
+    30468,
+    30937,
+    31405,
+    31874,
+    32343,
+    32812,
+    33280,
+    33749,
+    34218,
+    34687,
+    35155,
+    35624,
+    36093,
+    36562,
+    37030,
+    37499,
+    37968,
+    38437,
+    38905,
+    39374,
+    39843,
+    40312,
+    40780,
+    41249,
+    41718,
+    42187,
+    42655,
+    43124,
+    43593,
+    44062,
+    44530,
+    44999,
+    45468,
+    45937,
+    46405,
+    46874,
+    47343,
+    47812,
+    48280,
+    48749,
+    49218,
+    49687,
+    50155,
+    50624,
+    51093,
+    51562,
+    52030,
+    52499,
+    52968,
+    53437,
+    53905,
+    54374,
+    54843,
+    55312,
+    55780,
+    56249,
+    56718,
+    57187,
+    57655,
+    58124,
+    58593,
+    59062,
+    59530,
+    59999,
+    60468,
+    60937,
+    61405,
+    61874,
+    62343,
+    62812,
+    63280,
+    63749,
+    64218,
+    64687,
+    65155,
+    65624,
+    66093,
+    66562,
+    67030,
+    67499,
+    67968,
+    68437,
+    68905,
+    69374,
+    69843,
+    70312,
+    70780,
+    71249,
+    71718,
+    72187,
+    72655,
+    73124,
+    73593,
+    74062,
+    74530,
+    74999,
+    75468,
+    75937,
+    76405,
+    76874,
+    77343,
+    77812,
+    78280,
+    78749,
+    79218,
+    79687,
+    80155,
+    80624,
+    81093,
+    81562,
+    82030,
+    82499,
+    82968,
+    83437,
+    83905,
+    84374,
+    84843,
+    85312,
+    85780,
+    86249,
+    86718,
+    87187,
+    87655,
+    88124,
+    88593,
+    89062,
+    89530,
+    89999,
+    90468,
+    90937,
+    91405,
+    91874,
+    92343,
+    92812,
+    93280,
+    93749,
+    94218,
+    94687,
+    95155,
+    95624,
+    96093,
+    96562,
+    97030,
+    97499,
+    97968,
+    98437,
+    98905,
+    99374,
+    99843,
+    100312,
+    100780,
+    101249,
+    101718,
+    102187,
+    102655,
+    103124,
+    103593,
+    104062,
+    104530,
+    104999,
+    105468,
+    105937,
+    106405,
+    106874,
+    107343,
+    107812,
+    108280,
+    108749,
+    109218,
+    109687,
+    110155,
+    110624,
+    111093,
+    111562,
+    112030,
+    112499,
+    112968,
+    113437,
+    113905,
+    114374,
+    114843,
+    115312,
+    115780,
+    116249,
+    116718,
+    117187,
+    117655,
+    118124,
+    118593,
+    119062,
+    119530,
+    119999,
+    120468,
+    120937,
+    121405,
+    121874,
+    122343,
+    122812,
+    123280,
+    123749,
+    124218,
+    124687,
+    125155,
+    125624,
+    126093,
+    126562,
+    127030,
+    127499,
+    127968,
+    128437,
+    128905,
+    129374,
+    129843,
+    130312,
+    130780,
+    131249,
+    131718,
+    132187,
+    132655,
+    133124,
+    133593,
+    134062,
+    134530,
+    134999,
+    135468,
+    135937,
+    136405,
+    136874,
+    137343,
+    137812,
+    138280,
+    138749,
+    139218,
+    139687,
+    140155,
+    140624,
+    141093,
+    141562,
+    142030,
+    142499,
+    142968,
+    143437,
+    143905,
+    144374,
+    144843,
+    145312,
+    145780,
+    146249,
+    146718,
+    147187,
+    147655,
+    148124,
+    148593,
+    149062,
+    149530,
+    149999,
+    150468,
+    150937,
+    151405,
+    151874,
+    152343,
+    152812,
+    153280,
+    153749,
+    154218,
+    154687,
+    155155,
+    155624,
+    156093,
+    156562,
+    157030,
+    157499,
+    157968,
+    158437,
+    158905,
+    159374,
+    159843,
+    160312,
+    160780,
+    161249,
+    161718,
+    162187,
+    162655,
+    163124,
+    163593,
+    164062,
+    164530,
+    164999,
+    165468,
+    165937,
+    166405,
+    166874,
+    167343,
+    167812,
+    168280,
+    168749,
+    169218,
+    169687,
+    170155,
+    170624,
+    171093,
+    171562,
+    172030,
+    172499,
+    172968,
+    173437,
+    173905,
+    174374,
+    174843,
+    175312,
+    175780,
+    176249,
+    176718,
+    177187,
+    177655,
+    178124,
+    178593,
+    179062,
+    179530,
+    179999,
+    180468,
+    180937,
+    181405,
+    181874,
+    182343,
+    182812,
+    183280,
+    183749,
+    184218,
+    184687,
+    185155,
+    185624,
+    186093,
+    186562,
+    187030,
+    187499,
+    187968,
+    188437,
+    188905,
+    189374,
+    189843,
+    190312,
+    190780,
+    191249,
+    191718,
+    192187,
+    192655,
+    193124,
+    193593,
+    194062,
+    194530,
+    194999,
+    195468,
+    195937,
+    196405,
+    196874,
+    197343,
+    197812,
+    198280,
+    198749,
+    199218,
+    199687,
+    200155,
+    200624,
+    201093,
+    201562,
+    202030,
+    202499,
+    202968,
+    203437,
+    203905,
+    204374
+  ],
+  "lyrics": [
+    {
+      "time": 3222,
+      "duration": 1816,
+      "text": "Girl my body don't lie",
+      "isLineEnding": 1
+    },
+    {
+      "time": 5156,
+      "duration": 937,
+      "text": "I'm outta ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 6093,
+      "duration": 293,
+      "text": "my ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 6562,
+      "duration": 937,
+      "text": "mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 7499,
+      "duration": 937,
+      "text": "Let it rain ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 8437,
+      "duration": 586,
+      "text": "over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 9023,
+      "duration": 1523,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 10781,
+      "duration": 1406,
+      "text": "I'm rising so ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 12187,
+      "duration": 703,
+      "text": "high",
+      "isLineEnding": 1
+    },
+    {
+      "time": 12890,
+      "duration": 1172,
+      "text": "Out of my ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 14062,
+      "duration": 488,
+      "text": "mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 14629,
+      "duration": 1308,
+      "text": "So let it rain ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 15937,
+      "duration": 586,
+      "text": "over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 16523,
+      "duration": 1992,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 18749,
+      "duration": 352,
+      "text": "Ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 19218,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 19687,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 20390,
+      "duration": 469,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 21015,
+      "duration": 371,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 21562,
+      "duration": 645,
+      "text": "ay",
+      "isLineEnding": 1
+    },
+    {
+      "time": 22499,
+      "duration": 469,
+      "text": "Let it ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 22968,
+      "duration": 1054,
+      "text": "rain over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 24023,
+      "duration": 1875,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 26249,
+      "duration": 352,
+      "text": "Ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 26718,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 27187,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 27890,
+      "duration": 469,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 28515,
+      "duration": 371,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 29062,
+      "duration": 645,
+      "text": "ay",
+      "isLineEnding": 1
+    },
+    {
+      "time": 29999,
+      "duration": 469,
+      "text": "Let it ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 30468,
+      "duration": 1054,
+      "text": "rain over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 31523,
+      "duration": 1875,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 33515,
+      "duration": 703,
+      "text": "A billion's the new ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 34218,
+      "duration": 156,
+      "text": "million",
+      "isLineEnding": 1
+    },
+    {
+      "time": 34453,
+      "duration": 1054,
+      "text": "Voli's the new vodka",
+      "isLineEnding": 1
+    },
+    {
+      "time": 35507,
+      "duration": 820,
+      "text": "Forty is the new thirty",
+      "isLineEnding": 1
+    },
+    {
+      "time": 36328,
+      "duration": 1172,
+      "text": "And baby you're a rock star",
+      "isLineEnding": 1
+    },
+    {
+      "time": 37499,
+      "duration": 1875,
+      "text": "Dale veterana que tú sabes",
+      "isLineEnding": 1
+    },
+    {
+      "time": 39374,
+      "duration": 1875,
+      "text": "Más de la cuenta no te hagas",
+      "isLineEnding": 1
+    },
+    {
+      "time": 41601,
+      "duration": 1406,
+      "text": "Teach me baby or better yet",
+      "isLineEnding": 1
+    },
+    {
+      "time": 43476,
+      "duration": 1523,
+      "text": "Freak me baby yes yes",
+      "isLineEnding": 1
+    },
+    {
+      "time": 45292,
+      "duration": 879,
+      "text": "I'm freaky baby",
+      "isLineEnding": 1
+    },
+    {
+      "time": 46406,
+      "duration": 820,
+      "text": "I'mma make sure that",
+      "isLineEnding": 1
+    },
+    {
+      "time": 47226,
+      "duration": 1406,
+      "text": "Your ... feels peachy baby",
+      "isLineEnding": 1
+    },
+    {
+      "time": 48984,
+      "duration": 528,
+      "text": "No ... ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 49511,
+      "duration": 586,
+      "text": "broads ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 50273,
+      "duration": 586,
+      "text": "I like my women",
+      "isLineEnding": 1
+    },
+    {
+      "time": 50859,
+      "duration": 1641,
+      "text": "Sexy classy sassy",
+      "isLineEnding": 1
+    },
+    {
+      "time": 52851,
+      "duration": 937,
+      "text": "Powerful yes",
+      "isLineEnding": 1
+    },
+    {
+      "time": 54199,
+      "duration": 996,
+      "text": "They love to get the middle",
+      "isLineEnding": 1
+    },
+    {
+      "time": 55312,
+      "duration": 937,
+      "text": "Nasty ow",
+      "isLineEnding": 1
+    },
+    {
+      "time": 56484,
+      "duration": 996,
+      "text": "This ain't a game ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 57480,
+      "duration": 528,
+      "text": "you'll see",
+      "isLineEnding": 1
+    },
+    {
+      "time": 58359,
+      "duration": 937,
+      "text": "You can put the blame ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 59297,
+      "duration": 547,
+      "text": "on me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 59999,
+      "duration": 1113,
+      "text": "Dale muñequita ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 61406,
+      "duration": 820,
+      "text": "ahora ahi",
+      "isLineEnding": 1
+    },
+    {
+      "time": 62343,
+      "duration": 937,
+      "text": "And let it rain over me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 63281,
+      "duration": 1816,
+      "text": "Girl my body don't lie",
+      "isLineEnding": 1
+    },
+    {
+      "time": 65156,
+      "duration": 937,
+      "text": "I'm outta ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 66093,
+      "duration": 293,
+      "text": "my ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 66562,
+      "duration": 937,
+      "text": "mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 67499,
+      "duration": 937,
+      "text": "Let it rain ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 68437,
+      "duration": 586,
+      "text": "over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 69023,
+      "duration": 1523,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 70781,
+      "duration": 1406,
+      "text": "I'm rising so ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 72187,
+      "duration": 703,
+      "text": "high",
+      "isLineEnding": 1
+    },
+    {
+      "time": 72890,
+      "duration": 1172,
+      "text": "Out of my ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 74062,
+      "duration": 489,
+      "text": "mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 74628,
+      "duration": 1308,
+      "text": "So let it rain ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 75937,
+      "duration": 586,
+      "text": "over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 76523,
+      "duration": 1992,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 78749,
+      "duration": 352,
+      "text": "Ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 79218,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 79687,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 80390,
+      "duration": 469,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 81015,
+      "duration": 371,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 81562,
+      "duration": 645,
+      "text": "ay",
+      "isLineEnding": 1
+    },
+    {
+      "time": 82499,
+      "duration": 469,
+      "text": "Let it ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 82968,
+      "duration": 1054,
+      "text": "rain over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 84023,
+      "duration": 1875,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 86249,
+      "duration": 352,
+      "text": "Ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 86718,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 87187,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 87890,
+      "duration": 469,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 88515,
+      "duration": 371,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 89062,
+      "duration": 645,
+      "text": "ay",
+      "isLineEnding": 1
+    },
+    {
+      "time": 89999,
+      "duration": 469,
+      "text": "Let it ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 90468,
+      "duration": 1054,
+      "text": "rain over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 91523,
+      "duration": 1875,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 93515,
+      "duration": 586,
+      "text": "A billion's the new ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 94257,
+      "duration": 195,
+      "text": "million",
+      "isLineEnding": 1
+    },
+    {
+      "time": 94453,
+      "duration": 1054,
+      "text": "Voli's the new vodka",
+      "isLineEnding": 1
+    },
+    {
+      "time": 95507,
+      "duration": 820,
+      "text": "Latin's the new majority",
+      "isLineEnding": 1
+    },
+    {
+      "time": 96328,
+      "duration": 1172,
+      "text": "Ya tú sabes",
+      "isLineEnding": 1
+    },
+    {
+      "time": 97734,
+      "duration": 703,
+      "text": "Next step la ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 98437,
+      "duration": 937,
+      "text": "Casa Blanca",
+      "isLineEnding": 1
+    },
+    {
+      "time": 99609,
+      "duration": 937,
+      "text": "No hay carro nos vamos ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 100547,
+      "duration": 703,
+      "text": "en balsa",
+      "isLineEnding": 1
+    },
+    {
+      "time": 102187,
+      "duration": 937,
+      "text": "Mami you know the drill",
+      "isLineEnding": 1
+    },
+    {
+      "time": 103359,
+      "duration": 820,
+      "text": "They won't know what I got",
+      "isLineEnding": 1
+    },
+    {
+      "time": 104179,
+      "duration": 820,
+      "text": "Til they read the will",
+      "isLineEnding": 1
+    },
+    {
+      "time": 105234,
+      "duration": 469,
+      "text": "I ain't try",
+      "isLineEnding": 1
+    },
+    {
+      "time": 105703,
+      "duration": 1172,
+      "text": "I ain't trying to keep it real",
+      "isLineEnding": 1
+    },
+    {
+      "time": 106991,
+      "duration": 937,
+      "text": "I'm trying to keep wealth",
+      "isLineEnding": 1
+    },
+    {
+      "time": 108047,
+      "duration": 703,
+      "text": "And that's for real",
+      "isLineEnding": 1
+    },
+    {
+      "time": 109453,
+      "duration": 1172,
+      "text": "Pero mira que tu 'tas buena",
+      "isLineEnding": 1
+    },
+    {
+      "time": 111210,
+      "duration": 1641,
+      "text": "Y mira que tú 'tas dura",
+      "isLineEnding": 1
+    },
+    {
+      "time": 113203,
+      "duration": 1406,
+      "text": "Baby no me hables más",
+      "isLineEnding": 1
+    },
+    {
+      "time": 115078,
+      "duration": 1523,
+      "text": "Y tiramelo mami chula",
+      "isLineEnding": 1
+    },
+    {
+      "time": 116953,
+      "duration": 1172,
+      "text": "No games you'll see",
+      "isLineEnding": 1
+    },
+    {
+      "time": 118476,
+      "duration": 547,
+      "text": "You can put the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 119062,
+      "duration": 235,
+      "text": "blame ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 119297,
+      "duration": 449,
+      "text": "on me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 120351,
+      "duration": 1875,
+      "text": "Dale muñequita ahora ahi",
+      "isLineEnding": 1
+    },
+    {
+      "time": 122460,
+      "duration": 820,
+      "text": "And let it rain over me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 123281,
+      "duration": 1992,
+      "text": "Girl my body don't lie",
+      "isLineEnding": 1
+    },
+    {
+      "time": 125273,
+      "duration": 2110,
+      "text": "I'm outta my mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 127499,
+      "duration": 469,
+      "text": "Let it ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 127968,
+      "duration": 1054,
+      "text": "rain over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 129023,
+      "duration": 1582,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 130605,
+      "duration": 1797,
+      "text": "I'm rising so high",
+      "isLineEnding": 1
+    },
+    {
+      "time": 132402,
+      "duration": 1973,
+      "text": "Out of my mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 134492,
+      "duration": 391,
+      "text": "So ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 134999,
+      "duration": 469,
+      "text": "let it ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 135468,
+      "duration": 1054,
+      "text": "rain over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 136523,
+      "duration": 1875,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 139218,
+      "duration": 1054,
+      "text": "Mr worldwide",
+      "isLineEnding": 1
+    },
+    {
+      "time": 140273,
+      "duration": 1523,
+      "text": "Marc Anthony tú sabes",
+      "isLineEnding": 1
+    },
+    {
+      "time": 141914,
+      "duration": 1641,
+      "text": "I was playing with her",
+      "isLineEnding": 1
+    },
+    {
+      "time": 143672,
+      "duration": 1992,
+      "text": "She was playing with me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 146249,
+      "duration": 1289,
+      "text": "Next thing you know",
+      "isLineEnding": 1
+    },
+    {
+      "time": 147656,
+      "duration": 1621,
+      "text": "We were playing with three",
+      "isLineEnding": 1
+    },
+    {
+      "time": 149999,
+      "duration": 3770,
+      "text": "Oh oh oh oh oh oh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 153769,
+      "duration": 3379,
+      "text": "Oh oh oh oh oh oh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 157148,
+      "duration": 1641,
+      "text": "I was playing with her",
+      "isLineEnding": 1
+    },
+    {
+      "time": 158808,
+      "duration": 1836,
+      "text": "She was playing with me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 161249,
+      "duration": 937,
+      "text": "Next thing you know",
+      "isLineEnding": 1
+    },
+    {
+      "time": 162656,
+      "duration": 1738,
+      "text": "We were playing with three",
+      "isLineEnding": 1
+    },
+    {
+      "time": 164999,
+      "duration": 3750,
+      "text": "Oh oh oh oh oh oh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 168749,
+      "duration": 1875,
+      "text": "Oh oh oh oh ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 171328,
+      "duration": 703,
+      "text": "rain over me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 172031,
+      "duration": 1816,
+      "text": "Girl my body don't lie",
+      "isLineEnding": 1
+    },
+    {
+      "time": 173965,
+      "duration": 937,
+      "text": "I'm outta ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 174902,
+      "duration": 293,
+      "text": "my ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 175371,
+      "duration": 937,
+      "text": "mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 176308,
+      "duration": 937,
+      "text": "Let it rain ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 177246,
+      "duration": 586,
+      "text": "over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 177832,
+      "duration": 1523,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 179590,
+      "duration": 1406,
+      "text": "I'm rising so ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 180996,
+      "duration": 703,
+      "text": "high",
+      "isLineEnding": 1
+    },
+    {
+      "time": 181699,
+      "duration": 1172,
+      "text": "Out of my ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 182871,
+      "duration": 488,
+      "text": "mind",
+      "isLineEnding": 1
+    },
+    {
+      "time": 183437,
+      "duration": 1308,
+      "text": "So let it rain ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 184746,
+      "duration": 586,
+      "text": "over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 185332,
+      "duration": 1992,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 187499,
+      "duration": 352,
+      "text": "Ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 187968,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 188437,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 189140,
+      "duration": 469,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 189765,
+      "duration": 371,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 190312,
+      "duration": 645,
+      "text": "ay",
+      "isLineEnding": 1
+    },
+    {
+      "time": 191249,
+      "duration": 1875,
+      "text": "Let it rain over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 193124,
+      "duration": 1875,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 194999,
+      "duration": 352,
+      "text": "Ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 195468,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 195937,
+      "duration": 352,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 196640,
+      "duration": 469,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 197265,
+      "duration": 371,
+      "text": "ay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 197812,
+      "duration": 645,
+      "text": "ay",
+      "isLineEnding": 1
+    },
+    {
+      "time": 198749,
+      "duration": 937,
+      "text": "Let it rain ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 199687,
+      "duration": 586,
+      "text": "over ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 200273,
+      "duration": 1523,
+      "text": "me",
+      "isLineEnding": 1
+    }
+  ],
+  "pictos": [
+    {
+      "time": 3749,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 5624,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 7499,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 9374,
+      "duration": 547,
+      "name": "mee_ar_sh"
+    },
+    {
+      "time": 11249,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 13124,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 14999,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 16874,
+      "duration": 547,
+      "name": "fall_ar_sh"
+    },
+    {
+      "time": 18749,
+      "duration": 742,
+      "name": "aie_mo_ar_l"
+    },
+    {
+      "time": 20039,
+      "duration": 449,
+      "name": "aieclose_l_mo_sh"
+    },
+    {
+      "time": 20624,
+      "duration": 742,
+      "name": "aie_mo_ar_r"
+    },
+    {
+      "time": 21914,
+      "duration": 449,
+      "name": "aieclose_mo_sh_r"
+    },
+    {
+      "time": 22499,
+      "duration": 566,
+      "name": "showrain_ar_sh"
+    },
+    {
+      "time": 24374,
+      "duration": 352,
+      "name": "mefall_ar_sh"
+    },
+    {
+      "time": 26249,
+      "duration": 742,
+      "name": "aie_mo_ar_l"
+    },
+    {
+      "time": 27539,
+      "duration": 449,
+      "name": "aieclose_l_mo_sh"
+    },
+    {
+      "time": 28124,
+      "duration": 742,
+      "name": "aie_mo_ar_r"
+    },
+    {
+      "time": 29414,
+      "duration": 449,
+      "name": "aieclose_mo_sh_r"
+    },
+    {
+      "time": 29999,
+      "duration": 566,
+      "name": "showrain_ar_sh"
+    },
+    {
+      "time": 31874,
+      "duration": 352,
+      "name": "mefall_ar_sh"
+    },
+    {
+      "time": 33749,
+      "duration": 528,
+      "name": "jacket_ar"
+    },
+    {
+      "time": 35624,
+      "duration": 528,
+      "name": "jacket2_ar"
+    },
+    {
+      "time": 37499,
+      "duration": 332,
+      "name": "tap_sh"
+    },
+    {
+      "time": 38906,
+      "duration": 391,
+      "name": "tapdown_pu"
+    },
+    {
+      "time": 39374,
+      "duration": 332,
+      "name": "tap2_sh"
+    },
+    {
+      "time": 40781,
+      "duration": 391,
+      "name": "tapdown2_pu"
+    },
+    {
+      "time": 41249,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 42539,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 43183,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 44414,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 45058,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 46289,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 46933,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 48164,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 48749,
+      "duration": 332,
+      "name": "tap_sh"
+    },
+    {
+      "time": 50156,
+      "duration": 391,
+      "name": "tapdown_pu"
+    },
+    {
+      "time": 50624,
+      "duration": 332,
+      "name": "tap2_sh"
+    },
+    {
+      "time": 52031,
+      "duration": 391,
+      "name": "tapdown2_pu"
+    },
+    {
+      "time": 52499,
+      "duration": 332,
+      "name": "tap_sh"
+    },
+    {
+      "time": 53906,
+      "duration": 391,
+      "name": "tapdown_pu"
+    },
+    {
+      "time": 54374,
+      "duration": 332,
+      "name": "tap2_sh"
+    },
+    {
+      "time": 55781,
+      "duration": 391,
+      "name": "tapdown2_pu"
+    },
+    {
+      "time": 56249,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 57539,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 58183,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 59414,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 60058,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 61289,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 61933,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 63164,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 63749,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 65624,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 67499,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 69374,
+      "duration": 547,
+      "name": "mee_ar_sh"
+    },
+    {
+      "time": 71249,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 73124,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 74999,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 76874,
+      "duration": 547,
+      "name": "fall_ar_sh"
+    },
+    {
+      "time": 78749,
+      "duration": 742,
+      "name": "aie_mo_ar_l"
+    },
+    {
+      "time": 80039,
+      "duration": 449,
+      "name": "aieclose_l_mo_sh"
+    },
+    {
+      "time": 80624,
+      "duration": 742,
+      "name": "aie_mo_ar_r"
+    },
+    {
+      "time": 81914,
+      "duration": 449,
+      "name": "aieclose_mo_sh_r"
+    },
+    {
+      "time": 82499,
+      "duration": 566,
+      "name": "showrain_ar_sh"
+    },
+    {
+      "time": 84374,
+      "duration": 352,
+      "name": "mefall_ar_sh"
+    },
+    {
+      "time": 86249,
+      "duration": 742,
+      "name": "aie_mo_ar_l"
+    },
+    {
+      "time": 87539,
+      "duration": 449,
+      "name": "aieclose_l_mo_sh"
+    },
+    {
+      "time": 88124,
+      "duration": 742,
+      "name": "aie_mo_ar_r"
+    },
+    {
+      "time": 89531,
+      "duration": 449,
+      "name": "aieclose_mo_sh_r"
+    },
+    {
+      "time": 89999,
+      "duration": 566,
+      "name": "showrain_ar_sh"
+    },
+    {
+      "time": 91874,
+      "duration": 352,
+      "name": "mefall_ar_sh"
+    },
+    {
+      "time": 93749,
+      "duration": 528,
+      "name": "jacket_ar"
+    },
+    {
+      "time": 95624,
+      "duration": 528,
+      "name": "jacket2_ar"
+    },
+    {
+      "time": 97499,
+      "duration": 332,
+      "name": "tap_sh"
+    },
+    {
+      "time": 98906,
+      "duration": 391,
+      "name": "tapdown_pu"
+    },
+    {
+      "time": 99374,
+      "duration": 332,
+      "name": "tap2_sh"
+    },
+    {
+      "time": 100781,
+      "duration": 391,
+      "name": "tapdown2_pu"
+    },
+    {
+      "time": 101249,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 102539,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 103183,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 104414,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 105058,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 106289,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 106933,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 108164,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 108749,
+      "duration": 332,
+      "name": "tap_sh"
+    },
+    {
+      "time": 110156,
+      "duration": 391,
+      "name": "tapdown_pu"
+    },
+    {
+      "time": 110624,
+      "duration": 332,
+      "name": "tap2_sh"
+    },
+    {
+      "time": 112031,
+      "duration": 391,
+      "name": "tapdown2_pu"
+    },
+    {
+      "time": 112499,
+      "duration": 332,
+      "name": "tap_sh"
+    },
+    {
+      "time": 113906,
+      "duration": 391,
+      "name": "tapdown_pu"
+    },
+    {
+      "time": 114374,
+      "duration": 332,
+      "name": "tap2_sh"
+    },
+    {
+      "time": 115781,
+      "duration": 391,
+      "name": "tapdown2_pu"
+    },
+    {
+      "time": 116249,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 117539,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 118183,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 119414,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 120058,
+      "duration": 371,
+      "name": "shoulders_gh"
+    },
+    {
+      "time": 121289,
+      "duration": 664,
+      "name": "punchr_pu"
+    },
+    {
+      "time": 121933,
+      "duration": 371,
+      "name": "shoulder2_pu"
+    },
+    {
+      "time": 123164,
+      "duration": 664,
+      "name": "punchl_pu"
+    },
+    {
+      "time": 123749,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 125624,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 127499,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 129374,
+      "duration": 547,
+      "name": "mee_ar_sh"
+    },
+    {
+      "time": 131249,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 133124,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 134999,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 136874,
+      "duration": 547,
+      "name": "fall_ar_sh"
+    },
+    {
+      "time": 138749,
+      "duration": 254,
+      "name": "boomhead_sh"
+    },
+    {
+      "time": 140156,
+      "duration": 371,
+      "name": "getup_ar"
+    },
+    {
+      "time": 142499,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 142968,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 143437,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 143906,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 146249,
+      "duration": 352,
+      "name": "moveback_ar"
+    },
+    {
+      "time": 147656,
+      "duration": 449,
+      "name": "moveback2_ar"
+    },
+    {
+      "time": 149999,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 150468,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 150937,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 151406,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 153749,
+      "duration": 352,
+      "name": "moveback_ar"
+    },
+    {
+      "time": 155156,
+      "duration": 449,
+      "name": "moveback2_ar"
+    },
+    {
+      "time": 157499,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 157968,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 158437,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 158906,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 161249,
+      "duration": 313,
+      "name": "club_pu"
+    },
+    {
+      "time": 161718,
+      "duration": 235,
+      "name": "clubknee_r_sh_pu"
+    },
+    {
+      "time": 162187,
+      "duration": 313,
+      "name": "club_pu"
+    },
+    {
+      "time": 162656,
+      "duration": 449,
+      "name": "knee_l_sh"
+    },
+    {
+      "time": 164999,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 165468,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 165937,
+      "duration": 430,
+      "name": "chau_mo_sh"
+    },
+    {
+      "time": 166406,
+      "duration": 449,
+      "name": "legup_sh"
+    },
+    {
+      "time": 168749,
+      "duration": 313,
+      "name": "club_pu"
+    },
+    {
+      "time": 169218,
+      "duration": 235,
+      "name": "clubknee_r_sh_pu"
+    },
+    {
+      "time": 170624,
+      "duration": 410,
+      "name": "showoff_po_gold"
+    },
+    {
+      "time": 171562,
+      "duration": 391,
+      "name": "sparkles_ar_sh"
+    },
+    {
+      "time": 172499,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 174374,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 176249,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 178124,
+      "duration": 547,
+      "name": "mee_ar_sh"
+    },
+    {
+      "time": 179999,
+      "duration": 332,
+      "name": "push_ar"
+    },
+    {
+      "time": 181874,
+      "duration": 332,
+      "name": "head_ar"
+    },
+    {
+      "time": 183749,
+      "duration": 528,
+      "name": "turn_ar"
+    },
+    {
+      "time": 185624,
+      "duration": 547,
+      "name": "fall_ar_sh"
+    },
+    {
+      "time": 187499,
+      "duration": 742,
+      "name": "aie_mo_ar_l"
+    },
+    {
+      "time": 188789,
+      "duration": 449,
+      "name": "aieclose_l_mo_sh"
+    },
+    {
+      "time": 189374,
+      "duration": 742,
+      "name": "aie_mo_ar_r"
+    },
+    {
+      "time": 190664,
+      "duration": 449,
+      "name": "aieclose_mo_sh_r"
+    },
+    {
+      "time": 191249,
+      "duration": 567,
+      "name": "showrain_ar_sh"
+    },
+    {
+      "time": 193124,
+      "duration": 352,
+      "name": "mefall_ar_sh"
+    },
+    {
+      "time": 194999,
+      "duration": 742,
+      "name": "aie_mo_ar_l"
+    },
+    {
+      "time": 196289,
+      "duration": 449,
+      "name": "aieclose_l_mo_sh"
+    },
+    {
+      "time": 196874,
+      "duration": 742,
+      "name": "aie_mo_ar_r"
+    },
+    {
+      "time": 198164,
+      "duration": 449,
+      "name": "aieclose_mo_sh_r"
+    },
+    {
+      "time": 198749,
+      "duration": 567,
+      "name": "showrain_ar_sh"
+    },
+    {
+      "time": 200624,
+      "duration": 352,
+      "name": "mefall_ar_sh"
+    },
+    {
+      "time": 202499,
+      "duration": 567,
+      "name": "fame_mo_gold"
+    }
+  ],
+  "AudioPreview": {
+    "coverflow": {
+      "startbeat": 162
+    },
+    "prelobby": {
+      "startbeat": 162
+    }
+  },
+  "AudioPreviewFadeTime": 0.5
+}

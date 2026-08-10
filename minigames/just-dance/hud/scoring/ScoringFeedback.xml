@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="ScoringFeedback.png">
+  <SubTexture name="feedback_bad" x="196" y="4" width="128" height="128"/>
+  <SubTexture name="feedback_gold_bad" x="196" y="136" width="128" height="128"/>
+  <SubTexture name="feedback_ok" x="132" y="268" width="256" height="128"/>
+  <SubTexture name="feedback_good" x="4" y="400" width="512" height="128"/>
+  <SubTexture name="feedback_super" x="4" y="532" width="512" height="128"/>
+  <SubTexture name="feedback_perfect" x="4" y="664" width="512" height="128"/>
+  <SubTexture name="feedback_gold" x="4" y="796" width="512" height="128"/>
+  <SubTexture name="feedback_ok_flare" x="4" y="928" width="512" height="512"/>
+  <SubTexture name="feedback_good_flare" x="4" y="1444" width="512" height="512"/>
+  <SubTexture name="feedback_perfect_flare" x="4" y="1960" width="512" height="512"/>
+  <SubTexture name="feedback_perfectplus_flare" x="4" y="2476" width="512" height="512"/>
+  <SubTexture name="feedback_gold_flare" x="4" y="2992" width="512" height="512"/>
+</TextureAtlas>
