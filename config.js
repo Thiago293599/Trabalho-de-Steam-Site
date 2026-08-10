@@ -9,5 +9,5 @@
   Você também pode executar CONFIGURAR_SITE.bat, que faz isso para você.
 */
 window.GAME_CONFIG = {
-  SERVER_URL: "https://desktop-krmh4mf.taile2c81b.ts.net"
+  SERVER_URL: "https://steam-trabalho-de-um-tabuleiro.onrender.com"
 };
