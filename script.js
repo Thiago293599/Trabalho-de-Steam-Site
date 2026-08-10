@@ -412,7 +412,12 @@ const DANCE_CRITICAL_IMAGE_SOURCES = [
   "minigames/just-dance/hud/ipk-base/textures/line_linear_gradient_mask.png",
   `${DANCE_IPK_GOLD_BASE}/feedback_gold.png`,
   `${DANCE_IPK_GOLD_BASE}/feedback_gold_flare.png`,
-  `${DANCE_IPK_GOLD_BASE}/feedback_gold_bad.png`
+  `${DANCE_IPK_GOLD_BASE}/feedback_gold_bad.png`,
+  "minigames/just-dance/hud/ipk-2026-reference/screen_halo.png",
+  "minigames/just-dance/hud/ipk-2026-reference/ray_sharp_00.png",
+  "minigames/just-dance/hud/ipk-2026-reference/particles_zoom_sharp.png",
+  "minigames/just-dance/hud/ipk-2026-reference/sparks.png",
+  "minigames/just-dance/hud/ipk-2026-reference/sparks_multi.png"
 ];
 const DANCE_QUALITY_LABELS = { low: "Low • 360p", medium: "Medium • 720p", high: "High • 1080p" };
 const DANCE_SCORING_BASE = "minigames/just-dance/hud/scoring";
@@ -464,43 +469,109 @@ let danceStartLoopGoldIndex = -1;
 let danceStartLoopFirstPassAudio = null;
 let danceStartLoopCycleToken = 0;
 const danceFinishedGoldIntroMoves = new Set();
+const danceFinishedGoldImpactMoves = new Set();
+let danceGoldLastTimelineMs = 0;
 let dancePendingYeahAfterFinish = false;
 let danceYeahFinalTimer = 0;
 let danceYeahPreviewTimer = 0;
 
 
-/* ---------- Compatibilidade: Gold Move global experimental desativado ---------- */
+/* ---------- Gold Move global JD2026 ---------- */
 function stopDanceGoldStartLoop() {
   stopDanceStartLoopFirstAudio();
 }
 
 function stopDanceGoldFinishLoop() {
-  // O Finish Loop antigo por vídeo/frames está desativado nesta base estável.
+  // Compatibilidade com builds antigas. O Gold Move atual usa a HUD global JD2026.
+}
+
+function hideDanceGoldGlobalFx() {
+  if (!danceIpkGoldStageFx) return;
+  danceIpkGoldStageFx.classList.remove("active", "charge", "explode", "miss");
+  danceIpkGoldStageFx.setAttribute("aria-hidden", "true");
+}
+
+function showDanceGoldCharge() {
+  if (!danceIpkGoldStageFx) return;
+  if (danceIpkGoldStageFx.classList.contains("charge") && danceIpkGoldStageFx.classList.contains("active")) return;
+  danceIpkGoldStageFx.classList.remove("explode", "miss");
+  danceIpkGoldStageFx.classList.add("active", "charge");
+  danceIpkGoldStageFx.setAttribute("aria-hidden", "false");
+}
+
+function showDanceGoldExplosion() {
+  if (!danceIpkGoldStageFx) return;
+  danceIpkGoldStageFx.classList.remove("charge", "explode", "miss");
+  void danceIpkGoldStageFx.offsetWidth;
+  danceIpkGoldStageFx.classList.add("active", "explode");
+  danceIpkGoldStageFx.setAttribute("aria-hidden", "false");
 }
 
 function resetDanceGoldMoveFx(clearState = false) {
   stopDanceGoldStartLoop();
   stopDanceGoldFinishLoop();
-  if (danceYeahFinalTimer) {
-    window.clearTimeout(danceYeahFinalTimer);
-    danceYeahFinalTimer = 0;
-  }
-  if (danceYeahPreviewTimer) {
-    window.clearTimeout(danceYeahPreviewTimer);
-    danceYeahPreviewTimer = 0;
-  }
-  danceIpkGoldStageFx?.classList.remove("active", "miss");
-  danceIpkGoldStageFx?.setAttribute("aria-hidden", "true");
+  if (danceYeahFinalTimer) { window.clearTimeout(danceYeahFinalTimer); danceYeahFinalTimer = 0; }
+  if (danceYeahPreviewTimer) { window.clearTimeout(danceYeahPreviewTimer); danceYeahPreviewTimer = 0; }
+  hideDanceGoldGlobalFx();
   if (clearState) {
     danceActiveGoldMoveIndex = -1;
     danceStartLoopGoldIndex = -1;
     dancePendingYeahAfterFinish = false;
     danceFinishedGoldIntroMoves.clear();
+    danceFinishedGoldImpactMoves.clear();
+    danceGoldLastTimelineMs = 0;
   }
 }
 
-function updateDanceGoldMoveFx(_timeMs) {
-  // O overlay global experimental está desativado nesta base estável.
+function updateDanceGoldMoveFx(timeMs) {
+  if (!danceIpkGoldStageFx || !danceTestMoves.length) return;
+  const now = Math.max(0, Number(timeMs || 0));
+  if (danceGoldLastTimelineMs && now < danceGoldLastTimelineMs - 450) {
+    danceFinishedGoldIntroMoves.clear();
+    danceFinishedGoldImpactMoves.clear();
+    danceActiveGoldMoveIndex = -1;
+    hideDanceGoldGlobalFx();
+  }
+  danceGoldLastTimelineMs = now;
+
+  let visualState = "";
+  let visualIndex = -1;
+  for (let index = 0; index < danceTestMoves.length; index += 1) {
+    const move = danceTestMoves[index];
+    if (!move?.goldMove) continue;
+    const impactTime = Number(move.time || 0) + Number(danceGoldFinishOffsetMs || 0);
+    const chargeStart = impactTime - Math.max(250, Number(danceGoldPrepareMs || 3250));
+    const explodeEnd = impactTime + 1320;
+
+    if (now >= chargeStart && now < impactTime) {
+      visualState = "charge";
+      visualIndex = index;
+      if (!danceFinishedGoldIntroMoves.has(index) && isDanceMediaPlaying()) {
+        danceFinishedGoldIntroMoves.add(index);
+        playDanceIpkGoldIntroAudio();
+      }
+      break;
+    }
+
+    if (now >= impactTime && now <= explodeEnd) {
+      visualState = "explode";
+      visualIndex = index;
+      if (!danceFinishedGoldImpactMoves.has(index)) {
+        if (isDanceMediaPlaying()) {
+          danceFinishedGoldImpactMoves.add(index);
+          playDanceIpkGoldImpactAudio();
+        }
+        showDanceGoldExplosion();
+      }
+      break;
+    }
+  }
+
+  danceActiveGoldMoveIndex = visualIndex;
+  if (visualState === "charge") showDanceGoldCharge();
+  else if (visualState === "explode") {
+    if (!danceIpkGoldStageFx.classList.contains("explode")) showDanceGoldExplosion();
+  } else hideDanceGoldGlobalFx();
 }
 
 const ONLINE_SESSION_KEY = "corridaTabuleiroOnlineSessionV1";
@@ -2294,6 +2365,14 @@ function playDanceHudSound(name) {
   } catch {}
 }
 
+function playDanceIpkGoldIntroAudio() {
+  playDanceHudSound("gold-intro-ipk");
+}
+
+function playDanceIpkGoldImpactAudio() {
+  playDanceHudSound("gold-impact-ipk");
+}
+
 
 function setDancePreloadUi(percent = 0, status = "", title = "Preparando Just Dance…") {
   const value = Math.max(0, Math.min(100, Number(percent || 0)));
@@ -3027,15 +3106,18 @@ async function previewDanceYeahSequence() {
     return;
   }
   resetDanceGoldMoveFx(false);
+  showDanceGoldCharge();
   playDanceIpkGoldIntroAudio();
-  if (danceLabMessage) danceLabMessage.textContent = `Prévia segura: áudio de pré-Gold; impacto em ${danceGoldPrepareMs} ms.`;
+  if (danceLabMessage) danceLabMessage.textContent = `Prévia Gold Move: charge + som; explosão em ${danceGoldPrepareMs} ms.`;
   danceYeahPreviewTimer = window.setTimeout(() => {
     danceYeahPreviewTimer = 0;
+    showDanceGoldExplosion();
+    playDanceIpkGoldImpactAudio();
     const slot = danceVideoJudgements?.querySelector(".dance-video-player-judge");
-    const playerId = slot?.dataset?.playerId;
+    const playerId = slot?.dataset?.playerId || "";
     if (playerId) showDanceVideoJudgement(playerId, "YEAH", true);
-    else playDanceIpkGoldImpactAudio();
-    if (danceLabMessage) danceLabMessage.textContent = "Prévia concluída. Overlay global 2026 está desligado nesta build de recuperação.";
+    window.setTimeout(() => hideDanceGoldGlobalFx(), 1350);
+    if (danceLabMessage) danceLabMessage.textContent = "Prévia concluída: Gold Move global + som funcionando acima da HUD.";
   }, Math.max(0, danceGoldPrepareMs));
 }
 
@@ -3163,9 +3245,8 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
   feedback.classList.add("active");
 
   const normalizedJudgement = String(judgement || "").toUpperCase();
-  // O julgamento continua no quadro do jogador. A camada global experimental
-  // foi desligada nesta build de recuperação para não bagunçar a HUD.
-  if (normalizedJudgement.startsWith("YEAH")) playDanceIpkGoldImpactAudio();
+  // A explosão global e seu áudio pertencem à timeline; aqui toca só o feedback YEAH do jogador.
+  if (normalizedJudgement.startsWith("YEAH")) playDanceHudSound("yeah");
 }
 
 function pictoAtlasPosition(name) {

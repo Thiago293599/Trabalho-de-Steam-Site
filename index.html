@@ -13,7 +13,7 @@
       } catch {}
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=034-yeah-loop-audio-config" />
+  <link rel="stylesheet" href="style.css?v=037-gold-overlay-fix" />
 </head>
 <body class="site-loading">
 
@@ -533,11 +533,6 @@
               </div>
             </div>
             <div class="dance-game-hud" aria-label="HUD de sincronização do Just Dance">
-              <div id="danceIpkGoldStageFx" class="dance-ipk-gold-stage-fx" aria-hidden="true">
-                <span class="dance-ipk-gold-screen-flash" aria-hidden="true"></span>
-                <img id="danceIpkGoldStageFlare" class="dance-ipk-gold-stage-flare" src="minigames/just-dance/hud/ipk-gold/feedback_gold_flare.png" alt="" aria-hidden="true">
-                <img id="danceIpkGoldStageImage" class="dance-ipk-gold-stage-image" src="minigames/just-dance/hud/ipk-gold/feedback_gold.png" alt="YEAH!">
-              </div>
               <div id="danceVideoJudgements" class="dance-video-judgements"></div>
               <div id="danceStarHud" class="dance-star-hud" aria-label="Pontuação e estrelas">
                 <div id="danceHudStars" class="dance-hud-stars" aria-label="Progresso das cinco estrelas">
@@ -559,6 +554,15 @@
                 <div class="dance-picto-progress-line" aria-hidden="true"></div>
                 <div id="dancePictoItems" class="dance-picto-items"></div>
               </div>
+            </div>
+            <div id="danceIpkGoldStageFx" class="dance-ipk-gold-stage-fx" aria-hidden="true">
+              <span class="dance-ipk-gold-screen-flash" aria-hidden="true"></span>
+              <img id="danceIpkGoldStageFlare" class="dance-jd26-gold-halo" src="minigames/just-dance/hud/ipk-2026-reference/screen_halo.png" alt="" aria-hidden="true">
+              <img class="dance-jd26-gold-ray ray-a" src="minigames/just-dance/hud/ipk-2026-reference/ray_sharp_00.png" alt="" aria-hidden="true">
+              <img class="dance-jd26-gold-ray ray-b" src="minigames/just-dance/hud/ipk-2026-reference/ray_sharp_00.png" alt="" aria-hidden="true">
+              <img id="danceIpkGoldStageImage" class="dance-jd26-gold-particles" src="minigames/just-dance/hud/ipk-2026-reference/particles_zoom_sharp.png" alt="" aria-hidden="true">
+              <img class="dance-jd26-gold-sparks sparks-a" src="minigames/just-dance/hud/ipk-2026-reference/sparks_multi.png" alt="" aria-hidden="true">
+              <img class="dance-jd26-gold-sparks sparks-b" src="minigames/just-dance/hud/ipk-2026-reference/sparks.png" alt="" aria-hidden="true">
             </div>
           </div>
           <div class="dance-player-controls" aria-label="Controles de reprodução">
@@ -813,7 +817,7 @@
       window.dispatchEvent(new CustomEvent("dice3d-error", { detail: String(error?.message || error) }));
     });
   </script>
-  <script src="script.js?v=036-nav-recovery" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <script src="script.js?v=037-gold-overlay-fix" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <span class="version-badge" data-version>V. 0.2.3 (Teste)</span>
 </body>
 </html>
