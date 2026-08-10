@@ -13,7 +13,7 @@
       } catch {}
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=037-gold-overlay-fix" />
+  <link rel="stylesheet" href="style.css?v=038-gold-video-exact" />
 </head>
 <body class="site-loading">
 
@@ -555,7 +555,8 @@
                 <div id="dancePictoItems" class="dance-picto-items"></div>
               </div>
             </div>
-            <div id="danceIpkGoldStageFx" class="dance-ipk-gold-stage-fx" aria-hidden="true">
+            <canvas id="danceGoldCanvas" class="dance-gold-exact-canvas" width="960" height="540" aria-hidden="true"></canvas>
+            <div id="danceIpkGoldStageFx" class="dance-ipk-gold-stage-fx" aria-hidden="true" hidden>
               <span class="dance-ipk-gold-screen-flash" aria-hidden="true"></span>
               <img id="danceIpkGoldStageFlare" class="dance-jd26-gold-halo" src="minigames/just-dance/hud/ipk-2026-reference/screen_halo.png" alt="" aria-hidden="true">
               <img class="dance-jd26-gold-ray ray-a" src="minigames/just-dance/hud/ipk-2026-reference/ray_sharp_00.png" alt="" aria-hidden="true">
@@ -603,24 +604,30 @@
           <div class="dance-yeah-dev-head">
             <div>
               <span class="tiny-label">GOLD MOVE DEV</span>
-              <strong>Gold Move — base estável</strong>
+              <strong>Gold Move — animação exata dos vídeos</strong>
             </div>
-            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">Recuperação estável</span>
+            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">Frames exatos • 60 FPS</span>
           </div>
           <div class="dance-yeah-dev-grid">
             <label>Pré-aviso Gold Move
               <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="500" max="6000" step="25" value="3250" /><b>ms antes</b></span>
             </label>
+            <label>Depois da 1ª volta, repetir Start Loop a partir de
+              <span class="dance-yeah-dev-input"><input id="danceYeahLoopRestartMs" type="number" min="0" max="1600" step="25" value="0" /><b>ms do loop</b></span>
+            </label>
             <label>Impacto do Gold Move
               <span class="dance-yeah-dev-input"><input id="danceYeahFinishOffsetMs" type="number" min="-1500" max="1500" step="25" value="0" /><b>ms do Gold</b></span>
+            </label>
+            <label>FinishYeah depois do Finish Loop
+              <span class="dance-yeah-dev-input"><input id="danceYeahFinalDelayMs" type="number" min="0" max="2000" step="25" value="0" /><b>ms depois</b></span>
             </label>
           </div>
           <div class="dance-yeah-dev-actions">
             <button id="danceYeahApplyBtn" class="secondary compact-button" type="button">Aplicar</button>
-            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar Gold Move IPK</button>
+            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar animação original</button>
             <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrão</button>
           </div>
-          <p>Build de recuperação: mantive <b>letras, barra de pontuação, pictos, quadro dos jogadores e julgamentos</b> como estavam e desliguei somente o overlay global experimental que estava bagunçando a HUD. Os arquivos reais <code>hud_goldmove.isc</code>, <code>goldmove_aspiration.tape</code>, <code>goldmove_explode.tape</code> e <code>fx_goldmove.tpl</code> do Just Dance 2026 foram preservados como referência para a reconstrução correta.</p>
+          <p>Esta versão usa <b>os próprios quadros dos vídeos Start Loop, Finish Loop e Finish Yeah!</b> em 60 FPS, sem reproduzir MP4 durante o gameplay. O preto é composto em modo screen, então o efeito fica por cima de toda a HUD sem cobrir o vídeo. O som do Start Loop toca só na primeira volta; as repetições ficam mudas.</p>
         </div>
         <div class="dance-score-rules" aria-label="Sistema de pontuação">
           <div class="dance-judgement-legend">
@@ -817,7 +824,7 @@
       window.dispatchEvent(new CustomEvent("dice3d-error", { detail: String(error?.message || error) }));
     });
   </script>
-  <script src="script.js?v=037-gold-overlay-fix" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <script src="script.js?v=038-gold-video-exact" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <span class="version-badge" data-version>V. 0.2.3 (Teste)</span>
 </body>
 </html>

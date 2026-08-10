@@ -2805,3 +2805,25 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 @keyframes jd26GoldExplodeParticles{0%{opacity:1;transform:translate(-50%,-50%) scale(.34) rotate(-8deg)}30%{opacity:.96;transform:translate(-50%,-50%) scale(1.02) rotate(3deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.52) rotate(9deg)}}
 @keyframes jd26GoldExplodeSparksA{0%{opacity:1;transform:translate(-50%,-50%) scale(.26) rotate(-12deg)}34%{opacity:.94;transform:translate(-50%,-50%) scale(1.02) rotate(6deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.46) rotate(15deg)}}
 @keyframes jd26GoldExplodeSparksB{0%{opacity:.98;transform:translate(-50%,-50%) scale(.20) rotate(14deg)}38%{opacity:.88;transform:translate(-50%,-50%) scale(.88) rotate(-6deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.30) rotate(-17deg)}}
+
+/* ---------- Gold Move exato a partir dos vídeos de referência ---------- */
+.dance-gold-exact-canvas{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:80!important;
+  display:block!important;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  user-select:none;
+  mix-blend-mode:screen;
+  image-rendering:auto;
+  transform:none!important;
+}
+.dance-gold-exact-canvas.active{
+  opacity:1;
+  visibility:visible;
+}
+.dance-ipk-gold-stage-fx{display:none!important}
