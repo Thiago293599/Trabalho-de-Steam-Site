@@ -503,11 +503,21 @@
         </div>
         <div id="dancePlayerShell" class="dance-player-shell">
           <div id="danceVideoStage" class="dance-video-stage" data-lyrics-size="small" data-video-fit="contain">
-            <video id="danceTestVideo" class="dance-test-video" playsinline preload="metadata" poster="minigames/just-dance/songs/RainOverMe/RainOverMe.jpg" muted></video>
-            <audio id="danceSongAudio" preload="metadata" src="minigames/just-dance/songs/RainOverMe/RainOverMe_Audio.mp3"></audio>
-            <img id="dancePlayerHudTrack" class="dance-player-hud-overlay dance-player-hud-track" src="minigames/just-dance/hud/images/1P.png" alt="" aria-hidden="true" />
-            <img id="dancePlayerHudOverlay" class="dance-player-hud-overlay dance-player-hud-fill" src="minigames/just-dance/hud/images/1P.png" alt="" aria-hidden="true" />
+            <video id="danceTestVideo" class="dance-test-video" playsinline preload="none" poster="minigames/just-dance/songs/RainOverMe/RainOverMe.jpg" muted></video>
+            <audio id="danceSongAudio" preload="none"></audio>
+            <video id="danceYeahStartLoop" class="dance-gold-loop dance-gold-start-loop" playsinline preload="none" muted loop aria-hidden="true"></video>
+            <video id="danceYeahFinishLoop" class="dance-gold-loop dance-gold-finish-loop" playsinline preload="none" muted aria-hidden="true"></video>
+            <div id="danceScoreBar" class="dance-score-bar" aria-hidden="true"><img id="danceScoreBarFill" src="minigames/just-dance/hud/images/scorebars/1P_bar.png" alt=""></div>
             <canvas id="danceYeahCanvas" class="dance-yeah-canvas" width="960" height="540" aria-hidden="true"></canvas>
+            <div id="dancePreloadOverlay" class="dance-preload-overlay" role="status" aria-live="polite">
+              <div class="dance-preload-card">
+                <div class="dance-preload-spinner" aria-hidden="true"></div>
+                <strong id="dancePreloadTitle">Preparando Just Dance…</strong>
+                <span id="dancePreloadStatus">Carregando arquivos antes de iniciar.</span>
+                <div class="dance-preload-track"><span id="dancePreloadFill"></span></div>
+                <b id="dancePreloadPercent">0%</b>
+              </div>
+            </div>
             <div class="dance-game-hud" aria-label="HUD de sincronização do Just Dance">
               <div id="danceVideoJudgements" class="dance-video-judgements"></div>
               <div id="danceStarHud" class="dance-star-hud" aria-label="Pontuação e estrelas">
@@ -518,13 +528,14 @@
                   <span class="dance-hud-star" data-threshold="8000"><img class="outline" src="minigames/just-dance/hud/ipk-base/textures/star_outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
                   <span class="dance-hud-star" data-threshold="10000"><img class="outline" src="minigames/just-dance/hud/ipk-base/textures/star_outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
                 </div>
-                <div class="dance-hud-score-row"><strong id="danceHudScore">0</strong><img id="danceHudRankIcon" class="dance-hud-rank-icon hidden" alt=""></div>
               </div>
               <div id="danceKaraoke" class="dance-karaoke" aria-label="Letra sincronizada da música" aria-live="off">
                 <div id="danceKaraokeCurrent" class="dance-karaoke-current"></div>
                 <div id="danceKaraokeNext" class="dance-karaoke-next"></div>
               </div>
               <div id="dancePictoLane" class="dance-picto-lane" aria-label="Pictogramas da coreografia">
+                <div class="dance-picto-bar-bkg" aria-hidden="true"></div>
+                <div class="dance-picto-bar-gradient" aria-hidden="true"></div>
                 <div class="dance-picto-target" aria-hidden="true"></div>
                 <div class="dance-picto-progress-line" aria-hidden="true"></div>
                 <div id="dancePictoItems" class="dance-picto-items"></div>
@@ -532,9 +543,9 @@
             </div>
           </div>
           <div class="dance-player-controls" aria-label="Controles de reprodução">
-            <button id="dancePlayPauseBtn" class="dance-player-icon-button" type="button" aria-label="Reproduzir">▶</button>
+            <button id="dancePlayPauseBtn" class="dance-player-icon-button" type="button" aria-label="Reproduzir" disabled>▶</button>
             <span id="dancePlayerClock" class="dance-player-clock">0:00 / 0:00</span>
-            <input id="danceSeek" class="dance-player-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Posição da música" />
+            <input id="danceSeek" class="dance-player-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Posição da música" disabled />
             <label class="dance-volume-control" aria-label="Volume">🔊 <input id="danceVolume" type="range" min="0" max="1" value="0.9" step="0.05" /></label>
             <button id="danceWindowBtn" class="secondary compact-button" type="button">Preencher janela</button>
             <button id="danceFullscreenBtn" class="secondary compact-button" type="button">Tela cheia</button>

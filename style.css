@@ -2350,3 +2350,128 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
   .dance-hud-star{width:calc(35px * var(--jd-ui-scale));}
   .dance-hud-score-row strong{font-size:calc(13px * var(--jd-ui-scale));min-width:calc(46px * var(--jd-ui-scale));}
 }
+
+/* ---------- Just Dance HUD v0.2.6: preload + players/pictos IPK + gold sequence ---------- */
+/* Pré-carregamento real: fica por cima do quadro 16:9 até vídeo/áudio/FX estarem prontos. */
+.dance-preload-overlay{
+  position:absolute;inset:0;z-index:30;display:grid;place-items:center;
+  background:rgba(0,0,0,.88);color:#fff;pointer-events:auto;
+  transition:opacity .18s ease;
+}
+.dance-preload-overlay.hidden{display:none!important}
+.dance-preload-card{
+  width:min(420px,78%);display:grid;justify-items:center;gap:calc(10px * var(--jd-ui-scale));
+  text-align:center;padding:calc(22px * var(--jd-ui-scale));
+}
+.dance-preload-card strong{font-size:calc(20px * var(--jd-ui-scale));font-weight:950;text-shadow:0 2px 5px #000}
+.dance-preload-card span{font-size:calc(11px * var(--jd-ui-scale));color:rgba(255,255,255,.78)}
+.dance-preload-card b{font-size:calc(14px * var(--jd-ui-scale));font-variant-numeric:tabular-nums}
+.dance-preload-spinner{
+  width:calc(42px * var(--jd-ui-scale));height:calc(42px * var(--jd-ui-scale));border-radius:50%;
+  border:max(2px,calc(3px * var(--jd-ui-scale))) solid rgba(255,255,255,.22);
+  border-top-color:#fff;animation:jdPreloadSpin .8s linear infinite;
+}
+@keyframes jdPreloadSpin{to{transform:rotate(360deg)}}
+.dance-preload-track{width:100%;height:max(4px,calc(6px * var(--jd-ui-scale)));overflow:hidden;border-radius:999px;background:rgba(255,255,255,.18)}
+.dance-preload-track span{display:block;width:0;height:100%;border-radius:inherit;background:#fff;transition:width .12s linear}
+.dance-preload-overlay.error .dance-preload-spinner{animation:none;border-color:#ff6b75}
+.dance-player-icon-button:disabled,.dance-player-seek:disabled{opacity:.42;cursor:not-allowed}
+
+/* Gold Move: os MP4s têm centro preto; screen deixa apenas o FX luminoso por cima do gameplay. */
+.dance-gold-loop{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:8;
+  opacity:0;visibility:hidden;pointer-events:none;mix-blend-mode:screen;
+  transition:opacity .08s linear;background:transparent;
+}
+.dance-gold-loop.active{opacity:1;visibility:visible}
+.dance-yeah-canvas{z-index:9}
+
+/* Barra de score: sem trilho/fundo. O PNG original sobe de baixo para cima dentro da máscara,
+   preservando a ponta arredondada original em qualquer score. */
+.dance-score-bar{
+  --jd-scorebar-width:.7291667%;position:absolute;z-index:6;
+  left:3.6979167%;top:22.1296296%;width:var(--jd-scorebar-width);height:55.6481481%;
+  overflow:hidden;background:transparent!important;pointer-events:none;
+}
+.dance-score-bar img{
+  position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill;opacity:0;
+  transform:translateY(100%);transform-origin:50% 100%;
+  transition:transform .48s cubic-bezier(.20,.72,.18,1),opacity .10s linear;
+  will-change:transform;
+}
+.dance-player-hud-track,.dance-player-hud-fill{display:none!important}
+
+/* Players: estrutura reconstruída a partir de hud_players.isc / hud_player.tpl do patch_pc.ipk. */
+.dance-video-judgements{
+  position:absolute;left:0;right:0;top:2.1%;height:calc(112px * var(--jd-ui-scale));
+  display:block;z-index:11;overflow:visible;
+}
+.dance-video-player-judge{
+  position:absolute;left:calc(50% + var(--jd-player-slot-x,0%));top:0;
+  width:calc(154px * var(--jd-ui-scale));max-width:none;min-width:0;
+  transform:translateX(-50%);text-align:center;filter:none;
+}
+.dance-ipk-player-head{
+  position:relative;width:100%;height:calc(35px * var(--jd-ui-scale));
+  filter:drop-shadow(0 calc(2px * var(--jd-ui-scale)) calc(3px * var(--jd-ui-scale)) rgba(0,0,0,.72));
+}
+.dance-ipk-player-color{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.32) 0%,rgba(255,255,255,.06) 34%,rgba(0,0,0,.24) 100%),var(--player-color);
+  -webkit-mask:url("minigames/just-dance/hud/ipk-base/textures/bkg_player_new.png") center/100% 100% no-repeat;
+  mask:url("minigames/just-dance/hud/ipk-base/textures/bkg_player_new.png") center/100% 100% no-repeat;
+}
+.dance-ipk-player-outline{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.92;pointer-events:none}
+.dance-ipk-player-index{
+  position:absolute;left:calc(18px * var(--jd-ui-scale));top:50%;translate:0 -50%;z-index:4;
+  color:#fff;font-size:calc(8px * var(--jd-ui-scale));font-weight:1000;letter-spacing:.02em;text-shadow:0 1px 2px #000;
+}
+.dance-video-player-name{
+  position:absolute;z-index:4;left:calc(34px * var(--jd-ui-scale));right:calc(20px * var(--jd-ui-scale));top:50%;
+  width:auto;max-width:none;margin:0;padding:0;border:0;background:none;border-radius:0;translate:0 -50%;
+  color:#fff;font-size:calc(12px * var(--jd-ui-scale));line-height:1;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 1px 2px rgba(0,0,0,.95);
+}
+.dance-ipk-player-line{
+  position:absolute;z-index:5;left:7%;right:7%;bottom:calc(-4px * var(--jd-ui-scale));height:calc(7px * var(--jd-ui-scale));
+  background:url("minigames/just-dance/hud/ipk-base/textures/hud_players_line.png") center/100% 100% no-repeat;
+  opacity:.94;pointer-events:none;
+}
+.dance-video-feedback{
+  position:absolute;left:50%;top:calc(28px * var(--jd-ui-scale));width:calc(164px * var(--jd-ui-scale));
+  height:calc(72px * var(--jd-ui-scale));margin:0;translate:-50% 0;
+}
+.dance-video-feedback.feedback-bad .dance-video-judge-image,.dance-video-feedback.feedback-gold-bad .dance-video-judge-image{width:35%}
+.dance-video-feedback.feedback-ok .dance-video-judge-image{width:60%}
+
+/* PictoScale=180 no hud_picto.isc (canvas 1920x1080) => 90px no nosso canvas base 960x540. */
+.dance-picto-lane{right:-12%;bottom:2.5%;width:62%;height:calc(132px * var(--jd-ui-scale));overflow:visible}
+.dance-picto-item{width:calc(90px * var(--jd-ui-scale));bottom:calc(14px * var(--jd-ui-scale))}
+.dance-picto-bar-bkg{
+  position:absolute;left:22%;right:0;bottom:calc(4px * var(--jd-ui-scale));height:calc(15px * var(--jd-ui-scale));
+  background:linear-gradient(90deg,rgba(5,5,8,.44),rgba(5,5,8,.18) 58%,rgba(5,5,8,0));
+  -webkit-mask-image:linear-gradient(90deg,#000 0%,#000 70%,transparent 100%);mask-image:linear-gradient(90deg,#000 0%,#000 70%,transparent 100%);
+}
+.dance-picto-bar-gradient{
+  position:absolute;left:22%;right:0;bottom:calc(1px * var(--jd-ui-scale));height:calc(20px * var(--jd-ui-scale));opacity:.58;
+  background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(255,255,255,.28) 58%,transparent 100%);
+  -webkit-mask:url("minigames/just-dance/hud/ipk-base/textures/line_linear_gradient_mask.png") left center/100% 100% no-repeat;
+  mask:url("minigames/just-dance/hud/ipk-base/textures/line_linear_gradient_mask.png") left center/100% 100% no-repeat;
+  pointer-events:none;
+}
+.dance-picto-progress-line{left:22%;right:0;bottom:calc(7px * var(--jd-ui-scale));height:max(1px,calc(2px * var(--jd-ui-scale)));background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.82) 56%,rgba(255,255,255,0) 100%);box-shadow:0 1px 2px rgba(0,0,0,.72)}
+.dance-picto-target{left:22%;bottom:calc(5px * var(--jd-ui-scale));width:calc(96px * var(--jd-ui-scale));height:max(2px,calc(5px * var(--jd-ui-scale)));background:#fff;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.82),0 0 calc(5px * var(--jd-ui-scale)) rgba(255,255,255,.58)}
+
+/* Score numérico/rank visual não pertencem mais ao gameplay. */
+.dance-hud-score-row,.dance-hud-rank-icon{display:none!important}
+
+@media(max-width:780px){
+  .dance-picto-lane{height:calc(132px * var(--jd-ui-scale))}
+  .dance-picto-item{width:calc(90px * var(--jd-ui-scale))}
+}
+@media(max-width:500px){
+  .dance-video-judgements{top:2.1%;left:0;right:0;gap:0}
+  .dance-video-player-judge{width:calc(154px * var(--jd-ui-scale));max-width:none}
+  .dance-picto-lane{height:calc(132px * var(--jd-ui-scale))}
+  .dance-picto-item{width:calc(90px * var(--jd-ui-scale))}
+}

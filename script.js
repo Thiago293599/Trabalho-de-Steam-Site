@@ -192,13 +192,18 @@ const danceSeek = document.getElementById("danceSeek");
 const danceVolume = document.getElementById("danceVolume");
 const danceWindowBtn = document.getElementById("danceWindowBtn");
 const danceFullscreenBtn = document.getElementById("danceFullscreenBtn");
-const dancePlayerHudTrack = document.getElementById("dancePlayerHudTrack");
-const dancePlayerHudOverlay = document.getElementById("dancePlayerHudOverlay");
+const danceScoreBar = document.getElementById("danceScoreBar");
+const danceScoreBarFill = document.getElementById("danceScoreBarFill");
 const danceStarHud = document.getElementById("danceStarHud");
-const danceHudScore = document.getElementById("danceHudScore");
-const danceHudRankIcon = document.getElementById("danceHudRankIcon");
 const danceHudStars = document.getElementById("danceHudStars");
 const danceYeahCanvas = document.getElementById("danceYeahCanvas");
+const danceYeahStartLoop = document.getElementById("danceYeahStartLoop");
+const danceYeahFinishLoop = document.getElementById("danceYeahFinishLoop");
+const dancePreloadOverlay = document.getElementById("dancePreloadOverlay");
+const dancePreloadTitle = document.getElementById("dancePreloadTitle");
+const dancePreloadStatus = document.getElementById("dancePreloadStatus");
+const dancePreloadFill = document.getElementById("dancePreloadFill");
+const dancePreloadPercent = document.getElementById("dancePreloadPercent");
 
 const localModeBtn = document.getElementById("localModeBtn");
 const onlineModeBtn = document.getElementById("onlineModeBtn");
@@ -351,6 +356,23 @@ const DANCE_VIDEO_SOURCES = {
   medium: "minigames/just-dance/songs/RainOverMe/RainOverMe_Medium.mp4",
   high: "minigames/just-dance/songs/RainOverMe/RainOverMe_High.mp4"
 };
+const DANCE_AUDIO_SOURCE = "minigames/just-dance/songs/RainOverMe/RainOverMe_Audio.mp3";
+const DANCE_GOLD_START_SOURCE = "minigames/just-dance/hud/raw/start-loop.mp4";
+const DANCE_GOLD_FINISH_SOURCE = "minigames/just-dance/hud/raw/finish-loop.mp4";
+const DANCE_GOLD_PREPARE_MS = 2300;
+const DANCE_GOLD_FINISH_WINDOW_MS = 850;
+const DANCE_CRITICAL_IMAGE_SOURCES = [
+  "minigames/just-dance/songs/RainOverMe/pictos-atlas.png",
+  "minigames/just-dance/hud/yeah/FinishYeah.png",
+  "minigames/just-dance/hud/images/Star.png",
+  "minigames/just-dance/hud/images/Superstar.png",
+  "minigames/just-dance/hud/images/Megastar.png",
+  "minigames/just-dance/hud/ipk-base/textures/star_outline.png",
+  "minigames/just-dance/hud/ipk-base/textures/bkg_player_new.png",
+  "minigames/just-dance/hud/ipk-base/textures/bkg_player_new_outline.png",
+  "minigames/just-dance/hud/ipk-base/textures/hud_players_line.png",
+  "minigames/just-dance/hud/ipk-base/textures/line_linear_gradient_mask.png"
+];
 const DANCE_QUALITY_LABELS = { low: "Low • 360p", medium: "Medium • 720p", high: "High • 1080p" };
 const DANCE_SCORING_BASE = "minigames/just-dance/hud/scoring";
 const DANCE_STAR_VISUALS = {
@@ -384,6 +406,17 @@ let danceYeahImage = null;
 let danceYeahAnimationFrame = 0;
 let danceYeahStartedAt = 0;
 let danceLastYeahFxAt = 0;
+let dancePreloadReady = false;
+let dancePreloadPromise = null;
+let dancePreloadGeneration = 0;
+let dancePreloadedVideoQuality = "";
+let danceCoreMediaPreloaded = false;
+let danceHudSoundsPreloaded = false;
+const danceManagedBlobUrls = new Map();
+let danceActiveGoldMoveIndex = -1;
+let danceStartLoopGoldIndex = -1;
+const danceFinishedGoldIntroMoves = new Set();
+let dancePendingYeahAfterFinish = false;
 const DANCE_YEAH = { frameWidth: 512, frameHeight: 288, columns: 8, frames: 73, fps: 30 };
 
 
@@ -2170,8 +2203,225 @@ function playDanceHudSound(name) {
   } catch {}
 }
 
+
+function setDancePreloadUi(percent = 0, status = "", title = "Preparando Just Dance…") {
+  const value = Math.max(0, Math.min(100, Number(percent || 0)));
+  dancePreloadOverlay?.classList.remove("hidden", "error");
+  if (dancePreloadTitle) dancePreloadTitle.textContent = title;
+  if (dancePreloadStatus && status) dancePreloadStatus.textContent = status;
+  if (dancePreloadFill) dancePreloadFill.style.width = `${value.toFixed(1)}%`;
+  if (dancePreloadPercent) dancePreloadPercent.textContent = `${Math.round(value)}%`;
+}
+
+function setDancePlayerReadyState(ready) {
+  dancePreloadReady = Boolean(ready);
+  if (dancePlayPauseBtn) dancePlayPauseBtn.disabled = !dancePreloadReady;
+  if (danceSeek) danceSeek.disabled = !dancePreloadReady;
+  if (danceQualityMode) danceQualityMode.disabled = !dancePreloadReady && Boolean(dancePreloadPromise);
+  if (dancePreloadReady) dancePreloadOverlay?.classList.add("hidden");
+}
+
+async function fetchDanceBlob(url, onProgress = null) {
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status} ao carregar ${url}`);
+  const total = Math.max(0, Number(response.headers.get("content-length") || 0));
+  if (!response.body || typeof response.body.getReader !== "function") {
+    const blob = await response.blob();
+    onProgress?.(1, blob.size || total || 1, blob.size || total || 1);
+    return blob;
+  }
+  const reader = response.body.getReader();
+  const chunks = [];
+  let received = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value?.byteLength) {
+      chunks.push(value);
+      received += value.byteLength;
+      const ratio = total > 0 ? Math.min(1, received / total) : 0;
+      onProgress?.(ratio, received, total);
+    }
+  }
+  const type = response.headers.get("content-type") || "application/octet-stream";
+  const blob = new Blob(chunks, { type });
+  onProgress?.(1, received, total || received || 1);
+  return blob;
+}
+
+function replaceDanceManagedBlobUrl(key, blob) {
+  const previous = danceManagedBlobUrls.get(key);
+  if (previous) {
+    try { URL.revokeObjectURL(previous); } catch {}
+  }
+  const next = URL.createObjectURL(blob);
+  danceManagedBlobUrls.set(key, next);
+  return next;
+}
+
+function waitDanceMediaMetadata(element, timeoutMs = 12000) {
+  if (!element) return Promise.resolve();
+  if (element.readyState >= 1 && Number.isFinite(element.duration)) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    let timer = 0;
+    const cleanup = () => {
+      clearTimeout(timer);
+      element.removeEventListener("loadedmetadata", ok);
+      element.removeEventListener("error", fail);
+    };
+    const ok = () => { cleanup(); resolve(); };
+    const fail = () => { cleanup(); reject(new Error("Falha ao preparar mídia.")); };
+    element.addEventListener("loadedmetadata", ok, { once: true });
+    element.addEventListener("error", fail, { once: true });
+    timer = window.setTimeout(() => { cleanup(); reject(new Error("Tempo esgotado ao preparar mídia.")); }, timeoutMs);
+  });
+}
+
+async function installDanceMediaBlob(key, blob, element) {
+  if (!element) return;
+  const url = replaceDanceManagedBlobUrl(key, blob);
+  element.src = url;
+  if (element === danceTestVideo || element === danceYeahStartLoop || element === danceYeahFinishLoop) element.muted = true;
+  element.load();
+  await waitDanceMediaMetadata(element);
+}
+
+function preloadDanceImage(url) {
+  return new Promise(resolve => {
+    const image = new Image();
+    const finish = () => resolve(true);
+    image.onload = finish;
+    image.onerror = finish;
+    image.decoding = "async";
+    image.src = url;
+    if (image.complete) finish();
+  });
+}
+
+
+async function preloadDanceHudSounds(onProgress = null) {
+  if (danceHudSoundsPreloaded) { onProgress?.(1, 1, 1); return; }
+  unlockDanceHudAudio();
+  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah"];
+  for (let index = 0; index < names.length; index += 1) {
+    const name = names[index];
+    const blob = await fetchDanceBlob(`minigames/just-dance/hud/sounds/${name}.mp3`);
+    const url = replaceDanceManagedBlobUrl(`hud-sound-${name}`, blob);
+    const audio = danceHudSounds.get(name);
+    if (audio) { audio.src = url; audio.preload = "auto"; audio.load(); }
+    onProgress?.((index + 1) / names.length, index + 1, names.length);
+  }
+  danceHudSoundsPreloaded = true;
+}
+
+async function preloadDanceCriticalImages(onProgress = null) {
+  const urls = new Set(DANCE_CRITICAL_IMAGE_SOURCES);
+  Object.values(DANCE_FEEDBACK_ASSETS).forEach(asset => {
+    if (asset.image) urls.add(`${DANCE_SCORING_BASE}/${asset.image}`);
+    if (asset.flare) urls.add(`${DANCE_SCORING_BASE}/${asset.flare}`);
+  });
+  for (let i = 1; i <= 4; i += 1) urls.add(`minigames/just-dance/hud/images/scorebars/${i}P_bar.png`);
+  const list = Array.from(urls);
+  let done = 0;
+  await Promise.all(list.map(async url => {
+    await preloadDanceImage(url);
+    done += 1;
+    onProgress?.(done / Math.max(1, list.length), done, list.length);
+  }));
+}
+
+async function prepareDancePlayerAssets(targetQuality, options = {}) {
+  const quality = DANCE_VIDEO_SOURCES[targetQuality] ? targetQuality : "low";
+  if (dancePreloadPromise) {
+    try { await dancePreloadPromise; } catch {}
+  }
+  if (!options.force && dancePreloadReady && dancePreloadedVideoQuality === quality && danceCoreMediaPreloaded) {
+    danceActiveQuality = quality;
+    updateDanceQualityUi(options.reason || "");
+    return true;
+  }
+
+  const generation = ++dancePreloadGeneration;
+  const task = (async () => {
+    setDancePlayerReadyState(false);
+    danceQualitySwitching = true;
+    if (danceQualityMode) danceQualityMode.disabled = true;
+    const label = DANCE_QUALITY_LABELS[quality] || quality;
+    const currentTime = Math.max(0, Number(options.currentTime ?? getDanceMediaCurrentTime() ?? 0));
+
+    try {
+      const coreNeeded = !danceCoreMediaPreloaded;
+      const videoEnd = coreNeeded ? 72 : 95;
+      setDancePreloadUi(0, `Carregando vídeo ${label}…`, "Carregando antes de iniciar");
+      const videoBlob = await fetchDanceBlob(DANCE_VIDEO_SOURCES[quality], ratio => {
+        if (generation !== dancePreloadGeneration) return;
+        setDancePreloadUi(videoEnd * ratio, `Carregando vídeo ${label}…`);
+      });
+      await installDanceMediaBlob("video", videoBlob, danceTestVideo);
+      dancePreloadedVideoQuality = quality;
+
+      if (coreNeeded) {
+        setDancePreloadUi(72, "Carregando áudio principal…");
+        const audioBlob = await fetchDanceBlob(DANCE_AUDIO_SOURCE, ratio => setDancePreloadUi(72 + ratio * 15, "Carregando áudio principal…"));
+        await installDanceMediaBlob("audio", audioBlob, danceSongAudio);
+
+        setDancePreloadUi(87, "Carregando Start Loop do YEAH!…");
+        const startBlob = await fetchDanceBlob(DANCE_GOLD_START_SOURCE, ratio => setDancePreloadUi(87 + ratio * 5, "Carregando Start Loop do YEAH!…"));
+        await installDanceMediaBlob("gold-start", startBlob, danceYeahStartLoop);
+
+        setDancePreloadUi(92, "Carregando Finish Loop do YEAH!…");
+        const finishBlob = await fetchDanceBlob(DANCE_GOLD_FINISH_SOURCE, ratio => setDancePreloadUi(92 + ratio * 5, "Carregando Finish Loop do YEAH!…"));
+        await installDanceMediaBlob("gold-finish", finishBlob, danceYeahFinishLoop);
+        danceCoreMediaPreloaded = true;
+      }
+
+      const hudStart = coreNeeded ? 97 : 95;
+      const imageStart = coreNeeded ? 99 : 98;
+      setDancePreloadUi(hudStart, "Carregando sons da HUD…");
+      await preloadDanceHudSounds(ratio => setDancePreloadUi(hudStart + ratio * (imageStart - hudStart), "Carregando sons da HUD…"));
+      setDancePreloadUi(imageStart, "Preparando HUD, pictos e julgamentos…");
+      await preloadDanceCriticalImages(ratio => setDancePreloadUi(imageStart + ratio * (100 - imageStart), "Preparando HUD, pictos e julgamentos…"));
+
+      try { if (danceSongAudio) danceSongAudio.currentTime = currentTime; } catch {}
+      try { if (danceTestVideo) danceTestVideo.currentTime = currentTime; } catch {}
+      danceActiveQuality = quality;
+      danceQualitySwitching = false;
+      updateDanceQualityUi(options.reason || "");
+      setDancePreloadUi(100, "Tudo carregado. Pronto para dançar!", "Pronto");
+      setDancePlayerReadyState(true);
+      window.setTimeout(() => {
+        if (dancePreloadReady) dancePreloadOverlay?.classList.add("hidden");
+      }, 220);
+      syncDanceVideoToAudio(true);
+      updateDancePlayerControls();
+      return true;
+    } catch (error) {
+      danceQualitySwitching = false;
+      dancePreloadReady = false;
+      if (dancePlayPauseBtn) dancePlayPauseBtn.disabled = true;
+      if (danceSeek) danceSeek.disabled = true;
+      if (danceQualityMode) danceQualityMode.disabled = false;
+      dancePreloadOverlay?.classList.add("error");
+      setDancePreloadUi(0, "Não foi possível carregar todos os arquivos. Troque a qualidade ou reabra o teste.", "Falha no carregamento");
+      if (danceLabMessage) danceLabMessage.textContent = `Falha ao pré-carregar o player: ${error?.message || error}`;
+      console.error("Dance preload failed", error);
+      return false;
+    }
+  })();
+  dancePreloadPromise = task;
+  const result = await task;
+  if (dancePreloadPromise === task) dancePreloadPromise = null;
+  if (danceQualityMode) danceQualityMode.disabled = false;
+  return result;
+}
+
 async function playDanceMedia() {
   if (!danceSongAudio || !danceTestVideo) return;
+  if (!dancePreloadReady) {
+    const target = danceQualityPreference === "auto" ? chooseAutoDanceQuality() : danceQualityPreference;
+    const ready = await prepareDancePlayerAssets(target, { reason: danceQualityPreference === "auto" ? "perfil do aparelho" : "" });
+    if (!ready) return;
+  }
   unlockDanceHudAudio();
   syncDanceVideoToAudio(true);
   danceTestVideo.muted = true;
@@ -2194,6 +2444,8 @@ async function playDanceMedia() {
 function pauseDanceMedia() {
   danceSongAudio?.pause();
   danceTestVideo?.pause();
+  stopDanceGoldStartLoop();
+  stopDanceGoldFinishLoop();
   syncDanceMoveJudging();
   stopDanceVisualHud();
   updateDancePlayerControls();
@@ -2207,6 +2459,7 @@ function seekDanceMedia(seconds) {
   try { if (danceTestVideo) danceTestVideo.currentTime = target; } catch {}
   danceJudgeActiveMoveIndex = -1;
   danceJudgeAccumulators = new Map();
+  resetDanceGoldMoveFx(true);
   updateDanceSongTimeline();
   if (wasPlaying) {
     danceTestVideo?.play().catch(() => {});
@@ -2237,41 +2490,30 @@ function updateDanceQualityUi(reason = "") {
 
 async function switchDanceVideoQuality(targetQuality, options = {}) {
   const quality = DANCE_VIDEO_SOURCES[targetQuality] ? targetQuality : "low";
-  if (!danceTestVideo || (danceActiveQuality === quality && danceTestVideo.getAttribute("src"))) {
+  if (dancePreloadedVideoQuality === quality && dancePreloadReady && !options.force) {
+    danceActiveQuality = quality;
     updateDanceQualityUi(options.reason || "");
-    return;
+    return true;
   }
   const currentTime = getDanceMediaCurrentTime();
   const wasPlaying = isDanceMediaPlaying();
-  danceQualitySwitching = true;
-  danceActiveQuality = quality;
-  updateDanceQualityUi(options.reason || "");
-  const source = DANCE_VIDEO_SOURCES[quality];
-  await new Promise(resolve => {
-    const finish = () => {
-      danceTestVideo.removeEventListener("loadedmetadata", finish);
-      try { danceTestVideo.currentTime = currentTime; } catch {}
-      danceQualitySwitching = false;
-      resolve();
-    };
-    danceTestVideo.addEventListener("loadedmetadata", finish, { once: true });
-    danceTestVideo.src = source;
-    danceTestVideo.muted = true;
-    danceTestVideo.load();
-    setTimeout(() => { if (danceQualitySwitching) { danceQualitySwitching = false; resolve(); } }, 5000);
-  });
-  syncDanceVideoToAudio(true);
-  if (wasPlaying) danceTestVideo.play().catch(() => {});
+  if (wasPlaying) pauseDanceMedia();
+  const ready = await prepareDancePlayerAssets(quality, { ...options, currentTime });
+  if (ready && wasPlaying) await playDanceMedia();
+  return ready;
 }
 
-function applyDanceQualityPreference(preference, announce = false) {
+async function applyDanceQualityPreference(preference, announce = false) {
   danceQualityPreference = ["auto", "low", "medium", "high"].includes(preference) ? preference : "auto";
   safeLocalStorageSet(DANCE_QUALITY_STORAGE_KEY, danceQualityPreference);
   if (danceQualityMode) danceQualityMode.value = danceQualityPreference;
   const target = danceQualityPreference === "auto" ? chooseAutoDanceQuality() : danceQualityPreference;
   danceAutoCeiling = target;
-  switchDanceVideoQuality(target, { reason: danceQualityPreference === "auto" ? "perfil do aparelho" : "" });
-  if (announce && danceLabMessage) danceLabMessage.textContent = danceQualityPreference === "auto" ? `Qualidade automática ativada (${DANCE_QUALITY_LABELS[target]}).` : `Qualidade fixa: ${DANCE_QUALITY_LABELS[target]}.`;
+  const reason = danceQualityPreference === "auto" ? "perfil do aparelho" : "";
+  if (announce && danceLabMessage) danceLabMessage.textContent = `Carregando ${DANCE_QUALITY_LABELS[target]} antes de continuar…`;
+  const ready = await switchDanceVideoQuality(target, { reason });
+  if (announce && ready && danceLabMessage) danceLabMessage.textContent = danceQualityPreference === "auto" ? `Qualidade automática pronta (${DANCE_QUALITY_LABELS[target]}).` : `Qualidade fixa pronta: ${DANCE_QUALITY_LABELS[target]}.`;
+  return ready;
 }
 
 function handleDancePlaybackStall() {
@@ -2385,26 +2627,28 @@ function applyDanceHudStarRankVisual(score = 0) {
 
 function updateDancePlayerHudOverlay(count = 1) {
   const safe = Math.max(1, Math.min(4, Number(count || 1)));
-  const src = `minigames/just-dance/hud/images/${safe}P.png`;
-  if (dancePlayerHudTrack) dancePlayerHudTrack.src = src;
-  if (dancePlayerHudOverlay) dancePlayerHudOverlay.src = src;
+  if (danceScoreBarFill) danceScoreBarFill.src = `minigames/just-dance/hud/images/scorebars/${safe}P_bar.png`;
+  if (danceScoreBar) {
+    danceScoreBar.dataset.players = String(safe);
+    const nativeWidths = { 1: 28, 2: 59, 3: 90, 4: 121 };
+    danceScoreBar.style.setProperty("--jd-scorebar-width", `${nativeWidths[safe] / 3840 * 100}%`);
+  }
 }
 
 function updateDanceScoreBarVisual(score = 0) {
   const safeScore = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
   const progress = DANCE_MAX_SCORE > 0 ? safeScore / DANCE_MAX_SCORE : 0;
-  const barSpan = DANCE_SCORE_BAR_BOTTOM_PERCENT - DANCE_SCORE_BAR_TOP_PERCENT;
-  const fillTop = DANCE_SCORE_BAR_BOTTOM_PERCENT - barSpan * progress;
 
-  // O PNG do player continua preso ao quadro 16:9; o recorte sobe em coordenadas relativas
-  // ao próprio quadro, então não muda em ultrawide, celular, janela ou fullscreen.
-  if (dancePlayerHudOverlay) {
-    dancePlayerHudOverlay.style.clipPath = `inset(${fillTop.toFixed(4)}% 0 0 0)`;
-    dancePlayerHudOverlay.style.webkitClipPath = `inset(${fillTop.toFixed(4)}% 0 0 0)`;
+  // A barra é o recorte original do IPK/HUD e sobe inteira dentro de uma máscara.
+  // Dessa forma a ponta arredondada original é sempre a borda que lidera o preenchimento.
+  if (danceScoreBarFill) {
+    danceScoreBarFill.style.transform = `translateY(${((1 - progress) * 100).toFixed(4)}%)`;
+    danceScoreBarFill.style.opacity = progress > 0 ? "1" : "0";
   }
 
   applyDanceHudStarRankVisual(safeScore);
 
+  const barSpan = DANCE_SCORE_BAR_BOTTOM_PERCENT - DANCE_SCORE_BAR_TOP_PERCENT;
   danceHudStars?.querySelectorAll(".dance-hud-star").forEach(slot => {
     const threshold = Number(slot.dataset.threshold || 0);
     const ratio = Math.max(0, Math.min(1, threshold / DANCE_MAX_SCORE));
@@ -2416,16 +2660,7 @@ function updateDanceScoreBarVisual(score = 0) {
 
 function renderDanceMainHud(dance = {}) {
   const score = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(dance.score || 0)));
-  if (danceHudScore) danceHudScore.textContent = score.toLocaleString("pt-BR");
   updateDanceScoreBarVisual(score);
-  if (danceHudRankIcon) {
-    let src = "";
-    if (score >= DANCE_MAX_SCORE) src = "minigames/just-dance/hud/images/Crown.png";
-    else if (score >= 12000) src = "minigames/just-dance/hud/images/Megastar.png";
-    else if (score >= 11000) src = "minigames/just-dance/hud/images/Superstar.png";
-    danceHudRankIcon.classList.toggle("hidden", !src);
-    if (src) danceHudRankIcon.src = src;
-  }
 }
 
 function pulseDanceHudMilestone(kind = "star") {
@@ -2488,21 +2723,119 @@ function playDanceYeahFx() {
   danceYeahAnimationFrame = requestAnimationFrame(draw);
 }
 
-function initializeDancePlayerSettings() {
+
+function stopDanceGoldStartLoop() {
+  if (!danceYeahStartLoop) return;
+  danceYeahStartLoop.pause();
+  danceYeahStartLoop.classList.remove("active");
+  danceStartLoopGoldIndex = -1;
+}
+
+function stopDanceGoldFinishLoop() {
+  if (!danceYeahFinishLoop) return;
+  danceYeahFinishLoop.pause();
+  danceYeahFinishLoop.classList.remove("active");
+  danceActiveGoldMoveIndex = -1;
+}
+
+function resetDanceGoldMoveFx(clearHistory = true) {
+  stopDanceGoldStartLoop();
+  stopDanceGoldFinishLoop();
+  dancePendingYeahAfterFinish = false;
+  if (clearHistory) danceFinishedGoldIntroMoves.clear();
+}
+
+function playDanceGoldStartLoop(moveIndex) {
+  if (!danceYeahStartLoop || !danceYeahStartLoop.src || !isDanceMediaPlaying()) return;
+  if (danceStartLoopGoldIndex === moveIndex && danceYeahStartLoop.classList.contains("active")) return;
+  stopDanceGoldFinishLoop();
+  danceStartLoopGoldIndex = moveIndex;
+  danceYeahStartLoop.muted = true;
+  danceYeahStartLoop.volume = 0;
+  danceYeahStartLoop.loop = true;
+  try { danceYeahStartLoop.currentTime = 0; } catch {}
+  danceYeahStartLoop.classList.add("active");
+  danceYeahStartLoop.play().catch(() => {});
+}
+
+function playDanceGoldFinishLoop(moveIndex) {
+  if (!danceYeahFinishLoop || !danceYeahFinishLoop.src || danceFinishedGoldIntroMoves.has(moveIndex)) return;
+  danceFinishedGoldIntroMoves.add(moveIndex);
+  stopDanceGoldStartLoop();
+  stopDanceGoldFinishLoop();
+  danceActiveGoldMoveIndex = moveIndex;
+  danceYeahFinishLoop.muted = true;
+  danceYeahFinishLoop.volume = 0;
+  danceYeahFinishLoop.loop = false;
+  try { danceYeahFinishLoop.currentTime = 0; } catch {}
+  danceYeahFinishLoop.classList.add("active");
+  danceYeahFinishLoop.onended = () => {
+    danceYeahFinishLoop.classList.remove("active");
+    danceActiveGoldMoveIndex = -1;
+    if (dancePendingYeahAfterFinish) {
+      dancePendingYeahAfterFinish = false;
+      playDanceYeahFx();
+    }
+  };
+  danceYeahFinishLoop.play().catch(() => {
+    danceYeahFinishLoop.classList.remove("active");
+    danceActiveGoldMoveIndex = -1;
+  });
+}
+
+function queueDanceYeahFinalFx() {
+  if (danceYeahFinishLoop?.classList.contains("active") && !danceYeahFinishLoop.ended) {
+    dancePendingYeahAfterFinish = true;
+    return;
+  }
+  playDanceYeahFx();
+}
+
+function updateDanceGoldMoveFx(timeMs) {
+  if (!danceTestMoves.length) return;
+  if (!isDanceMediaPlaying()) {
+    if (danceYeahStartLoop?.classList.contains("active")) stopDanceGoldStartLoop();
+    return;
+  }
+
+  let nextGoldIndex = -1;
+  for (let index = 0; index < danceTestMoves.length; index += 1) {
+    const move = danceTestMoves[index];
+    if (!move?.goldMove) continue;
+    const start = Number(move.time || 0);
+    const delta = start - timeMs;
+
+    if (delta > 0 && delta <= DANCE_GOLD_PREPARE_MS && nextGoldIndex < 0) nextGoldIndex = index;
+
+    if (timeMs >= start && timeMs <= start + DANCE_GOLD_FINISH_WINDOW_MS) {
+      playDanceGoldFinishLoop(index);
+      nextGoldIndex = -1;
+      break;
+    }
+
+    // Ao saltar para depois do Gold Move, não reproduz a introdução atrasada.
+    if (timeMs > start + DANCE_GOLD_FINISH_WINDOW_MS) danceFinishedGoldIntroMoves.add(index);
+  }
+
+  if (nextGoldIndex >= 0) playDanceGoldStartLoop(nextGoldIndex);
+  else if (danceStartLoopGoldIndex >= 0) stopDanceGoldStartLoop();
+}
+
+async function initializeDancePlayerSettings() {
   danceQualityPreference = safeLocalStorageGet(DANCE_QUALITY_STORAGE_KEY, "auto");
   if (!["auto","low","medium","high"].includes(danceQualityPreference)) danceQualityPreference = "auto";
   applyDanceLyricsSize(safeLocalStorageGet(DANCE_LYRICS_SIZE_STORAGE_KEY, "small"), false);
   applyDanceVideoFit(safeLocalStorageGet(DANCE_VIDEO_FIT_STORAGE_KEY, "contain"), false);
   if (danceQualityMode) danceQualityMode.value = danceQualityPreference;
-  if (danceSongAudio && danceVolume) {
-    danceSongAudio.volume = Number(danceVolume.value || .9);
-  }
-  applyDanceQualityPreference(danceQualityPreference, false);
+  if (danceSongAudio && danceVolume) danceSongAudio.volume = Number(danceVolume.value || .9);
   preloadDanceFeedbackAssets();
   ensureDanceYeahImage();
   renderDanceMainHud({ score: 0, stars: 0 });
   updateDancePlayerHudOverlay(1);
   updateDancePlayerControls();
+  const target = danceQualityPreference === "auto" ? chooseAutoDanceQuality() : danceQualityPreference;
+  danceAutoCeiling = target;
+  return prepareDancePlayerAssets(target, { reason: danceQualityPreference === "auto" ? "perfil do aparelho" : "" });
 }
 
 function danceRankLabel(dance = {}) {
@@ -2547,14 +2880,22 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
   renderDanceMainHud(players[0]?.dance || {});
   if (!danceVideoJudgements) return;
 
-  // Atualiza os slots sem recriá-los: estados do servidor podem chegar enquanto o FX está animando.
   const visiblePlayers = players.slice(0, 4);
   const keepIds = new Set(visiblePlayers.map(player => String(player.id)));
   for (const oldItem of danceVideoJudgements.querySelectorAll(".dance-video-player-judge")) {
     if (!keepIds.has(String(oldItem.dataset.playerId || ""))) oldItem.remove();
   }
 
-  for (const player of visiblePlayers) {
+  // hud_players.isc do IPK usa slots espaçados em 200 unidades ao redor do centro.
+  // No nosso canvas de referência 960px, isso equivale à metade das coordenadas 1920x1080.
+  const slotPositions = {
+    1: [0],
+    2: [-100, 100],
+    3: [-200, 0, 200],
+    4: [-300, -100, 100, 300]
+  }[visiblePlayers.length] || [0];
+
+  visiblePlayers.forEach((player, playerIndex) => {
     let item = Array.from(danceVideoJudgements.querySelectorAll(".dance-video-player-judge"))
       .find(slot => String(slot.dataset.playerId) === String(player.id));
     if (!item) {
@@ -2562,16 +2903,24 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
       item.className = "dance-video-player-judge";
       item.dataset.playerId = player.id;
       item.innerHTML = `
-        <span class="dance-video-player-name"></span>
+        <div class="dance-ipk-player-head">
+          <div class="dance-ipk-player-color" aria-hidden="true"></div>
+          <img class="dance-ipk-player-outline" src="minigames/just-dance/hud/ipk-base/textures/bkg_player_new_outline.png" alt="" aria-hidden="true">
+          <span class="dance-ipk-player-index"></span>
+          <span class="dance-video-player-name"></span>
+          <span class="dance-ipk-player-line" aria-hidden="true"></span>
+        </div>
         <div class="dance-video-feedback" aria-live="polite" aria-atomic="true">
           <img class="dance-video-judge-flare" alt="" aria-hidden="true">
           <img class="dance-video-judge-image" alt="">
         </div>`;
     }
     item.style.setProperty("--player-color", player.color || "#fff");
+    item.style.setProperty("--jd-player-slot-x", `${((slotPositions[playerIndex] || 0) / 1920 * 100).toFixed(4)}%`);
+    item.querySelector(".dance-ipk-player-index").textContent = `P${playerIndex + 1}`;
     item.querySelector(".dance-video-player-name").textContent = player.name || "Jogador";
     danceVideoJudgements.appendChild(item);
-  }
+  });
 }
 
 function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
@@ -2593,7 +2942,7 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
   void feedback.offsetWidth;
   feedback.classList.add("active");
 
-  if (String(judgement || "").toUpperCase().startsWith("YEAH")) playDanceYeahFx();
+  if (String(judgement || "").toUpperCase().startsWith("YEAH")) queueDanceYeahFinalFx();
 }
 
 function pictoAtlasPosition(name) {
@@ -2762,6 +3111,7 @@ function updateDanceVisualHud() {
   const timeMs = getDanceTimelineTimeMs();
   renderDancePictos(timeMs);
   renderDanceLyrics(timeMs);
+  updateDanceGoldMoveFx(timeMs);
   syncDanceVideoToAudio(false);
   updateDancePlayerControls();
   if (isDanceMediaPlaying()) danceHudAnimationFrame = requestAnimationFrame(updateDanceVisualHud);
@@ -2794,6 +3144,7 @@ function resetLocalDanceJudging() {
   danceLocallyJudgedMoves.clear();
   danceLastVideoTimeMs = 0;
   danceLastLyricLineIndex = -999;
+  resetDanceGoldMoveFx(true);
 }
 
 function beginDanceMoveJudging(index) {
@@ -3052,9 +3403,11 @@ async function openDanceSensorLab() {
   gameMode = "dev-sensor";
   resetDanceLabUi();
   showOnly(danceDevScreenEl);
-  initializeDancePlayerSettings();
-  loadDanceTestSongData();
-  if (danceLabMessage) danceLabMessage.textContent = "Verificando o servidor…";
+  if (danceLabMessage) danceLabMessage.textContent = "Carregando música, vídeo e HUD antes de iniciar…";
+  await loadDanceTestSongData();
+  const playerReady = await initializeDancePlayerSettings();
+  if (!playerReady) return;
+  if (danceLabMessage) danceLabMessage.textContent = "Arquivos prontos. Verificando o servidor…";
   const compatible = await verifyMultiplayerServer({ mode: "dev" });
   if (compatible) {
     danceLabServerWarning?.classList.add("hidden");
@@ -3066,6 +3419,7 @@ function backToDevMenu() {
   closeDevSensorRoom();
   pauseDanceMedia();
   setDanceWindowMode(false);
+  resetDanceGoldMoveFx(true);
   stopDanceYeahFx();
   gameMode = "dev";
   showOnly(devMenuEl);
