@@ -516,10 +516,10 @@
               </div>
             </div>
             <div class="dance-game-hud" aria-label="HUD de sincronização do Just Dance">
-              <div id="danceIpkGoldStageFx" class="dance-ipk-gold-stage-fx" aria-hidden="true">
-                <span class="dance-ipk-gold-screen-flash" aria-hidden="true"></span>
-                <img id="danceIpkGoldStageFlare" class="dance-ipk-gold-stage-flare" src="minigames/just-dance/hud/ipk-gold/feedback_gold_flare.png" alt="" aria-hidden="true">
-                <img id="danceIpkGoldStageImage" class="dance-ipk-gold-stage-image" src="minigames/just-dance/hud/ipk-gold/feedback_gold.png" alt="YEAH!">
+              <div id="danceGoldMoveGlobalFx" class="dance-goldmove-global-fx" aria-hidden="true">
+                <img id="danceGoldMoveScreenHalo" class="dance-goldmove-screen-halo" src="minigames/just-dance/hud/ipk-2026/goldmove/screen_halo.png" alt="" aria-hidden="true">
+                <canvas id="danceGoldMoveFxCanvas" class="dance-goldmove-fx-canvas" width="960" height="540" aria-hidden="true"></canvas>
+                <span id="danceGoldMoveImpactFlash" class="dance-goldmove-impact-flash" aria-hidden="true"></span>
               </div>
               <div id="danceVideoJudgements" class="dance-video-judgements"></div>
               <div id="danceStarHud" class="dance-star-hud" aria-label="Pontuação e estrelas">
@@ -599,7 +599,7 @@
             <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar Gold Move IPK</button>
             <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrão</button>
           </div>
-          <p>Esta versão não usa <b>Start Loop, Finish Loop, canvas de quadros nem FinishYeah em vídeo</b>. O pré-aviso usa o áudio original <code>hud_pregoldmove</code> do IPK e o acerto usa <code>feedback_gold.tape</code> + <code>feedback_gold.tga</code> + <code>feedback_gold_flare.tga</code>, com o impacto <code>hud_goldmove</code>. Assim o Gold Move fica no mesmo fluxo da HUD e não precisa trocar de mídia.</p>
+          <p>O efeito <b>global</b> do Gold Move agora usa como base a cena real <code>hud_goldmove.isc</code> do Just Dance 2026 e o controlador <code>fx_goldmove.tpl</code>: entra o grupo <code>charge</code> antes do Gold e, no impacto, troca para <code>explo</code>. Não há troca/seek/loop de vídeo. O <b>YEAH!/X individual do jogador continua sendo o julgamento já pronto</b>, separado desse efeito que passa na frente de toda a HUD.</p>
         </div>
         <div class="dance-score-rules" aria-label="Sistema de pontuação">
           <div class="dance-judgement-legend">

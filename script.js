@@ -410,6 +410,11 @@ const DANCE_CRITICAL_IMAGE_SOURCES = [
   "minigames/just-dance/hud/ipk-base/textures/bkg_player_new_outline.png",
   "minigames/just-dance/hud/ipk-base/textures/hud_players_line.png",
   "minigames/just-dance/hud/ipk-base/textures/line_linear_gradient_mask.png",
+  "minigames/just-dance/hud/ipk-2026/goldmove/screen_halo.png",
+  "minigames/just-dance/hud/ipk-2026/goldmove/sparks.png",
+  "minigames/just-dance/hud/ipk-2026/goldmove/sparks_multi.png",
+  "minigames/just-dance/hud/ipk-2026/goldmove/ray_sharp_00.png",
+  "minigames/just-dance/hud/ipk-2026/goldmove/particles_zoom_sharp.png",
   `${DANCE_IPK_GOLD_BASE}/feedback_gold.png`,
   `${DANCE_IPK_GOLD_BASE}/feedback_gold_flare.png`,
   `${DANCE_IPK_GOLD_BASE}/feedback_gold_bad.png`
@@ -3421,13 +3426,8 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
   void feedback.offsetWidth;
   feedback.classList.add("active");
 
-  const normalizedJudgement = String(judgement || "").toUpperCase();
-  if (normalizedJudgement.startsWith("YEAH")) {
-    showDanceIpkGoldStageFx("yeah");
-    playDanceIpkGoldImpactAudio();
-  } else if (goldMove && normalizedJudgement === "X") {
-    showDanceIpkGoldStageFx("miss");
-  }
+  // O YEAH!/X permanece somente no slot do jogador. O Gold Move global é
+  // disparado pela timeline, independentemente do julgamento individual.
 }
 
 function pictoAtlasPosition(name) {
@@ -4305,3 +4305,89 @@ setDiceFace(1);
 createBoard();
 updateNameFields();
 handleInitialRoute();
+
+// ============================================================================
+// Just Dance 2026 - cue GLOBAL de Gold Move
+// hud_goldmove.isc -> screen_dark + fx_goldmove.tpl (charge / explo).
+// Letras, score bar e feedbacks individuais permanecem intocados.
+// ============================================================================
+const JD2026_GOLD_BASE = "minigames/just-dance/hud/ipk-2026/goldmove";
+const jd26GoldEl = document.getElementById("danceGoldMoveGlobalFx");
+const jd26GoldCanvas = document.getElementById("danceGoldMoveFxCanvas");
+const jd26GoldCtx = jd26GoldCanvas?.getContext("2d", { alpha:true }) || null;
+const jd26GoldSources = Object.freeze({sparks:`${JD2026_GOLD_BASE}/sparks.png`,multi:`${JD2026_GOLD_BASE}/sparks_multi.png`,ray:`${JD2026_GOLD_BASE}/ray_sharp_00.png`,zoom:`${JD2026_GOLD_BASE}/particles_zoom_sharp.png`});
+const jd26GoldImages = new Map();
+const jd26GoldImpactMoves = new Set();
+let jd26GoldParticles=[];
+let jd26GoldPhase="idle";
+let jd26GoldMove=-1;
+let jd26GoldImpactTime=0;
+let jd26GoldRaf=0;
+let jd26GoldLast=0;
+let jd26GoldSpawnAcc=0;
+let jd26GoldImpactStarted=0;
+let jd26GoldChargeStarted=0;
+let jd26GoldPreview=false;
+let jd26GoldPreviewTimer=0;
+
+function ensureDanceGoldMove2026Images(){
+  return Promise.all(Object.entries(jd26GoldSources).map(([key,src])=>new Promise(resolve=>{
+    const cached=jd26GoldImages.get(key); if(cached?.complete) return resolve(true);
+    const im=new Image(); im.decoding="async"; im.onload=()=>{jd26GoldImages.set(key,im);resolve(true)}; im.onerror=()=>resolve(false); im.src=src;
+  })));
+}
+function jd26Rand(a,b){return a+Math.random()*(b-a)}
+function jd26SpawnCharge(strength=0){
+  const a=Math.random()*Math.PI*2,r=jd26Rand(180,470),cx=480,cy=270,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r*.56,t=Math.atan2(cy-y,cx-x),q=Math.random();
+  const kind=q<.53?"spark":q<.78?"shape":q<.94?"ray":"zoom",speed=jd26Rand(95,230)*(.8+strength*.45);
+  jd26GoldParticles.push({phase:"charge",kind,x,y,vx:Math.cos(t)*speed+jd26Rand(-18,18),vy:Math.sin(t)*speed+jd26Rand(-14,14),life:0,max:jd26Rand(.62,1.18),size:kind==="ray"?jd26Rand(70,160):kind==="zoom"?jd26Rand(110,210):jd26Rand(16,42),rot:kind==="ray"?t:jd26Rand(-Math.PI,Math.PI),spin:jd26Rand(-2.4,2.4),sprite:Math.floor(Math.random()*4),alpha:jd26Rand(.55,1)});
+}
+function jd26SpawnExplosion(){
+  const cx=480,cy=270,groups=[{n:92,k:"shape",s0:190,s1:560,z0:18,z1:56},{n:82,k:"spark",s0:230,s1:670,z0:12,z1:38},{n:26,k:"ray",s0:75,s1:250,z0:120,z1:330}];
+  for(const g of groups)for(let i=0;i<g.n;i++){const a=Math.random()*Math.PI*2,r=g.k==="ray"?jd26Rand(18,90):jd26Rand(0,46),sp=jd26Rand(g.s0,g.s1);jd26GoldParticles.push({phase:"explo",kind:g.k,x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r*.72,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*.74,life:0,max:g.k==="ray"?jd26Rand(.42,.82):jd26Rand(.55,1.04),size:jd26Rand(g.z0,g.z1),rot:g.k==="ray"?a:jd26Rand(-Math.PI,Math.PI),spin:jd26Rand(-4.4,4.4),sprite:Math.floor(Math.random()*4),alpha:jd26Rand(.68,1)})}
+  jd26GoldParticles.push({phase:"explo",kind:"zoom",x:cx,y:cy,vx:0,vy:0,life:0,max:.58,size:620,rot:0,spin:.35,sprite:0,alpha:.95});
+}
+function jd26DrawSprite(ctx,img,p,atlas=true){
+  if(!img?.complete||!img.naturalWidth)return; const prog=Math.max(0,Math.min(1,p.life/p.max)),alpha=p.alpha*Math.min(1,prog/.1)*Math.min(1,(1-prog)/.34); if(alpha<.002)return;
+  let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;if(atlas){sw/=2;sh/=2;sx=(p.sprite%2)*sw;sy=Math.floor((p.sprite%4)/2)*sh}
+  const sc=p.phase==="charge"?.58+prog*.58:1.06-prog*.24,w=p.size*sc,h=p.kind==="ray"?Math.max(4,w*.075):w;ctx.save();ctx.globalAlpha=alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.drawImage(img,sx,sy,sw,sh,-w/2,-h/2,w,h);ctx.restore();
+}
+function jd26Render(){
+  if(!jd26GoldCtx)return;const c=jd26GoldCtx;c.clearRect(0,0,960,540);c.save();c.globalCompositeOperation="lighter";c.filter="sepia(.2) saturate(1.8) brightness(1.15)";for(const p of jd26GoldParticles){if(p.kind==="ray")jd26DrawSprite(c,jd26GoldImages.get("ray"),p,false);else if(p.kind==="zoom")jd26DrawSprite(c,jd26GoldImages.get("zoom"),p,false);else if(p.kind==="shape")jd26DrawSprite(c,jd26GoldImages.get("sparks"),p,true);else jd26DrawSprite(c,jd26GoldImages.get("multi"),p,true)}c.restore();
+}
+function jd26Tick(stamp){
+  if(jd26GoldPhase==="idle"){jd26GoldRaf=0;return} if(!jd26GoldLast)jd26GoldLast=stamp;let dt=Math.min(.05,Math.max(0,(stamp-jd26GoldLast)/1000));jd26GoldLast=stamp;if(!jd26GoldPreview&&!isDanceMediaPlaying())dt=0;
+  if(jd26GoldPhase==="charge"&&dt>0){const remaining=jd26GoldPreview?Math.max(0,danceGoldPrepareMs-(performance.now()-jd26GoldChargeStarted)):Math.max(0,jd26GoldImpactTime-getDanceTimelineTimeMs()),strength=1-Math.min(1,remaining/Math.max(500,danceGoldPrepareMs)),interval=Math.max(.018,.052-strength*.027);jd26GoldSpawnAcc+=dt;while(jd26GoldSpawnAcc>=interval&&jd26GoldParticles.length<155){jd26GoldSpawnAcc-=interval;jd26SpawnCharge(strength);if(strength>.64&&Math.random()<.38)jd26SpawnCharge(strength)}}
+  if(dt>0){const keep=[];for(const p of jd26GoldParticles){p.life+=dt;if(p.life>=p.max)continue;p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.spin*dt;if(p.phase==="explo"){p.vx*=Math.pow(.34,dt);p.vy*=Math.pow(.34,dt)}keep.push(p)}jd26GoldParticles=keep}jd26Render();
+  if(jd26GoldPhase==="impact"&&(stamp-jd26GoldImpactStarted)>1250){stopDanceGoldMove2026Fx();return}jd26GoldRaf=requestAnimationFrame(jd26Tick);
+}
+function startDanceGoldMove2026Charge(moveIndex,impactTimeMs,preview=false){
+  if(!jd26GoldEl||!jd26GoldCtx)return false;if(jd26GoldPhase==="charge"&&jd26GoldMove===moveIndex)return true;ensureDanceGoldMove2026Images();if(jd26GoldRaf)cancelAnimationFrame(jd26GoldRaf);jd26GoldParticles=[];jd26GoldPhase="charge";jd26GoldMove=moveIndex;jd26GoldImpactTime=Number(impactTimeMs||0);jd26GoldChargeStarted=performance.now();jd26GoldPreview=preview;jd26GoldLast=0;jd26GoldSpawnAcc=0;jd26GoldEl.classList.remove("impact");jd26GoldEl.classList.add("active","charge");jd26GoldEl.setAttribute("aria-hidden","false");jd26GoldRaf=requestAnimationFrame(jd26Tick);return true;
+}
+function triggerDanceGoldMove2026Impact(moveIndex,preview=false){
+  if(!jd26GoldEl||!jd26GoldCtx)return false;ensureDanceGoldMove2026Images();if(jd26GoldRaf)cancelAnimationFrame(jd26GoldRaf);jd26GoldPhase="impact";jd26GoldMove=moveIndex;jd26GoldPreview=preview;jd26GoldLast=0;jd26GoldImpactStarted=performance.now();jd26SpawnExplosion();jd26GoldEl.classList.remove("charge","impact");void jd26GoldEl.offsetWidth;jd26GoldEl.classList.add("active","impact");jd26GoldEl.setAttribute("aria-hidden","false");jd26GoldRaf=requestAnimationFrame(jd26Tick);return true;
+}
+function stopDanceGoldMove2026Fx(){if(jd26GoldRaf)cancelAnimationFrame(jd26GoldRaf);jd26GoldRaf=0;jd26GoldParticles=[];jd26GoldPhase="idle";jd26GoldMove=-1;jd26GoldLast=0;jd26GoldSpawnAcc=0;jd26GoldPreview=false;jd26GoldEl?.classList.remove("active","charge","impact");jd26GoldEl?.setAttribute("aria-hidden","true");jd26GoldCtx?.clearRect(0,0,960,540)}
+
+// Neutraliza o antigo YEAH em tela inteira. Os julgamentos individuais não mudam.
+function showDanceIpkGoldStageFx(){return false}
+function hideDanceIpkGoldStageFx(){}
+function queueDanceYeahFinalFx(){}
+function stopDanceYeahFx(){}
+function playDanceYeahFx(){}
+function playDanceGoldStartLoop(){}
+function playDanceGoldFinishLoop(){}
+function stopDanceGoldStartLoop(){stopDanceIpkGoldIntroAudio()}
+function stopDanceGoldFinishLoop(){}
+
+function resetDanceGoldMoveFx(clearHistory=true){stopDanceIpkGoldIntroAudio();stopDanceGoldMove2026Fx();if(jd26GoldPreviewTimer)clearTimeout(jd26GoldPreviewTimer);jd26GoldPreviewTimer=0;if(danceYeahPreviewTimer)clearTimeout(danceYeahPreviewTimer);danceYeahPreviewTimer=0;if(clearHistory){danceIpkGoldIntroMoves.clear();jd26GoldImpactMoves.clear()}}
+function updateDanceGoldMoveFx(timeMs){
+  if(!danceTestMoves.length||!isDanceMediaPlaying())return;let upcoming=-1;
+  for(let i=0;i<danceTestMoves.length;i++){const m=danceTestMoves[i];if(!m?.goldMove)continue;const impact=Number(m.time||0)+danceGoldFinishOffsetMs,delta=impact-timeMs;if(delta<-DANCE_GOLD_FINISH_WINDOW_MS){danceIpkGoldIntroMoves.add(i);jd26GoldImpactMoves.add(i);continue}if(delta>0&&delta<=danceGoldPrepareMs&&!danceIpkGoldIntroMoves.has(i)){danceIpkGoldIntroMoves.add(i);playDanceIpkGoldIntroAudio();startDanceGoldMove2026Charge(i,impact,false)}if(delta>0&&delta<=danceGoldPrepareMs)upcoming=i;if(delta<=0&&delta>=-DANCE_GOLD_FINISH_WINDOW_MS&&!jd26GoldImpactMoves.has(i)){jd26GoldImpactMoves.add(i);danceIpkGoldIntroMoves.add(i);playDanceIpkGoldImpactAudio();triggerDanceGoldMove2026Impact(i,false);break}}
+  if(jd26GoldPhase==="charge"&&upcoming<0&&timeMs>jd26GoldImpactTime+DANCE_GOLD_FINISH_WINDOW_MS)stopDanceGoldMove2026Fx();
+}
+function renderDanceYeahDevSettings(){if(danceYeahPrepareMsInput)danceYeahPrepareMsInput.value=String(danceGoldPrepareMs);if(danceYeahFinishOffsetMsInput)danceYeahFinishOffsetMsInput.value=String(danceGoldFinishOffsetMs);if(danceYeahDevStatus)danceYeahDevStatus.textContent=`HUD JD2026 • charge → explo • Pré -${danceGoldPrepareMs} ms • Impacto ${formatDanceSyncOffset(danceGoldFinishOffsetMs)} • sem vídeo`}
+function applyDanceYeahDevSettings(announce=true){danceGoldPrepareMs=clampDanceYeahSetting(danceYeahPrepareMsInput?.value,500,6000,DANCE_GOLD_DEFAULTS.prepareMs);danceGoldFinishOffsetMs=clampDanceYeahSetting(danceYeahFinishOffsetMsInput?.value,-1500,1500,DANCE_GOLD_DEFAULTS.finishOffsetMs);saveDanceYeahDevSettings();renderDanceYeahDevSettings();resetDanceGoldMoveFx(false);if(announce&&danceLabMessage)danceLabMessage.textContent="Gold Move JD2026 aplicado: cena global charge/explo, sem vídeo."}
+function resetDanceYeahDevSettings(){danceGoldPrepareMs=DANCE_GOLD_DEFAULTS.prepareMs;danceGoldFinishOffsetMs=DANCE_GOLD_DEFAULTS.finishOffsetMs;saveDanceYeahDevSettings();renderDanceYeahDevSettings();resetDanceGoldMoveFx(false);if(danceLabMessage)danceLabMessage.textContent="Gold Move restaurado para o timing padrão da HUD JD2026."}
+async function previewDanceYeahSequence(){applyDanceYeahDevSettings(false);if(!dancePreloadReady){if(danceLabMessage)danceLabMessage.textContent="Espere o carregamento chegar a 100% antes de testar o Gold Move.";return}await ensureDanceGoldMove2026Images();resetDanceGoldMoveFx(false);playDanceIpkGoldIntroAudio();startDanceGoldMove2026Charge(-999,0,true);if(danceLabMessage)danceLabMessage.textContent=`Prévia JD2026: charge global; explosão em ${danceGoldPrepareMs} ms.`;jd26GoldPreviewTimer=setTimeout(()=>{jd26GoldPreviewTimer=0;playDanceIpkGoldImpactAudio();triggerDanceGoldMove2026Impact(-999,true);if(danceLabMessage)danceLabMessage.textContent="Prévia concluída: HUD global charge/explo. YEAH individual continua separado."},Math.max(0,danceGoldPrepareMs))}
+ensureDanceGoldMove2026Images();
