@@ -204,6 +204,15 @@ const dancePreloadTitle = document.getElementById("dancePreloadTitle");
 const dancePreloadStatus = document.getElementById("dancePreloadStatus");
 const dancePreloadFill = document.getElementById("dancePreloadFill");
 const dancePreloadPercent = document.getElementById("dancePreloadPercent");
+const danceYeahPrepareMsInput = document.getElementById("danceYeahPrepareMs");
+const danceYeahLoopRestartMsInput = document.getElementById("danceYeahLoopRestartMs");
+const danceYeahFinishOffsetMsInput = document.getElementById("danceYeahFinishOffsetMs");
+const danceYeahFinalDelayMsInput = document.getElementById("danceYeahFinalDelayMs");
+const danceYeahScalePctInput = document.getElementById("danceYeahScalePct");
+const danceYeahApplyBtn = document.getElementById("danceYeahApplyBtn");
+const danceYeahPreviewBtn = document.getElementById("danceYeahPreviewBtn");
+const danceYeahResetBtn = document.getElementById("danceYeahResetBtn");
+const danceYeahDevStatus = document.getElementById("danceYeahDevStatus");
 
 const localModeBtn = document.getElementById("localModeBtn");
 const onlineModeBtn = document.getElementById("onlineModeBtn");
@@ -327,8 +336,8 @@ let danceLastLyricLineIndex = -999;
 // O videoOffset do JSON já aparece refletido nos timestamps da timeline de Rain Over Me
 // (o primeiro beat é exatamente 2812 ms). Portanto ele NÃO deve ser subtraído novamente.
 let danceSourceVideoOffsetMs = 0;
-const DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS = -1475;
-const DANCE_RAIN_OVER_ME_SYNC_STORAGE_KEY = "jdRainOverMeSyncOffsetMsV2";
+const DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS = -1725;
+const DANCE_RAIN_OVER_ME_SYNC_STORAGE_KEY = "jdRainOverMeSyncOffsetMsV4";
 let danceManualSyncOffsetMs = DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS;
 let danceTestSongLoaded = false;
 const devSensorLive = new Map();
@@ -357,11 +366,19 @@ const DANCE_VIDEO_SOURCES = {
   high: "minigames/just-dance/songs/RainOverMe/RainOverMe_High.mp4"
 };
 const DANCE_AUDIO_SOURCE = "minigames/just-dance/songs/RainOverMe/RainOverMe_Audio.mp3";
+const DANCE_PLAYER_AVATAR_SOURCE = "minigames/just-dance/songs/RainOverMe/rainoverme_thumb_kiwi.jpg";
 const DANCE_GOLD_START_SOURCE = "minigames/just-dance/hud/raw/start-loop.mp4";
 const DANCE_GOLD_FINISH_SOURCE = "minigames/just-dance/hud/raw/finish-loop.mp4";
-const DANCE_GOLD_PREPARE_MS = 2300;
+const DANCE_GOLD_DEFAULTS = Object.freeze({ prepareMs: 2300, loopRestartMs: 0, finishOffsetMs: 0, finalDelayMs: 0, finalScalePct: 100 });
+const DANCE_YEAH_DEV_STORAGE_KEY = "jdYeahDevSettingsV1";
 const DANCE_GOLD_FINISH_WINDOW_MS = 850;
+let danceGoldPrepareMs = DANCE_GOLD_DEFAULTS.prepareMs;
+let danceGoldLoopRestartMs = DANCE_GOLD_DEFAULTS.loopRestartMs;
+let danceGoldFinishOffsetMs = DANCE_GOLD_DEFAULTS.finishOffsetMs;
+let danceYeahFinalDelayMs = DANCE_GOLD_DEFAULTS.finalDelayMs;
+let danceYeahScalePct = DANCE_GOLD_DEFAULTS.finalScalePct;
 const DANCE_CRITICAL_IMAGE_SOURCES = [
+  DANCE_PLAYER_AVATAR_SOURCE,
   "minigames/just-dance/songs/RainOverMe/pictos-atlas.png",
   "minigames/just-dance/hud/yeah/FinishYeah.png",
   "minigames/just-dance/hud/images/Star.png",
@@ -415,8 +432,12 @@ let danceHudSoundsPreloaded = false;
 const danceManagedBlobUrls = new Map();
 let danceActiveGoldMoveIndex = -1;
 let danceStartLoopGoldIndex = -1;
+let danceStartLoopFirstPassAudio = null;
+let danceStartLoopCycleToken = 0;
 const danceFinishedGoldIntroMoves = new Set();
 let dancePendingYeahAfterFinish = false;
+let danceYeahFinalTimer = 0;
+let danceYeahPreviewTimer = 0;
 const DANCE_YEAH = { frameWidth: 512, frameHeight: 288, columns: 8, frames: 73, fps: 30 };
 
 
@@ -2182,12 +2203,12 @@ function updateDancePlayerControls() {
 }
 
 function unlockDanceHudAudio() {
-  const urls = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah"];
+  const urls = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah", "start-loop-first"];
   for (const name of urls) {
     if (danceHudSounds.has(name)) continue;
     const audio = new Audio(`minigames/just-dance/hud/sounds/${name}.mp3`);
     audio.preload = "auto";
-    audio.volume = name === "yeah" ? 0.86 : 0.72;
+    audio.volume = name === "yeah" ? 0.86 : (name === "start-loop-first" ? 0.82 : 0.72);
     danceHudSounds.set(name, audio);
   }
 }
@@ -2302,7 +2323,7 @@ function preloadDanceImage(url) {
 async function preloadDanceHudSounds(onProgress = null) {
   if (danceHudSoundsPreloaded) { onProgress?.(1, 1, 1); return; }
   unlockDanceHudAudio();
-  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah"];
+  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah", "start-loop-first"];
   for (let index = 0; index < names.length; index += 1) {
     const name = names[index];
     const blob = await fetchDanceBlob(`minigames/just-dance/hud/sounds/${name}.mp3`);
@@ -2683,6 +2704,182 @@ function handleDanceHudMilestones(playerId, oldScore, newScore) {
   if (last) { playDanceHudSound(last); pulseDanceHudMilestone(last); }
 }
 
+function clampDanceYeahSetting(value, min, max, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.round(parsed))) : fallback;
+}
+
+function renderDanceYeahDevSettings() {
+  if (danceYeahPrepareMsInput) danceYeahPrepareMsInput.value = String(danceGoldPrepareMs);
+  if (danceYeahLoopRestartMsInput) danceYeahLoopRestartMsInput.value = String(danceGoldLoopRestartMs);
+  if (danceYeahFinishOffsetMsInput) danceYeahFinishOffsetMsInput.value = String(danceGoldFinishOffsetMs);
+  if (danceYeahFinalDelayMsInput) danceYeahFinalDelayMsInput.value = String(danceYeahFinalDelayMs);
+  if (danceYeahScalePctInput) danceYeahScalePctInput.value = String(danceYeahScalePct);
+  if (danceYeahCanvas) danceYeahCanvas.style.setProperty("--dance-yeah-scale", String(danceYeahScalePct / 100));
+  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `Start -${danceGoldPrepareMs} ms • 1ª volta com som • loop mudo em ${danceGoldLoopRestartMs} ms • Finish ${formatDanceSyncOffset(danceGoldFinishOffsetMs)} • Final +${danceYeahFinalDelayMs} ms • ${danceYeahScalePct}%`;
+}
+
+function saveDanceYeahDevSettings() {
+  try {
+    localStorage.setItem(DANCE_YEAH_DEV_STORAGE_KEY, JSON.stringify({
+      prepareMs: danceGoldPrepareMs,
+      loopRestartMs: danceGoldLoopRestartMs,
+      finishOffsetMs: danceGoldFinishOffsetMs,
+      finalDelayMs: danceYeahFinalDelayMs,
+      finalScalePct: danceYeahScalePct
+    }));
+  } catch {}
+}
+
+function loadDanceYeahDevSettings() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(DANCE_YEAH_DEV_STORAGE_KEY) || "null"); } catch {}
+  danceGoldPrepareMs = clampDanceYeahSetting(saved?.prepareMs, 250, 6000, DANCE_GOLD_DEFAULTS.prepareMs);
+  danceGoldLoopRestartMs = clampDanceYeahSetting(saved?.loopRestartMs, 0, 1600, DANCE_GOLD_DEFAULTS.loopRestartMs);
+  danceGoldFinishOffsetMs = clampDanceYeahSetting(saved?.finishOffsetMs, -1500, 1500, DANCE_GOLD_DEFAULTS.finishOffsetMs);
+  danceYeahFinalDelayMs = clampDanceYeahSetting(saved?.finalDelayMs, 0, 2000, DANCE_GOLD_DEFAULTS.finalDelayMs);
+  danceYeahScalePct = clampDanceYeahSetting(saved?.finalScalePct, 60, 160, DANCE_GOLD_DEFAULTS.finalScalePct);
+  renderDanceYeahDevSettings();
+}
+
+function applyDanceYeahDevSettings(announce = true) {
+  danceGoldPrepareMs = clampDanceYeahSetting(danceYeahPrepareMsInput?.value, 250, 6000, DANCE_GOLD_DEFAULTS.prepareMs);
+  danceGoldLoopRestartMs = clampDanceYeahSetting(danceYeahLoopRestartMsInput?.value, 0, 1600, DANCE_GOLD_DEFAULTS.loopRestartMs);
+  danceGoldFinishOffsetMs = clampDanceYeahSetting(danceYeahFinishOffsetMsInput?.value, -1500, 1500, DANCE_GOLD_DEFAULTS.finishOffsetMs);
+  danceYeahFinalDelayMs = clampDanceYeahSetting(danceYeahFinalDelayMsInput?.value, 0, 2000, DANCE_GOLD_DEFAULTS.finalDelayMs);
+  danceYeahScalePct = clampDanceYeahSetting(danceYeahScalePctInput?.value, 60, 160, DANCE_GOLD_DEFAULTS.finalScalePct);
+  saveDanceYeahDevSettings();
+  renderDanceYeahDevSettings();
+  resetDanceGoldMoveFx(false);
+  if (announce && danceLabMessage) danceLabMessage.textContent = "Configuração do YEAH! aplicada e salva neste navegador.";
+}
+
+function resetDanceYeahDevSettings() {
+  danceGoldPrepareMs = DANCE_GOLD_DEFAULTS.prepareMs;
+  danceGoldLoopRestartMs = DANCE_GOLD_DEFAULTS.loopRestartMs;
+  danceGoldFinishOffsetMs = DANCE_GOLD_DEFAULTS.finishOffsetMs;
+  danceYeahFinalDelayMs = DANCE_GOLD_DEFAULTS.finalDelayMs;
+  danceYeahScalePct = DANCE_GOLD_DEFAULTS.finalScalePct;
+  saveDanceYeahDevSettings();
+  renderDanceYeahDevSettings();
+  resetDanceGoldMoveFx(false);
+  if (danceLabMessage) danceLabMessage.textContent = "Configuração do YEAH! restaurada para o padrão.";
+}
+
+function scheduleDanceYeahFinalFx() {
+  if (danceYeahFinalTimer) window.clearTimeout(danceYeahFinalTimer);
+  danceYeahFinalTimer = window.setTimeout(() => {
+    danceYeahFinalTimer = 0;
+    playDanceYeahFx();
+  }, Math.max(0, danceYeahFinalDelayMs));
+}
+
+function stopDanceStartLoopFirstAudio() {
+  if (!danceStartLoopFirstPassAudio) return;
+  try {
+    danceStartLoopFirstPassAudio.pause();
+    danceStartLoopFirstPassAudio.currentTime = 0;
+  } catch {}
+  danceStartLoopFirstPassAudio = null;
+}
+
+function playDanceStartLoopFirstAudio() {
+  stopDanceStartLoopFirstAudio();
+  unlockDanceHudAudio();
+  const base = danceHudSounds.get("start-loop-first");
+  if (!base) return;
+  try {
+    const sound = base.cloneNode(true);
+    sound.volume = base.volume;
+    sound.currentTime = 0;
+    danceStartLoopFirstPassAudio = sound;
+    sound.onended = () => {
+      if (danceStartLoopFirstPassAudio === sound) danceStartLoopFirstPassAudio = null;
+    };
+    sound.play().catch(() => {
+      if (danceStartLoopFirstPassAudio === sound) danceStartLoopFirstPassAudio = null;
+    });
+  } catch {}
+}
+
+function getDanceStartLoopRestartSeconds() {
+  const duration = Number(danceYeahStartLoop?.duration || 0);
+  const maxMs = duration > 0 ? Math.max(0, Math.floor(duration * 1000) - 50) : 1600;
+  const safeMs = Math.max(0, Math.min(danceGoldLoopRestartMs, maxMs));
+  return safeMs / 1000;
+}
+
+function startDanceGoldStartLoopPlayback(moveIndex, { requireSongPlaying = true } = {}) {
+  if (!danceYeahStartLoop || !danceYeahStartLoop.src) return false;
+  if (requireSongPlaying && !isDanceMediaPlaying()) return false;
+
+  stopDanceGoldFinishLoop();
+  stopDanceStartLoopFirstAudio();
+  const token = ++danceStartLoopCycleToken;
+  danceStartLoopGoldIndex = moveIndex;
+  danceYeahStartLoop.loop = false;
+  danceYeahStartLoop.muted = true;
+  danceYeahStartLoop.volume = 0;
+  danceYeahStartLoop.onended = null;
+  try { danceYeahStartLoop.currentTime = 0; } catch {}
+  danceYeahStartLoop.classList.add("active");
+
+  let firstPass = true;
+  const playSilentRepeat = () => {
+    if (token !== danceStartLoopCycleToken || !danceYeahStartLoop.classList.contains("active")) return;
+    danceYeahStartLoop.muted = true;
+    danceYeahStartLoop.volume = 0;
+    try { danceYeahStartLoop.currentTime = getDanceStartLoopRestartSeconds(); } catch {}
+    danceYeahStartLoop.play().catch(() => {});
+  };
+
+  danceYeahStartLoop.onended = () => {
+    if (token !== danceStartLoopCycleToken) return;
+    if (firstPass) {
+      firstPass = false;
+      stopDanceStartLoopFirstAudio();
+    }
+    playSilentRepeat();
+  };
+
+  // O vídeo fica sempre mudo. O som da primeira volta é separado para nunca repetir junto com o loop.
+  playDanceStartLoopFirstAudio();
+  danceYeahStartLoop.play().catch(() => {});
+  return true;
+}
+
+async function previewDanceYeahSequence() {
+  applyDanceYeahDevSettings(false);
+  if (!dancePreloadReady || !danceYeahStartLoop?.src || !danceYeahFinishLoop?.src) {
+    if (danceLabMessage) danceLabMessage.textContent = "Espere o carregamento chegar a 100% antes de testar o YEAH!.";
+    return;
+  }
+  if (danceYeahPreviewTimer) window.clearTimeout(danceYeahPreviewTimer);
+  resetDanceGoldMoveFx(false);
+  stopDanceYeahFx();
+  startDanceGoldStartLoopPlayback(-999, { requireSongPlaying: false });
+  if (danceLabMessage) danceLabMessage.textContent = `Prévia do YEAH!: 1ª volta do Start Loop com som; repetições mudas a partir de ${danceGoldLoopRestartMs} ms…`;
+  const previewStartDuration = Math.max(350, Math.min(2500, danceGoldPrepareMs));
+  danceYeahPreviewTimer = window.setTimeout(() => {
+    danceYeahPreviewTimer = 0;
+    stopDanceGoldStartLoop();
+    danceYeahFinishLoop.muted = true;
+    danceYeahFinishLoop.volume = 0;
+    danceYeahFinishLoop.loop = false;
+    try { danceYeahFinishLoop.currentTime = 0; } catch {}
+    danceYeahFinishLoop.classList.add("active");
+    danceYeahFinishLoop.onended = () => {
+      danceYeahFinishLoop.classList.remove("active");
+      scheduleDanceYeahFinalFx();
+      if (danceLabMessage) danceLabMessage.textContent = "Prévia do YEAH! concluída.";
+    };
+    danceYeahFinishLoop.play().catch(() => {
+      danceYeahFinishLoop.classList.remove("active");
+      scheduleDanceYeahFinalFx();
+    });
+  }, previewStartDuration);
+}
+
 function ensureDanceYeahImage() {
   if (danceYeahImage) return danceYeahImage;
   danceYeahImage = new Image();
@@ -2706,6 +2903,7 @@ function playDanceYeahFx() {
   if (!danceYeahCanvas) return;
   playDanceHudSound("yeah");
   stopDanceYeahFx();
+  danceYeahCanvas.style.setProperty("--dance-yeah-scale", String(danceYeahScalePct / 100));
   danceYeahCanvas.classList.add("active");
   danceYeahStartedAt = performance.now();
   const ctx = danceYeahCanvas.getContext("2d");
@@ -2726,7 +2924,13 @@ function playDanceYeahFx() {
 
 function stopDanceGoldStartLoop() {
   if (!danceYeahStartLoop) return;
+  danceStartLoopCycleToken += 1;
+  stopDanceStartLoopFirstAudio();
   danceYeahStartLoop.pause();
+  danceYeahStartLoop.loop = false;
+  danceYeahStartLoop.onended = null;
+  danceYeahStartLoop.muted = true;
+  danceYeahStartLoop.volume = 0;
   danceYeahStartLoop.classList.remove("active");
   danceStartLoopGoldIndex = -1;
 }
@@ -2741,6 +2945,10 @@ function stopDanceGoldFinishLoop() {
 function resetDanceGoldMoveFx(clearHistory = true) {
   stopDanceGoldStartLoop();
   stopDanceGoldFinishLoop();
+  if (danceYeahFinalTimer) window.clearTimeout(danceYeahFinalTimer);
+  danceYeahFinalTimer = 0;
+  if (danceYeahPreviewTimer) window.clearTimeout(danceYeahPreviewTimer);
+  danceYeahPreviewTimer = 0;
   dancePendingYeahAfterFinish = false;
   if (clearHistory) danceFinishedGoldIntroMoves.clear();
 }
@@ -2748,14 +2956,7 @@ function resetDanceGoldMoveFx(clearHistory = true) {
 function playDanceGoldStartLoop(moveIndex) {
   if (!danceYeahStartLoop || !danceYeahStartLoop.src || !isDanceMediaPlaying()) return;
   if (danceStartLoopGoldIndex === moveIndex && danceYeahStartLoop.classList.contains("active")) return;
-  stopDanceGoldFinishLoop();
-  danceStartLoopGoldIndex = moveIndex;
-  danceYeahStartLoop.muted = true;
-  danceYeahStartLoop.volume = 0;
-  danceYeahStartLoop.loop = true;
-  try { danceYeahStartLoop.currentTime = 0; } catch {}
-  danceYeahStartLoop.classList.add("active");
-  danceYeahStartLoop.play().catch(() => {});
+  startDanceGoldStartLoopPlayback(moveIndex, { requireSongPlaying: true });
 }
 
 function playDanceGoldFinishLoop(moveIndex) {
@@ -2774,7 +2975,7 @@ function playDanceGoldFinishLoop(moveIndex) {
     danceActiveGoldMoveIndex = -1;
     if (dancePendingYeahAfterFinish) {
       dancePendingYeahAfterFinish = false;
-      playDanceYeahFx();
+      scheduleDanceYeahFinalFx();
     }
   };
   danceYeahFinishLoop.play().catch(() => {
@@ -2788,7 +2989,7 @@ function queueDanceYeahFinalFx() {
     dancePendingYeahAfterFinish = true;
     return;
   }
-  playDanceYeahFx();
+  scheduleDanceYeahFinalFx();
 }
 
 function updateDanceGoldMoveFx(timeMs) {
@@ -2803,18 +3004,19 @@ function updateDanceGoldMoveFx(timeMs) {
     const move = danceTestMoves[index];
     if (!move?.goldMove) continue;
     const start = Number(move.time || 0);
-    const delta = start - timeMs;
+    const finishStart = start + danceGoldFinishOffsetMs;
+    const deltaToFinish = finishStart - timeMs;
 
-    if (delta > 0 && delta <= DANCE_GOLD_PREPARE_MS && nextGoldIndex < 0) nextGoldIndex = index;
+    if (deltaToFinish > 0 && deltaToFinish <= danceGoldPrepareMs && nextGoldIndex < 0) nextGoldIndex = index;
 
-    if (timeMs >= start && timeMs <= start + DANCE_GOLD_FINISH_WINDOW_MS) {
+    if (timeMs >= finishStart && timeMs <= finishStart + DANCE_GOLD_FINISH_WINDOW_MS) {
       playDanceGoldFinishLoop(index);
       nextGoldIndex = -1;
       break;
     }
 
     // Ao saltar para depois do Gold Move, não reproduz a introdução atrasada.
-    if (timeMs > start + DANCE_GOLD_FINISH_WINDOW_MS) danceFinishedGoldIntroMoves.add(index);
+    if (timeMs > finishStart + DANCE_GOLD_FINISH_WINDOW_MS) danceFinishedGoldIntroMoves.add(index);
   }
 
   if (nextGoldIndex >= 0) playDanceGoldStartLoop(nextGoldIndex);
@@ -2822,6 +3024,7 @@ function updateDanceGoldMoveFx(timeMs) {
 }
 
 async function initializeDancePlayerSettings() {
+  loadDanceYeahDevSettings();
   danceQualityPreference = safeLocalStorageGet(DANCE_QUALITY_STORAGE_KEY, "auto");
   if (!["auto","low","medium","high"].includes(danceQualityPreference)) danceQualityPreference = "auto";
   applyDanceLyricsSize(safeLocalStorageGet(DANCE_LYRICS_SIZE_STORAGE_KEY, "small"), false);
@@ -2904,10 +3107,12 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
       item.dataset.playerId = player.id;
       item.innerHTML = `
         <div class="dance-ipk-player-head">
-          <div class="dance-ipk-player-color" aria-hidden="true"></div>
-          <img class="dance-ipk-player-outline" src="minigames/just-dance/hud/ipk-base/textures/bkg_player_new_outline.png" alt="" aria-hidden="true">
-          <span class="dance-ipk-player-index"></span>
-          <span class="dance-video-player-name"></span>
+          <div class="dance-ipk-player-card">
+            <img class="dance-ipk-player-avatar" src="${DANCE_PLAYER_AVATAR_SOURCE}" alt="" aria-hidden="true">
+            <span class="dance-ipk-player-color" aria-hidden="true"></span>
+            <span class="dance-ipk-player-index"></span>
+            <span class="dance-video-player-name"></span>
+          </div>
           <span class="dance-ipk-player-line" aria-hidden="true"></span>
         </div>
         <div class="dance-video-feedback" aria-live="polite" aria-atomic="true">
@@ -3701,6 +3906,12 @@ danceSyncAdvanceBtn?.addEventListener("click", () => nudgeDanceSync(100));
 danceSyncDelayFineBtn?.addEventListener("click", () => nudgeDanceSync(-25));
 danceSyncAdvanceFineBtn?.addEventListener("click", () => nudgeDanceSync(25));
 danceSyncResetBtn?.addEventListener("click", () => setDanceManualSyncOffset(DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS));
+danceYeahApplyBtn?.addEventListener("click", () => applyDanceYeahDevSettings(true));
+danceYeahPreviewBtn?.addEventListener("click", previewDanceYeahSequence);
+danceYeahResetBtn?.addEventListener("click", resetDanceYeahDevSettings);
+[danceYeahPrepareMsInput, danceYeahFinishOffsetMsInput, danceYeahFinalDelayMsInput, danceYeahScalePctInput].forEach(input => {
+  input?.addEventListener("keydown", event => { if (event.key === "Enter") applyDanceYeahDevSettings(true); });
+});
 copyDanceJoinUrlBtn?.addEventListener("click", async () => {
   if (!devSensorJoinUrl) return;
   try {

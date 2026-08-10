@@ -13,7 +13,7 @@
       } catch {}
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=028-rainoverme-sync-1475" />
+  <link rel="stylesheet" href="style.css?v=034-yeah-loop-audio-config" />
 </head>
 <body class="site-loading">
 
@@ -560,7 +560,7 @@
           <div class="dance-sync-head">
             <div>
               <span class="tiny-label">Sincronia DEV</span>
-              <strong id="danceSyncValue">-1475 ms</strong>
+              <strong id="danceSyncValue">-1725 ms</strong>
             </div>
             <div class="dance-sync-clocks" aria-live="polite">
               <span>Player <b id="danceSyncVideoTime">0:00.000</b></span>
@@ -570,11 +570,43 @@
           <div class="dance-sync-actions">
             <button id="danceSyncDelayBtn" class="secondary compact-button" type="button">Atrasar HUD 100 ms</button>
             <button id="danceSyncDelayFineBtn" class="secondary compact-button" type="button">−25 ms</button>
-            <button id="danceSyncResetBtn" class="secondary compact-button" type="button">Padrão (-1475 ms)</button>
+            <button id="danceSyncResetBtn" class="secondary compact-button" type="button">Padrão (-1725 ms)</button>
             <button id="danceSyncAdvanceFineBtn" class="secondary compact-button" type="button">+25 ms</button>
             <button id="danceSyncAdvanceBtn" class="secondary compact-button" type="button">Adiantar HUD 100 ms</button>
           </div>
-          <p>O erro anterior era de <b>2.812 ms</b>: o <code>videoOffset</code> foi subtraído de uma timeline que já começava nesse tempo. Para <b>Rain Over Me</b>, a calibração confirmada agora é <b>-1475 ms</b> e esse passa a ser o padrão da música. Se ainda notar diferença no aparelho/tela, use os botões durante o vídeo; <kbd>[</kbd>/<kbd>]</kbd> ajustam 25 ms e <kbd>Shift</kbd> + essas teclas ajusta 250 ms.</p>
+          <p>O erro anterior era de <b>2.812 ms</b>: o <code>videoOffset</code> foi subtraído de uma timeline que já começava nesse tempo. Para <b>Rain Over Me</b>, a calibração confirmada agora é <b>-1725 ms</b> e esse passa a ser o padrão da música. Se ainda notar diferença no aparelho/tela, use os botões durante o vídeo; <kbd>[</kbd>/<kbd>]</kbd> ajustam 25 ms e <kbd>Shift</kbd> + essas teclas ajusta 250 ms.</p>
+        </div>
+        <div class="dance-yeah-calibrator" aria-label="Configuração DEV do YEAH">
+          <div class="dance-yeah-dev-head">
+            <div>
+              <span class="tiny-label">YEAH! DEV</span>
+              <strong>Sequência do Gold Move</strong>
+            </div>
+            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">Padrão do IPK</span>
+          </div>
+          <div class="dance-yeah-dev-grid">
+            <label>Start Loop começa
+              <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="250" max="6000" step="25" value="2300" /><b>ms antes</b></span>
+            </label>
+            <label>Depois da 1ª volta, repetir a partir de
+              <span class="dance-yeah-dev-input"><input id="danceYeahLoopRestartMs" type="number" min="0" max="1600" step="25" value="0" /><b>ms do vídeo</b></span>
+            </label>
+            <label>Finish Loop
+              <span class="dance-yeah-dev-input"><input id="danceYeahFinishOffsetMs" type="number" min="-1500" max="1500" step="25" value="0" /><b>ms do Gold</b></span>
+            </label>
+            <label>FinishYeah depois do Finish Loop
+              <span class="dance-yeah-dev-input"><input id="danceYeahFinalDelayMs" type="number" min="0" max="2000" step="25" value="0" /><b>ms</b></span>
+            </label>
+            <label>Escala do FinishYeah
+              <span class="dance-yeah-dev-input"><input id="danceYeahScalePct" type="number" min="60" max="160" step="5" value="100" /><b>%</b></span>
+            </label>
+          </div>
+          <div class="dance-yeah-dev-actions">
+            <button id="danceYeahApplyBtn" class="secondary compact-button" type="button">Aplicar</button>
+            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar sequência</button>
+            <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrão</button>
+          </div>
+          <p>Use este painel para acertar visualmente o Gold Move. O <b>Start Loop toca a primeira volta com som</b>; quando termina, as repetições ficam mudas e começam no ponto configurado em <b>“repetir a partir de”</b>. Valor negativo no <b>Finish Loop</b> faz ele começar antes do movimento; positivo começa depois. O Finish Loop continua mudo. As configurações ficam salvas neste navegador.</p>
         </div>
         <div class="dance-score-rules" aria-label="Sistema de pontuação">
           <div class="dance-judgement-legend">
@@ -771,7 +803,7 @@
       window.dispatchEvent(new CustomEvent("dice3d-error", { detail: String(error?.message || error) }));
     });
   </script>
-  <script src="script.js?v=031-jd-ipk-scoring-16x9" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…')"></script>
+  <script src="script.js?v=034-yeah-loop-audio-config" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…')"></script>
   <span class="version-badge" data-version>V. 0.2.3 (Teste)</span>
 </body>
 </html>

@@ -1945,7 +1945,7 @@ html[data-theme="dark"] .dance-sync-calibrator{background:rgba(255,255,255,.035)
 .dance-player-settings{grid-column:1/-1;display:grid;grid-template-columns:1.15fr .85fr 1fr 1fr;gap:8px;padding:10px 11px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
 .dance-player-settings label,.dance-quality-active{display:grid;gap:5px;color:var(--muted);font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.035em}.dance-player-settings select{width:100%;min-height:36px;border:1px solid var(--line);border-radius:10px;background:var(--input);color:var(--text);padding:6px 8px;font:inherit;text-transform:none;letter-spacing:0}.dance-quality-active{align-content:center;padding:5px 8px;border-radius:10px;background:rgba(127,127,140,.07)}.dance-quality-active strong{color:var(--text);font-size:11px;text-transform:none;letter-spacing:0}
 .dance-song-info{grid-column:1/-1}.dance-player-shell{grid-column:1/-1;min-width:0;display:grid;gap:0;border-radius:15px;overflow:hidden;background:#050505}.dance-player-shell .dance-video-stage{border-radius:15px 15px 0 0}.dance-player-controls{display:grid;grid-template-columns:auto auto minmax(100px,1fr) auto auto auto;align-items:center;gap:8px;padding:8px 9px;background:#101114;color:#fff}.dance-player-icon-button{width:34px;height:32px;border:0;border-radius:8px;background:#fff;color:#111;font-weight:900;cursor:pointer}.dance-player-clock{font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}.dance-player-seek{width:100%;accent-color:#fff}.dance-volume-control{display:flex;align-items:center;gap:5px;font-size:11px}.dance-volume-control input{width:76px;accent-color:#fff}.dance-player-controls .secondary{border-color:rgba(255,255,255,.24);background:#202228;color:#fff}
-.dance-test-video{height:100%;object-fit:contain}.dance-video-stage[data-video-fit="cover"] .dance-test-video{object-fit:cover}.dance-video-stage{aspect-ratio:16/9}.dance-player-hud-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:2;pointer-events:none}.dance-yeah-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:9;pointer-events:none;opacity:0;transition:opacity .06s linear}.dance-yeah-canvas.active{opacity:1}
+.dance-test-video{height:100%;object-fit:contain}.dance-video-stage[data-video-fit="cover"] .dance-test-video{object-fit:cover}.dance-video-stage{aspect-ratio:16/9}.dance-player-hud-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:2;pointer-events:none}.dance-yeah-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:9;pointer-events:none;opacity:0;transform:scale(var(--dance-yeah-scale,1));transform-origin:center;transition:opacity .06s linear,transform .12s ease}.dance-yeah-canvas.active{opacity:1}
 .dance-star-hud{position:absolute;left:2.3%;top:17%;z-index:6;display:grid;gap:3px;min-width:140px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.78));transform-origin:left top}.dance-hud-stars{display:flex;gap:1px}.dance-hud-star{position:relative;width:clamp(17px,2.7vw,31px);aspect-ratio:1/1}.dance-hud-star img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.dance-hud-star .fill{opacity:0;transform:scale(.55);transition:opacity .25s ease,transform .3s cubic-bezier(.2,.85,.2,1)}.dance-hud-star.filled .fill{opacity:1;transform:scale(1)}.dance-hud-star.filled .outline{opacity:.15}.dance-hud-score-row{display:flex;align-items:center;gap:5px}.dance-hud-score-row strong{color:#fff;font-size:clamp(10px,1.55vw,18px);font-weight:1000;text-shadow:0 2px 3px #000;font-variant-numeric:tabular-nums}.dance-hud-rank-icon{width:clamp(18px,3vw,34px);height:clamp(18px,3vw,34px);object-fit:contain}.dance-star-hud.milestone{animation:danceStarMilestone .72s cubic-bezier(.18,.85,.2,1)}@keyframes danceStarMilestone{0%{transform:scale(.78);opacity:.5}50%{transform:scale(1.16);opacity:1}100%{transform:scale(1)}}
 /* Letras menores por padrão; tamanho pode ser trocado sem recarregar a música. */
 .dance-video-stage[data-lyrics-size="small"] .dance-karaoke-current{font-size:clamp(9px,1.35vw,18px)}.dance-video-stage[data-lyrics-size="small"] .dance-karaoke-next{font-size:clamp(7px,1vw,13px)}.dance-video-stage[data-lyrics-size="normal"] .dance-karaoke-current{font-size:clamp(11px,1.65vw,22px)}.dance-video-stage[data-lyrics-size="normal"] .dance-karaoke-next{font-size:clamp(8px,1.18vw,15px)}.dance-video-stage[data-lyrics-size="large"] .dance-karaoke-current{font-size:clamp(13px,2.1vw,27px)}.dance-video-stage[data-lyrics-size="large"] .dance-karaoke-next{font-size:clamp(10px,1.45vw,18px)}
@@ -2475,3 +2475,144 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
   .dance-picto-lane{height:calc(132px * var(--jd-ui-scale))}
   .dance-picto-item{width:calc(90px * var(--jd-ui-scale))}
 }
+
+
+/* ---------- Just Dance HUD v0.2.7: cartão quadrado + sync Rain Over Me ---------- */
+/*
+  O patch_pc.ipk trabalha o avatar e a barra do jogador como elementos separados.
+  A versão anterior esticava bkg_player_new em 154x35 e, por isso, o trapézio do
+  material virava uma faixa enorme. Aqui o avatar volta a ser um cartão 1:1 e a
+  hud_players_line fica apenas como linha inferior, sem deformação.
+*/
+.dance-video-judgements{
+  top:1.7%;
+  height:calc(132px * var(--jd-ui-scale));
+}
+.dance-video-player-judge{
+  width:calc(150px * var(--jd-ui-scale));
+  max-width:none;
+}
+.dance-ipk-player-head{
+  position:relative;
+  width:calc(78px * var(--jd-ui-scale));
+  height:calc(78px * var(--jd-ui-scale));
+  margin:0 auto;
+  filter:drop-shadow(0 calc(2px * var(--jd-ui-scale)) calc(3px * var(--jd-ui-scale)) rgba(0,0,0,.74));
+}
+.dance-ipk-player-card{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  aspect-ratio:1/1;
+  border:calc(2px * var(--jd-ui-scale)) solid rgba(255,255,255,.92);
+  background:#111;
+  box-sizing:border-box;
+  isolation:isolate;
+}
+.dance-ipk-player-avatar{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  z-index:0;
+}
+/* Cor do jogador entra apenas como moldura/gradiente, sem tampar o coach. */
+.dance-ipk-player-color{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:
+    linear-gradient(180deg,color-mix(in srgb,var(--player-color) 90%,transparent) 0%,transparent 22%,transparent 64%,rgba(0,0,0,.78) 100%);
+  box-shadow:inset 0 calc(4px * var(--jd-ui-scale)) 0 var(--player-color);
+  -webkit-mask:none;
+  mask:none;
+  pointer-events:none;
+}
+.dance-ipk-player-outline{display:none!important}
+.dance-ipk-player-index{
+  left:calc(5px * var(--jd-ui-scale));
+  top:calc(5px * var(--jd-ui-scale));
+  translate:0 0;
+  z-index:3;
+  padding:calc(1px * var(--jd-ui-scale)) calc(3px * var(--jd-ui-scale));
+  border-radius:calc(2px * var(--jd-ui-scale));
+  background:rgba(0,0,0,.54);
+  font-size:calc(8px * var(--jd-ui-scale));
+  line-height:1.1;
+}
+.dance-video-player-name{
+  left:calc(4px * var(--jd-ui-scale));
+  right:calc(4px * var(--jd-ui-scale));
+  top:auto;
+  bottom:calc(5px * var(--jd-ui-scale));
+  translate:0 0;
+  z-index:3;
+  display:block;
+  width:auto;
+  max-width:none;
+  padding:0;
+  color:#fff;
+  font-size:calc(10px * var(--jd-ui-scale));
+  line-height:1.05;
+  text-align:center;
+  text-shadow:0 1px 2px #000,0 0 3px #000;
+}
+.dance-ipk-player-line{
+  left:50%;
+  right:auto;
+  bottom:calc(-6px * var(--jd-ui-scale));
+  width:calc(98px * var(--jd-ui-scale));
+  height:calc(6px * var(--jd-ui-scale));
+  translate:-50% 0;
+  background:url("minigames/just-dance/hud/ipk-base/textures/hud_players_line.png") center 66%/100% auto no-repeat;
+  opacity:.92;
+}
+/* Julgamento fica logo abaixo e pode invadir levemente o cartão, como na referência. */
+.dance-video-feedback{
+  left:50%;
+  top:calc(58px * var(--jd-ui-scale));
+  width:calc(150px * var(--jd-ui-scale));
+  height:calc(72px * var(--jd-ui-scale));
+  translate:-50% 0;
+  overflow:visible;
+}
+.dance-video-feedback.feedback-good .dance-video-judge-image,
+.dance-video-feedback.feedback-super .dance-video-judge-image,
+.dance-video-feedback.feedback-perfect .dance-video-judge-image,
+.dance-video-feedback.feedback-yeah .dance-video-judge-image{width:92%}
+.dance-video-feedback.feedback-yeah .dance-video-judge-image{width:104%}
+
+/* Browsers antigos sem color-mix recebem uma borda de cor sólida. */
+@supports not (color:color-mix(in srgb, red 50%, blue)){
+  .dance-ipk-player-color{background:linear-gradient(180deg,var(--player-color) 0 5%,transparent 5% 64%,rgba(0,0,0,.78) 100%)}
+}
+
+@media(max-width:500px){
+  .dance-video-judgements{top:1.4%;height:calc(126px * var(--jd-ui-scale))}
+  .dance-video-player-judge{width:calc(142px * var(--jd-ui-scale))}
+  .dance-ipk-player-head{width:calc(74px * var(--jd-ui-scale));height:calc(74px * var(--jd-ui-scale))}
+  .dance-video-feedback{top:calc(55px * var(--jd-ui-scale));width:calc(142px * var(--jd-ui-scale))}
+}
+
+
+/* ---------- YEAH! DEV + sync 1725 ---------- */
+.dance-yeah-calibrator{
+  grid-column:1/-1;padding:12px;border:1px dashed var(--line);border-radius:14px;
+  background:rgba(127,127,140,.055);display:grid;gap:10px;
+}
+.dance-yeah-dev-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.dance-yeah-dev-head>div{display:grid;gap:2px}.dance-yeah-dev-head strong{font-size:16px}
+.dance-yeah-dev-status{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;max-width:70%}
+.dance-yeah-dev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.dance-yeah-dev-grid label{display:grid;gap:5px;font-size:10px;color:var(--muted)}
+.dance-yeah-dev-input{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;background:var(--surface,rgba(255,255,255,.8));border:1px solid var(--line);border-radius:10px;padding:5px 8px}
+.dance-yeah-dev-input input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.dance-yeah-dev-input b{font-size:9px;color:var(--muted);white-space:nowrap}
+.dance-yeah-dev-actions{display:flex;gap:7px;flex-wrap:wrap}
+.dance-yeah-calibrator p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}
+html[data-theme="dark"] .dance-yeah-calibrator{background:rgba(255,255,255,.035)}
+html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
+@media(max-width:800px){.dance-yeah-dev-grid{grid-template-columns:1fr 1fr}.dance-yeah-dev-status{max-width:100%}}
+@media(max-width:520px){.dance-yeah-dev-grid{grid-template-columns:1fr}.dance-yeah-dev-actions{display:grid;grid-template-columns:1fr}.dance-yeah-dev-actions button{width:100%}}
