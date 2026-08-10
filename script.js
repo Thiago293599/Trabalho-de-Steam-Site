@@ -196,9 +196,8 @@ const danceScoreBar = document.getElementById("danceScoreBar");
 const danceScoreBarFill = document.getElementById("danceScoreBarFill");
 const danceStarHud = document.getElementById("danceStarHud");
 const danceHudStars = document.getElementById("danceHudStars");
-const danceYeahCanvas = document.getElementById("danceYeahCanvas");
-const danceYeahStartLoop = document.getElementById("danceYeahStartLoop");
-const danceYeahFinishLoop = document.getElementById("danceYeahFinishLoop");
+const danceGoldCanvas = document.getElementById("danceGoldCanvas");
+const danceYeahFinalVideo = document.getElementById("danceYeahFinalVideo");
 const dancePreloadOverlay = document.getElementById("dancePreloadOverlay");
 const dancePreloadTitle = document.getElementById("dancePreloadTitle");
 const dancePreloadStatus = document.getElementById("dancePreloadStatus");
@@ -367,8 +366,27 @@ const DANCE_VIDEO_SOURCES = {
 };
 const DANCE_AUDIO_SOURCE = "minigames/just-dance/songs/RainOverMe/RainOverMe_Audio.mp3";
 const DANCE_PLAYER_AVATAR_SOURCE = "minigames/just-dance/songs/RainOverMe/rainoverme_thumb_kiwi.jpg";
-const DANCE_GOLD_START_SOURCE = "minigames/just-dance/hud/raw/start-loop.mp4";
-const DANCE_GOLD_FINISH_SOURCE = "minigames/just-dance/hud/raw/finish-loop.mp4";
+const DANCE_GOLD_SPRITE_BASE = "minigames/just-dance/hud/gold-sprites";
+const DANCE_GOLD_SPRITES = Object.freeze({
+  start: Object.freeze({
+    fps: 60, frameWidth: 960, frameHeight: 540, frames: 100,
+    sheets: Object.freeze([
+      Object.freeze({ file: "start_00.webp", startFrame: 0, frameCount: 20, columns: 5 }),
+      Object.freeze({ file: "start_01.webp", startFrame: 20, frameCount: 20, columns: 5 }),
+      Object.freeze({ file: "start_02.webp", startFrame: 40, frameCount: 20, columns: 5 }),
+      Object.freeze({ file: "start_03.webp", startFrame: 60, frameCount: 20, columns: 5 }),
+      Object.freeze({ file: "start_04.webp", startFrame: 80, frameCount: 20, columns: 5 })
+    ])
+  }),
+  finish: Object.freeze({
+    fps: 60, frameWidth: 960, frameHeight: 540, frames: 29,
+    sheets: Object.freeze([
+      Object.freeze({ file: "finish_00.webp", startFrame: 0, frameCount: 15, columns: 5 }),
+      Object.freeze({ file: "finish_01.webp", startFrame: 15, frameCount: 14, columns: 5 })
+    ])
+  })
+});
+const DANCE_YEAH_FINAL_SOURCE = "minigames/just-dance/hud/yeah/FinishYeah.mp4";
 const DANCE_GOLD_DEFAULTS = Object.freeze({ prepareMs: 2300, loopRestartMs: 0, finishOffsetMs: 0, finalDelayMs: 0, finalScalePct: 100 });
 const DANCE_YEAH_DEV_STORAGE_KEY = "jdYeahDevSettingsV1";
 const DANCE_GOLD_FINISH_WINDOW_MS = 850;
@@ -380,7 +398,6 @@ let danceYeahScalePct = DANCE_GOLD_DEFAULTS.finalScalePct;
 const DANCE_CRITICAL_IMAGE_SOURCES = [
   DANCE_PLAYER_AVATAR_SOURCE,
   "minigames/just-dance/songs/RainOverMe/pictos-atlas.png",
-  "minigames/just-dance/hud/yeah/FinishYeah.png",
   "minigames/just-dance/hud/images/Star.png",
   "minigames/just-dance/hud/images/Superstar.png",
   "minigames/just-dance/hud/images/Megastar.png",
@@ -419,9 +436,14 @@ let danceWindowMode = false;
 let danceStartSoundPlayed = false;
 const danceHudPreviousScores = new Map();
 const danceHudSounds = new Map();
-let danceYeahImage = null;
-let danceYeahAnimationFrame = 0;
-let danceYeahStartedAt = 0;
+const danceGoldSpriteImages = new Map();
+let danceGoldAnimationFrame = 0;
+let danceGoldAnimationToken = 0;
+let danceGoldAnimationKind = "";
+let danceGoldAnimationStartedAt = 0;
+let danceGoldAnimationStartFrame = 0;
+let danceGoldAnimationFirstPass = false;
+let danceGoldAnimationOnComplete = null;
 let danceLastYeahFxAt = 0;
 let dancePreloadReady = false;
 let dancePreloadPromise = null;
@@ -438,7 +460,6 @@ const danceFinishedGoldIntroMoves = new Set();
 let dancePendingYeahAfterFinish = false;
 let danceYeahFinalTimer = 0;
 let danceYeahPreviewTimer = 0;
-const DANCE_YEAH = { frameWidth: 512, frameHeight: 288, columns: 8, frames: 73, fps: 30 };
 
 
 const ONLINE_SESSION_KEY = "corridaTabuleiroOnlineSessionV1";
@@ -2302,7 +2323,7 @@ async function installDanceMediaBlob(key, blob, element) {
   if (!element) return;
   const url = replaceDanceManagedBlobUrl(key, blob);
   element.src = url;
-  if (element === danceTestVideo || element === danceYeahStartLoop || element === danceYeahFinishLoop) element.muted = true;
+  if (element === danceTestVideo || element === danceYeahFinalVideo) element.muted = true;
   element.load();
   await waitDanceMediaMetadata(element);
 }
@@ -2351,6 +2372,40 @@ async function preloadDanceCriticalImages(onProgress = null) {
   }));
 }
 
+function getDanceGoldSpriteSheetUrl(kind, sheet) {
+  return `${DANCE_GOLD_SPRITE_BASE}/${sheet.file}`;
+}
+
+async function preloadDanceGoldSpriteAtlases(onProgress = null) {
+  const entries = [];
+  for (const kind of ["start", "finish"]) {
+    const meta = DANCE_GOLD_SPRITES[kind];
+    meta.sheets.forEach((sheet, index) => entries.push({ kind, sheet, index }));
+  }
+  let done = 0;
+  for (const entry of entries) {
+    const key = `${entry.kind}:${entry.sheet.file}`;
+    if (danceGoldSpriteImages.has(key)) {
+      done += 1;
+      onProgress?.(done / entries.length, done, entries.length);
+      continue;
+    }
+    const url = getDanceGoldSpriteSheetUrl(entry.kind, entry.sheet);
+    const blob = await fetchDanceBlob(url, ratio => onProgress?.((done + ratio) / entries.length, done, entries.length));
+    const objectUrl = replaceDanceManagedBlobUrl(`gold-sprite-${entry.kind}-${entry.index}`, blob);
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`Falha ao preparar ${entry.sheet.file}.`));
+      img.src = objectUrl;
+    });
+    danceGoldSpriteImages.set(key, image);
+    done += 1;
+    onProgress?.(done / entries.length, done, entries.length);
+  }
+}
+
 async function prepareDancePlayerAssets(targetQuality, options = {}) {
   const quality = DANCE_VIDEO_SOURCES[targetQuality] ? targetQuality : "low";
   if (dancePreloadPromise) {
@@ -2372,7 +2427,7 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
 
     try {
       const coreNeeded = !danceCoreMediaPreloaded;
-      const videoEnd = coreNeeded ? 72 : 95;
+      const videoEnd = coreNeeded ? 70 : 95;
       setDancePreloadUi(0, `Carregando vídeo ${label}…`, "Carregando antes de iniciar");
       const videoBlob = await fetchDanceBlob(DANCE_VIDEO_SOURCES[quality], ratio => {
         if (generation !== dancePreloadGeneration) return;
@@ -2382,17 +2437,16 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       dancePreloadedVideoQuality = quality;
 
       if (coreNeeded) {
-        setDancePreloadUi(72, "Carregando áudio principal…");
-        const audioBlob = await fetchDanceBlob(DANCE_AUDIO_SOURCE, ratio => setDancePreloadUi(72 + ratio * 15, "Carregando áudio principal…"));
+        setDancePreloadUi(70, "Carregando áudio principal…");
+        const audioBlob = await fetchDanceBlob(DANCE_AUDIO_SOURCE, ratio => setDancePreloadUi(70 + ratio * 14, "Carregando áudio principal…"));
         await installDanceMediaBlob("audio", audioBlob, danceSongAudio);
 
-        setDancePreloadUi(87, "Carregando Start Loop do YEAH!…");
-        const startBlob = await fetchDanceBlob(DANCE_GOLD_START_SOURCE, ratio => setDancePreloadUi(87 + ratio * 5, "Carregando Start Loop do YEAH!…"));
-        await installDanceMediaBlob("gold-start", startBlob, danceYeahStartLoop);
+        setDancePreloadUi(84, "Carregando FX do Gold Move em quadros…");
+        await preloadDanceGoldSpriteAtlases(ratio => setDancePreloadUi(84 + ratio * 10, "Carregando FX do Gold Move em quadros…"));
 
-        setDancePreloadUi(92, "Carregando Finish Loop do YEAH!…");
-        const finishBlob = await fetchDanceBlob(DANCE_GOLD_FINISH_SOURCE, ratio => setDancePreloadUi(92 + ratio * 5, "Carregando Finish Loop do YEAH!…"));
-        await installDanceMediaBlob("gold-finish", finishBlob, danceYeahFinishLoop);
+        setDancePreloadUi(94, "Carregando FinishYeah…");
+        const finalYeahBlob = await fetchDanceBlob(DANCE_YEAH_FINAL_SOURCE, ratio => setDancePreloadUi(94 + ratio * 3, "Carregando FinishYeah…"));
+        await installDanceMediaBlob("yeah-final-video", finalYeahBlob, danceYeahFinalVideo);
         danceCoreMediaPreloaded = true;
       }
 
@@ -2715,8 +2769,8 @@ function renderDanceYeahDevSettings() {
   if (danceYeahFinishOffsetMsInput) danceYeahFinishOffsetMsInput.value = String(danceGoldFinishOffsetMs);
   if (danceYeahFinalDelayMsInput) danceYeahFinalDelayMsInput.value = String(danceYeahFinalDelayMs);
   if (danceYeahScalePctInput) danceYeahScalePctInput.value = String(danceYeahScalePct);
-  if (danceYeahCanvas) danceYeahCanvas.style.setProperty("--dance-yeah-scale", String(danceYeahScalePct / 100));
-  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `Start -${danceGoldPrepareMs} ms • 1ª volta com som • loop mudo em ${danceGoldLoopRestartMs} ms • Finish ${formatDanceSyncOffset(danceGoldFinishOffsetMs)} • Final +${danceYeahFinalDelayMs} ms • ${danceYeahScalePct}%`;
+  if (danceYeahFinalVideo) danceYeahFinalVideo.style.setProperty("--dance-yeah-scale", String(danceYeahScalePct / 100));
+  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `Frames 60 FPS • Start -${danceGoldPrepareMs} ms • 1ª volta com som • loop mudo em ${danceGoldLoopRestartMs} ms • Finish ${formatDanceSyncOffset(danceGoldFinishOffsetMs)} • Final MP4 +${danceYeahFinalDelayMs} ms • ${danceYeahScalePct}%`;
 }
 
 function saveDanceYeahDevSettings() {
@@ -2802,55 +2856,128 @@ function playDanceStartLoopFirstAudio() {
   } catch {}
 }
 
-function getDanceStartLoopRestartSeconds() {
-  const duration = Number(danceYeahStartLoop?.duration || 0);
-  const maxMs = duration > 0 ? Math.max(0, Math.floor(duration * 1000) - 50) : 1600;
+function getDanceGoldSpriteImage(kind, sheet) {
+  return danceGoldSpriteImages.get(`${kind}:${sheet.file}`) || null;
+}
+
+function getDanceGoldSpriteSheet(kind, frame) {
+  const meta = DANCE_GOLD_SPRITES[kind];
+  if (!meta) return null;
+  return meta.sheets.find(sheet => frame >= sheet.startFrame && frame < sheet.startFrame + sheet.frameCount) || meta.sheets.at(-1) || null;
+}
+
+function drawDanceGoldSpriteFrame(kind, frame) {
+  if (!danceGoldCanvas) return false;
+  const meta = DANCE_GOLD_SPRITES[kind];
+  if (!meta) return false;
+  const safeFrame = Math.max(0, Math.min(meta.frames - 1, Math.floor(frame || 0)));
+  const sheet = getDanceGoldSpriteSheet(kind, safeFrame);
+  const image = sheet ? getDanceGoldSpriteImage(kind, sheet) : null;
+  if (!sheet || !image || !image.complete || !image.naturalWidth) return false;
+  const localFrame = safeFrame - sheet.startFrame;
+  const sx = (localFrame % sheet.columns) * meta.frameWidth;
+  const sy = Math.floor(localFrame / sheet.columns) * meta.frameHeight;
+  const ctx = danceGoldCanvas.getContext("2d");
+  if (!ctx) return false;
+  ctx.clearRect(0, 0, danceGoldCanvas.width, danceGoldCanvas.height);
+  ctx.drawImage(image, sx, sy, meta.frameWidth, meta.frameHeight, 0, 0, danceGoldCanvas.width, danceGoldCanvas.height);
+  return true;
+}
+
+function clearDanceGoldCanvas() {
+  const ctx = danceGoldCanvas?.getContext("2d");
+  if (ctx && danceGoldCanvas) ctx.clearRect(0, 0, danceGoldCanvas.width, danceGoldCanvas.height);
+  danceGoldCanvas?.classList.remove("active");
+}
+
+function stopDanceGoldCanvasAnimation(kind = "") {
+  if (kind && danceGoldAnimationKind && danceGoldAnimationKind !== kind) return false;
+  danceGoldAnimationToken += 1;
+  if (danceGoldAnimationFrame) cancelAnimationFrame(danceGoldAnimationFrame);
+  danceGoldAnimationFrame = 0;
+  danceGoldAnimationKind = "";
+  danceGoldAnimationOnComplete = null;
+  clearDanceGoldCanvas();
+  return true;
+}
+
+function startDanceGoldCanvasAnimation(kind, { loop = false, restartFrame = 0, onFirstPassEnd = null, onComplete = null } = {}) {
+  const meta = DANCE_GOLD_SPRITES[kind];
+  if (!meta || !danceGoldCanvas || !danceGoldSpriteImages.size) return false;
+  stopDanceGoldCanvasAnimation();
+  const token = ++danceGoldAnimationToken;
+  const frameMs = 1000 / meta.fps;
+  const fullDuration = meta.frames * frameMs;
+  const safeRestart = Math.max(0, Math.min(meta.frames - 1, Math.floor(restartFrame || 0)));
+  const loopFrames = Math.max(1, meta.frames - safeRestart);
+  let firstPassReported = false;
+  danceGoldAnimationKind = kind;
+  danceGoldAnimationStartedAt = performance.now();
+  danceGoldAnimationStartFrame = safeRestart;
+  danceGoldAnimationFirstPass = true;
+  danceGoldAnimationOnComplete = onComplete;
+  danceGoldCanvas.classList.add("active");
+  drawDanceGoldSpriteFrame(kind, 0);
+
+  const draw = stamp => {
+    if (token !== danceGoldAnimationToken || danceGoldAnimationKind !== kind) return;
+    const elapsed = Math.max(0, stamp - danceGoldAnimationStartedAt);
+    let frame = 0;
+
+    if (elapsed < fullDuration) {
+      frame = Math.min(meta.frames - 1, Math.floor(elapsed / frameMs));
+    } else if (loop) {
+      if (!firstPassReported) {
+        firstPassReported = true;
+        danceGoldAnimationFirstPass = false;
+        onFirstPassEnd?.();
+      }
+      const loopElapsed = elapsed - fullDuration;
+      frame = safeRestart + (Math.floor(loopElapsed / frameMs) % loopFrames);
+    } else {
+      drawDanceGoldSpriteFrame(kind, meta.frames - 1);
+      const done = danceGoldAnimationOnComplete;
+      stopDanceGoldCanvasAnimation(kind);
+      done?.();
+      return;
+    }
+
+    drawDanceGoldSpriteFrame(kind, frame);
+    danceGoldAnimationFrame = requestAnimationFrame(draw);
+  };
+  danceGoldAnimationFrame = requestAnimationFrame(draw);
+  return true;
+}
+
+function getDanceStartLoopRestartFrame() {
+  const meta = DANCE_GOLD_SPRITES.start;
+  const maxMs = Math.max(0, Math.floor((meta.frames - 1) * (1000 / meta.fps)));
   const safeMs = Math.max(0, Math.min(danceGoldLoopRestartMs, maxMs));
-  return safeMs / 1000;
+  return Math.floor(safeMs / (1000 / meta.fps));
 }
 
 function startDanceGoldStartLoopPlayback(moveIndex, { requireSongPlaying = true } = {}) {
-  if (!danceYeahStartLoop || !danceYeahStartLoop.src) return false;
   if (requireSongPlaying && !isDanceMediaPlaying()) return false;
+  if (!danceGoldSpriteImages.size) return false;
 
   stopDanceGoldFinishLoop();
   stopDanceStartLoopFirstAudio();
-  const token = ++danceStartLoopCycleToken;
+  danceStartLoopCycleToken += 1;
   danceStartLoopGoldIndex = moveIndex;
-  danceYeahStartLoop.loop = false;
-  danceYeahStartLoop.muted = true;
-  danceYeahStartLoop.volume = 0;
-  danceYeahStartLoop.onended = null;
-  try { danceYeahStartLoop.currentTime = 0; } catch {}
-  danceYeahStartLoop.classList.add("active");
 
-  let firstPass = true;
-  const playSilentRepeat = () => {
-    if (token !== danceStartLoopCycleToken || !danceYeahStartLoop.classList.contains("active")) return;
-    danceYeahStartLoop.muted = true;
-    danceYeahStartLoop.volume = 0;
-    try { danceYeahStartLoop.currentTime = getDanceStartLoopRestartSeconds(); } catch {}
-    danceYeahStartLoop.play().catch(() => {});
-  };
-
-  danceYeahStartLoop.onended = () => {
-    if (token !== danceStartLoopCycleToken) return;
-    if (firstPass) {
-      firstPass = false;
-      stopDanceStartLoopFirstAudio();
-    }
-    playSilentRepeat();
-  };
-
-  // O vídeo fica sempre mudo. O som da primeira volta é separado para nunca repetir junto com o loop.
+  // Visual idêntico ao Start Loop original, mas reproduzido quadro a quadro em canvas.
+  // O áudio continua separado: toca apenas na primeira volta e nunca entra nas repetições.
   playDanceStartLoopFirstAudio();
-  danceYeahStartLoop.play().catch(() => {});
-  return true;
+  return startDanceGoldCanvasAnimation("start", {
+    loop: true,
+    restartFrame: getDanceStartLoopRestartFrame(),
+    onFirstPassEnd: stopDanceStartLoopFirstAudio
+  });
 }
 
 async function previewDanceYeahSequence() {
   applyDanceYeahDevSettings(false);
-  if (!dancePreloadReady || !danceYeahStartLoop?.src || !danceYeahFinishLoop?.src) {
+  if (!dancePreloadReady || !danceGoldSpriteImages.size || !danceYeahFinalVideo?.src) {
     if (danceLabMessage) danceLabMessage.textContent = "Espere o carregamento chegar a 100% antes de testar o YEAH!.";
     return;
   }
@@ -2858,87 +2985,59 @@ async function previewDanceYeahSequence() {
   resetDanceGoldMoveFx(false);
   stopDanceYeahFx();
   startDanceGoldStartLoopPlayback(-999, { requireSongPlaying: false });
-  if (danceLabMessage) danceLabMessage.textContent = `Prévia do YEAH!: 1ª volta do Start Loop com som; repetições mudas a partir de ${danceGoldLoopRestartMs} ms…`;
+  if (danceLabMessage) danceLabMessage.textContent = `Prévia: Start Loop em quadros, 1ª volta com som; loop mudo a partir de ${danceGoldLoopRestartMs} ms…`;
   const previewStartDuration = Math.max(350, Math.min(2500, danceGoldPrepareMs));
   danceYeahPreviewTimer = window.setTimeout(() => {
     danceYeahPreviewTimer = 0;
     stopDanceGoldStartLoop();
-    danceYeahFinishLoop.muted = true;
-    danceYeahFinishLoop.volume = 0;
-    danceYeahFinishLoop.loop = false;
-    try { danceYeahFinishLoop.currentTime = 0; } catch {}
-    danceYeahFinishLoop.classList.add("active");
-    danceYeahFinishLoop.onended = () => {
-      danceYeahFinishLoop.classList.remove("active");
-      scheduleDanceYeahFinalFx();
-      if (danceLabMessage) danceLabMessage.textContent = "Prévia do YEAH! concluída.";
-    };
-    danceYeahFinishLoop.play().catch(() => {
-      danceYeahFinishLoop.classList.remove("active");
-      scheduleDanceYeahFinalFx();
+    startDanceGoldCanvasAnimation("finish", {
+      loop: false,
+      onComplete: () => {
+        scheduleDanceYeahFinalFx();
+        if (danceLabMessage) danceLabMessage.textContent = "Prévia do YEAH! concluída.";
+      }
     });
   }, previewStartDuration);
 }
 
-function ensureDanceYeahImage() {
-  if (danceYeahImage) return danceYeahImage;
-  danceYeahImage = new Image();
-  danceYeahImage.src = "minigames/just-dance/hud/yeah/FinishYeah.png";
-  return danceYeahImage;
-}
-
 function stopDanceYeahFx() {
-  if (danceYeahAnimationFrame) cancelAnimationFrame(danceYeahAnimationFrame);
-  danceYeahAnimationFrame = 0;
-  const ctx = danceYeahCanvas?.getContext("2d");
-  if (ctx && danceYeahCanvas) ctx.clearRect(0,0,danceYeahCanvas.width,danceYeahCanvas.height);
-  danceYeahCanvas?.classList.remove("active");
+  if (!danceYeahFinalVideo) return;
+  try {
+    danceYeahFinalVideo.pause();
+    danceYeahFinalVideo.currentTime = 0;
+  } catch {}
+  danceYeahFinalVideo.onended = null;
+  danceYeahFinalVideo.classList.remove("active");
 }
 
 function playDanceYeahFx() {
   const now = performance.now();
   if (now - danceLastYeahFxAt < 320) return;
   danceLastYeahFxAt = now;
-  const image = ensureDanceYeahImage();
-  if (!danceYeahCanvas) return;
-  playDanceHudSound("yeah");
+  if (!danceYeahFinalVideo?.src) return;
   stopDanceYeahFx();
-  danceYeahCanvas.style.setProperty("--dance-yeah-scale", String(danceYeahScalePct / 100));
-  danceYeahCanvas.classList.add("active");
-  danceYeahStartedAt = performance.now();
-  const ctx = danceYeahCanvas.getContext("2d");
-  const draw = stamp => {
-    if (!ctx || !danceYeahCanvas) return;
-    const elapsed = stamp - danceYeahStartedAt;
-    const frame = Math.floor(elapsed / (1000 / DANCE_YEAH.fps));
-    if (frame >= DANCE_YEAH.frames) { stopDanceYeahFx(); return; }
-    const sx = (frame % DANCE_YEAH.columns) * DANCE_YEAH.frameWidth;
-    const sy = Math.floor(frame / DANCE_YEAH.columns) * DANCE_YEAH.frameHeight;
-    ctx.clearRect(0,0,danceYeahCanvas.width,danceYeahCanvas.height);
-    if (image.complete && image.naturalWidth) ctx.drawImage(image,sx,sy,DANCE_YEAH.frameWidth,DANCE_YEAH.frameHeight,0,0,danceYeahCanvas.width,danceYeahCanvas.height);
-    danceYeahAnimationFrame = requestAnimationFrame(draw);
+  playDanceHudSound("yeah");
+  danceYeahFinalVideo.muted = true;
+  danceYeahFinalVideo.volume = 0;
+  danceYeahFinalVideo.style.setProperty("--dance-yeah-scale", String(danceYeahScalePct / 100));
+  try { danceYeahFinalVideo.currentTime = 0; } catch {}
+  danceYeahFinalVideo.classList.add("active");
+  danceYeahFinalVideo.onended = () => {
+    danceYeahFinalVideo.classList.remove("active");
+    danceYeahFinalVideo.onended = null;
   };
-  danceYeahAnimationFrame = requestAnimationFrame(draw);
+  danceYeahFinalVideo.play().catch(() => danceYeahFinalVideo.classList.remove("active"));
 }
 
-
 function stopDanceGoldStartLoop() {
-  if (!danceYeahStartLoop) return;
   danceStartLoopCycleToken += 1;
   stopDanceStartLoopFirstAudio();
-  danceYeahStartLoop.pause();
-  danceYeahStartLoop.loop = false;
-  danceYeahStartLoop.onended = null;
-  danceYeahStartLoop.muted = true;
-  danceYeahStartLoop.volume = 0;
-  danceYeahStartLoop.classList.remove("active");
+  if (danceGoldAnimationKind === "start") stopDanceGoldCanvasAnimation("start");
   danceStartLoopGoldIndex = -1;
 }
 
 function stopDanceGoldFinishLoop() {
-  if (!danceYeahFinishLoop) return;
-  danceYeahFinishLoop.pause();
-  danceYeahFinishLoop.classList.remove("active");
+  if (danceGoldAnimationKind === "finish") stopDanceGoldCanvasAnimation("finish");
   danceActiveGoldMoveIndex = -1;
 }
 
@@ -2954,38 +3053,31 @@ function resetDanceGoldMoveFx(clearHistory = true) {
 }
 
 function playDanceGoldStartLoop(moveIndex) {
-  if (!danceYeahStartLoop || !danceYeahStartLoop.src || !isDanceMediaPlaying()) return;
-  if (danceStartLoopGoldIndex === moveIndex && danceYeahStartLoop.classList.contains("active")) return;
+  if (!danceGoldSpriteImages.size || !isDanceMediaPlaying()) return;
+  if (danceStartLoopGoldIndex === moveIndex && danceGoldAnimationKind === "start") return;
   startDanceGoldStartLoopPlayback(moveIndex, { requireSongPlaying: true });
 }
 
 function playDanceGoldFinishLoop(moveIndex) {
-  if (!danceYeahFinishLoop || !danceYeahFinishLoop.src || danceFinishedGoldIntroMoves.has(moveIndex)) return;
+  if (!danceGoldSpriteImages.size || danceFinishedGoldIntroMoves.has(moveIndex)) return;
   danceFinishedGoldIntroMoves.add(moveIndex);
   stopDanceGoldStartLoop();
   stopDanceGoldFinishLoop();
   danceActiveGoldMoveIndex = moveIndex;
-  danceYeahFinishLoop.muted = true;
-  danceYeahFinishLoop.volume = 0;
-  danceYeahFinishLoop.loop = false;
-  try { danceYeahFinishLoop.currentTime = 0; } catch {}
-  danceYeahFinishLoop.classList.add("active");
-  danceYeahFinishLoop.onended = () => {
-    danceYeahFinishLoop.classList.remove("active");
-    danceActiveGoldMoveIndex = -1;
-    if (dancePendingYeahAfterFinish) {
-      dancePendingYeahAfterFinish = false;
-      scheduleDanceYeahFinalFx();
+  startDanceGoldCanvasAnimation("finish", {
+    loop: false,
+    onComplete: () => {
+      danceActiveGoldMoveIndex = -1;
+      if (dancePendingYeahAfterFinish) {
+        dancePendingYeahAfterFinish = false;
+        scheduleDanceYeahFinalFx();
+      }
     }
-  };
-  danceYeahFinishLoop.play().catch(() => {
-    danceYeahFinishLoop.classList.remove("active");
-    danceActiveGoldMoveIndex = -1;
   });
 }
 
 function queueDanceYeahFinalFx() {
-  if (danceYeahFinishLoop?.classList.contains("active") && !danceYeahFinishLoop.ended) {
+  if (danceGoldAnimationKind === "finish") {
     dancePendingYeahAfterFinish = true;
     return;
   }
@@ -2995,7 +3087,7 @@ function queueDanceYeahFinalFx() {
 function updateDanceGoldMoveFx(timeMs) {
   if (!danceTestMoves.length) return;
   if (!isDanceMediaPlaying()) {
-    if (danceYeahStartLoop?.classList.contains("active")) stopDanceGoldStartLoop();
+    if (danceGoldAnimationKind === "start") stopDanceGoldStartLoop();
     return;
   }
 
@@ -3032,7 +3124,6 @@ async function initializeDancePlayerSettings() {
   if (danceQualityMode) danceQualityMode.value = danceQualityPreference;
   if (danceSongAudio && danceVolume) danceSongAudio.volume = Number(danceVolume.value || .9);
   preloadDanceFeedbackAssets();
-  ensureDanceYeahImage();
   renderDanceMainHud({ score: 0, stars: 0 });
   updateDancePlayerHudOverlay(1);
   updateDancePlayerControls();

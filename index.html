@@ -505,10 +505,9 @@
           <div id="danceVideoStage" class="dance-video-stage" data-lyrics-size="small" data-video-fit="contain">
             <video id="danceTestVideo" class="dance-test-video" playsinline preload="none" poster="minigames/just-dance/songs/RainOverMe/RainOverMe.jpg" muted></video>
             <audio id="danceSongAudio" preload="none"></audio>
-            <video id="danceYeahStartLoop" class="dance-gold-loop dance-gold-start-loop" playsinline preload="none" muted loop aria-hidden="true"></video>
-            <video id="danceYeahFinishLoop" class="dance-gold-loop dance-gold-finish-loop" playsinline preload="none" muted aria-hidden="true"></video>
+            <canvas id="danceGoldCanvas" class="dance-gold-frame-canvas" width="960" height="540" aria-hidden="true"></canvas>
+            <video id="danceYeahFinalVideo" class="dance-yeah-final-video" playsinline preload="none" muted aria-hidden="true"></video>
             <div id="danceScoreBar" class="dance-score-bar" aria-hidden="true"><img id="danceScoreBarFill" src="minigames/just-dance/hud/images/scorebars/1P_bar.png" alt=""></div>
-            <canvas id="danceYeahCanvas" class="dance-yeah-canvas" width="960" height="540" aria-hidden="true"></canvas>
             <div id="dancePreloadOverlay" class="dance-preload-overlay" role="status" aria-live="polite">
               <div class="dance-preload-card">
                 <div class="dance-preload-spinner" aria-hidden="true"></div>
@@ -589,7 +588,7 @@
               <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="250" max="6000" step="25" value="2300" /><b>ms antes</b></span>
             </label>
             <label>Depois da 1ª volta, repetir a partir de
-              <span class="dance-yeah-dev-input"><input id="danceYeahLoopRestartMs" type="number" min="0" max="1600" step="25" value="0" /><b>ms do vídeo</b></span>
+              <span class="dance-yeah-dev-input"><input id="danceYeahLoopRestartMs" type="number" min="0" max="1600" step="25" value="0" /><b>ms da animação</b></span>
             </label>
             <label>Finish Loop
               <span class="dance-yeah-dev-input"><input id="danceYeahFinishOffsetMs" type="number" min="-1500" max="1500" step="25" value="0" /><b>ms do Gold</b></span>
@@ -606,7 +605,7 @@
             <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar sequência</button>
             <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrão</button>
           </div>
-          <p>Use este painel para acertar visualmente o Gold Move. O <b>Start Loop toca a primeira volta com som</b>; quando termina, as repetições ficam mudas e começam no ponto configurado em <b>“repetir a partir de”</b>. Valor negativo no <b>Finish Loop</b> faz ele começar antes do movimento; positivo começa depois. O Finish Loop continua mudo. As configurações ficam salvas neste navegador.</p>
+          <p>Use este painel para acertar visualmente o Gold Move. <b>Start Loop e Finish Loop não usam mais vídeo:</b> os quadros originais são reproduzidos diretamente no canvas, evitando a quebra do fluxo ao reiniciar um MP4. O Start toca a primeira volta com som; depois repete mudo a partir do ponto configurado. O <b>FinishYeah</b> usa o MP4 original somente uma vez no final, sem loop, enquanto o áudio continua separado para não interferir na música.</p>
         </div>
         <div class="dance-score-rules" aria-label="Sistema de pontuação">
           <div class="dance-judgement-legend">
@@ -803,7 +802,7 @@
       window.dispatchEvent(new CustomEvent("dice3d-error", { detail: String(error?.message || error) }));
     });
   </script>
-  <script src="script.js?v=034-yeah-loop-audio-config" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…')"></script>
+  <script src="script.js?v=035-yeah-canvas-frames-final-video" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…')"></script>
   <span class="version-badge" data-version>V. 0.2.3 (Teste)</span>
 </body>
 </html>
