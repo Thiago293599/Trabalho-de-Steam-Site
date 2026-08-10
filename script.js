@@ -181,6 +181,9 @@ const danceSyncResetBtn = document.getElementById("danceSyncResetBtn");
 const dancePlayerShell = document.getElementById("dancePlayerShell");
 const dancePlayerControls = dancePlayerShell?.querySelector(".dance-player-controls") || null;
 const danceVideoStage = document.getElementById("danceVideoStage");
+const danceIpkGoldStageFx = document.getElementById("danceIpkGoldStageFx");
+const danceIpkGoldStageImage = document.getElementById("danceIpkGoldStageImage");
+const danceIpkGoldStageFlare = document.getElementById("danceIpkGoldStageFlare");
 const danceSongAudio = document.getElementById("danceSongAudio");
 const danceQualityMode = document.getElementById("danceQualityMode");
 const danceQualityActive = document.getElementById("danceQualityActive");
@@ -406,7 +409,10 @@ const DANCE_CRITICAL_IMAGE_SOURCES = [
   "minigames/just-dance/hud/ipk-base/textures/bkg_player_new.png",
   "minigames/just-dance/hud/ipk-base/textures/bkg_player_new_outline.png",
   "minigames/just-dance/hud/ipk-base/textures/hud_players_line.png",
-  "minigames/just-dance/hud/ipk-base/textures/line_linear_gradient_mask.png"
+  "minigames/just-dance/hud/ipk-base/textures/line_linear_gradient_mask.png",
+  `${DANCE_IPK_GOLD_BASE}/feedback_gold.png`,
+  `${DANCE_IPK_GOLD_BASE}/feedback_gold_flare.png`,
+  `${DANCE_IPK_GOLD_BASE}/feedback_gold_bad.png`
 ];
 const DANCE_QUALITY_LABELS = { low: "Low • 360p", medium: "Medium • 720p", high: "High • 1080p" };
 const DANCE_SCORING_BASE = "minigames/just-dance/hud/scoring";
@@ -3168,10 +3174,40 @@ function playDanceIpkGoldImpactAudio() {
   } catch {}
 }
 
+let danceIpkGoldStageTimer = 0;
+let danceIpkGoldLastStageFxAt = 0;
+
+function hideDanceIpkGoldStageFx() {
+  if (danceIpkGoldStageTimer) window.clearTimeout(danceIpkGoldStageTimer);
+  danceIpkGoldStageTimer = 0;
+  danceIpkGoldStageFx?.classList.remove("active");
+}
+
+function showDanceIpkGoldStageFx(kind = "yeah") {
+  if (!danceIpkGoldStageFx || !danceIpkGoldStageImage || !danceIpkGoldStageFlare) return false;
+  const now = performance.now();
+  if (now - danceIpkGoldLastStageFxAt < 220) return false;
+  danceIpkGoldLastStageFxAt = now;
+  const isMiss = kind === "miss";
+  danceIpkGoldStageImage.src = `${DANCE_IPK_GOLD_BASE}/${isMiss ? "feedback_gold_bad.png" : "feedback_gold.png"}`;
+  danceIpkGoldStageImage.alt = isMiss ? "X" : "YEAH!";
+  danceIpkGoldStageFlare.src = `${DANCE_IPK_GOLD_BASE}/feedback_gold_flare.png`;
+  danceIpkGoldStageFx.classList.toggle("miss", isMiss);
+  danceIpkGoldStageFx.classList.remove("active");
+  void danceIpkGoldStageFx.offsetWidth;
+  danceIpkGoldStageFx.classList.add("active");
+  if (danceIpkGoldStageTimer) window.clearTimeout(danceIpkGoldStageTimer);
+  danceIpkGoldStageTimer = window.setTimeout(() => {
+    danceIpkGoldStageTimer = 0;
+    danceIpkGoldStageFx?.classList.remove("active");
+  }, isMiss ? 760 : 1220);
+  return true;
+}
+
 function renderDanceYeahDevSettings() {
   if (danceYeahPrepareMsInput) danceYeahPrepareMsInput.value = String(danceGoldPrepareMs);
   if (danceYeahFinishOffsetMsInput) danceYeahFinishOffsetMsInput.value = String(danceGoldFinishOffsetMs);
-  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `IPK nativo • Pré -${danceGoldPrepareMs} ms • Impacto ${formatDanceSyncOffset(danceGoldFinishOffsetMs)} • tape 69/60 = 1,15 s`;
+  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `IPK nativo • Pré -${danceGoldPrepareMs} ms • Impacto ${formatDanceSyncOffset(danceGoldFinishOffsetMs)} • YEAH visual 1,15 s + flare`;
 }
 
 function saveDanceYeahDevSettings() {
@@ -3206,14 +3242,21 @@ function resetDanceYeahDevSettings() {
 
 function resetDanceGoldMoveFx(clearHistory = true) {
   stopDanceIpkGoldIntroAudio();
+  hideDanceIpkGoldStageFx();
   if (danceYeahPreviewTimer) window.clearTimeout(danceYeahPreviewTimer);
   danceYeahPreviewTimer = 0;
   if (clearHistory) danceIpkGoldIntroMoves.clear();
 }
 
-function queueDanceYeahFinalFx() { playDanceIpkGoldImpactAudio(); }
-function stopDanceYeahFx() {}
-function playDanceYeahFx() { playDanceIpkGoldImpactAudio(); }
+function queueDanceYeahFinalFx() {
+  showDanceIpkGoldStageFx("yeah");
+  playDanceIpkGoldImpactAudio();
+}
+function stopDanceYeahFx() { hideDanceIpkGoldStageFx(); }
+function playDanceYeahFx() {
+  showDanceIpkGoldStageFx("yeah");
+  playDanceIpkGoldImpactAudio();
+}
 function stopDanceGoldStartLoop() { stopDanceIpkGoldIntroAudio(); }
 function stopDanceGoldFinishLoop() {}
 function playDanceGoldStartLoop() {}
@@ -3248,6 +3291,7 @@ function previewDanceYeahSequence() {
     danceYeahPreviewTimer = 0;
     const slot = danceVideoJudgements?.querySelector(".dance-video-player-judge");
     const playerId = slot?.dataset?.playerId;
+    showDanceIpkGoldStageFx("yeah");
     if (playerId) showDanceVideoJudgement(playerId, "YEAH", true);
     else playDanceIpkGoldImpactAudio();
     if (danceLabMessage) danceLabMessage.textContent = "Prévia IPK concluída: feedback_gold + hud_goldmove.";
@@ -3377,7 +3421,13 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
   void feedback.offsetWidth;
   feedback.classList.add("active");
 
-  if (String(judgement || "").toUpperCase().startsWith("YEAH")) playDanceIpkGoldImpactAudio();
+  const normalizedJudgement = String(judgement || "").toUpperCase();
+  if (normalizedJudgement.startsWith("YEAH")) {
+    showDanceIpkGoldStageFx("yeah");
+    playDanceIpkGoldImpactAudio();
+  } else if (goldMove && normalizedJudgement === "X") {
+    showDanceIpkGoldStageFx("miss");
+  }
 }
 
 function pictoAtlasPosition(name) {

@@ -2665,3 +2665,60 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 }
 /* Elementos antigos de vídeo/canvas do Gold Move ficam definitivamente desativados. */
 .dance-gold-frame-canvas,.dance-yeah-final-video,.dance-gold-loop{display:none!important}
+
+
+/* ---------- Gold Move IPK visual fix ---------- */
+/* A versão anterior tocava o áudio do IPK, mas não tinha um ator visual de palco.
+   Este ator usa diretamente feedback_gold + feedback_gold_flare do patch_pc.ipk. */
+.dance-ipk-gold-stage-fx{
+  position:absolute;inset:0;z-index:10;overflow:hidden;pointer-events:none;
+  opacity:0;visibility:hidden;isolation:isolate;
+}
+.dance-ipk-gold-stage-fx.active{opacity:1;visibility:visible}
+.dance-ipk-gold-screen-flash{
+  position:absolute;inset:-8%;z-index:0;opacity:0;
+  background:radial-gradient(circle at 50% 38%,rgba(255,244,135,.62) 0%,rgba(255,190,34,.28) 28%,rgba(255,132,0,.08) 52%,transparent 76%);
+  mix-blend-mode:screen;
+}
+.dance-ipk-gold-stage-flare,.dance-ipk-gold-stage-image{
+  position:absolute;left:50%;top:42%;max-width:none;pointer-events:none;will-change:transform,opacity;
+  transform-origin:50% 50%;
+}
+.dance-ipk-gold-stage-flare{
+  z-index:1;width:58%;height:auto;mix-blend-mode:screen;opacity:0;
+}
+.dance-ipk-gold-stage-image{
+  z-index:2;width:46%;height:auto;filter:drop-shadow(0 calc(4px * var(--jd-ui-scale)) calc(8px * var(--jd-ui-scale)) rgba(0,0,0,.48));opacity:0;
+}
+.dance-ipk-gold-stage-fx.active .dance-ipk-gold-screen-flash{animation:jdIpkGoldStageFlash 1.15s ease-out both}
+.dance-ipk-gold-stage-fx.active .dance-ipk-gold-stage-image{animation:jdIpkGoldStageImage 1.15s linear both}
+.dance-ipk-gold-stage-fx.active .dance-ipk-gold-stage-flare{animation:jdIpkGoldStageFlare 1.15s linear both}
+@keyframes jdIpkGoldStageImage{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.95) rotate(10deg)}
+  8.6957%{opacity:1;transform:translate(-50%,-50%) scale(1.10) rotate(10deg)}
+  26.087%{opacity:1;transform:translate(-50%,-50%) scale(1.075) rotate(10deg)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.95) rotate(10deg)}
+}
+@keyframes jdIpkGoldStageFlare{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.82) rotate(0deg)}
+  8.6957%{opacity:1;transform:translate(-50%,-50%) scale(1.10) rotate(0deg)}
+  26.087%{opacity:.92;transform:translate(-50%,-50%) scale(1.02) rotate(0deg)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.88) rotate(0deg)}
+}
+@keyframes jdIpkGoldStageFlash{
+  0%{opacity:.9;transform:scale(.86)}
+  16%{opacity:.56;transform:scale(1.02)}
+  100%{opacity:0;transform:scale(1.16)}
+}
+.dance-ipk-gold-stage-fx.miss .dance-ipk-gold-stage-image{width:18%;animation:jdIpkGoldStageMiss .64s ease-out both}
+.dance-ipk-gold-stage-fx.miss .dance-ipk-gold-stage-flare{width:30%;animation-duration:.64s;filter:hue-rotate(235deg) saturate(1.35)}
+.dance-ipk-gold-stage-fx.miss .dance-ipk-gold-screen-flash{animation-duration:.64s;filter:hue-rotate(235deg)}
+@keyframes jdIpkGoldStageMiss{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.55) rotate(10deg)}
+  18%{opacity:1;transform:translate(-50%,-50%) scale(.72) rotate(10deg)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.58) rotate(10deg)}
+}
+@media(max-width:600px){
+  .dance-ipk-gold-stage-image{width:54%}
+  .dance-ipk-gold-stage-flare{width:68%}
+}
