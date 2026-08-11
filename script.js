@@ -3681,27 +3681,137 @@ function resetLocalDanceJudging() {
   resetDanceGoldMoveFx(true);
 }
 
+function makeDanceJudgeStats() {
+  return {
+    count: 0,
+    sum: 0,
+    sumSquares: 0,
+    peak: 0,
+    active: 0,
+    highMotion: 0,
+    veryHighMotion: 0,
+    rotationSum: 0,
+    rotationPeak: 0,
+    directionSamples: 0,
+    directionTransitions: 0,
+    directionChaos: 0,
+    hardReversals: 0,
+    directionSumX: 0,
+    directionSumY: 0,
+    directionSumZ: 0,
+    previousDirection: null,
+    previousGravityVector: null
+  };
+}
+
+function danceJudgeVectorMagnitude(vector) {
+  const x = Number(vector?.x || 0);
+  const y = Number(vector?.y || 0);
+  const z = Number(vector?.z || 0);
+  return Math.sqrt(x * x + y * y + z * z);
+}
+
+function danceJudgeUnitVector(vector) {
+  const magnitude = danceJudgeVectorMagnitude(vector);
+  if (magnitude < 0.0001) return null;
+  return {
+    x: Number(vector?.x || 0) / magnitude,
+    y: Number(vector?.y || 0) / magnitude,
+    z: Number(vector?.z || 0) / magnitude
+  };
+}
+
+function danceJudgeBandScore(value, outerLow, innerLow, innerHigh, outerHigh) {
+  const v = Number(value || 0);
+  if (v <= outerLow || v >= outerHigh) return 0;
+  if (v >= innerLow && v <= innerHigh) return 1;
+  if (v < innerLow) return Math.max(0, Math.min(1, (v - outerLow) / Math.max(0.0001, innerLow - outerLow)));
+  return Math.max(0, Math.min(1, (outerHigh - v) / Math.max(0.0001, outerHigh - innerHigh)));
+}
+
+function danceJudgeIsRealShakeMove(move) {
+  return /(?:^|[_-])shake(?:$|[_-])/i.test(String(move?.name || ""));
+}
+
 function beginDanceMoveJudging(index) {
   if (index < 0 || danceLocallyJudgedMoves.has(index)) return;
   danceJudgeActiveMoveIndex = index;
   danceJudgeAccumulators = new Map();
   for (const player of devSensorState?.players || []) {
-    danceJudgeAccumulators.set(player.id, { count: 0, sum: 0, peak: 0, active: 0, rotationSum: 0, rotationPeak: 0 });
+    danceJudgeAccumulators.set(player.id, makeDanceJudgeStats());
   }
 }
 
 function provisionalDanceJudgement(stats, move = null) {
-  if (!stats || stats.count < 2) return { judgement: "X", quality: 0 };
-  const avg = stats.sum / Math.max(1, stats.count);
-  const coverage = stats.active / Math.max(1, stats.count);
-  const avgRotation = stats.rotationSum / Math.max(1, stats.count);
-  const avgQ = Math.max(0, Math.min(1, (avg - 0.025) / 0.30));
-  const peakQ = Math.max(0, Math.min(1, (stats.peak - 0.06) / 0.48));
-  const rotationQ = Math.max(0, Math.min(1, avgRotation / 230));
-  const quality = Math.max(0, Math.min(1, avgQ * 0.38 + peakQ * 0.30 + coverage * 0.18 + rotationQ * 0.14));
+  if (!stats || stats.count < 4) return { judgement: "X", quality: 0 };
+
+  const count = Math.max(1, stats.count);
+  const avg = stats.sum / count;
+  const coverage = stats.active / count;
+  const avgRotation = stats.rotationSum / count;
+  const variance = Math.max(0, stats.sumSquares / count - avg * avg);
+  const variation = Math.sqrt(variance);
+  const highMotionRatio = stats.highMotion / count;
+  const veryHighMotionRatio = stats.veryHighMotion / count;
+  const transitions = Math.max(1, stats.directionTransitions);
+  const reversalRate = stats.hardReversals / transitions;
+  const chaosRate = Math.max(0, Math.min(1, stats.directionChaos / transitions));
+  const coherence = stats.directionSamples > 0
+    ? Math.max(0, Math.min(1, Math.sqrt(
+        stats.directionSumX * stats.directionSumX +
+        stats.directionSumY * stats.directionSumY +
+        stats.directionSumZ * stats.directionSumZ
+      ) / stats.directionSamples))
+    : 0.55;
+
+  let quality = 0;
+
+  if (danceJudgeIsRealShakeMove(move)) {
+    // Alguns mapas possuem um movimento Shake real. Neles, reversões rápidas fazem parte da coreografia.
+    const avgQ = danceJudgeBandScore(avg, 0.035, 0.13, 0.68, 1.01);
+    const peakQ = danceJudgeBandScore(stats.peak, 0.08, 0.30, 0.90, 1.01);
+    const coverageQ = danceJudgeBandScore(coverage, 0.08, 0.34, 0.95, 1.01);
+    const rotationQ = danceJudgeBandScore(avgRotation, 0, 35, 600, 1200);
+    const variationQ = danceJudgeBandScore(variation, 0.005, 0.035, 0.42, 0.75);
+    quality = avgQ * 0.30 + peakQ * 0.24 + coverageQ * 0.24 + rotationQ * 0.12 + variationQ * 0.10;
+  } else {
+    // Movimento normal: procura um gesto controlado, não apenas energia bruta.
+    const avgQ = danceJudgeBandScore(avg, 0.02, 0.09, 0.42, 0.80);
+    const peakQ = danceJudgeBandScore(stats.peak, 0.06, 0.24, 0.78, 1.01);
+    const coverageQ = danceJudgeBandScore(coverage, 0.04, 0.20, 0.78, 1.01);
+    const rotationQ = danceJudgeBandScore(avgRotation, 0, 20, 320, 850);
+    const variationQ = danceJudgeBandScore(variation, 0.003, 0.025, 0.28, 0.60);
+    const directionQ = Math.max(0, Math.min(1, coherence * 0.42 + (1 - chaosRate) * 0.58));
+
+    const baseQuality =
+      avgQ * 0.27 +
+      peakQ * 0.22 +
+      coverageQ * 0.19 +
+      rotationQ * 0.10 +
+      variationQ * 0.08 +
+      directionQ * 0.14;
+
+    // Anti-shake: alternar o celular rapidamente em sentidos opostos deixa de ser um atalho para PERFECT.
+    const reversalPenalty = Math.max(0, Math.min(1, (reversalRate - 0.18) / 0.48));
+    const chaosPenalty = Math.max(0, Math.min(1, (chaosRate - 0.52) / 0.40));
+    const sustainedPenalty = Math.max(0, Math.min(1, (highMotionRatio - 0.56) / 0.40));
+    const extremePenalty = Math.max(0, Math.min(1, (veryHighMotionRatio - 0.24) / 0.56));
+    const antiShakeMultiplier = Math.max(
+      0.16,
+      1 - reversalPenalty * 0.48 - chaosPenalty * 0.25 - sustainedPenalty * 0.34 - extremePenalty * 0.22
+    );
+
+    quality = baseQuality * antiShakeMultiplier;
+
+    // Se o padrão for claramente "chacoalhar sem parar", limita o resultado mesmo com muita força.
+    if (reversalRate >= 0.52 && coverage >= 0.70) quality = Math.min(quality, 0.49);
+    if ((reversalRate >= 0.68 && coverage >= 0.78) || highMotionRatio >= 0.93) quality = Math.min(quality, 0.34);
+  }
+
+  quality = Math.max(0, Math.min(1, quality));
   const roundedQuality = Math.round(quality * 1000) / 1000;
-  if (move?.goldMove) return { judgement: quality >= 0.45 ? "YEAH" : "X", quality: roundedQuality };
-  const judgement = quality >= 0.78 ? "PERFECT" : quality >= 0.62 ? "SUPER" : quality >= 0.45 ? "GOOD" : quality >= 0.24 ? "OK" : "X";
+  if (move?.goldMove) return { judgement: quality >= 0.55 ? "YEAH" : "X", quality: roundedQuality };
+  const judgement = quality >= 0.82 ? "PERFECT" : quality >= 0.66 ? "SUPER" : quality >= 0.48 ? "GOOD" : quality >= 0.28 ? "OK" : "X";
   return { judgement, quality: roundedQuality };
 }
 
@@ -3750,7 +3860,7 @@ function finalizeDanceMoveJudging(index) {
   if (!move || !playersNow.length) return;
 
   const results = playersNow.map(player => {
-    const stats = danceJudgeAccumulators.get(player.id) || { count: 0, sum: 0, peak: 0, active: 0, rotationSum: 0, rotationPeak: 0 };
+    const stats = danceJudgeAccumulators.get(player.id) || makeDanceJudgeStats();
     return { playerId: player.id, ...provisionalDanceJudgement(stats, move) };
   });
 
@@ -3799,16 +3909,68 @@ function collectDanceJudgementSample(payload) {
   if (!danceTestVideo || !isDanceMediaPlaying() || !devSensorModeEnabled || !danceTestMoves.length) return;
   syncDanceMoveJudging();
   if (danceJudgeActiveMoveIndex < 0) return;
-  const stats = danceJudgeAccumulators.get(payload.playerId) || { count: 0, sum: 0, peak: 0, active: 0, rotationSum: 0, rotationPeak: 0 };
+
+  const stats = danceJudgeAccumulators.get(payload.playerId) || makeDanceJudgeStats();
+  const sample = payload.sample || {};
   const intensity = Math.max(0, Math.min(1, Number(payload.intensity || 0)));
-  const rotationRate = payload.sample?.rotationRate || {};
-  const rotation = Math.sqrt((Number(rotationRate.x) || 0) ** 2 + (Number(rotationRate.y) || 0) ** 2 + (Number(rotationRate.z) || 0) ** 2);
+  const rotationRate = sample.rotationRate || {};
+  const rotation = danceJudgeVectorMagnitude(rotationRate);
+
   stats.count += 1;
   stats.sum += intensity;
+  stats.sumSquares += intensity * intensity;
   stats.peak = Math.max(stats.peak, intensity);
   if (intensity >= 0.08 || rotation >= 35) stats.active += 1;
+  if (intensity >= 0.68 || rotation >= 600) stats.highMotion += 1;
+  if (intensity >= 0.84 || rotation >= 900) stats.veryHighMotion += 1;
   stats.rotationSum += rotation;
   stats.rotationPeak = Math.max(stats.rotationPeak, rotation);
+
+  // Prefere aceleração linear. Quando o navegador não fornece, usa a mudança da aceleração com gravidade.
+  const linear = {
+    x: Number(sample.acceleration?.x || 0),
+    y: Number(sample.acceleration?.y || 0),
+    z: Number(sample.acceleration?.z || 0)
+  };
+  const gravity = {
+    x: Number(sample.accelerationIncludingGravity?.x || 0),
+    y: Number(sample.accelerationIncludingGravity?.y || 0),
+    z: Number(sample.accelerationIncludingGravity?.z || 0)
+  };
+
+  let motionVector = linear;
+  if (danceJudgeVectorMagnitude(linear) < 0.08 && stats.previousGravityVector) {
+    motionVector = {
+      x: gravity.x - stats.previousGravityVector.x,
+      y: gravity.y - stats.previousGravityVector.y,
+      z: gravity.z - stats.previousGravityVector.z
+    };
+  }
+  stats.previousGravityVector = gravity;
+
+  if (danceJudgeVectorMagnitude(motionVector) >= 0.16) {
+    const direction = danceJudgeUnitVector(motionVector);
+    if (direction) {
+      stats.directionSamples += 1;
+      stats.directionSumX += direction.x;
+      stats.directionSumY += direction.y;
+      stats.directionSumZ += direction.z;
+
+      if (stats.previousDirection) {
+        const dot = Math.max(-1, Math.min(1,
+          direction.x * stats.previousDirection.x +
+          direction.y * stats.previousDirection.y +
+          direction.z * stats.previousDirection.z
+        ));
+        stats.directionTransitions += 1;
+        // Mudanças suaves quase não contam; inversões rápidas pesam bastante.
+        stats.directionChaos += Math.max(0, Math.min(1, (0.45 - dot) / 1.45));
+        if (dot <= -0.32) stats.hardReversals += 1;
+      }
+      stats.previousDirection = direction;
+    }
+  }
+
   danceJudgeAccumulators.set(payload.playerId, stats);
 }
 
