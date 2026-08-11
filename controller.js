@@ -651,7 +651,7 @@ function applyState(nextState) {
     mobileRollBtn.disabled = true;
     mobileDeckArea.classList.add("hidden");
     turnKicker.textContent = "Servidor desatualizado";
-    turnTitle.textContent = "Atualize o servidor do PC";
+    turnTitle.textContent = "Atualize o servidor online";
     turnDescription.textContent = "As cartas e os turnos deste controle exigem a versão nova do SERVIDOR_PC.";
     return;
   }
@@ -727,12 +727,12 @@ async function verifyControllerServer() {
     );
 
     if (!compatible) {
-      showMessage(joinMessage, "O servidor do PC está desatualizado. Substitua a pasta SERVIDOR_PC por esta versão e execute INICIAR_TUDO.bat novamente.");
+      showMessage(joinMessage, "O servidor online está desatualizado. Atualize a implantação do servidor para esta versão.");
       return false;
     }
     return true;
   } catch {
-    showMessage(joinMessage, "Não foi possível acessar o servidor do PC. Confirme que INICIAR_TUDO.bat e o Tailscale Funnel estão ativos.");
+    showMessage(joinMessage, "Não foi possível acessar o servidor online. Aguarde o serviço iniciar e tente novamente.");
     return false;
   } finally {
     clearTimeout(timer);

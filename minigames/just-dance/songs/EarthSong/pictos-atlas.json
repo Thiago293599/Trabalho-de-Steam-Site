@@ -1,0 +1,144 @@
+{
+  "imageSize": {
+    "width": 256,
+    "height": 256
+  },
+  "images": {
+    "earthsong_bras_genou": [
+      0,
+      0
+    ],
+    "earthsong_poing_terre": [
+      256,
+      0
+    ],
+    "earthsong_bras_sol": [
+      512,
+      0
+    ],
+    "earthsong_jette": [
+      768,
+      0
+    ],
+    "earthsong_lever": [
+      1024,
+      0
+    ],
+    "earthsong_poitrine_l": [
+      1280,
+      0
+    ],
+    "earthsong_spin": [
+      0,
+      256
+    ],
+    "earthsong_bras_u": [
+      256,
+      256
+    ],
+    "earthsong_bras_down": [
+      512,
+      256
+    ],
+    "earthsong_allemand": [
+      768,
+      256
+    ],
+    "earthsong_pointer_sol": [
+      1024,
+      256
+    ],
+    "earthsong_poitrine_r": [
+      1280,
+      256
+    ],
+    "earthsong_main": [
+      0,
+      512
+    ],
+    "earthsong_bras": [
+      256,
+      512
+    ],
+    "earthsong_ski_l": [
+      512,
+      512
+    ],
+    "earthsong_saut_r": [
+      768,
+      512
+    ],
+    "earthsong_saut_l": [
+      1024,
+      512
+    ],
+    "earthsong_bras_tendu": [
+      1280,
+      512
+    ],
+    "earthsong_poing_lever_l": [
+      0,
+      768
+    ],
+    "earthsong_poing_lever_r": [
+      256,
+      768
+    ],
+    "earthsong_ski_r": [
+      512,
+      768
+    ],
+    "earthsong_poing_l": [
+      768,
+      768
+    ],
+    "earthsong_poing_r": [
+      1024,
+      768
+    ],
+    "earthsong_poing_f": [
+      1280,
+      768
+    ],
+    "earthsong_main_r": [
+      0,
+      1024
+    ],
+    "earthsong_genou_tape": [
+      256,
+      1024
+    ],
+    "earthsong_genou_moi": [
+      512,
+      1024
+    ],
+    "earthsong_main_l": [
+      768,
+      1024
+    ],
+    "earthsong_pose_fin": [
+      1024,
+      1024
+    ],
+    "earthsong_poing_lever_f": [
+      1280,
+      1024
+    ],
+    "earthsong_shake": [
+      0,
+      1280
+    ],
+    "earthsong_kiss": [
+      256,
+      1280
+    ],
+    "earthsong_a_genou": [
+      512,
+      1280
+    ],
+    "earthsong__ski_r": [
+      768,
+      1280
+    ]
+  }
+}

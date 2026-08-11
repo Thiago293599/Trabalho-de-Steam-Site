@@ -1,0 +1,1264 @@
+{
+  "MapName": "EarthSong",
+  "JDVersion": 2011,
+  "OriginalJDVersion": 2011,
+  "Artist": "Michael Jackson",
+  "Title": "Earth Song",
+  "Credits": "Performed by Michael Jackson. Words and music by Michael Jackson. © 1995 Mijac Music (BMI). All rights administered by Warner-Tamerlane Publishing Corp. All rights reserved. Courtesy of MJJ Productions Inc./Epic Records. By arrangement with Sony Music Licensing.",
+  "NumCoach": 1,
+  "CountInProgression": 1,
+  "DancerName": "Unknown Dancer",
+  "LocaleID": 4294967295,
+  "MojoValue": 0,
+  "Mode": 6,
+  "Status": 3,
+  "LyricsType": 0,
+  "BackgroundType": 0,
+  "Difficulty": 1,
+  "DefaultColors": {
+    "lyrics": "0xFFFFFFFF",
+    "theme": "0xFFFFFFFF",
+    "songColor_1A": "0xFF202020",
+    "songColor_1B": "0xFF101010",
+    "songColor_2A": "0xFF404040",
+    "songColor_2B": "0xFF202020"
+  },
+  "lyricsColor": "#FFFFFF",
+  "videoOffset": 868,
+  "beats": [
+    868,
+    1735,
+    2603,
+    3470,
+    4338,
+    5205,
+    6073,
+    6940,
+    7808,
+    8676,
+    9543,
+    10411,
+    11278,
+    12146,
+    13013,
+    13881,
+    14748,
+    15616,
+    16483,
+    17351,
+    18219,
+    19086,
+    19954,
+    20821,
+    21689,
+    22556,
+    23424,
+    24291,
+    25159,
+    26027,
+    26894,
+    27762,
+    28629,
+    29497,
+    30364,
+    31232,
+    32099,
+    32967,
+    33834,
+    34702,
+    35570,
+    36437,
+    37305,
+    38172,
+    39040,
+    39907,
+    40775,
+    41642,
+    42510,
+    43378,
+    44245,
+    45113,
+    45980,
+    46848,
+    47715,
+    48583,
+    49450,
+    50318,
+    51185,
+    52053,
+    52921,
+    53788,
+    54656,
+    55523,
+    56391,
+    57258,
+    58126,
+    58993,
+    59861,
+    60729,
+    61596,
+    62464,
+    63331,
+    64199,
+    65066,
+    65934,
+    66801,
+    67669,
+    68537,
+    69404,
+    70272,
+    71139,
+    72007,
+    72874,
+    73742,
+    74609,
+    75477,
+    76344,
+    77212,
+    78080,
+    78947,
+    79815,
+    80682,
+    81550,
+    82417,
+    83285,
+    84152,
+    85020,
+    85888,
+    86755,
+    87623,
+    88490,
+    89358,
+    90225,
+    91093,
+    91960,
+    92828,
+    93696,
+    94563,
+    95431,
+    96298,
+    97166,
+    98033,
+    98901,
+    99768,
+    100636,
+    101503,
+    102371,
+    103239,
+    104106,
+    104974,
+    105841,
+    106709,
+    107576,
+    108444,
+    109311,
+    110179,
+    111047,
+    111914,
+    112782,
+    113649,
+    114517,
+    115384,
+    116266,
+    117119,
+    117987,
+    118854,
+    119722,
+    120590,
+    121469,
+    122325,
+    123192,
+    124060,
+    124940,
+    125795,
+    126662,
+    127530,
+    128398,
+    129265,
+    130133,
+    130986,
+    131868,
+    132735,
+    133603,
+    134470,
+    135338,
+    136205,
+    137086,
+    137941,
+    138808,
+    139676,
+    140543,
+    141398,
+    142278,
+    143146,
+    144013,
+    144881,
+    145749,
+    146616,
+    147484,
+    148351,
+    149230,
+    150092,
+    150944,
+    151821,
+    152701,
+    153571,
+    154424,
+    155292,
+    156164,
+    157027,
+    157894,
+    158762,
+    159632,
+    160497,
+    161364,
+    162232,
+    163108,
+    163967,
+    164843,
+    165702,
+    166570,
+    167437,
+    168305,
+    169172,
+    170050,
+    170908,
+    171775,
+    172643,
+    173510,
+    174378,
+    175245,
+    176113,
+    176980,
+    177848,
+    178723,
+    179593,
+    180457,
+    181318,
+    182186,
+    183053,
+    183921,
+    184788,
+    185656,
+    186523,
+    187391,
+    188259,
+    189126,
+    189994,
+    190871,
+    191729,
+    192608,
+    193464,
+    194334,
+    195199,
+    196067,
+    196934,
+    197807,
+    198676,
+    199546,
+    200404,
+    201282,
+    202139,
+    203007,
+    203874,
+    204753,
+    205610,
+    206477,
+    207345,
+    208217,
+    209090,
+    209956,
+    210815,
+    211691,
+    212559,
+    213418,
+    214285,
+    215162,
+    216020,
+    216892,
+    217755,
+    218635,
+    219490,
+    220364,
+    221225,
+    222100,
+    222961,
+    223842,
+    224696,
+    225575,
+    226446,
+    227321,
+    228166,
+    229042,
+    229901,
+    230777,
+    231645,
+    232513,
+    233382,
+    234262,
+    235120,
+    235988,
+    236856,
+    237723,
+    238591,
+    239458,
+    240326,
+    241193,
+    242061,
+    242928,
+    243796,
+    244664,
+    245531,
+    246410,
+    247266,
+    248134,
+    249001,
+    249869,
+    250736,
+    251604,
+    252471,
+    253339,
+    254207,
+    255074,
+    255942,
+    256809,
+    257677,
+    258544,
+    259412,
+    260279,
+    261147,
+    262015,
+    262882,
+    263750,
+    264617,
+    265485,
+    266352,
+    267220,
+    268087,
+    268955,
+    269822,
+    270690,
+    271558,
+    272434,
+    273293,
+    274168,
+    275028,
+    275906,
+    276789,
+    277657,
+    278524,
+    279392,
+    280259,
+    281127,
+    281994,
+    282862,
+    283729,
+    284597,
+    285465,
+    286332,
+    287200,
+    288067,
+    288935,
+    289802,
+    290670,
+    291537,
+    292405,
+    293273,
+    294140,
+    295008,
+    295875,
+    296743,
+    297610,
+    298478,
+    299345,
+    300213,
+    301080,
+    301948,
+    302816,
+    303683,
+    304551,
+    305418,
+    306286,
+    307153,
+    308021,
+    308888,
+    309756,
+    310624,
+    311491,
+    312359,
+    313226,
+    314094,
+    314961,
+    315829,
+    316696,
+    317564,
+    318431,
+    319299,
+    320167,
+    321034,
+    321902,
+    322769,
+    323637,
+    324504
+  ],
+  "lyrics": [
+    {
+      "time": 20616,
+      "duration": 2939,
+      "text": "What About Sunrise",
+      "isLineEnding": 1
+    },
+    {
+      "time": 24048,
+      "duration": 2404,
+      "text": "What About Rain",
+      "isLineEnding": 1
+    },
+    {
+      "time": 27603,
+      "duration": 2121,
+      "text": "What About All The Things",
+      "isLineEnding": 1
+    },
+    {
+      "time": 29836,
+      "duration": 3103,
+      "text": "That You Said We Were To Gain...",
+      "isLineEnding": 1
+    },
+    {
+      "time": 34550,
+      "duration": 2891,
+      "text": "What About Killing Fields",
+      "isLineEnding": 1
+    },
+    {
+      "time": 38112,
+      "duration": 1814,
+      "text": "Is There A Time",
+      "isLineEnding": 1
+    },
+    {
+      "time": 41465,
+      "duration": 2212,
+      "text": "What About All The Things",
+      "isLineEnding": 1
+    },
+    {
+      "time": 43728,
+      "duration": 2812,
+      "text": "That You Said Was Yours And Mine...",
+      "isLineEnding": 1
+    },
+    {
+      "time": 47298,
+      "duration": 3287,
+      "text": "Did You Ever Stop To Notice",
+      "isLineEnding": 1
+    },
+    {
+      "time": 50674,
+      "duration": 2812,
+      "text": "All The Blood We've Shed Before",
+      "isLineEnding": 1
+    },
+    {
+      "time": 54070,
+      "duration": 2744,
+      "text": "Did You Ever Stop To Notice",
+      "isLineEnding": 1
+    },
+    {
+      "time": 57365,
+      "duration": 2728,
+      "text": "The Crying Earth The Weeping Shores?",
+      "isLineEnding": 1
+    },
+    {
+      "time": 60634,
+      "duration": 6842,
+      "text": "Aaaaaaaaah ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 67581,
+      "duration": 6945,
+      "text": "Oooooooooh ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 76203,
+      "duration": 3244,
+      "text": "What Have We Done To The World",
+      "isLineEnding": 1
+    },
+    {
+      "time": 79640,
+      "duration": 1908,
+      "text": "Look What We've Done",
+      "isLineEnding": 1
+    },
+    {
+      "time": 83105,
+      "duration": 2208,
+      "text": "What About All The Peace",
+      "isLineEnding": 1
+    },
+    {
+      "time": 85362,
+      "duration": 2482,
+      "text": "That You Pledge Your Only Son...",
+      "isLineEnding": 1
+    },
+    {
+      "time": 90001,
+      "duration": 2866,
+      "text": "What About Flowering Fields",
+      "isLineEnding": 1
+    },
+    {
+      "time": 93526,
+      "duration": 2064,
+      "text": "Is There A Time",
+      "isLineEnding": 1
+    },
+    {
+      "time": 97057,
+      "duration": 2046,
+      "text": "What About All The Dreams",
+      "isLineEnding": 1
+    },
+    {
+      "time": 99205,
+      "duration": 2829,
+      "text": "That You Said Was Yours And Mine...",
+      "isLineEnding": 1
+    },
+    {
+      "time": 102754,
+      "duration": 2728,
+      "text": "Did You Ever Stop To Notice",
+      "isLineEnding": 1
+    },
+    {
+      "time": 106180,
+      "duration": 2709,
+      "text": "All The Children Dead From War",
+      "isLineEnding": 1
+    },
+    {
+      "time": 109654,
+      "duration": 2434,
+      "text": "Did You Ever Stop To Notice",
+      "isLineEnding": 1
+    },
+    {
+      "time": 112882,
+      "duration": 2727,
+      "text": "The Crying Earth The Weeping Shores?",
+      "isLineEnding": 1
+    },
+    {
+      "time": 116205,
+      "duration": 6872,
+      "text": "Aaaaaaaaah ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 123139,
+      "duration": 6909,
+      "text": "Oooooooooh ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 130086,
+      "duration": 6872,
+      "text": "Aaaaaaaaah ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 137020,
+      "duration": 6909,
+      "text": "Oooooooooh ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 144823,
+      "duration": 1754,
+      "text": "I Used To Dream",
+      "isLineEnding": 1
+    },
+    {
+      "time": 147569,
+      "duration": 3331,
+      "text": "I Used To Glance Beyond The Stars",
+      "isLineEnding": 1
+    },
+    {
+      "time": 151711,
+      "duration": 2405,
+      "text": "Now I Don't Know Where We Are",
+      "isLineEnding": 1
+    },
+    {
+      "time": 154738,
+      "duration": 1419,
+      "text": "Although I Know",
+      "isLineEnding": 1
+    },
+    {
+      "time": 156594,
+      "duration": 1774,
+      "text": "We've Drifted Far",
+      "isLineEnding": 1
+    },
+    {
+      "time": 158385,
+      "duration": 6413,
+      "text": "Aaaaaaaaah ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 164818,
+      "duration": 6787,
+      "text": "Oooooooooh ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 171700,
+      "duration": 6912,
+      "text": "Aaaaaaaaah ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 178672,
+      "duration": 6263,
+      "text": "Oooooooooh ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 185581,
+      "duration": 6912,
+      "text": "Aaaaaaaaah ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 192553,
+      "duration": 6873,
+      "text": "Oooooooooh ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 199469,
+      "duration": 6850,
+      "text": "Aaaaaaaaah ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 206405,
+      "duration": 6174,
+      "text": "Oooooooooh ",
+      "isLineEnding": 1
+    },
+    {
+      "time": 214599,
+      "duration": 3646,
+      "text": "What About Yesterday (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 218281,
+      "duration": 3232,
+      "text": "What About The Seas (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 221777,
+      "duration": 2020,
+      "text": "The Heavens Are Falling Down",
+      "isLineEnding": 1
+    },
+    {
+      "time": 223797,
+      "duration": 1323,
+      "text": "(What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 225274,
+      "duration": 3325,
+      "text": "I Can't Even Breathe (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 228668,
+      "duration": 3499,
+      "text": "What About Apathy (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 232251,
+      "duration": 3271,
+      "text": "Ravaging The Seas (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 235689,
+      "duration": 2460,
+      "text": "What About Forest Trails",
+      "isLineEnding": 1
+    },
+    {
+      "time": 239151,
+      "duration": 1928,
+      "text": "Burnt Despite Our Pleas",
+      "isLineEnding": 1
+    },
+    {
+      "time": 241123,
+      "duration": 1531,
+      "text": "(What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 242752,
+      "duration": 3296,
+      "text": "What About The Holy Land (What About It)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 246126,
+      "duration": 3389,
+      "text": "Torn Apart By Creed (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 249575,
+      "duration": 2095,
+      "text": "Where Did We Go Wrong",
+      "isLineEnding": 1
+    },
+    {
+      "time": 252960,
+      "duration": 3469,
+      "text": "Someone Tell Me Why (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 256592,
+      "duration": 3299,
+      "text": "What About Baby Boy (What About It)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 260033,
+      "duration": 3367,
+      "text": "What About The Days (What About Us)",
+      "isLineEnding": 1
+    },
+    {
+      "time": 263501,
+      "duration": 1969,
+      "text": "What About All Their Joy",
+      "isLineEnding": 1
+    },
+    {
+      "time": 266930,
+      "duration": 2051,
+      "text": "Do We Give A Damn",
+      "isLineEnding": 1
+    }
+  ],
+  "pictos": [
+    {
+      "time": 16753,
+      "duration": 500,
+      "name": "earthsong_a_genou"
+    },
+    {
+      "time": 20821,
+      "duration": 500,
+      "name": "earthsong_bras_genou"
+    },
+    {
+      "time": 25159,
+      "duration": 500,
+      "name": "earthsong_poing_terre"
+    },
+    {
+      "time": 27762,
+      "duration": 500,
+      "name": "earthsong_bras_sol"
+    },
+    {
+      "time": 31632,
+      "duration": 500,
+      "name": "earthsong_jette"
+    },
+    {
+      "time": 34702,
+      "duration": 500,
+      "name": "earthsong_bras_genou"
+    },
+    {
+      "time": 39040,
+      "duration": 500,
+      "name": "earthsong_poing_terre"
+    },
+    {
+      "time": 41642,
+      "duration": 500,
+      "name": "earthsong_bras_sol"
+    },
+    {
+      "time": 45513,
+      "duration": 500,
+      "name": "earthsong_jette"
+    },
+    {
+      "time": 47715,
+      "duration": 500,
+      "name": "earthsong_lever"
+    },
+    {
+      "time": 51185,
+      "duration": 500,
+      "name": "earthsong_poitrine_r"
+    },
+    {
+      "time": 54656,
+      "duration": 500,
+      "name": "earthsong_poitrine_l"
+    },
+    {
+      "time": 58126,
+      "duration": 500,
+      "name": "earthsong_spin"
+    },
+    {
+      "time": 61596,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 65066,
+      "duration": 500,
+      "name": "earthsong_bras_down"
+    },
+    {
+      "time": 68537,
+      "duration": 500,
+      "name": "earthsong_allemand"
+    },
+    {
+      "time": 72007,
+      "duration": 500,
+      "name": "earthsong_pointer_sol"
+    },
+    {
+      "time": 74879,
+      "duration": 500,
+      "name": "earthsong_a_genou"
+    },
+    {
+      "time": 76344,
+      "duration": 500,
+      "name": "earthsong_bras_genou"
+    },
+    {
+      "time": 80682,
+      "duration": 500,
+      "name": "earthsong_poing_terre"
+    },
+    {
+      "time": 83285,
+      "duration": 500,
+      "name": "earthsong_bras_sol"
+    },
+    {
+      "time": 87155,
+      "duration": 500,
+      "name": "earthsong_jette"
+    },
+    {
+      "time": 90225,
+      "duration": 500,
+      "name": "earthsong_bras_genou"
+    },
+    {
+      "time": 94563,
+      "duration": 500,
+      "name": "earthsong_poing_terre"
+    },
+    {
+      "time": 97166,
+      "duration": 500,
+      "name": "earthsong_bras_sol"
+    },
+    {
+      "time": 101036,
+      "duration": 500,
+      "name": "earthsong_jette"
+    },
+    {
+      "time": 103239,
+      "duration": 500,
+      "name": "earthsong_lever"
+    },
+    {
+      "time": 106709,
+      "duration": 500,
+      "name": "earthsong_poitrine_r"
+    },
+    {
+      "time": 110179,
+      "duration": 500,
+      "name": "earthsong_poitrine_l"
+    },
+    {
+      "time": 113649,
+      "duration": 500,
+      "name": "earthsong_spin"
+    },
+    {
+      "time": 117119,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 120590,
+      "duration": 500,
+      "name": "earthsong_bras_down"
+    },
+    {
+      "time": 124060,
+      "duration": 500,
+      "name": "earthsong_allemand"
+    },
+    {
+      "time": 127530,
+      "duration": 500,
+      "name": "earthsong_pointer_sol"
+    },
+    {
+      "time": 130986,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 134470,
+      "duration": 500,
+      "name": "earthsong_bras_down"
+    },
+    {
+      "time": 137941,
+      "duration": 500,
+      "name": "earthsong_allemand"
+    },
+    {
+      "time": 141398,
+      "duration": 500,
+      "name": "earthsong_pointer_sol"
+    },
+    {
+      "time": 144881,
+      "duration": 500,
+      "name": "earthsong_main"
+    },
+    {
+      "time": 146616,
+      "duration": 500,
+      "name": "earthsong_poitrine_r"
+    },
+    {
+      "time": 148351,
+      "duration": 500,
+      "name": "earthsong_bras"
+    },
+    {
+      "time": 150092,
+      "duration": 500,
+      "name": "earthsong_poitrine_l"
+    },
+    {
+      "time": 151821,
+      "duration": 500,
+      "name": "earthsong_saut_r"
+    },
+    {
+      "time": 153571,
+      "duration": 500,
+      "name": "earthsong_poitrine_r"
+    },
+    {
+      "time": 155292,
+      "duration": 500,
+      "name": "earthsong_saut_l"
+    },
+    {
+      "time": 157027,
+      "duration": 500,
+      "name": "earthsong_ski_r"
+    },
+    {
+      "time": 157894,
+      "duration": 500,
+      "name": "earthsong_ski_r"
+    },
+    {
+      "time": 158762,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 162232,
+      "duration": 500,
+      "name": "earthsong_bras_down"
+    },
+    {
+      "time": 165702,
+      "duration": 500,
+      "name": "earthsong_allemand"
+    },
+    {
+      "time": 169172,
+      "duration": 500,
+      "name": "earthsong_pointer_sol"
+    },
+    {
+      "time": 172643,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 176113,
+      "duration": 500,
+      "name": "earthsong_bras_down"
+    },
+    {
+      "time": 179593,
+      "duration": 500,
+      "name": "earthsong_allemand"
+    },
+    {
+      "time": 183053,
+      "duration": 500,
+      "name": "earthsong_pointer_sol"
+    },
+    {
+      "time": 185656,
+      "duration": 500,
+      "name": "earthsong_shake"
+    },
+    {
+      "time": 186523,
+      "duration": 500,
+      "name": "earthsong_poing_lever_r"
+    },
+    {
+      "time": 189994,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 193464,
+      "duration": 500,
+      "name": "earthsong_poing_lever_l"
+    },
+    {
+      "time": 196934,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 200404,
+      "duration": 500,
+      "name": "earthsong_poing_lever_r"
+    },
+    {
+      "time": 203874,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 207345,
+      "duration": 500,
+      "name": "earthsong_poing_lever_l"
+    },
+    {
+      "time": 210815,
+      "duration": 500,
+      "name": "earthsong_bras_tendu"
+    },
+    {
+      "time": 215162,
+      "duration": 500,
+      "name": "earthsong_poing_lever_r"
+    },
+    {
+      "time": 216892,
+      "duration": 500,
+      "name": "earthsong_ski_l"
+    },
+    {
+      "time": 217755,
+      "duration": 500,
+      "name": "earthsong_ski_l"
+    },
+    {
+      "time": 218635,
+      "duration": 500,
+      "name": "earthsong_poing_lever_l"
+    },
+    {
+      "time": 220364,
+      "duration": 500,
+      "name": "earthsong__ski_r"
+    },
+    {
+      "time": 221225,
+      "duration": 500,
+      "name": "earthsong_ski_r"
+    },
+    {
+      "time": 222100,
+      "duration": 500,
+      "name": "earthsong_poing_lever_r"
+    },
+    {
+      "time": 227321,
+      "duration": 500,
+      "name": "earthsong__ski_r"
+    },
+    {
+      "time": 228166,
+      "duration": 500,
+      "name": "earthsong_ski_r"
+    },
+    {
+      "time": 234262,
+      "duration": 500,
+      "name": "earthsong__ski_r"
+    },
+    {
+      "time": 235120,
+      "duration": 500,
+      "name": "earthsong_ski_r"
+    },
+    {
+      "time": 235988,
+      "duration": 500,
+      "name": "earthsong_poing_f"
+    },
+    {
+      "time": 241193,
+      "duration": 500,
+      "name": "earthsong_spin"
+    },
+    {
+      "time": 242331,
+      "duration": 500,
+      "name": "earthsong_a_genou"
+    },
+    {
+      "time": 243796,
+      "duration": 500,
+      "name": "earthsong_main_r"
+    },
+    {
+      "time": 244664,
+      "duration": 500,
+      "name": "earthsong_genou_tape"
+    },
+    {
+      "time": 245531,
+      "duration": 500,
+      "name": "earthsong_genou_moi"
+    },
+    {
+      "time": 246410,
+      "duration": 500,
+      "name": "earthsong_main_l"
+    },
+    {
+      "time": 248134,
+      "duration": 500,
+      "name": "earthsong_genou_tape"
+    },
+    {
+      "time": 249001,
+      "duration": 500,
+      "name": "earthsong_genou_moi"
+    },
+    {
+      "time": 249869,
+      "duration": 500,
+      "name": "earthsong_main_r"
+    },
+    {
+      "time": 252471,
+      "duration": 500,
+      "name": "earthsong_shake"
+    },
+    {
+      "time": 256809,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 260279,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 262882,
+      "duration": 500,
+      "name": "earthsong_shake"
+    },
+    {
+      "time": 263750,
+      "duration": 500,
+      "name": "earthsong_bras_u"
+    },
+    {
+      "time": 267220,
+      "duration": 500,
+      "name": "earthsong_shake"
+    },
+    {
+      "time": 270690,
+      "duration": 500,
+      "name": "earthsong_poing_lever_f"
+    },
+    {
+      "time": 272434,
+      "duration": 500,
+      "name": "earthsong_poing_lever_f"
+    },
+    {
+      "time": 294140,
+      "duration": 500,
+      "name": "earthsong_kiss"
+    }
+  ],
+  "AudioPreview": {
+    "coverflow": {
+      "startbeat": 68
+    },
+    "prelobby": {
+      "startbeat": 68
+    }
+  },
+  "AudioPreviewFadeTime": 0.5,
+  "_conversionInfo": {
+    "source": "Michael Jackson: The Experience Wii",
+    "moves": "122 source timeline entries decoded",
+    "goldMoves": 3,
+    "beats": 374,
+    "lyrics": 61,
+    "pictos": 94,
+    "pictogramImages": 34,
+    "pictogramDuration": "500ms provisional because Wii source timeline stores timestamp+ID but no JDN duration field",
+    "scoring": "LiveMove source classifiers preserved; MSM conversion is not faked"
+  }
+}

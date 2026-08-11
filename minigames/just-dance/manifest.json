@@ -27,6 +27,26 @@
       "pictosAtlas": "songs/RainOverMe/pictos-atlas.png",
       "pictosAtlasData": "songs/RainOverMe/pictos-atlas.json",
       "cover": "songs/RainOverMe/rainoverme_cover@2x.jpg"
+    },
+    {
+      "id": "EarthSong",
+      "mapName": "EarthSong",
+      "title": "Earth Song",
+      "artist": "Michael Jackson",
+      "status": "beta",
+      "coaches": 1,
+      "video": "songs/EarthSong/EarthSong_Coach_Low.mp4",
+      "videoLow": "songs/EarthSong/EarthSong_Coach_Low.mp4",
+      "videoMedium": "songs/EarthSong/EarthSong_Coach_Medium.mp4",
+      "videoHigh": "songs/EarthSong/EarthSong_Coach_High.mp4",
+      "audio": "songs/EarthSong/EarthSong_Audio.mp3",
+      "map": "songs/EarthSong/EarthSong.json",
+      "metadata": "songs/EarthSong/metadata.json",
+      "moves": "songs/EarthSong/moves/EarthSong_moves0.json",
+      "classifiers": "songs/EarthSong/classifiers_WIIU/",
+      "pictosAtlas": "songs/EarthSong/pictos-atlas.png",
+      "pictosAtlasData": "songs/EarthSong/pictos-atlas.json",
+      "cover": "songs/EarthSong/earthsong_cover@2x.jpg"
     }
   ]
 }

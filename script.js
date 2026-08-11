@@ -161,6 +161,11 @@ const dancePlayerCount = document.getElementById("dancePlayerCount");
 const danceSensorPlayers = document.getElementById("danceSensorPlayers");
 const danceTestVideo = document.getElementById("danceTestVideo");
 const danceSongAssetStatus = document.getElementById("danceSongAssetStatus");
+const danceSongSelect = document.getElementById("danceSongSelect");
+const danceSongCover = document.getElementById("danceSongCover");
+const danceSongBadge = document.getElementById("danceSongBadge");
+const danceSongTitle = document.getElementById("danceSongTitle");
+const danceSongMeta = document.getElementById("danceSongMeta");
 const danceSongTime = document.getElementById("danceSongTime");
 const danceCurrentMove = document.getElementById("danceCurrentMove");
 const danceNextMove = document.getElementById("danceNextMove");
@@ -335,12 +340,27 @@ let dancePictoAtlas = null;
 let danceTestLyrics = [];
 let danceLyricLines = [];
 let danceLastLyricLineIndex = -999;
-// O videoOffset do JSON já aparece refletido nos timestamps da timeline de Rain Over Me
-// (o primeiro beat é exatamente 2812 ms). Portanto ele NÃO deve ser subtraído novamente.
+// Os timestamps de cada mapa já seguem o relógio do vídeo; videoOffset é mantido apenas como metadado.
 let danceSourceVideoOffsetMs = 0;
-const DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS = -1725;
-const DANCE_RAIN_OVER_ME_SYNC_STORAGE_KEY = "jdRainOverMeSyncOffsetMsV4";
-let danceManualSyncOffsetMs = DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS;
+const DANCE_SONG_STORAGE_KEY = "jdSelectedSongV1";
+const DANCE_SONGS = Object.freeze({
+  RainOverMe: Object.freeze({
+    id: "RainOverMe", title: "Rain Over Me", artist: "Pitbull Ft. Marc Anthony", edition: "Just Dance 2020", coaches: 1, beta: false, lyricsColor: "#FF584A",
+    base: "minigames/just-dance/songs/RainOverMe", mapFile: "RainOverMe.json", movesFile: "RainOverMe_moves0.json",
+    videos: Object.freeze({ low: "RainOverMe_Low.mp4", medium: "RainOverMe_Medium.mp4", high: "RainOverMe_High.mp4" }),
+    audioFile: "RainOverMe_Audio.mp3", coverFile: "rainoverme_cover@2x.jpg", posterFile: "RainOverMe.jpg", avatarFile: "rainoverme_thumb_kiwi.jpg",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsV4"
+  }),
+  EarthSong: Object.freeze({
+    id: "EarthSong", title: "Earth Song", artist: "Michael Jackson", edition: "Michael Jackson: The Experience", coaches: 1, beta: true, lyricsColor: "#FFFFFF",
+    base: "minigames/just-dance/songs/EarthSong", mapFile: "EarthSong.json", movesFile: "EarthSong_moves0.json",
+    videos: Object.freeze({ low: "EarthSong_Coach_Low.mp4", medium: "EarthSong_Coach_Medium.mp4", high: "EarthSong_Coach_High.mp4" }),
+    audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1"
+  })
+});
+let danceActiveSongId = "RainOverMe";
+let danceManualSyncOffsetMs = DANCE_SONGS.RainOverMe.defaultSyncMs;
 let danceTestSongLoaded = false;
 const devSensorLive = new Map();
 const DANCE_MAX_SCORE = 13333;
@@ -362,13 +382,30 @@ let danceLastVideoTimeMs = 0;
 const DANCE_QUALITY_STORAGE_KEY = "jdVideoQualityModeV1";
 const DANCE_LYRICS_SIZE_STORAGE_KEY = "jdLyricsSizeV1";
 const DANCE_VIDEO_FIT_STORAGE_KEY = "jdVideoFitV1";
-const DANCE_VIDEO_SOURCES = {
-  low: "minigames/just-dance/songs/RainOverMe/RainOverMe_Low.mp4",
-  medium: "minigames/just-dance/songs/RainOverMe/RainOverMe_Medium.mp4",
-  high: "minigames/just-dance/songs/RainOverMe/RainOverMe_High.mp4"
-};
-const DANCE_AUDIO_SOURCE = "minigames/just-dance/songs/RainOverMe/RainOverMe_Audio.mp3";
-const DANCE_PLAYER_AVATAR_SOURCE = "minigames/just-dance/songs/RainOverMe/rainoverme_thumb_kiwi.jpg";
+let DANCE_VIDEO_SOURCES = {};
+let DANCE_AUDIO_SOURCE = "";
+let DANCE_PLAYER_AVATAR_SOURCE = "";
+let DANCE_PICTO_ATLAS_SOURCE = "";
+
+function getDanceSongConfig(songId = danceActiveSongId) {
+  return DANCE_SONGS[songId] || DANCE_SONGS.RainOverMe;
+}
+
+function applyDanceSongSources(songId = danceActiveSongId) {
+  const song = getDanceSongConfig(songId);
+  danceActiveSongId = song.id;
+  DANCE_VIDEO_SOURCES = {
+    low: `${song.base}/${song.videos.low}`,
+    medium: `${song.base}/${song.videos.medium}`,
+    high: `${song.base}/${song.videos.high}`
+  };
+  DANCE_AUDIO_SOURCE = `${song.base}/${song.audioFile}`;
+  DANCE_PLAYER_AVATAR_SOURCE = `${song.base}/${song.avatarFile}`;
+  DANCE_PICTO_ATLAS_SOURCE = `${song.base}/${song.atlasImageFile}`;
+  return song;
+}
+
+applyDanceSongSources(danceActiveSongId);
 const DANCE_GOLD_SPRITE_BASE = "minigames/just-dance/hud/gold-video-exact";
 const DANCE_GOLD_SPRITES = Object.freeze({
   start: Object.freeze({
@@ -417,8 +454,6 @@ let danceGoldFinishOffsetMs = DANCE_GOLD_DEFAULTS.finishOffsetMs;
 let danceYeahFinalDelayMs = DANCE_GOLD_DEFAULTS.finalDelayMs;
 let danceYeahScalePct = DANCE_GOLD_DEFAULTS.finalScalePct;
 const DANCE_CRITICAL_IMAGE_SOURCES = [
-  DANCE_PLAYER_AVATAR_SOURCE,
-  "minigames/just-dance/songs/RainOverMe/pictos-atlas.png",
   "minigames/just-dance/hud/images/Star.png",
   "minigames/just-dance/hud/images/Superstar.png",
   "minigames/just-dance/hud/images/Megastar.png",
@@ -718,7 +753,7 @@ async function openPhoneLocalMode() {
 }
 
 function openControlsMode() {
-  // Abre a página do controle no mesmo servidor.
+  // Abre a página pública do controle; ela usa o mesmo servidor online configurado.
   // O jogador pode digitar o código manualmente.
   window.location.href = "/controller.html";
 }
@@ -803,7 +838,7 @@ async function fetchServerStatus({ timeoutMs = 4000 } = {}) {
 }
 
 function multiplayerUpdateMessage() {
-  return "O servidor do PC está em uma versão antiga. Substitua a pasta SERVIDOR_PC por esta versão e execute INICIAR_TUDO.bat novamente. As cartas, perguntas e turnos multiplayer dependem do servidor novo.";
+  return "O servidor online está em uma versão antiga. Atualize a implantação do servidor para esta versão; cartas, perguntas e turnos multiplayer dependem do protocolo novo.";
 }
 
 async function verifyMultiplayerServer({ mode = "online" } = {}) {
@@ -815,13 +850,13 @@ async function verifyMultiplayerServer({ mode = "online" } = {}) {
       phoneLobby.classList.add("hidden");
       const title = phoneServerWarning.querySelector("strong");
       const text = phoneServerWarning.querySelector("p");
-      if (title) title.textContent = result.reason === "not-configured" ? "O servidor não está configurado." : "O servidor do PC não está acessível.";
-      if (text) text.textContent = result.reason === "not-configured" ? "Configure o endereço do servidor e publique o site novamente." : "Execute INICIAR_TUDO.bat no PC e confirme que o Tailscale Funnel está ativo.";
+      if (title) title.textContent = result.reason === "not-configured" ? "O servidor não está configurado." : "O servidor online não está acessível.";
+      if (text) text.textContent = result.reason === "not-configured" ? "Configure o endereço do servidor e publique o site novamente." : "Aguarde o serviço online iniciar e tente novamente.";
     } else if (mode === "dev") {
       danceLabServerWarning?.classList.remove("hidden");
-      if (danceLabMessage) danceLabMessage.textContent = result.reason === "not-configured" ? "Configure o endereço do servidor antes de testar sensores." : "Não foi possível alcançar o servidor do PC.";
+      if (danceLabMessage) danceLabMessage.textContent = result.reason === "not-configured" ? "Configure o endereço do servidor antes de testar sensores." : "Não foi possível alcançar o servidor online.";
     } else {
-      showOnlineMessage(result.reason === "not-configured" ? "O servidor ainda não foi configurado neste site." : "Não foi possível alcançar o servidor do PC.");
+      showOnlineMessage(result.reason === "not-configured" ? "O servidor ainda não foi configurado neste site." : "Não foi possível alcançar o servidor online.");
       setServerStatus("offline", "Servidor offline");
     }
     return false;
@@ -1504,7 +1539,7 @@ function ensureRemoteSocket() {
     remoteRoomCode = "";
     remoteState = null;
     if (gameMode === "phone-host") {
-      statusEl.textContent = "A sala local foi encerrada.";
+      statusEl.textContent = "A sala foi encerrada.";
       showOnly(localMenuEl);
     }
   });
@@ -1562,7 +1597,7 @@ function createRemoteRoom() {
   if (!ensureRemoteSocket()) return;
 
   if (!remoteSocket.connected) {
-    lobbyStatus.textContent = "Conectando ao servidor local…";
+    lobbyStatus.textContent = "Conectando ao servidor online…";
     remoteSocket.once("connect", () => createRemoteRoom());
     return;
   }
@@ -1574,7 +1609,7 @@ function createRemoteRoom() {
       const title = phoneServerWarning.querySelector("strong");
       const text = phoneServerWarning.querySelector("p");
       if (title) title.textContent = "O servidor não respondeu.";
-      if (text) text.textContent = "Feche servidores antigos e execute INICIAR_TUDO.bat desta versão.";
+      if (text) text.textContent = "O serviço online não respondeu. Aguarde alguns segundos e tente novamente.";
       return;
     }
     if (!response?.ok) {
@@ -1846,7 +1881,7 @@ async function ensureOnlineConnection(onReady) {
   setServerStatus("online", "Servidor online");
 
   if (!ensureRemoteSocket()) {
-    showOnlineMessage("O servidor do PC não está disponível. Verifique o servidor Node e o Tailscale Funnel.");
+    showOnlineMessage("O servidor online não está disponível. Aguarde o serviço iniciar e tente novamente.");
     return;
   }
 
@@ -1855,11 +1890,11 @@ async function ensureOnlineConnection(onReady) {
     return;
   }
 
-  showOnlineMessage("Conectando ao servidor local…");
+  showOnlineMessage("Conectando ao servidor online…");
 
   const timer = setTimeout(() => {
     showOnlineMessage(
-      "O servidor demorou para responder. Feche servidores antigos do jogo e execute novamente o INICIAR_TUDO.bat desta versão."
+      "O servidor online demorou para responder. Aguarde alguns segundos e tente novamente."
     );
   }, 6000);
 
@@ -2142,7 +2177,7 @@ function createOnlineRoom() {
 
       if (error) {
         showOnlineMessage(
-          "O servidor não respondeu ao pedido para criar a sala. Provavelmente há uma versão antiga do servidor aberta. Feche-a e execute o INICIAR_TUDO.bat desta versão."
+          "O servidor online não respondeu ao pedido para criar a sala. Aguarde alguns segundos e tente novamente."
         );
         return;
       }
@@ -2580,6 +2615,8 @@ async function preloadDanceHudSounds(onProgress = null) {
 
 async function preloadDanceCriticalImages(onProgress = null) {
   const urls = new Set(DANCE_CRITICAL_IMAGE_SOURCES);
+  urls.add(DANCE_PLAYER_AVATAR_SOURCE);
+  urls.add(DANCE_PICTO_ATLAS_SOURCE);
   Object.values(DANCE_FEEDBACK_ASSETS).forEach(asset => {
     if (asset.image) urls.add(`${DANCE_SCORING_BASE}/${asset.image}`);
     if (asset.flare) urls.add(`${DANCE_SCORING_BASE}/${asset.flare}`);
@@ -3208,8 +3245,69 @@ async function previewDanceYeahSequence() {
   }, Math.max(0, danceGoldPrepareMs));
 }
 
+function updateDanceSongIdentityUi() {
+  const song = getDanceSongConfig();
+  if (danceSongSelect) danceSongSelect.value = song.id;
+  if (danceSongCover) {
+    danceSongCover.src = `${song.base}/${song.coverFile}`;
+    danceSongCover.alt = `Capa de ${song.title}`;
+  }
+  if (danceSongTitle) danceSongTitle.textContent = song.title;
+  if (danceSongMeta) danceSongMeta.textContent = `${song.artist} • ${song.edition} • ${song.coaches} coach${song.coaches === 1 ? "" : "es"}`;
+  if (danceSongBadge) danceSongBadge.textContent = song.beta ? "Música de teste • BETA" : "Música de teste";
+  if (danceSyncResetBtn) danceSyncResetBtn.textContent = `Padrão (${formatDanceSyncOffset(song.defaultSyncMs)})`;
+  if (danceKaraoke) danceKaraoke.style.setProperty("--dance-lyric-color", song.lyricsColor || "#FFFFFF");
+  if (danceTestVideo) danceTestVideo.poster = `${song.base}/${song.posterFile}`;
+}
+
+function releaseDanceSongMedia() {
+  pauseDanceMedia();
+  dancePreloadGeneration += 1;
+  dancePreloadReady = false;
+  dancePreloadedVideoQuality = "";
+  danceCoreMediaPreloaded = false;
+  for (const key of ["video", "audio"]) {
+    const url = danceManagedBlobUrls.get(key);
+    if (url) { try { URL.revokeObjectURL(url); } catch {} danceManagedBlobUrls.delete(key); }
+  }
+  if (danceTestVideo) { danceTestVideo.removeAttribute("src"); danceTestVideo.load(); }
+  if (danceSongAudio) { danceSongAudio.removeAttribute("src"); danceSongAudio.load(); }
+  resetDanceGoldMoveFx(true);
+  resetLocalDanceJudging();
+}
+
+async function switchDanceSong(songId, announce = true) {
+  const next = getDanceSongConfig(songId);
+  if (next.id === danceActiveSongId && danceTestSongLoaded) return true;
+  if (danceSongSelect) danceSongSelect.disabled = true;
+  if (dancePreloadPromise) { try { await dancePreloadPromise; } catch {} }
+  releaseDanceSongMedia();
+  applyDanceSongSources(next.id);
+  danceTestSongLoaded = false;
+  danceTestMoves = [];
+  danceTestPictos = [];
+  danceTestLyrics = [];
+  danceLyricLines = [];
+  dancePictoAtlas = null;
+  safeLocalStorageSet(DANCE_SONG_STORAGE_KEY, next.id);
+  updateDanceSongIdentityUi();
+  setDancePreloadUi(2, `Preparando ${next.title}${next.beta ? " (Beta)" : ""}…`);
+  if (announce && danceLabMessage) danceLabMessage.textContent = `Carregando ${next.title}${next.beta ? " (Beta)" : ""}…`;
+  const dataReady = await loadDanceTestSongData(true);
+  if (!dataReady) { if (danceSongSelect) danceSongSelect.disabled = false; return false; }
+  const target = danceQualityPreference === "auto" ? chooseAutoDanceQuality() : danceQualityPreference;
+  const ready = await prepareDancePlayerAssets(target, { reason: danceQualityPreference === "auto" ? "perfil do aparelho" : "", force: true });
+  updateDancePlayerHudOverlay(Math.max(1, Number(devSensorState?.players?.length || 1)));
+  if (danceSongSelect) danceSongSelect.disabled = false;
+  if (announce && danceLabMessage) danceLabMessage.textContent = ready ? `${next.title}${next.beta ? " (Beta)" : ""} pronta.` : `Falha ao carregar ${next.title}.`;
+  return ready;
+}
+
 async function initializeDancePlayerSettings() {
   loadDanceYeahDevSettings();
+  const storedSong = safeLocalStorageGet(DANCE_SONG_STORAGE_KEY, "RainOverMe");
+  applyDanceSongSources(DANCE_SONGS[storedSong] ? storedSong : "RainOverMe");
+  updateDanceSongIdentityUi();
   danceQualityPreference = safeLocalStorageGet(DANCE_QUALITY_STORAGE_KEY, "auto");
   if (!["auto","low","medium","high"].includes(danceQualityPreference)) danceQualityPreference = "auto";
   applyDanceLyricsSize(safeLocalStorageGet(DANCE_LYRICS_SIZE_STORAGE_KEY, "small"), false);
@@ -3304,6 +3402,8 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
           <img class="dance-video-judge-image" alt="">
         </div>`;
     }
+    const avatar = item.querySelector(".dance-ipk-player-avatar");
+    if (avatar) avatar.src = DANCE_PLAYER_AVATAR_SOURCE;
     item.style.setProperty("--player-color", player.color || "#fff");
     item.style.setProperty("--jd-player-slot-x", `${((slotPositions[playerIndex] || 0) / 1920 * 100).toFixed(4)}%`);
     item.querySelector(".dance-ipk-player-index").textContent = `P${playerIndex + 1}`;
@@ -3371,7 +3471,7 @@ function renderDanceSyncCalibration() {
 
 function setDanceManualSyncOffset(nextMs, announce = true) {
   danceManualSyncOffsetMs = Math.max(-3000, Math.min(3000, Math.round(Number(nextMs || 0))));
-  try { localStorage.setItem(DANCE_RAIN_OVER_ME_SYNC_STORAGE_KEY, String(danceManualSyncOffsetMs)); } catch {}
+  try { localStorage.setItem(getDanceSongConfig().syncStorageKey, String(danceManualSyncOffsetMs)); } catch {}
   renderDanceSyncCalibration();
   updateDanceSongTimeline();
   startDanceVisualHud();
@@ -3491,6 +3591,7 @@ function renderDancePictos(timeMs) {
     item.style.left = `${left}%`;
     item.style.opacity = String(opacity);
     item.style.transform = `scale(${scale.toFixed(3)})`;
+    item.style.backgroundImage = `url("${DANCE_PICTO_ATLAS_SOURCE}")`;
     item.style.backgroundPosition = `${position.x}% ${position.y}%`;
     item.title = `${picto.name || "picto"} • ${formatDanceTime(Number(picto.time || 0) / 1000)}`;
     dancePictoItems.appendChild(item);
@@ -3720,14 +3821,14 @@ function formatDanceTime(seconds) {
   return `${minutes}:${String(secs).padStart(2, "0")}.${String(ms).padStart(3, "0")}`;
 }
 
-async function loadDanceTestSongData() {
-  if (danceTestSongLoaded) return true;
+async function loadDanceTestSongData(force = false) {
+  if (danceTestSongLoaded && !force) return true;
+  const songConfig = getDanceSongConfig();
   try {
-    const base = "minigames/just-dance/songs/RainOverMe";
     const [movesResponse, songResponse, atlasResponse] = await Promise.all([
-      fetch(`${base}/moves/RainOverMe_moves0.json`, { cache: "no-store" }),
-      fetch(`${base}/RainOverMe.json`, { cache: "no-store" }),
-      fetch(`${base}/pictos-atlas.json`, { cache: "no-store" })
+      fetch(`${songConfig.base}/moves/${songConfig.movesFile}`, { cache: "no-store" }),
+      fetch(`${songConfig.base}/${songConfig.mapFile}`, { cache: "no-store" }),
+      fetch(`${songConfig.base}/${songConfig.atlasDataFile}`, { cache: "no-store" })
     ]);
     if (!movesResponse.ok || !songResponse.ok || !atlasResponse.ok) throw new Error("Falha ao carregar timeline/pictos.");
     const [moves, song, atlas] = await Promise.all([movesResponse.json(), songResponse.json(), atlasResponse.json()]);
@@ -3737,25 +3838,25 @@ async function loadDanceTestSongData() {
     danceLyricLines = buildDanceLyricLines(danceTestLyrics);
     danceSourceVideoOffsetMs = Math.max(0, Number(song?.videoOffset ?? 0));
     try {
-      const storedRaw = localStorage.getItem(DANCE_RAIN_OVER_ME_SYNC_STORAGE_KEY);
+      const storedRaw = localStorage.getItem(songConfig.syncStorageKey);
       const storedSync = storedRaw === null ? NaN : Number(storedRaw);
-      danceManualSyncOffsetMs = Number.isFinite(storedSync)
-        ? Math.max(-3000, Math.min(3000, Math.round(storedSync)))
-        : DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS;
+      danceManualSyncOffsetMs = Number.isFinite(storedSync) ? Math.max(-3000, Math.min(3000, storedSync)) : songConfig.defaultSyncMs;
     } catch {
-      danceManualSyncOffsetMs = DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS;
+      danceManualSyncOffsetMs = songConfig.defaultSyncMs;
     }
     dancePictoAtlas = atlas && typeof atlas === "object" ? atlas : null;
     danceTestSongLoaded = true;
-    danceLastLyricLineIndex = -999;
-    if (danceKaraoke && song?.lyricsColor) danceKaraoke.style.setProperty("--dance-lyric-color", String(song.lyricsColor));
-    const goldCount = danceTestMoves.filter(move => Boolean(move.goldMove)).length;
-    if (danceSongAssetStatus) danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH! • quadro 16:9 • Scoring FX do IPK • vídeo 360p/720p/1080p.`;
+    const goldCount = danceTestMoves.filter(move => move.goldMove).length;
+    if (danceSongAssetStatus) {
+      const betaText = songConfig.beta ? " • BETA" : "";
+      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText} • vídeo 360p/720p/1080p.`;
+    }
     renderDanceSyncCalibration();
     updateDanceSongTimeline();
-    renderDanceVideoPlayerSlots();
     return true;
   } catch (error) {
+    console.error("Falha ao carregar dados da música do Just Dance:", error);
+    danceTestSongLoaded = false;
     if (danceSongAssetStatus) danceSongAssetStatus.textContent = "Não foi possível ler a timeline ou os pictos da música.";
     return false;
   }
@@ -3795,7 +3896,11 @@ async function openDanceSensorLab() {
   resetDanceLabUi();
   showOnly(danceDevScreenEl);
   if (danceLabMessage) danceLabMessage.textContent = "Carregando música, vídeo e HUD antes de iniciar…";
-  await loadDanceTestSongData();
+  const storedSong = safeLocalStorageGet(DANCE_SONG_STORAGE_KEY, "RainOverMe");
+  applyDanceSongSources(DANCE_SONGS[storedSong] ? storedSong : "RainOverMe");
+  updateDanceSongIdentityUi();
+  danceTestSongLoaded = false;
+  await loadDanceTestSongData(true);
   const playerReady = await initializeDancePlayerSettings();
   if (!playerReady) return;
   if (danceLabMessage) danceLabMessage.textContent = "Arquivos prontos. Verificando o servidor…";
@@ -4071,6 +4176,7 @@ danceSeek?.addEventListener("input", () => {
 danceSeek?.addEventListener("change", () => { dancePlayerSeeking = false; updateDancePlayerControls(); });
 danceSeek?.addEventListener("pointerup", () => { dancePlayerSeeking = false; updateDancePlayerControls(); });
 danceVolume?.addEventListener("input", () => { if (danceSongAudio) danceSongAudio.volume = Math.max(0, Math.min(1, Number(danceVolume.value || 0))); });
+danceSongSelect?.addEventListener("change", () => switchDanceSong(danceSongSelect.value, true));
 danceQualityMode?.addEventListener("change", () => applyDanceQualityPreference(danceQualityMode.value, true));
 danceLyricsSize?.addEventListener("change", () => applyDanceLyricsSize(danceLyricsSize.value, true));
 danceVideoFit?.addEventListener("change", () => applyDanceVideoFit(danceVideoFit.value, true));
@@ -4091,7 +4197,7 @@ danceSyncDelayBtn?.addEventListener("click", () => nudgeDanceSync(-100));
 danceSyncAdvanceBtn?.addEventListener("click", () => nudgeDanceSync(100));
 danceSyncDelayFineBtn?.addEventListener("click", () => nudgeDanceSync(-25));
 danceSyncAdvanceFineBtn?.addEventListener("click", () => nudgeDanceSync(25));
-danceSyncResetBtn?.addEventListener("click", () => setDanceManualSyncOffset(DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS));
+danceSyncResetBtn?.addEventListener("click", () => setDanceManualSyncOffset(getDanceSongConfig().defaultSyncMs));
 danceYeahApplyBtn?.addEventListener("click", () => applyDanceYeahDevSettings(true));
 danceYeahPreviewBtn?.addEventListener("click", previewDanceYeahSequence);
 danceYeahResetBtn?.addEventListener("click", resetDanceYeahDevSettings);
@@ -4115,7 +4221,7 @@ document.addEventListener("keydown", event => {
   if (tag === "input" || tag === "textarea" || tag === "select") return;
   if (event.key === "[") { event.preventDefault(); nudgeDanceSync(event.shiftKey ? -250 : -25); }
   if (event.key === "]") { event.preventDefault(); nudgeDanceSync(event.shiftKey ? 250 : 25); }
-  if (event.key === "\\") { event.preventDefault(); setDanceManualSyncOffset(DANCE_RAIN_OVER_ME_DEFAULT_SYNC_MS); }
+  if (event.key === "\\") { event.preventDefault(); setDanceManualSyncOffset(getDanceSongConfig().defaultSyncMs); }
 });
 
 document.addEventListener("keydown", event => {

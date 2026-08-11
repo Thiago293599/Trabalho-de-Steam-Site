@@ -1,0 +1,172 @@
+[
+  {
+    "sourceIndex": 0,
+    "sourceName": "Bras_Genou",
+    "webName": "earthsong_bras_genou"
+  },
+  {
+    "sourceIndex": 1,
+    "sourceName": "Poing_Terre",
+    "webName": "earthsong_poing_terre"
+  },
+  {
+    "sourceIndex": 2,
+    "sourceName": "Bras_Sol",
+    "webName": "earthsong_bras_sol"
+  },
+  {
+    "sourceIndex": 3,
+    "sourceName": "Jette",
+    "webName": "earthsong_jette"
+  },
+  {
+    "sourceIndex": 4,
+    "sourceName": "Lever",
+    "webName": "earthsong_lever"
+  },
+  {
+    "sourceIndex": 5,
+    "sourceName": "Poitrine_L",
+    "webName": "earthsong_poitrine_l"
+  },
+  {
+    "sourceIndex": 6,
+    "sourceName": "Spin",
+    "webName": "earthsong_spin"
+  },
+  {
+    "sourceIndex": 7,
+    "sourceName": "Bras_U",
+    "webName": "earthsong_bras_u"
+  },
+  {
+    "sourceIndex": 8,
+    "sourceName": "Bras_Down",
+    "webName": "earthsong_bras_down"
+  },
+  {
+    "sourceIndex": 9,
+    "sourceName": "Allemand",
+    "webName": "earthsong_allemand"
+  },
+  {
+    "sourceIndex": 10,
+    "sourceName": "Pointer_Sol",
+    "webName": "earthsong_pointer_sol"
+  },
+  {
+    "sourceIndex": 11,
+    "sourceName": "Poitrine_R",
+    "webName": "earthsong_poitrine_r"
+  },
+  {
+    "sourceIndex": 12,
+    "sourceName": "Main",
+    "webName": "earthsong_main"
+  },
+  {
+    "sourceIndex": 13,
+    "sourceName": "Bras",
+    "webName": "earthsong_bras"
+  },
+  {
+    "sourceIndex": 14,
+    "sourceName": "Ski_L",
+    "webName": "earthsong_ski_l"
+  },
+  {
+    "sourceIndex": 15,
+    "sourceName": "Saut_R",
+    "webName": "earthsong_saut_r"
+  },
+  {
+    "sourceIndex": 16,
+    "sourceName": "Saut_L",
+    "webName": "earthsong_saut_l"
+  },
+  {
+    "sourceIndex": 17,
+    "sourceName": "Bras_Tendu",
+    "webName": "earthsong_bras_tendu"
+  },
+  {
+    "sourceIndex": 18,
+    "sourceName": "Poing_Lever_L",
+    "webName": "earthsong_poing_lever_l"
+  },
+  {
+    "sourceIndex": 19,
+    "sourceName": "Poing_Lever_R",
+    "webName": "earthsong_poing_lever_r"
+  },
+  {
+    "sourceIndex": 20,
+    "sourceName": "Ski_R",
+    "webName": "earthsong_ski_r"
+  },
+  {
+    "sourceIndex": 21,
+    "sourceName": "Poing_L",
+    "webName": "earthsong_poing_l"
+  },
+  {
+    "sourceIndex": 22,
+    "sourceName": "Poing_R",
+    "webName": "earthsong_poing_r"
+  },
+  {
+    "sourceIndex": 23,
+    "sourceName": "Poing_F",
+    "webName": "earthsong_poing_f"
+  },
+  {
+    "sourceIndex": 24,
+    "sourceName": "Main_R",
+    "webName": "earthsong_main_r"
+  },
+  {
+    "sourceIndex": 25,
+    "sourceName": "Genou_Tape",
+    "webName": "earthsong_genou_tape"
+  },
+  {
+    "sourceIndex": 26,
+    "sourceName": "Genou_Moi",
+    "webName": "earthsong_genou_moi"
+  },
+  {
+    "sourceIndex": 27,
+    "sourceName": "Main_L",
+    "webName": "earthsong_main_l"
+  },
+  {
+    "sourceIndex": 28,
+    "sourceName": "Pose_Fin",
+    "webName": "earthsong_pose_fin"
+  },
+  {
+    "sourceIndex": 29,
+    "sourceName": "Poing_Lever_F",
+    "webName": "earthsong_poing_lever_f"
+  },
+  {
+    "sourceIndex": 30,
+    "sourceName": "Shake",
+    "webName": "earthsong_shake"
+  },
+  {
+    "sourceIndex": 31,
+    "sourceName": "Kiss",
+    "webName": "earthsong_kiss"
+  },
+  {
+    "sourceIndex": 32,
+    "sourceName": "A_Genou",
+    "webName": "earthsong_a_genou"
+  },
+  {
+    "sourceIndex": 33,
+    "sourceName": "_Ski_R",
+    "webName": "earthsong__ski_r"
+  }
+]

@@ -1,12 +1,9 @@
 /*
-  ENDEREÇO DO SERVIDOR DO JOGO
+  SERVIDOR ONLINE DO JOGO
 
-  Depois de ativar o Tailscale Funnel no PC, troque o endereço abaixo
-  pelo endereço HTTPS mostrado pelo Tailscale, por exemplo:
-
-  https://meu-computador.minha-rede.ts.net
-
-  Você também pode executar CONFIGURAR_SITE.bat, que faz isso para você.
+  O site usa este endereço para salas, controles, sensores e verificação
+  de disponibilidade. O carregamento inicial só libera a interface quando
+  este servidor responder em /api/status.
 */
 window.GAME_CONFIG = {
   SERVER_URL: "https://steam-trabalho-de-um-tabuleiro.onrender.com"

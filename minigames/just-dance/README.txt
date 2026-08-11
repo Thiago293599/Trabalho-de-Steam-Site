@@ -1,10 +1,20 @@
-JUST DANCE - SENSOR LAB / PRIMEIRA MÚSICA
+JUST DANCE - SENSOR LAB / MÚSICAS DE TESTE
 
 Nesta versão:
-- Rain Over Me foi adicionada como primeira música de teste.
-- O player DEV usa o vídeo Low para manter o pacote menor.
-- A timeline RainOverMe_moves0.json já é lida e o movimento atual aparece durante o vídeo.
-- Os classificadores Wii U (.msm) foram preservados para a etapa de pontuação real.
+- Rain Over Me continua disponível como música de teste.
+- Earth Song (Michael Jackson: The Experience) foi adicionada como música BETA.
+- O player permite trocar de música sem sair do Sensor Lab.
+- As duas músicas têm vídeo Low / Medium / High e áudio separado para sincronismo.
+- Timeline, letras, pictogramas e Gold Moves são lidos a partir dos arquivos de cada música.
+- A sincronia manual é salva separadamente para cada música.
+
+Earth Song (BETA):
+- 122 movimentos.
+- 94 pictogramas.
+- 61 linhas/segmentos de letra convertidos para o player.
+- 3 Gold Moves marcados na timeline.
+- Classificadores LiveMove da fonte Wii foram preservados no pacote da música.
+- A calibração fina de pontuação/classificadores ainda é experimental.
 
 Sensores:
 - DeviceMotion e DeviceOrientation continuam suportados.
@@ -13,4 +23,6 @@ Sensores:
 - O site envia telemetria em ~20 Hz.
 - HTTPS é obrigatório para os sensores em navegadores modernos.
 
-A pontuação atual ainda é diagnóstico de movimento. A próxima etapa é interpretar/calibrar os .msm e sincronizar julgamento com a timeline da música.
+Servidor:
+- O site usa o servidor online configurado em config.js.
+- A tela inicial e a página de controle aguardam /api/status responder antes de liberar a interface.

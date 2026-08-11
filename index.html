@@ -13,7 +13,8 @@
       } catch {}
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=038-gold-video-exact" />
+  <script src="config.js?v=040-earthsong-server-gate"></script>
+  <link rel="stylesheet" href="style.css?v=040-earthsong-server-gate" />
 </head>
 <body class="site-loading">
 
@@ -39,11 +40,15 @@
     (() => {
       const startedAt = performance.now();
       const minimumVisibleMs = 650;
+      const retryDelayMs = 2500;
+      const requestTimeoutMs = 6500;
       let progress = 0;
       let domReady = false;
       let appReady = false;
       let threeReady = false;
+      let serverReady = false;
       let finished = false;
+      let serverAttempts = 0;
 
       const clamp = value => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
 
@@ -60,11 +65,10 @@
         if (fill) fill.style.width = `${progress}%`;
       }
 
-      function finish(force = false) {
-        if (finished) return;
-        if (!force && (!domReady || !appReady || !threeReady)) return;
+      function finish() {
+        if (finished || !domReady || !appReady || !threeReady || !serverReady) return;
         finished = true;
-        render(100, "Pronto!");
+        render(100, "Servidor online. Pronto!");
 
         const loader = document.getElementById("siteLoader");
         const elapsed = performance.now() - startedAt;
@@ -78,9 +82,39 @@
         }, wait);
       }
 
+      async function checkServerUntilReady() {
+        if (serverReady || finished) return;
+        serverAttempts += 1;
+        const base = String(window.GAME_CONFIG?.SERVER_URL || "").trim().replace(/\/+$/, "");
+        if (!base) {
+          render(Math.max(progress, 88), "Servidor online não configurado.");
+          window.setTimeout(checkServerUntilReady, retryDelayMs);
+          return;
+        }
+
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), requestTimeoutMs);
+        try {
+          render(Math.max(progress, 82), serverAttempts === 1 ? "Verificando servidor online…" : "Aguardando o servidor online iniciar…");
+          const response = await fetch(`${base}/api/status?t=${Date.now()}`, { cache: "no-store", signal: controller.signal });
+          const status = await response.json().catch(() => null);
+          if (!response.ok || !status?.ok) throw new Error("Servidor ainda indisponível");
+          serverReady = true;
+          render(Math.max(progress, 96), "Servidor online conectado.");
+          window.dispatchEvent(new CustomEvent("game-server-ready", { detail: status }));
+          finish();
+        } catch {
+          render(Math.max(progress, 90), "Servidor iniciando… o site abrirá automaticamente quando ficar online.");
+          window.setTimeout(checkServerUntilReady, retryDelayMs);
+        } finally {
+          window.clearTimeout(timer);
+        }
+      }
+
       window.SiteLoader = {
         report(value, status) {
-          render(value, status);
+          const capped = serverReady ? value : Math.min(Number(value) || 0, 94);
+          render(capped, status);
         },
         markAppReady() {
           appReady = true;
@@ -89,22 +123,23 @@
         },
         markAppError() {
           appReady = true;
-          render(Math.max(progress, 55), "Abrindo com recursos disponíveis…");
+          render(Math.max(progress, 55), "Interface preparada com os recursos disponíveis…");
           finish();
         },
         mark3DReady() {
           threeReady = true;
-          render(100, "3D pronto");
+          render(Math.max(progress, 76), "3D pronto. Verificando servidor…");
           finish();
         },
         mark3DError() {
           threeReady = true;
-          render(100, "Abrindo o jogo…");
+          render(Math.max(progress, 76), "Dado 3D em fallback. Verificando servidor…");
           finish();
         }
       };
 
       render(3, "Preparando o jogo…");
+      checkServerUntilReady();
 
       document.addEventListener("DOMContentLoaded", () => {
         domReady = true;
@@ -117,19 +152,10 @@
 
       window.setTimeout(() => {
         if (!threeReady) {
-          console.warn("O carregamento 3D demorou; abrindo com o fallback do dado.");
+          console.warn("O carregamento 3D demorou; usando o fallback do dado enquanto o servidor é verificado.");
           window.SiteLoader.mark3DError();
         }
       }, 3500);
-
-      window.setTimeout(() => {
-        if (!finished) {
-          console.warn("Liberando a interface para não bloquear a navegação.");
-          domReady = true;
-          appReady = true;
-          finish(true);
-        }
-      }, 5000);
     })();
   </script>
 
@@ -271,8 +297,8 @@
       </div>
 
       <div id="phoneServerWarning" class="server-warning hidden">
-        <strong>O servidor local não está ativo.</strong>
-        <p>Abra o jogo pelo arquivo <b>INICIAR_TUDO.bat</b>. Abrir somente o index.html não permite conectar outros dispositivos.</p>
+        <strong>O servidor online ainda não está disponível.</strong>
+        <p>Aguarde o servidor online iniciar. O site libera a entrada automaticamente quando a conexão estiver pronta.</p>
       </div>
 
       <div id="phoneLobby" class="phone-lobby">
@@ -327,7 +353,7 @@
       <div class="menu-heading">
         <p class="eyebrow">Modo online</p>
         <h1>Jogar Online</h1>
-        <p class="subtitle">Crie ou entre em uma sala sincronizada. Por enquanto, o servidor Online ainda roda localmente no computador.</p>
+        <p class="subtitle">Crie ou entre em uma sala sincronizada. O servidor da partida fica online e sincroniza as salas automaticamente.</p>
       <div id="serverStatus" class="server-status checking" aria-live="polite">
         <span class="server-status-dot" aria-hidden="true"></span>
         <span id="serverStatusText">Verificando servidor…</span>
@@ -378,7 +404,7 @@
         </div>
 
         <div id="onlineShareBox" class="online-share-box hidden">
-          <span>Endereço para compartilhar nesta versão local</span>
+          <span>Endereço para compartilhar</span>
           <code id="onlineShareUrl">Preparando endereço…</code>
           <button id="copyOnlineLinkBtn" class="secondary compact-button" type="button">Copiar convite</button>
         </div>
@@ -486,15 +512,21 @@
 
       <section class="dance-song-test" aria-label="Música de teste Just Dance">
         <div class="dance-song-info">
-          <img src="minigames/just-dance/songs/RainOverMe/rainoverme_cover@2x.jpg" alt="Capa de Rain Over Me" />
+          <img id="danceSongCover" src="minigames/just-dance/songs/RainOverMe/rainoverme_cover@2x.jpg" alt="Capa de Rain Over Me" />
           <div>
-            <span class="tiny-label">Primeira música de teste</span>
-            <strong>Rain Over Me</strong>
-            <small>Pitbull Ft. Marc Anthony • Just Dance 2020 • 1 coach</small>
+            <span id="danceSongBadge" class="tiny-label">Música de teste</span>
+            <strong id="danceSongTitle">Rain Over Me</strong>
+            <small id="danceSongMeta">Pitbull Ft. Marc Anthony • Just Dance 2020 • 1 coach</small>
             <p id="danceSongAssetStatus">Low / Medium / High + HUD real carregados no projeto.</p>
           </div>
         </div>
         <div class="dance-player-settings" aria-label="Opções do player">
+          <label>Música
+            <select id="danceSongSelect">
+              <option value="RainOverMe">Rain Over Me</option>
+              <option value="EarthSong">Earth Song • Beta</option>
+            </select>
+          </label>
           <label>Qualidade do vídeo
             <select id="danceQualityMode">
               <option value="auto">Automática</option>
@@ -642,7 +674,7 @@
 
       <div id="danceLabServerWarning" class="server-warning hidden">
         <strong>Servidor indisponível.</strong>
-        <p>Execute <b>INICIAR_TUDO.bat</b> desta versão e confirme que o endereço do servidor está configurado.</p>
+        <p>O servidor online precisa estar disponível para usar os sensores. Aguarde a conexão e tente novamente.</p>
       </div>
 
       <div class="dance-lab-layout">
@@ -808,8 +840,7 @@
     </div>
   </div>
 
-  <script src="config.js?v=031-jd-ipk-scoring-16x9" onload="window.SiteLoader?.report(13, 'Configuração carregada…')"></script>
-  <script src="vendor/socket.io.min.js?v=local-4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
+  <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
   <script type="importmap">
     {
       "imports": {
@@ -819,12 +850,12 @@
   </script>
   <script type="module">
     window.SiteLoader?.report(20, "Baixando motor 3D…");
-    import("./dice3d.js?v=031-jd-ipk-scoring-16x9").catch(error => {
+    import("./dice3d.js?v=040-earthsong-server-gate").catch(error => {
       console.error("Falha ao carregar o dado 3D:", error);
       window.dispatchEvent(new CustomEvent("dice3d-error", { detail: String(error?.message || error) }));
     });
   </script>
-  <script src="script.js?v=038-gold-video-exact" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
-  <span class="version-badge" data-version>V. 0.2.3 (Teste)</span>
+  <script src="script.js?v=040-earthsong-server-gate" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <span class="version-badge" data-version>V. 0.2.4 (Teste)</span>
 </body>
 </html>

@@ -1,0 +1,615 @@
+[
+  {
+    "name": "earthsong_bras_genou",
+    "time": 20821,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_poing_terre",
+    "time": 24291,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_sol",
+    "time": 27762,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_jette",
+    "time": 30364,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_bras_genou",
+    "time": 34702,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_poing_terre",
+    "time": 38172,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_sol",
+    "time": 41642,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_jette",
+    "time": 44245,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_lever",
+    "time": 47715,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 51185,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 52053,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 52921,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 54656,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 55523,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 56391,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_spin",
+    "time": 58126,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 61596,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_down",
+    "time": 65066,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_allemand",
+    "time": 68537,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_pointer_sol",
+    "time": 71139,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_genou",
+    "time": 76344,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_poing_terre",
+    "time": 79815,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_sol",
+    "time": 83285,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_jette",
+    "time": 85888,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_bras_genou",
+    "time": 90225,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_poing_terre",
+    "time": 93696,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_sol",
+    "time": 97166,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_jette",
+    "time": 99768,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_lever",
+    "time": 103239,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 106709,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 107576,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 108444,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 110179,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 111047,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 111914,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_spin",
+    "time": 113649,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 117119,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_down",
+    "time": 120590,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_allemand",
+    "time": 124060,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_pointer_sol",
+    "time": 126662,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 130986,
+    "duration": 1750
+  },
+  {
+    "name": "earthsong_bras_down",
+    "time": 134470,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_allemand",
+    "time": 137941,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_pointer_sol",
+    "time": 140543,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_main",
+    "time": 144881,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 146616,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 147484,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_bras",
+    "time": 148351,
+    "duration": 1741
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 150092,
+    "duration": 852
+  },
+  {
+    "name": "earthsong_poitrine_l",
+    "time": 150944,
+    "duration": 877
+  },
+  {
+    "name": "earthsong_saut_r",
+    "time": 151821,
+    "duration": 1750
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 153571,
+    "duration": 853
+  },
+  {
+    "name": "earthsong_poitrine_r",
+    "time": 154424,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_saut_l",
+    "time": 155292,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 157027,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 157894,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 158762,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_down",
+    "time": 162232,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_allemand",
+    "time": 165702,
+    "duration": 2603
+  },
+  {
+    "name": "earthsong_pointer_sol",
+    "time": 168305,
+    "duration": 1745
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 172643,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_down",
+    "time": 176113,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_allemand",
+    "time": 179593,
+    "duration": 2593
+  },
+  {
+    "name": "earthsong_pointer_sol",
+    "time": 182186,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_shake",
+    "time": 185656,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_r",
+    "time": 186523,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 189994,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_poing_lever_l",
+    "time": 193464,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 196934,
+    "duration": 1742
+  },
+  {
+    "name": "earthsong_poing_lever_r",
+    "time": 200404,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 203874,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_poing_lever_l",
+    "time": 207345,
+    "duration": 1745
+  },
+  {
+    "name": "earthsong_bras_tendu",
+    "time": 210815,
+    "duration": 1744
+  },
+  {
+    "name": "earthsong_poing_lever_r",
+    "time": 214285,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_ski_l",
+    "time": 216892,
+    "duration": 863
+  },
+  {
+    "name": "earthsong_ski_l",
+    "time": 217755,
+    "duration": 880
+  },
+  {
+    "name": "earthsong_poing_l",
+    "time": 218635,
+    "duration": 1729
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 220364,
+    "duration": 861,
+    "goldMove": 1
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 221225,
+    "duration": 875
+  },
+  {
+    "name": "earthsong_poing_r",
+    "time": 222100,
+    "duration": 1742
+  },
+  {
+    "name": "earthsong_ski_l",
+    "time": 223842,
+    "duration": 854
+  },
+  {
+    "name": "earthsong_ski_l",
+    "time": 224696,
+    "duration": 880
+  },
+  {
+    "name": "earthsong_poing_l",
+    "time": 225575,
+    "duration": 1746
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 227321,
+    "duration": 845,
+    "goldMove": 1
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 228166,
+    "duration": 876
+  },
+  {
+    "name": "earthsong_poing_r",
+    "time": 229042,
+    "duration": 1734
+  },
+  {
+    "name": "earthsong_ski_l",
+    "time": 230777,
+    "duration": 869
+  },
+  {
+    "name": "earthsong_ski_l",
+    "time": 231645,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_l",
+    "time": 232513,
+    "duration": 1748
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 234262,
+    "duration": 858,
+    "goldMove": 1
+  },
+  {
+    "name": "earthsong_ski_r",
+    "time": 235120,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_f",
+    "time": 235988,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_spin",
+    "time": 240326,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_main_r",
+    "time": 242928,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_genou_tape",
+    "time": 244664,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_genou_moi",
+    "time": 245531,
+    "duration": 878
+  },
+  {
+    "name": "earthsong_main_l",
+    "time": 246410,
+    "duration": 1724
+  },
+  {
+    "name": "earthsong_genou_tape",
+    "time": 248134,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_genou_moi",
+    "time": 249001,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_main_r",
+    "time": 249869,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_genou_tape",
+    "time": 251604,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_shake",
+    "time": 252471,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_shake",
+    "time": 253339,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 256809,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 260279,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_shake",
+    "time": 262882,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_bras_u",
+    "time": 263750,
+    "duration": 1735
+  },
+  {
+    "name": "earthsong_shake",
+    "time": 267220,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_shake",
+    "time": 268087,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 270690,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 272434,
+    "duration": 858
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 274168,
+    "duration": 860
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 275906,
+    "duration": 883
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 277657,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 279392,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 281127,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 282862,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 284597,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 286332,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 288067,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_poing_lever_f",
+    "time": 289802,
+    "duration": 868
+  },
+  {
+    "name": "earthsong_pose_fin",
+    "time": 293273,
+    "duration": 2603
+  }
+]

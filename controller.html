@@ -14,7 +14,8 @@
       } catch {}
     })();
   </script>
-  <link rel="stylesheet" href="controller.css?v=024-jd-yeah-pictos" />
+  <script src="config.js?v=040-earthsong-server-gate"></script>
+  <link rel="stylesheet" href="controller.css?v=040-earthsong-server-gate" />
 </head>
 <body class="site-loading">
 
@@ -40,13 +41,16 @@
     (() => {
       const startedAt = performance.now();
       const minimumVisibleMs = 500;
+      const retryDelayMs = 2500;
       let progress = 0;
       let pageLoaded = false;
       let appReady = false;
+      let serverReady = false;
       let finished = false;
 
       function render(value, status) {
-        progress = Math.max(progress, Math.max(0, Math.min(100, Math.round(Number(value) || 0))));
+        const next = Math.max(0, Math.min(serverReady ? 100 : 94, Math.round(Number(value) || 0)));
+        progress = Math.max(progress, next);
         const loader = document.getElementById("siteLoader");
         const percent = document.getElementById("loaderPercent");
         const statusText = document.getElementById("loaderStatus");
@@ -58,9 +62,10 @@
       }
 
       function finish() {
-        if (finished || !pageLoaded || !appReady) return;
+        if (finished || !pageLoaded || !appReady || !serverReady) return;
         finished = true;
-        render(100, "Pronto!");
+        progress = 100;
+        render(100, "Servidor online. Controle pronto!");
         const loader = document.getElementById("siteLoader");
         const wait = Math.max(160, minimumVisibleMs - (performance.now() - startedAt));
         window.setTimeout(() => {
@@ -71,24 +76,46 @@
         }, wait);
       }
 
+      async function waitForServer() {
+        if (serverReady || finished) return;
+        const base = String(window.GAME_CONFIG?.SERVER_URL || "").trim().replace(/\/+$/, "");
+        if (!base) {
+          render(90, "Servidor online não configurado.");
+          window.setTimeout(waitForServer, retryDelayMs);
+          return;
+        }
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), 6500);
+        try {
+          render(86, "Verificando servidor online…");
+          const response = await fetch(`${base}/api/status?t=${Date.now()}`, { cache: "no-store", signal: controller.signal });
+          const status = await response.json().catch(() => null);
+          if (!response.ok || !status?.ok) throw new Error("offline");
+          serverReady = true;
+          render(96, "Servidor online conectado.");
+          finish();
+        } catch {
+          render(92, "Servidor iniciando… o controle abrirá automaticamente.");
+          window.setTimeout(waitForServer, retryDelayMs);
+        } finally {
+          window.clearTimeout(timer);
+        }
+      }
+
       window.ControllerLoader = {
         report: render,
         markReady() {
           appReady = true;
-          render(96, "Finalizando controle…");
+          render(94, "Finalizando controle…");
           finish();
         }
       };
 
       render(5, "Preparando controle…");
+      waitForServer();
       document.addEventListener("DOMContentLoaded", () => render(12, "Carregando interface…"), { once: true });
-      window.addEventListener("load", () => {
-        pageLoaded = true;
-        finish();
-      }, { once: true });
-      window.setTimeout(() => {
-        if (!appReady) window.ControllerLoader.markReady();
-      }, 15000);
+      window.addEventListener("load", () => { pageLoaded = true; finish(); }, { once: true });
+      window.setTimeout(() => { if (!appReady) window.ControllerLoader.markReady(); }, 15000);
     })();
   </script>
 
@@ -194,9 +221,8 @@
     </article>
   </div>
 
-  <script src="config.js?v=024-jd-yeah-pictos" onload="window.ControllerLoader?.report(32, 'Configuração carregada…')"></script>
-  <script src="vendor/socket.io.min.js?v=local-4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
-  <script src="controller.js?v=024-jd-yeah-pictos" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
-  <span class="version-badge" data-version>V. 0.2.2 (Teste)</span>
+  <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
+  <script src="controller.js?v=040-earthsong-server-gate" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
+  <span class="version-badge" data-version>V. 0.2.4 (Teste)</span>
 </body>
 </html>
