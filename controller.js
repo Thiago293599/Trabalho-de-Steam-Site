@@ -297,7 +297,7 @@ function showSensorReceivingUi() {
 function sendLatestSensorSample(source = "mixed", interval = 0) {
   if (!sensorStreaming || !sensorModeRequested || !socket?.connected || !joinedRoom) return;
   const now = performance.now();
-  if (now - sensorLastSentAt < 48) return;
+  if (now - sensorLastSentAt < 28) return;
   sensorLastSentAt = now;
 
   const rotationRate = sensorVectorMagnitude(sensorLatestRotation) > 0.001
@@ -393,7 +393,7 @@ function registerGenericSensor(sensor, source, onReading) {
   sensor.onreading = () => {
     try {
       onReading(sensor);
-      sendLatestSensorSample(source, 1000 / 30);
+      sendLatestSensorSample(source, 1000 / 40);
     } catch {}
   };
   sensor.onerror = event => {
@@ -408,7 +408,7 @@ function startGenericSensors() {
   if (!window.isSecureContext) return;
   try {
     if (typeof window.Gyroscope !== "undefined") {
-      const gyro = new window.Gyroscope({ frequency: 30 });
+      const gyro = new window.Gyroscope({ frequency: 40 });
       registerGenericSensor(gyro, "generic-gyroscope", value => {
         const RAD_TO_DEG = 180 / Math.PI;
         sensorLatestRotation = {
@@ -424,13 +424,13 @@ function startGenericSensors() {
   }
   try {
     if (typeof window.LinearAccelerationSensor !== "undefined") {
-      const linear = new window.LinearAccelerationSensor({ frequency: 30 });
+      const linear = new window.LinearAccelerationSensor({ frequency: 40 });
       registerGenericSensor(linear, "generic-linear-acceleration", value => {
         sensorLatestAcceleration = { x: Number(value.x || 0), y: Number(value.y || 0), z: Number(value.z || 0) };
         markObserved("accelerometer");
       });
     } else if (typeof window.Accelerometer !== "undefined") {
-      const accel = new window.Accelerometer({ frequency: 30 });
+      const accel = new window.Accelerometer({ frequency: 40 });
       registerGenericSensor(accel, "generic-accelerometer", value => {
         sensorLatestAccelerationIncludingGravity = { x: Number(value.x || 0), y: Number(value.y || 0), z: Number(value.z || 0) };
         markObserved("accelerometer");

@@ -3692,14 +3692,27 @@ function makeDanceJudgeStats() {
     veryHighMotion: 0,
     rotationSum: 0,
     rotationPeak: 0,
+    motionSum: 0,
+    motionSquares: 0,
+    motionPeak: 0,
+    jerkSum: 0,
+    jerkPeak: 0,
+    angularAccelSum: 0,
+    angularAccelPeak: 0,
     directionSamples: 0,
     directionTransitions: 0,
     directionChaos: 0,
     hardReversals: 0,
+    strongReversals: 0,
     directionSumX: 0,
     directionSumY: 0,
     directionSumZ: 0,
+    firstSampleTime: 0,
+    lastSampleTime: 0,
+    previousSampleTime: 0,
     previousDirection: null,
+    previousMotionVector: null,
+    previousRotationVector: null,
     previousGravityVector: null
   };
 }
@@ -3730,7 +3743,8 @@ function danceJudgeBandScore(value, outerLow, innerLow, innerHigh, outerHigh) {
 }
 
 function danceJudgeIsRealShakeMove(move) {
-  return /(?:^|[_-])shake(?:$|[_-])/i.test(String(move?.name || ""));
+  // Aceita nomes como earthsong_shake, Shake, Shake01 e shake-fast.
+  return /(?:^|[^a-z0-9])shake(?:[^a-z0-9]|\d|$)/i.test(String(move?.name || ""));
 }
 
 function beginDanceMoveJudging(index) {
@@ -3743,7 +3757,7 @@ function beginDanceMoveJudging(index) {
 }
 
 function provisionalDanceJudgement(stats, move = null) {
-  if (!stats || stats.count < 4) return { judgement: "X", quality: 0 };
+  if (!stats || stats.count < 3) return { judgement: "X", quality: 0 };
 
   const count = Math.max(1, stats.count);
   const avg = stats.sum / count;
@@ -3755,6 +3769,7 @@ function provisionalDanceJudgement(stats, move = null) {
   const veryHighMotionRatio = stats.veryHighMotion / count;
   const transitions = Math.max(1, stats.directionTransitions);
   const reversalRate = stats.hardReversals / transitions;
+  const strongReversalRate = stats.strongReversals / transitions;
   const chaosRate = Math.max(0, Math.min(1, stats.directionChaos / transitions));
   const coherence = stats.directionSamples > 0
     ? Math.max(0, Math.min(1, Math.sqrt(
@@ -3764,16 +3779,47 @@ function provisionalDanceJudgement(stats, move = null) {
       ) / stats.directionSamples))
     : 0.55;
 
+  const avgMotion = stats.motionSum / count;
+  const motionVariance = Math.max(0, stats.motionSquares / count - avgMotion * avgMotion);
+  const motionVariation = Math.sqrt(motionVariance);
+  const avgJerk = stats.jerkSum / Math.max(1, count - 1);
+  const avgAngularAccel = stats.angularAccelSum / Math.max(1, count - 1);
+  const elapsedSeconds = Math.max(0.18, (Number(stats.lastSampleTime || 0) - Number(stats.firstSampleTime || 0)) / 1000);
+  const reversalHz = stats.strongReversals / elapsedSeconds;
+
   let quality = 0;
 
   if (danceJudgeIsRealShakeMove(move)) {
-    // Alguns mapas possuem um movimento Shake real. Neles, reversões rápidas fazem parte da coreografia.
-    const avgQ = danceJudgeBandScore(avg, 0.035, 0.13, 0.68, 1.01);
-    const peakQ = danceJudgeBandScore(stats.peak, 0.08, 0.30, 0.90, 1.01);
-    const coverageQ = danceJudgeBandScore(coverage, 0.08, 0.34, 0.95, 1.01);
-    const rotationQ = danceJudgeBandScore(avgRotation, 0, 35, 600, 1200);
-    const variationQ = danceJudgeBandScore(variation, 0.005, 0.035, 0.42, 0.75);
-    quality = avgQ * 0.30 + peakQ * 0.24 + coverageQ * 0.24 + rotationQ * 0.12 + variationQ * 0.10;
+    // SHAKE REAL: aqui reversões rápidas são desejadas. Usamos vários sinais do celular
+    // e não exigimos giroscópio, porque alguns navegadores entregam apenas aceleração.
+    const motionQ = danceJudgeBandScore(avgMotion, 0.12, 0.75, 8.5, 24);
+    const motionPeakQ = danceJudgeBandScore(stats.motionPeak, 0.35, 2.1, 20, 48);
+    const coverageQ = danceJudgeBandScore(coverage, 0.04, 0.20, 0.98, 1.01);
+    const reversalQ = danceJudgeBandScore(strongReversalRate, 0.01, 0.16, 0.92, 1.01);
+    const cadenceQ = danceJudgeBandScore(reversalHz, 0.25, 1.15, 8.2, 13.5);
+    const jerkQ = danceJudgeBandScore(avgJerk, 0.5, 5.0, 150, 360);
+    const variationQ = danceJudgeBandScore(motionVariation, 0.02, 0.25, 7.0, 18);
+
+    // Giro ajuda, mas é bônus: um celular/navegador sem gyro ainda pode acertar o Shake.
+    const rotationSignal = Math.max(avgRotation, stats.rotationPeak * 0.35);
+    const rotationBonus = danceJudgeBandScore(rotationSignal, 3, 22, 700, 1600);
+    const angularBonus = danceJudgeBandScore(avgAngularAccel, 20, 150, 12000, 30000);
+    const sensorBonus = Math.max(rotationBonus, angularBonus);
+
+    quality =
+      motionQ * 0.22 +
+      motionPeakQ * 0.10 +
+      coverageQ * 0.14 +
+      reversalQ * 0.22 +
+      cadenceQ * 0.16 +
+      jerkQ * 0.10 +
+      variationQ * 0.06;
+
+    quality = Math.min(1, quality + sensorBonus * 0.10);
+
+    // Um shake curto mas claramente alternado não deve virar X só por ter pouca força.
+    if (stats.strongReversals >= 2 && coverage >= 0.22 && avgMotion >= 0.45) quality = Math.max(quality, 0.50);
+    if (stats.strongReversals >= 3 && reversalHz >= 1.2 && avgMotion >= 0.75) quality = Math.max(quality, 0.64);
   } else {
     // Movimento normal: procura um gesto controlado, não apenas energia bruta.
     const avgQ = danceJudgeBandScore(avg, 0.02, 0.09, 0.42, 0.80);
@@ -3791,7 +3837,7 @@ function provisionalDanceJudgement(stats, move = null) {
       variationQ * 0.08 +
       directionQ * 0.14;
 
-    // Anti-shake: alternar o celular rapidamente em sentidos opostos deixa de ser um atalho para PERFECT.
+    // Anti-shake só vale para movimentos que NÃO são Shake.
     const reversalPenalty = Math.max(0, Math.min(1, (reversalRate - 0.18) / 0.48));
     const chaosPenalty = Math.max(0, Math.min(1, (chaosRate - 0.52) / 0.40));
     const sustainedPenalty = Math.max(0, Math.min(1, (highMotionRatio - 0.56) / 0.40));
@@ -3802,8 +3848,6 @@ function provisionalDanceJudgement(stats, move = null) {
     );
 
     quality = baseQuality * antiShakeMultiplier;
-
-    // Se o padrão for claramente "chacoalhar sem parar", limita o resultado mesmo com muita força.
     if (reversalRate >= 0.52 && coverage >= 0.70) quality = Math.min(quality, 0.49);
     if ((reversalRate >= 0.68 && coverage >= 0.78) || highMotionRatio >= 0.93) quality = Math.min(quality, 0.34);
   }
@@ -3913,20 +3957,26 @@ function collectDanceJudgementSample(payload) {
   const stats = danceJudgeAccumulators.get(payload.playerId) || makeDanceJudgeStats();
   const sample = payload.sample || {};
   const intensity = Math.max(0, Math.min(1, Number(payload.intensity || 0)));
-  const rotationRate = sample.rotationRate || {};
+  const rotationRate = {
+    x: Number(sample.rotationRate?.x || 0),
+    y: Number(sample.rotationRate?.y || 0),
+    z: Number(sample.rotationRate?.z || 0)
+  };
   const rotation = danceJudgeVectorMagnitude(rotationRate);
+  const sampleTime = Number(sample.clientTime || payload.serverTime || Date.now());
+  if (!stats.firstSampleTime) stats.firstSampleTime = sampleTime;
+  stats.lastSampleTime = Math.max(stats.lastSampleTime || 0, sampleTime);
 
   stats.count += 1;
   stats.sum += intensity;
   stats.sumSquares += intensity * intensity;
   stats.peak = Math.max(stats.peak, intensity);
-  if (intensity >= 0.08 || rotation >= 35) stats.active += 1;
+  if (intensity >= 0.06 || rotation >= 28) stats.active += 1;
   if (intensity >= 0.68 || rotation >= 600) stats.highMotion += 1;
   if (intensity >= 0.84 || rotation >= 900) stats.veryHighMotion += 1;
   stats.rotationSum += rotation;
   stats.rotationPeak = Math.max(stats.rotationPeak, rotation);
 
-  // Prefere aceleração linear. Quando o navegador não fornece, usa a mudança da aceleração com gravidade.
   const linear = {
     x: Number(sample.acceleration?.x || 0),
     y: Number(sample.acceleration?.y || 0),
@@ -3938,8 +3988,9 @@ function collectDanceJudgementSample(payload) {
     z: Number(sample.accelerationIncludingGravity?.z || 0)
   };
 
+  // Prefere aceleração linear. Se ela não existir, mede a mudança do vetor com gravidade.
   let motionVector = linear;
-  if (danceJudgeVectorMagnitude(linear) < 0.08 && stats.previousGravityVector) {
+  if (danceJudgeVectorMagnitude(linear) < 0.06 && stats.previousGravityVector) {
     motionVector = {
       x: gravity.x - stats.previousGravityVector.x,
       y: gravity.y - stats.previousGravityVector.y,
@@ -3948,7 +3999,44 @@ function collectDanceJudgementSample(payload) {
   }
   stats.previousGravityVector = gravity;
 
-  if (danceJudgeVectorMagnitude(motionVector) >= 0.16) {
+  const motionMagnitudeFromServer = Number(sample.motionMagnitude);
+  const motionMagnitude = Number.isFinite(motionMagnitudeFromServer) && motionMagnitudeFromServer > 0
+    ? motionMagnitudeFromServer
+    : danceJudgeVectorMagnitude(motionVector);
+  stats.motionSum += motionMagnitude;
+  stats.motionSquares += motionMagnitude * motionMagnitude;
+  stats.motionPeak = Math.max(stats.motionPeak, motionMagnitude);
+
+  const dt = stats.previousSampleTime
+    ? Math.max(0.025, Math.min(0.16, (sampleTime - stats.previousSampleTime) / 1000))
+    : 0.04;
+  stats.previousSampleTime = sampleTime;
+
+  if (stats.previousMotionVector) {
+    const jerkVector = {
+      x: (motionVector.x - stats.previousMotionVector.x) / dt,
+      y: (motionVector.y - stats.previousMotionVector.y) / dt,
+      z: (motionVector.z - stats.previousMotionVector.z) / dt
+    };
+    const jerk = danceJudgeVectorMagnitude(jerkVector);
+    stats.jerkSum += jerk;
+    stats.jerkPeak = Math.max(stats.jerkPeak, jerk);
+  }
+  stats.previousMotionVector = motionVector;
+
+  if (stats.previousRotationVector) {
+    const angularAccelVector = {
+      x: (rotationRate.x - stats.previousRotationVector.x) / dt,
+      y: (rotationRate.y - stats.previousRotationVector.y) / dt,
+      z: (rotationRate.z - stats.previousRotationVector.z) / dt
+    };
+    const angularAccel = danceJudgeVectorMagnitude(angularAccelVector);
+    stats.angularAccelSum += angularAccel;
+    stats.angularAccelPeak = Math.max(stats.angularAccelPeak, angularAccel);
+  }
+  stats.previousRotationVector = rotationRate;
+
+  if (danceJudgeVectorMagnitude(motionVector) >= 0.10) {
     const direction = danceJudgeUnitVector(motionVector);
     if (direction) {
       stats.directionSamples += 1;
@@ -3963,9 +4051,9 @@ function collectDanceJudgementSample(payload) {
           direction.z * stats.previousDirection.z
         ));
         stats.directionTransitions += 1;
-        // Mudanças suaves quase não contam; inversões rápidas pesam bastante.
         stats.directionChaos += Math.max(0, Math.min(1, (0.45 - dot) / 1.45));
-        if (dot <= -0.32) stats.hardReversals += 1;
+        if (dot <= -0.22) stats.hardReversals += 1;
+        if (dot <= -0.52) stats.strongReversals += 1;
       }
       stats.previousDirection = direction;
     }
