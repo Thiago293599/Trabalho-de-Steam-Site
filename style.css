@@ -2827,3 +2827,24 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   visibility:visible;
 }
 .dance-ipk-gold-stage-fx{display:none!important}
+
+
+/* ---------- Gold Move v0.4: vídeo único Starry Cubes ---------- */
+.dance-gold-single-video{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  z-index:82!important;
+  display:block!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  background:transparent!important;
+  mix-blend-mode:screen!important;
+  transform:scale(var(--dance-yeah-scale,1))!important;
+  transform-origin:center!important;
+  transition:opacity .04s linear!important;
+}
+.dance-gold-single-video.active{opacity:1!important;visibility:visible!important;}

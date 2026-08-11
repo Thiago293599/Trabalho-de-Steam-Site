@@ -588,6 +588,7 @@
               </div>
             </div>
             <canvas id="danceGoldCanvas" class="dance-gold-exact-canvas" width="960" height="540" aria-hidden="true"></canvas>
+            <video id="danceYeahFinalVideo" class="dance-yeah-final-video dance-gold-single-video" preload="auto" playsinline aria-hidden="true"></video>
             <div id="danceIpkGoldStageFx" class="dance-ipk-gold-stage-fx" aria-hidden="true" hidden>
               <span class="dance-ipk-gold-screen-flash" aria-hidden="true"></span>
               <img id="danceIpkGoldStageFlare" class="dance-jd26-gold-halo" src="minigames/just-dance/hud/ipk-2026-reference/screen_halo.png" alt="" aria-hidden="true">
@@ -632,34 +633,25 @@
           </div>
           <p>O erro anterior era de <b>2.812 ms</b>: o <code>videoOffset</code> foi subtraído de uma timeline que já começava nesse tempo. Para <b>Rain Over Me</b>, a calibração confirmada agora é <b>-1725 ms</b> e esse passa a ser o padrão da música. Se ainda notar diferença no aparelho/tela, use os botões durante o vídeo; <kbd>[</kbd>/<kbd>]</kbd> ajustam 25 ms e <kbd>Shift</kbd> + essas teclas ajusta 250 ms.</p>
         </div>
-        <div class="dance-yeah-calibrator" aria-label="Configuração DEV do Gold Move do IPK">
+        <div class="dance-yeah-calibrator" aria-label="Configuração DEV do vídeo do Gold Move">
           <div class="dance-yeah-dev-head">
             <div>
               <span class="tiny-label">GOLD MOVE DEV</span>
-              <strong>Gold Move — animação exata dos vídeos</strong>
+              <strong>Gold Move — vídeo único Starry Cubes</strong>
             </div>
-            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">Frames exatos • 60 FPS</span>
+            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">MP4 único • 1080p • 60 FPS</span>
           </div>
           <div class="dance-yeah-dev-grid">
-            <label>Pré-aviso Gold Move
-              <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="500" max="6000" step="25" value="3250" /><b>ms antes</b></span>
-            </label>
-            <label>Depois da 1ª volta, repetir Start Loop a partir de
-              <span class="dance-yeah-dev-input"><input id="danceYeahLoopRestartMs" type="number" min="0" max="1600" step="25" value="0" /><b>ms do loop</b></span>
-            </label>
-            <label>Impacto do Gold Move
-              <span class="dance-yeah-dev-input"><input id="danceYeahFinishOffsetMs" type="number" min="-1500" max="1500" step="25" value="0" /><b>ms do Gold</b></span>
-            </label>
-            <label>FinishYeah depois do Finish Loop
-              <span class="dance-yeah-dev-input"><input id="danceYeahFinalDelayMs" type="number" min="0" max="2000" step="25" value="0" /><b>ms depois</b></span>
+            <label>Começar o vídeo antes do YEAH real
+              <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="0" max="5000" step="25" value="3250" /><b>ms antes</b></span>
             </label>
           </div>
           <div class="dance-yeah-dev-actions">
             <button id="danceYeahApplyBtn" class="secondary compact-button" type="button">Aplicar</button>
-            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar animação original</button>
+            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar vídeo</button>
             <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrão</button>
           </div>
-          <p>Esta versão usa <b>os próprios quadros dos vídeos Start Loop, Finish Loop e Finish Yeah!</b> em 60 FPS, sem reproduzir MP4 durante o gameplay. O preto é composto em modo screen, então o efeito fica por cima de toda a HUD sem cobrir o vídeo. O som do Start Loop toca só na primeira volta; as repetições ficam mudas.</p>
+          <p>Agora o Gold Move usa <b>somente o vídeo Starry Cubes enviado</b>, sem separar Start Loop, Finish Loop e Finish Yeah. Ajuste o valor acima para escolher quantos milissegundos antes do <b>YEAH real</b> o vídeo deve começar. O valor fica salvo neste navegador.</p>
         </div>
         <div class="dance-score-rules" aria-label="Sistema de pontuação">
           <div class="dance-judgement-legend">
