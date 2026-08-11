@@ -3757,8 +3757,13 @@ function beginDanceMoveJudging(index) {
 }
 
 function provisionalDanceJudgement(stats, move = null) {
-  if (!stats || stats.count < 3) return { judgement: "X", quality: 0 };
+  // Pontuacao V3: mais arcade e tolerante.
+  // Sem um perfil de sensores gravado para cada coreografia, nao tentamos adivinhar
+  // a direcao "correta" do braco. O foco e: houve movimento no tempo certo, com
+  // energia suficiente e sem ser apenas um shake repetitivo em movimentos normais.
+  if (!stats || stats.count < 2) return { judgement: "X", quality: 0 };
 
+  const clamp01 = value => Math.max(0, Math.min(1, Number(value || 0)));
   const count = Math.max(1, stats.count);
   const avg = stats.sum / count;
   const coverage = stats.active / count;
@@ -3770,92 +3775,100 @@ function provisionalDanceJudgement(stats, move = null) {
   const transitions = Math.max(1, stats.directionTransitions);
   const reversalRate = stats.hardReversals / transitions;
   const strongReversalRate = stats.strongReversals / transitions;
-  const chaosRate = Math.max(0, Math.min(1, stats.directionChaos / transitions));
-  const coherence = stats.directionSamples > 0
-    ? Math.max(0, Math.min(1, Math.sqrt(
-        stats.directionSumX * stats.directionSumX +
-        stats.directionSumY * stats.directionSumY +
-        stats.directionSumZ * stats.directionSumZ
-      ) / stats.directionSamples))
-    : 0.55;
 
   const avgMotion = stats.motionSum / count;
-  const motionVariance = Math.max(0, stats.motionSquares / count - avgMotion * avgMotion);
-  const motionVariation = Math.sqrt(motionVariance);
   const avgJerk = stats.jerkSum / Math.max(1, count - 1);
   const avgAngularAccel = stats.angularAccelSum / Math.max(1, count - 1);
-  const elapsedSeconds = Math.max(0.18, (Number(stats.lastSampleTime || 0) - Number(stats.firstSampleTime || 0)) / 1000);
+  const elapsedSeconds = Math.max(0.16, (Number(stats.lastSampleTime || 0) - Number(stats.firstSampleTime || 0)) / 1000);
   const reversalHz = stats.strongReversals / elapsedSeconds;
+
+  // Sinais basicos. Cada celular entrega escalas um pouco diferentes, por isso usamos
+  // o melhor indicio entre intensidade normalizada, aceleracao real e giro.
+  const intensityQ = clamp01((avg - 0.025) / 0.24);
+  const peakQ = clamp01((stats.peak - 0.055) / 0.56);
+  const motionQ = clamp01((avgMotion - 0.10) / 3.30);
+  const motionPeakQ = clamp01((stats.motionPeak - 0.22) / 7.50);
+  const rotationQ = clamp01((avgRotation - 4) / 230);
+  const rotationPeakQ = clamp01((stats.rotationPeak - 15) / 620);
+  const coverageQ = clamp01((coverage - 0.05) / 0.52);
+  const variationQ = clamp01((variation - 0.004) / 0.22);
+  const movementEvidence = Math.max(intensityQ, motionQ, rotationQ * 0.92);
+  const peakEvidence = Math.max(peakQ, motionPeakQ, rotationPeakQ * 0.88);
 
   let quality = 0;
 
   if (danceJudgeIsRealShakeMove(move)) {
-    // SHAKE REAL: aqui reversões rápidas são desejadas. Usamos vários sinais do celular
-    // e não exigimos giroscópio, porque alguns navegadores entregam apenas aceleração.
-    const motionQ = danceJudgeBandScore(avgMotion, 0.12, 0.75, 8.5, 24);
-    const motionPeakQ = danceJudgeBandScore(stats.motionPeak, 0.35, 2.1, 20, 48);
-    const coverageQ = danceJudgeBandScore(coverage, 0.04, 0.20, 0.98, 1.01);
-    const reversalQ = danceJudgeBandScore(strongReversalRate, 0.01, 0.16, 0.92, 1.01);
-    const cadenceQ = danceJudgeBandScore(reversalHz, 0.25, 1.15, 8.2, 13.5);
-    const jerkQ = danceJudgeBandScore(avgJerk, 0.5, 5.0, 150, 360);
-    const variationQ = danceJudgeBandScore(motionVariation, 0.02, 0.25, 7.0, 18);
-
-    // Giro ajuda, mas é bônus: um celular/navegador sem gyro ainda pode acertar o Shake.
-    const rotationSignal = Math.max(avgRotation, stats.rotationPeak * 0.35);
-    const rotationBonus = danceJudgeBandScore(rotationSignal, 3, 22, 700, 1600);
-    const angularBonus = danceJudgeBandScore(avgAngularAccel, 20, 150, 12000, 30000);
-    const sensorBonus = Math.max(rotationBonus, angularBonus);
+    // SHAKE REAL: reversoes e cadencia sao desejadas, mas nao obrigamos um sensor
+    // especifico. Um aparelho sem giroscopio ainda consegue SUPER/PERFECT.
+    const reversalCountQ = clamp01(stats.strongReversals / 4);
+    const reversalRateQ = clamp01((strongReversalRate - 0.04) / 0.56);
+    const cadenceQ = danceJudgeBandScore(reversalHz, 0.18, 0.75, 8.8, 14.5);
+    const jerkQ = clamp01((avgJerk - 0.8) / 75);
+    const angularQ = clamp01((avgAngularAccel - 25) / 6000);
+    const shakeEvidence = Math.max(reversalCountQ, reversalRateQ * 0.90, cadenceQ * 0.86);
+    const sensorBonus = Math.max(jerkQ, angularQ, rotationQ) * 0.08;
 
     quality =
-      motionQ * 0.22 +
-      motionPeakQ * 0.10 +
-      coverageQ * 0.14 +
-      reversalQ * 0.22 +
-      cadenceQ * 0.16 +
-      jerkQ * 0.10 +
-      variationQ * 0.06;
+      movementEvidence * 0.30 +
+      peakEvidence * 0.12 +
+      coverageQ * 0.25 +
+      shakeEvidence * 0.28 +
+      variationQ * 0.05 +
+      sensorBonus;
 
-    quality = Math.min(1, quality + sensorBonus * 0.10);
-
-    // Um shake curto mas claramente alternado não deve virar X só por ter pouca força.
-    if (stats.strongReversals >= 2 && coverage >= 0.22 && avgMotion >= 0.45) quality = Math.max(quality, 0.50);
-    if (stats.strongReversals >= 3 && reversalHz >= 1.2 && avgMotion >= 0.75) quality = Math.max(quality, 0.64);
+    // Pisos de seguranca para shakes curtos (como os de ~868 ms da Earth Song).
+    // Se o jogador realmente alternou o celular, nao deve receber X por diferenca
+    // de escala entre Android/iPhone/navegadores.
+    const anyClearMotion = coverage >= 0.16 && (avg >= 0.045 || avgMotion >= 0.30 || avgRotation >= 18);
+    if (anyClearMotion) quality = Math.max(quality, 0.24); // pelo menos OK
+    if (stats.hardReversals >= 1 && coverage >= 0.18) quality = Math.max(quality, 0.31);
+    if (stats.strongReversals >= 2 && coverage >= 0.22) quality = Math.max(quality, 0.46); // GOOD
+    if (stats.strongReversals >= 3 && coverage >= 0.30 && reversalHz >= 0.9) quality = Math.max(quality, 0.65); // SUPER
+    if (stats.strongReversals >= 4 && coverage >= 0.42 && reversalHz >= 1.2 && movementEvidence >= 0.38) {
+      quality = Math.max(quality, 0.83); // PERFECT possivel quando o shake foi claro
+    }
   } else {
-    // Movimento normal: procura um gesto controlado, não apenas energia bruta.
-    const avgQ = danceJudgeBandScore(avg, 0.02, 0.09, 0.42, 0.80);
-    const peakQ = danceJudgeBandScore(stats.peak, 0.06, 0.24, 0.78, 1.01);
-    const coverageQ = danceJudgeBandScore(coverage, 0.04, 0.20, 0.78, 1.01);
-    const rotationQ = danceJudgeBandScore(avgRotation, 0, 20, 320, 850);
-    const variationQ = danceJudgeBandScore(variation, 0.003, 0.025, 0.28, 0.60);
-    const directionQ = Math.max(0, Math.min(1, coherence * 0.42 + (1 - chaosRate) * 0.58));
+    // MOVIMENTO NORMAL: pontuacao arcade. Nao penaliza coreografia por mudar de direcao.
+    quality =
+      movementEvidence * 0.42 +
+      coverageQ * 0.29 +
+      peakEvidence * 0.17 +
+      variationQ * 0.06 +
+      rotationQ * 0.06;
 
-    const baseQuality =
-      avgQ * 0.27 +
-      peakQ * 0.22 +
-      coverageQ * 0.19 +
-      rotationQ * 0.10 +
-      variationQ * 0.08 +
-      directionQ * 0.14;
+    // Pisos para movimentos visivelmente executados. Isso evita uma sequencia de X
+    // so porque o celular tem sensores menos sensiveis.
+    const clearMotion = coverage >= 0.18 && (avg >= 0.05 || avgMotion >= 0.35 || avgRotation >= 22);
+    const solidMotion = coverage >= 0.34 && (avg >= 0.075 || avgMotion >= 0.60 || avgRotation >= 34);
+    const strongMotion = coverage >= 0.50 && (avg >= 0.10 || avgMotion >= 0.90 || avgRotation >= 48);
+    if (clearMotion) quality = Math.max(quality, 0.25); // OK
+    if (solidMotion) quality = Math.max(quality, 0.43); // GOOD
+    if (strongMotion && peakEvidence >= 0.35) quality = Math.max(quality, 0.58);
 
-    // Anti-shake só vale para movimentos que NÃO são Shake.
-    const reversalPenalty = Math.max(0, Math.min(1, (reversalRate - 0.18) / 0.48));
-    const chaosPenalty = Math.max(0, Math.min(1, (chaosRate - 0.52) / 0.40));
-    const sustainedPenalty = Math.max(0, Math.min(1, (highMotionRatio - 0.56) / 0.40));
-    const extremePenalty = Math.max(0, Math.min(1, (veryHighMotionRatio - 0.24) / 0.56));
-    const antiShakeMultiplier = Math.max(
-      0.16,
-      1 - reversalPenalty * 0.48 - chaosPenalty * 0.25 - sustainedPenalty * 0.34 - extremePenalty * 0.22
-    );
-
-    quality = baseQuality * antiShakeMultiplier;
-    if (reversalRate >= 0.52 && coverage >= 0.70) quality = Math.min(quality, 0.49);
-    if ((reversalRate >= 0.68 && coverage >= 0.78) || highMotionRatio >= 0.93) quality = Math.min(quality, 0.34);
+    // Anti-shake V3: somente impede PERFECT/SUPER quando ha um padrao claramente
+    // repetitivo e rapido. Ele nao transforma mais um movimento legitimo em X.
+    const repetitiveShake = reversalHz >= 3.4 && stats.strongReversals >= 4 && coverage >= 0.62;
+    const extremeShake = reversalHz >= 5.0 && stats.strongReversals >= 5 && highMotionRatio >= 0.58;
+    if (repetitiveShake) quality = Math.min(quality, 0.57); // no maximo GOOD
+    if (extremeShake && veryHighMotionRatio >= 0.22) quality = Math.min(quality, 0.50);
   }
 
-  quality = Math.max(0, Math.min(1, quality));
+  quality = clamp01(quality);
   const roundedQuality = Math.round(quality * 1000) / 1000;
-  if (move?.goldMove) return { judgement: quality >= 0.55 ? "YEAH" : "X", quality: roundedQuality };
-  const judgement = quality >= 0.82 ? "PERFECT" : quality >= 0.66 ? "SUPER" : quality >= 0.48 ? "GOOD" : quality >= 0.28 ? "OK" : "X";
+
+  // Gold Move tambem fica mais tolerante: precisa existir movimento claro no tempo,
+  // nao uma correspondencia perfeita com um modelo que o site nao possui.
+  if (move?.goldMove) return { judgement: quality >= 0.36 ? "YEAH" : "X", quality: roundedQuality };
+
+  const judgement = quality >= 0.78
+    ? "PERFECT"
+    : quality >= 0.58
+      ? "SUPER"
+      : quality >= 0.36
+        ? "GOOD"
+        : quality >= 0.18
+          ? "OK"
+          : "X";
   return { judgement, quality: roundedQuality };
 }
 
