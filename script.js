@@ -3076,6 +3076,40 @@ function applyDanceVideoFit(value, save = true) {
   if (save) safeLocalStorageSet(DANCE_VIDEO_FIT_STORAGE_KEY, fit);
 }
 
+// V10: Where Have You Been possui fontes com enquadramentos diferentes.
+// Se a fonte carregada não for realmente 16:9, preenchemos o palco sem
+// deformar: zoom proporcional (cover), centro horizontal e base ancorada.
+function applyDanceAutomaticVideoFraming() {
+  if (!danceTestVideo) return;
+
+  // Sempre limpa a regra automática antes de avaliar a fonte atual.
+  danceTestVideo.style.removeProperty("object-fit");
+  danceTestVideo.style.removeProperty("object-position");
+  danceVideoStage?.removeAttribute("data-auto-video-framing");
+
+  const song = getDanceSongConfig();
+  if (song.id !== "WhereHaveYou") return;
+
+  const width = Number(danceTestVideo.videoWidth || 0);
+  const height = Number(danceTestVideo.videoHeight || 0);
+  if (!(width > 0 && height > 0)) return;
+
+  const sourceRatio = width / height;
+  const targetRatio = 16 / 9;
+  // ~1% de tolerância evita zoom por pequenas diferenças de metadata/SAR.
+  const isSixteenNine = Math.abs(sourceRatio - targetRatio) / targetRatio <= 0.01;
+
+  if (!isSixteenNine) {
+    danceTestVideo.style.setProperty("object-fit", "cover");
+    danceTestVideo.style.setProperty("object-position", "center bottom");
+    danceVideoStage?.setAttribute("data-auto-video-framing", "cover-center-bottom");
+    console.info(`[Just Dance] ${song.title}: vídeo ${width}x${height} (${sourceRatio.toFixed(3)}), aplicando cover + center bottom.`);
+  } else {
+    danceVideoStage?.setAttribute("data-auto-video-framing", "native-16x9");
+    console.info(`[Just Dance] ${song.title}: vídeo ${width}x${height} já é 16:9; enquadramento automático não necessário.`);
+  }
+}
+
 function setDanceWindowMode(enabled) {
   danceWindowMode = Boolean(enabled);
   document.body.classList.toggle("dance-window-player", danceWindowMode);
@@ -3445,6 +3479,13 @@ async function previewDanceYeahSequence() {
 
 function updateDanceSongIdentityUi() {
   const song = getDanceSongConfig();
+  // Limpa o enquadramento automático da fonte/música anterior. Quando os
+  // novos metadados chegarem, loadedmetadata aplicará a regra novamente.
+  if (danceTestVideo) {
+    danceTestVideo.style.removeProperty("object-fit");
+    danceTestVideo.style.removeProperty("object-position");
+  }
+  danceVideoStage?.removeAttribute("data-auto-video-framing");
   if (danceSongSelect) danceSongSelect.value = song.id;
   if (danceSongCover) {
     danceSongCover.src = `${song.base}/${song.coverFile}`;
@@ -5229,7 +5270,7 @@ function testDevCard() {
 
 // V6.8: todos os eventos de gameplay seguem o MP4. O <audio> fica livre para preview futuro.
 danceTestVideo?.addEventListener("timeupdate", () => { updateDanceSongTimeline(); updateDancePlayerControls(); broadcastDancePhoneSession("sync", false); });
-danceTestVideo?.addEventListener("loadedmetadata", () => { updateDanceSongTimeline(); updateDancePlayerControls(); });
+danceTestVideo?.addEventListener("loadedmetadata", () => { applyDanceAutomaticVideoFraming(); updateDanceSongTimeline(); updateDancePlayerControls(); });
 danceTestVideo?.addEventListener("play", () => { syncDanceMoveJudging(); startDanceVisualHud(); updateDancePlayerControls(); });
 danceTestVideo?.addEventListener("pause", () => { syncDanceMoveJudging(); stopDanceVisualHud(); updateDancePlayerControls(); });
 danceTestVideo?.addEventListener("ended", () => {
