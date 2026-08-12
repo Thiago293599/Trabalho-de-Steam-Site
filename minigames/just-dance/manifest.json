@@ -43,7 +43,7 @@
       "map": "songs/EarthSong/EarthSong.json",
       "metadata": "songs/EarthSong/metadata.json",
       "moves": "songs/EarthSong/moves/EarthSong_moves0.json",
-      "classifiers": "songs/EarthSong/classifiers_WII_source/",
+      "classifiers": "songs/EarthSong/classifiers_WIIU/",
       "pictosAtlas": "songs/EarthSong/pictos-atlas.png",
       "pictosAtlasData": "songs/EarthSong/pictos-atlas.json",
       "cover": "songs/EarthSong/earthsong_cover@2x.jpg"

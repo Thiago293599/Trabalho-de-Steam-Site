@@ -361,7 +361,7 @@ const DANCE_SONGS = Object.freeze({
     videos: Object.freeze({ low: "EarthSong_Coach_Low.mp4", medium: "EarthSong_Coach_Medium.mp4", high: "EarthSong_Coach_High.mp4" }),
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
-    classifierFormat: "livemove", classifierFolder: "classifiers_WII_source"
+    classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
   }),
   ItsRainingMen: Object.freeze({
     id: "ItsRainingMen", title: "It's Raining Men", artist: "The Weather Girls", edition: "Just Dance 2", coaches: 1, beta: true, lyricsColor: "#35C5ED",
@@ -3941,21 +3941,41 @@ function danceFindAscii(bytes, text) {
 }
 
 function parseDanceMsmClassifier(arrayBuffer, moveName = "") {
-  if (!(arrayBuffer instanceof ArrayBuffer) || arrayBuffer.byteLength < 260) return null;
+  if (!(arrayBuffer instanceof ArrayBuffer) || arrayBuffer.byteLength < 244) return null;
   const view = new DataView(arrayBuffer);
-  const count = view.getUint32(232, false);
-  const channels = view.getUint32(236, false);
   const duration = view.getFloat32(200, false);
-  const start = 244;
+
+  // Layout MSM moderno (Rain Over Me / It's Raining Men).
+  let count = view.getUint32(232, false);
+  let channels = view.getUint32(236, false);
+  let start = 244;
+  let layout = "modern";
+
+  // Layout MSM legado do Wii U usado pelos classifiers novos de Earth Song.
+  // Nesse formato: count @ 224, channels @ 228 e amostras @ 236.
+  const modernValid = count > 0
+    && count <= 512
+    && channels === 2
+    && start + (count * 2 + 2) * 4 <= arrayBuffer.byteLength;
+
+  if (!modernValid) {
+    count = view.getUint32(224, false);
+    channels = view.getUint32(228, false);
+    start = 236;
+    layout = "legacy-wiiu";
+  }
+
   if (!count || count > 512 || channels !== 2 || start + (count * 2 + 2) * 4 > arrayBuffer.byteLength) return null;
+
   const primary = [];
   const secondary = [];
   for (let index = 0; index < count; index += 1) primary.push(view.getFloat32(start + index * 4, false));
   for (let index = 0; index < count; index += 1) secondary.push(view.getFloat32(start + (count + index) * 4, false));
   const scaleA = view.getFloat32(start + count * 8, false);
   const scaleB = view.getFloat32(start + count * 8 + 4, false);
-  if (![...primary, ...secondary].every(Number.isFinite)) return null;
-  return { format: "msm", moveName, duration, count, primary, secondary, scaleA, scaleB };
+
+  if (![duration, scaleA, scaleB, ...primary, ...secondary].every(Number.isFinite)) return null;
+  return { format: "msm", layout, moveName, duration, count, primary, secondary, scaleA, scaleB };
 }
 
 function parseDanceLiveMoveClassifier(arrayBuffer, moveName = "") {

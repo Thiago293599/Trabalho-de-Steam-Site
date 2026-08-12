@@ -151,7 +151,7 @@ const PHONE_DANCE_MAX_SCORE = 13333;
 const PHONE_DANCE_WEIGHTS = Object.freeze({ PERFECT: 1, SUPER: 0.8, GOOD: 0.6, OK: 0.35, YEAH: 1, X: 0 });
 const PHONE_DANCE_SONGS = Object.freeze({
   RainOverMe: Object.freeze({ id:"RainOverMe", base:"minigames/just-dance/songs/RainOverMe", movesFile:"RainOverMe_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
-  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"livemove", classifierFolder:"classifiers_WII_source" }),
+  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
   ItsRainingMen: Object.freeze({ id:"ItsRainingMen", base:"minigames/just-dance/songs/ItsRainingMen", movesFile:"ItsRainingMen_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" })
 });
 const PHONE_DANCE_SCORE_TUNING = Object.freeze({
@@ -268,7 +268,26 @@ function phoneUnit(v){ const m=phoneMagnitude(v); return m>1e-5?{x:Number(v?.x||
 function phoneDot(a,b){ return Number(a?.x||0)*Number(b?.x||0)+Number(a?.y||0)*Number(b?.y||0)+Number(a?.z||0)*Number(b?.z||0); }
 function phoneDanceClassifierFile(song, moveName){ const n=String(moveName||"").toLowerCase(); return song?.classifierFormat==="msm"?`${n}.msm`:PHONE_EARTH_CLASSIFIERS[n]||""; }
 function phoneFindAscii(bytes,text){ const t=Array.from(String(text||""),c=>c.charCodeAt(0)&255); outer:for(let i=0;i<=bytes.length-t.length;i++){for(let j=0;j<t.length;j++)if(bytes[i+j]!==t[j])continue outer;return i;} return -1; }
-function phoneParseMsm(buffer,moveName=""){ if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<260)return null; const v=new DataView(buffer),count=v.getUint32(232,false),channels=v.getUint32(236,false),duration=v.getFloat32(200,false),start=244; if(!count||count>512||channels!==2||start+(count*2+2)*4>buffer.byteLength)return null; const primary=[],secondary=[]; for(let i=0;i<count;i++)primary.push(v.getFloat32(start+i*4,false)); for(let i=0;i<count;i++)secondary.push(v.getFloat32(start+(count+i)*4,false)); if(![...primary,...secondary].every(Number.isFinite))return null; return {format:"msm",moveName,count,duration,primary,secondary}; }
+function phoneParseMsm(buffer,moveName=""){
+  if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<244)return null;
+  const v=new DataView(buffer);
+  const duration=v.getFloat32(200,false);
+  let count=v.getUint32(232,false),channels=v.getUint32(236,false),start=244,layout="modern";
+  const modernValid=count>0&&count<=512&&channels===2&&start+(count*2+2)*4<=buffer.byteLength;
+  if(!modernValid){
+    count=v.getUint32(224,false);
+    channels=v.getUint32(228,false);
+    start=236;
+    layout="legacy-wiiu";
+  }
+  if(!count||count>512||channels!==2||start+(count*2+2)*4>buffer.byteLength)return null;
+  const primary=[],secondary=[];
+  for(let i=0;i<count;i++)primary.push(v.getFloat32(start+i*4,false));
+  for(let i=0;i<count;i++)secondary.push(v.getFloat32(start+(count+i)*4,false));
+  const scaleA=v.getFloat32(start+count*8,false),scaleB=v.getFloat32(start+count*8+4,false);
+  if(![duration,scaleA,scaleB,...primary,...secondary].every(Number.isFinite))return null;
+  return {format:"msm",layout,moveName,count,duration,primary,secondary,scaleA,scaleB};
+}
 function phoneParseLiveMove(buffer,moveName=""){ if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<512)return null; const bytes=new Uint8Array(buffer),mi=phoneFindAscii(bytes,"motion"); if(mi<0)return null; let co=mi+6; while(co<bytes.length&&bytes[co]===0)co++; if(co+4>bytes.length)return null; const v=new DataView(buffer),count=v.getUint32(co,true),start=co+4; if(!count||count>512||start+count*12>buffer.byteLength)return null; const axes=[[],[],[]]; for(let a=0;a<3;a++)for(let i=0;i<count;i++){const x=v.getFloat32(start+(a*count+i)*4,true);if(!Number.isFinite(x)||Math.abs(x)>1000)return null;axes[a].push(x);} return {format:"livemove",moveName,count,axes}; }
 function phoneNormalize(values){ const a=(values||[]).map(x=>Number(x||0)); if(!a.length)return[]; const mean=a.reduce((s,x)=>s+x,0)/a.length, variance=a.reduce((s,x)=>s+(x-mean)**2,0)/a.length,sd=Math.sqrt(Math.max(variance,1e-8)); return a.map(x=>(x-mean)/sd); }
 function phoneResample(values,target){ const s=(values||[]).map(x=>Number(x||0)),n=Math.max(1,Math.round(target||1)); if(!s.length)return Array(n).fill(0); if(s.length===1)return Array(n).fill(s[0]); const out=[]; for(let i=0;i<n;i++){const p=i*(s.length-1)/Math.max(1,n-1),l=Math.floor(p),r=Math.min(s.length-1,l+1),m=p-l;out.push(s[l]*(1-m)+s[r]*m);} return out; }
