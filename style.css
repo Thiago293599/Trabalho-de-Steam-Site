@@ -2849,16 +2849,17 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 }
 .dance-gold-single-video.active{opacity:1!important;visibility:visible!important;}
 
-/* ---------- Just Dance V6.5: glow vertical + estrelas progressivas ---------- */
-/* Mantem a barra dos pictos limpa e os pictos maiores da V6.4. */
+/* ---------- Just Dance V6.6: Outline correta + glow Solo ---------- */
+/* Mantem a pista limpa e os pictos grandes das versoes anteriores. */
 .dance-picto-bar-bkg,
 .dance-picto-bar-gradient{
   display:none!important;
 }
 
+/* V6.6: um pouco menos alta que a V6.5, acompanhando a referencia Solo.png. */
 .dance-picto-lane{
   isolation:isolate;
-  height:calc(238px * var(--jd-ui-scale))!important;
+  height:calc(218px * var(--jd-ui-scale))!important;
 }
 .dance-picto-items{z-index:4}
 .dance-picto-item{
@@ -2880,11 +2881,12 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   box-shadow:0 1px 2px rgba(0,0,0,.76)!important;
 }
 
+/* Barrinha branca na frente da linha. So um pouco mais larga que a V6.5. */
 .dance-picto-target{
   z-index:6!important;
   left:22%!important;
   bottom:calc(5px * var(--jd-ui-scale))!important;
-  width:calc(126px * var(--jd-ui-scale))!important;
+  width:calc(132px * var(--jd-ui-scale))!important;
   height:max(3px,calc(5px * var(--jd-ui-scale)))!important;
   background:#fff!important;
   border-radius:999px!important;
@@ -2894,40 +2896,27 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   transform-origin:50% 50%;
 }
 
-/* V6.5: NAO aumenta para os lados. A largura volta para 112px.
-   O aumento agora acontece somente para CIMA: 210px de altura. */
+/* V6.6: usa a textura extraida da Solo.png enviada pelo usuario.
+   V6.5 = 112x210. Agora = 138x184: um pouco mais largo e claramente mais baixo.
+   A linha/branca de beat continua separada; esta imagem contem somente a luz vertical. */
 .dance-picto-lane::before{
   content:"";
   position:absolute;
   z-index:1;
   left:22%;
-  bottom:calc(3px * var(--jd-ui-scale));
-  width:calc(112px * var(--jd-ui-scale));
-  height:calc(210px * var(--jd-ui-scale));
+  bottom:calc(9px * var(--jd-ui-scale));
+  width:calc(138px * var(--jd-ui-scale));
+  height:calc(184px * var(--jd-ui-scale));
   translate:-50% 0;
   pointer-events:none;
   opacity:1;
-  background:linear-gradient(to top,
-    rgba(255,255,255,.56) 0%,
-    rgba(255,255,255,.43) 10%,
-    rgba(255,255,255,.31) 24%,
-    rgba(255,255,255,.20) 40%,
-    rgba(255,255,255,.11) 57%,
-    rgba(255,255,255,.055) 73%,
-    rgba(255,255,255,.018) 87%,
-    rgba(255,255,255,0) 100%);
-  /* Apenas um amaciamento pequeno nas bordas; nao cria expansao lateral. */
-  -webkit-mask-image:linear-gradient(90deg,
-    transparent 0%,
-    #000 12%,
-    #000 88%,
-    transparent 100%);
-  mask-image:linear-gradient(90deg,
-    transparent 0%,
-    #000 12%,
-    #000 88%,
-    transparent 100%);
-  filter:blur(calc(.25px * var(--jd-ui-scale)));
+  background-image:url("minigames/just-dance/hud/images/picto-glow-v6.6.png")!important;
+  background-repeat:no-repeat!important;
+  background-position:center bottom!important;
+  background-size:100% 100%!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+  filter:none!important;
 }
 
 .dance-picto-lane.jd-two-beat-pulse::before{
@@ -2949,27 +2938,28 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 }
 
 /* ---------- Score / estrelas ---------- */
-/* O score bar era z-index 6, enquanto todo o HUD estava preso num stacking context z-index 3.
-   Assim, mesmo uma estrela com z-index alto podia ficar ATRAS da barra. O HUD agora passa
-   por cima da barra; Gold Move/Yeah/preload continuam acima dele (8/9/30). */
+/* HUD/estrelas sempre a frente da barra vertical de score. */
 .dance-game-hud{z-index:7!important}
 .dance-score-bar{z-index:6!important}
 .dance-star-hud,
 .dance-hud-stars{z-index:12!important}
 
-/* Todos os slots ficam invisiveis por padrao. */
 .dance-hud-star{
   z-index:13!important;
   opacity:0!important;
-  transform:translate(-50%,-50%) scale(1)!important;
+  transform:translate(-50%,-50%) rotate(0deg) scale(1)!important;
   animation:none;
 }
 .dance-hud-star img{z-index:1}
+
+/* A Outline usada pela V6.6 e hud/images/Outline.png (900x900), NAO a star_outline do IPK. */
 .dance-hud-star .outline{
+  z-index:1!important;
   opacity:0!important;
   transform:rotate(0deg) scale(1)!important;
   transform-origin:50% 50%!important;
   animation:none!important;
+  object-fit:contain!important;
   filter:drop-shadow(0 1px calc(2px * var(--jd-ui-scale)) rgba(0,0,0,.9))!important;
 }
 .dance-hud-star .fill{
@@ -2977,25 +2967,23 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   opacity:0!important;
 }
 
-/* Somente a PROXIMA estrela a conquistar mostra a outline. Ela fica completamente reta (0deg). */
+/* 0 estrelas -> outline 1; 1 estrela -> outline 2; ... */
 .dance-hud-star.next-outline{
   opacity:1!important;
   transform:translate(-50%,-50%) rotate(0deg) scale(1)!important;
   animation:none!important;
 }
 .dance-hud-star.next-outline .outline{
-  opacity:.88!important;
+  opacity:1!important;
   transform:rotate(0deg) scale(1)!important;
 }
 .dance-hud-star.next-outline .fill{opacity:0!important}
 
-/* Estrelas conquistadas ficam preenchidas e sempre NA FRENTE da score bar.
-   A outline do slot conquistado some; a outline passa para o proximo slot. */
 .dance-hud-star.filled{
   z-index:14!important;
   opacity:1!important;
-  transform:translate(-50%,-50%) scale(1)!important;
-  animation:danceVerticalStarWinV65 .58s cubic-bezier(.17,.86,.21,1.15)!important;
+  transform:translate(-50%,-50%) rotate(0deg) scale(1)!important;
+  animation:danceVerticalStarWinV66 .58s cubic-bezier(.17,.86,.21,1.15)!important;
 }
 .dance-hud-star.filled .outline{opacity:0!important}
 .dance-hud-star.filled .fill{
@@ -3003,36 +2991,35 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   transform:scale(1)!important;
 }
 
-@keyframes danceVerticalStarWinV65{
+@keyframes danceVerticalStarWinV66{
   0%{opacity:0;transform:translate(-50%,-50%) scale(.18) rotate(-18deg)}
   56%{opacity:1;transform:translate(-50%,-50%) scale(1.34) rotate(5deg)}
   78%{transform:translate(-50%,-50%) scale(.92) rotate(-2deg)}
   100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg)}
 }
 
-/* Durante Superstar/Megastar, nao deixa o estado visual reativar a outline das ja conquistadas. */
 .dance-hud-stars.rank-shift .dance-hud-star.next-outline{
   animation:none!important;
   transform:translate(-50%,-50%) rotate(0deg) scale(1)!important;
 }
 
 @media(max-width:780px){
-  .dance-picto-lane{height:calc(220px * var(--jd-ui-scale))!important}
+  .dance-picto-lane{height:calc(202px * var(--jd-ui-scale))!important}
   .dance-picto-item{width:calc(116px * var(--jd-ui-scale))!important}
-  .dance-picto-target{width:calc(120px * var(--jd-ui-scale))!important}
+  .dance-picto-target{width:calc(126px * var(--jd-ui-scale))!important}
   .dance-picto-lane::before{
-    width:calc(112px * var(--jd-ui-scale));
-    height:calc(194px * var(--jd-ui-scale));
+    width:calc(132px * var(--jd-ui-scale));
+    height:calc(176px * var(--jd-ui-scale));
   }
 }
 @media(max-width:500px){
-  .dance-picto-lane{height:calc(204px * var(--jd-ui-scale))!important}
+  .dance-picto-lane{height:calc(188px * var(--jd-ui-scale))!important}
   .dance-picto-item{width:calc(108px * var(--jd-ui-scale))!important}
-  .dance-picto-target{width:calc(112px * var(--jd-ui-scale))!important}
+  .dance-picto-target{width:calc(120px * var(--jd-ui-scale))!important}
   .dance-picto-lane::before{
-    width:calc(112px * var(--jd-ui-scale));
-    height:calc(178px * var(--jd-ui-scale));
+    width:calc(126px * var(--jd-ui-scale));
+    height:calc(166px * var(--jd-ui-scale));
   }
 }
-/* ---------- END Just Dance V6.5: glow vertical + estrelas progressivas ---------- */
+/* ---------- END Just Dance V6.6: Outline correta + glow Solo ---------- */
 

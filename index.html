@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -27,7 +27,7 @@
     </div>
     <div class="site-loader-progress">
       <div class="site-loader-meta">
-        <span id="loaderStatus" class="site-loader-status">Preparando o jogo…</span>
+        <span id="loaderStatus" class="site-loader-status">Preparando o jogoâ€¦</span>
         <strong id="loaderPercent" class="site-loader-percent">0%</strong>
       </div>
       <div class="site-loader-bar" aria-hidden="true">
@@ -87,7 +87,7 @@
         serverAttempts += 1;
         const base = String(window.GAME_CONFIG?.SERVER_URL || "").trim().replace(/\/+$/, "");
         if (!base) {
-          render(Math.max(progress, 88), "Servidor online não configurado.");
+          render(Math.max(progress, 88), "Servidor online nÃ£o configurado.");
           window.setTimeout(checkServerUntilReady, retryDelayMs);
           return;
         }
@@ -95,16 +95,16 @@
         const controller = new AbortController();
         const timer = window.setTimeout(() => controller.abort(), requestTimeoutMs);
         try {
-          render(Math.max(progress, 82), serverAttempts === 1 ? "Verificando servidor online…" : "Aguardando o servidor online iniciar…");
+          render(Math.max(progress, 82), serverAttempts === 1 ? "Verificando servidor onlineâ€¦" : "Aguardando o servidor online iniciarâ€¦");
           const response = await fetch(`${base}/api/status?t=${Date.now()}`, { cache: "no-store", signal: controller.signal });
           const status = await response.json().catch(() => null);
-          if (!response.ok || !status?.ok) throw new Error("Servidor ainda indisponível");
+          if (!response.ok || !status?.ok) throw new Error("Servidor ainda indisponÃ­vel");
           serverReady = true;
           render(Math.max(progress, 96), "Servidor online conectado.");
           window.dispatchEvent(new CustomEvent("game-server-ready", { detail: status }));
           finish();
         } catch {
-          render(Math.max(progress, 90), "Servidor iniciando… o site abrirá automaticamente quando ficar online.");
+          render(Math.max(progress, 90), "Servidor iniciandoâ€¦ o site abrirÃ¡ automaticamente quando ficar online.");
           window.setTimeout(checkServerUntilReady, retryDelayMs);
         } finally {
           window.clearTimeout(timer);
@@ -118,32 +118,32 @@
         },
         markAppReady() {
           appReady = true;
-          render(Math.max(progress, 55), "Lógica do jogo pronta…");
+          render(Math.max(progress, 55), "LÃ³gica do jogo prontaâ€¦");
           finish();
         },
         markAppError() {
           appReady = true;
-          render(Math.max(progress, 55), "Interface preparada com os recursos disponíveis…");
+          render(Math.max(progress, 55), "Interface preparada com os recursos disponÃ­veisâ€¦");
           finish();
         },
         mark3DReady() {
           threeReady = true;
-          render(Math.max(progress, 76), "3D pronto. Verificando servidor…");
+          render(Math.max(progress, 76), "3D pronto. Verificando servidorâ€¦");
           finish();
         },
         mark3DError() {
           threeReady = true;
-          render(Math.max(progress, 76), "Dado 3D em fallback. Verificando servidor…");
+          render(Math.max(progress, 76), "Dado 3D em fallback. Verificando servidorâ€¦");
           finish();
         }
       };
 
-      render(3, "Preparando o jogo…");
+      render(3, "Preparando o jogoâ€¦");
       checkServerUntilReady();
 
       document.addEventListener("DOMContentLoaded", () => {
         domReady = true;
-        render(10, "Carregando arquivos do jogo…");
+        render(10, "Carregando arquivos do jogoâ€¦");
         finish();
       }, { once: true });
 
@@ -152,7 +152,7 @@
 
       window.setTimeout(() => {
         if (!threeReady) {
-          console.warn("O carregamento 3D demorou; usando o fallback do dado enquanto o servidor é verificado.");
+          console.warn("O carregamento 3D demorou; usando o fallback do dado enquanto o servidor Ã© verificado.");
           window.SiteLoader.mark3DError();
         }
       }, 3500);
@@ -160,7 +160,7 @@
   </script>
 
 <button id="themeToggle" class="theme-toggle" type="button" aria-label="Ativar modo escuro" title="Alternar tema">
-    <span id="themeToggleIcon" aria-hidden="true">☾</span>
+    <span id="themeToggleIcon" aria-hidden="true">â˜¾</span>
     <span id="themeToggleText">Escuro</span>
   </button>
 
@@ -169,7 +169,7 @@
       <div class="menu-heading">
         <p class="eyebrow">Jogo de tabuleiro</p>
         <h1>Corrida de Tabuleiro</h1>
-        <p class="subtitle">Escolha como você quer jogar.</p>
+        <p class="subtitle">Escolha como vocÃª quer jogar.</p>
       </div>
 
       <div class="mode-grid">
@@ -186,7 +186,7 @@
             <strong>Local</strong>
             <small>Jogue nesta tela ou conecte outros dispositivos como controles.</small>
           </span>
-          <span class="mode-arrow" aria-hidden="true">›</span>
+          <span class="mode-arrow" aria-hidden="true">â€º</span>
         </button>
 
         
@@ -201,9 +201,9 @@
           </span>
           <span class="mode-copy">
             <strong>Controles</strong>
-            <small>Digite o código da sala e use este dispositivo como controle.</small>
+            <small>Digite o cÃ³digo da sala e use este dispositivo como controle.</small>
           </span>
-          <span class="mode-arrow" aria-hidden="true">›</span>
+          <span class="mode-arrow" aria-hidden="true">â€º</span>
         </button>
 
         <button id="onlineModeBtn" class="mode-card" type="button">
@@ -217,9 +217,9 @@
           </span>
           <span class="mode-copy">
             <strong>Online</strong>
-            <small>Crie uma sala ou entre usando um código.</small>
+            <small>Crie uma sala ou entre usando um cÃ³digo.</small>
           </span>
-          <span class="mode-arrow" aria-hidden="true">›</span>
+          <span class="mode-arrow" aria-hidden="true">â€º</span>
         </button>
       </div>
     </div>
@@ -229,13 +229,13 @@
   <section id="localMenu" class="menu-screen hidden">
     <div class="menu-card">
       <button id="localBackBtn" class="back-link" type="button" aria-label="Voltar ao menu principal">
-        <span aria-hidden="true">‹</span> Voltar
+        <span aria-hidden="true">â€¹</span> Voltar
       </button>
 
       <div class="menu-heading">
         <p class="eyebrow">Modo local</p>
-        <h1>Como você quer jogar?</h1>
-        <p class="subtitle">Escolha como os jogadores vão participar da partida.</p>
+        <h1>Como vocÃª quer jogar?</h1>
+        <p class="subtitle">Escolha como os jogadores vÃ£o participar da partida.</p>
       </div>
 
       <div class="mode-grid">
@@ -251,7 +251,7 @@
             <strong>Jogar neste dispositivo</strong>
             <small>Todos jogam usando esta mesma tela.</small>
           </span>
-          <span class="mode-arrow" aria-hidden="true">›</span>
+          <span class="mode-arrow" aria-hidden="true">â€º</span>
         </button>
 
         <button id="phoneModeBtn" class="mode-card" type="button">
@@ -266,7 +266,7 @@
             <strong>Conectar dispositivos para jogar</strong>
             <small>Use outro dispositivo como controle da partida.</small>
           </span>
-          <span class="mode-arrow" aria-hidden="true">›</span>
+          <span class="mode-arrow" aria-hidden="true">â€º</span>
         </button>
       </div>
     </div>
@@ -275,8 +275,8 @@
 
   <section id="localPhoneMenu" class="menu-screen hidden">
     <div class="menu-card phone-connect-card">
-      <button id="phoneBackBtn" class="back-link" type="button" aria-label="Voltar às opções locais">
-        <span aria-hidden="true">‹</span> Voltar
+      <button id="phoneBackBtn" class="back-link" type="button" aria-label="Voltar Ã s opÃ§Ãµes locais">
+        <span aria-hidden="true">â€¹</span> Voltar
       </button>
 
       <div class="phone-connect-hero">
@@ -290,26 +290,26 @@
         </div>
 
         <div class="menu-heading phone-heading">
-          <p class="eyebrow">Modo local • controles</p>
+          <p class="eyebrow">Modo local â€¢ controles</p>
           <h1>Conecte os controles</h1>
           <p class="subtitle">O tabuleiro fica neste computador principal. Cada jogador pode usar outro dispositivo como controle.</p>
         </div>
       </div>
 
       <div id="phoneServerWarning" class="server-warning hidden">
-        <strong>O servidor online ainda não está disponível.</strong>
-        <p>Aguarde o servidor online iniciar. O site libera a entrada automaticamente quando a conexão estiver pronta.</p>
+        <strong>O servidor online ainda nÃ£o estÃ¡ disponÃ­vel.</strong>
+        <p>Aguarde o servidor online iniciar. O site libera a entrada automaticamente quando a conexÃ£o estiver pronta.</p>
       </div>
 
       <div id="phoneLobby" class="phone-lobby">
         <div class="connect-grid">
           <div class="qr-panel">
-            <div id="qrLoading" class="qr-loading">Preparando QR Code…</div>
+            <div id="qrLoading" class="qr-loading">Preparando QR Codeâ€¦</div>
             <img id="phoneQr" class="phone-qr hidden" alt="QR Code para conectar um controle" />
           </div>
 
           <div class="join-info">
-            <span class="join-label">Código da sala</span>
+            <span class="join-label">CÃ³digo da sala</span>
             <strong id="phoneRoomCode" class="room-code">------</strong>
 
             <label id="networkChoiceWrap" class="network-choice hidden">
@@ -317,12 +317,12 @@
               <select id="networkAddressSelect"></select>
             </label>
 
-            <p class="join-tip">Abra o endereço em qualquer dispositivo compatível e conecte-se à sala. O QR Code continua sendo a forma mais rápida.</p>
+            <p class="join-tip">Abra o endereÃ§o em qualquer dispositivo compatÃ­vel e conecte-se Ã  sala. O QR Code continua sendo a forma mais rÃ¡pida.</p>
 
             <div class="join-link-box">
               <span>Ou abra em outro dispositivo:</span>
-              <code id="phoneJoinUrl">Preparando endereço…</code>
-              <button id="copyJoinUrlBtn" class="secondary compact-button" type="button">Copiar endereço</button>
+              <code id="phoneJoinUrl">Preparando endereÃ§oâ€¦</code>
+              <button id="copyJoinUrlBtn" class="secondary compact-button" type="button">Copiar endereÃ§o</button>
             </div>
           </div>
         </div>
@@ -332,13 +332,13 @@
             <strong>Jogadores conectados</strong>
             <p id="connectedCount">0 de 4</p>
           </div>
-          <span id="lobbyStatus" class="lobby-status">Aguardando controles…</span>
+          <span id="lobbyStatus" class="lobby-status">Aguardando controlesâ€¦</span>
         </div>
 
         <div id="connectedPlayers" class="connected-players"></div>
 
-        <button id="startPhoneGameBtn" class="primary" type="button" disabled>Começar partida</button>
-        <p class="lobby-help">É necessário conectar pelo menos 2 jogadores. O máximo é 4.</p>
+        <button id="startPhoneGameBtn" class="primary" type="button" disabled>ComeÃ§ar partida</button>
+        <p class="lobby-help">Ã‰ necessÃ¡rio conectar pelo menos 2 jogadores. O mÃ¡ximo Ã© 4.</p>
       </div>
     </div>
   </section>
@@ -347,7 +347,7 @@
   <section id="onlineMenu" class="menu-screen hidden">
     <div class="menu-card online-card">
       <button id="onlineBackBtn" class="back-link" type="button" aria-label="Voltar ao menu">
-        <span aria-hidden="true">‹</span> Voltar
+        <span aria-hidden="true">â€¹</span> Voltar
       </button>
 
       <div class="menu-heading">
@@ -356,7 +356,7 @@
         <p class="subtitle">Crie ou entre em uma sala sincronizada. O servidor da partida fica online e sincroniza as salas automaticamente.</p>
       <div id="serverStatus" class="server-status checking" aria-live="polite">
         <span class="server-status-dot" aria-hidden="true"></span>
-        <span id="serverStatusText">Verificando servidor…</span>
+        <span id="serverStatusText">Verificando servidorâ€¦</span>
       </div>
 
       </div>
@@ -364,12 +364,12 @@
       <div id="onlineActions" class="online-actions">
         <button id="createRoomBtn" class="online-option" type="button">
           <span class="online-option-title">Criar sala</span>
-          <span class="online-option-text">Crie uma partida e compartilhe o código com seus amigos.</span>
+          <span class="online-option-text">Crie uma partida e compartilhe o cÃ³digo com seus amigos.</span>
         </button>
 
         <button id="joinRoomBtn" class="online-option" type="button">
           <span class="online-option-title">Entrar em sala</span>
-          <span class="online-option-text">Use o código de uma sala criada por outro jogador.</span>
+          <span class="online-option-text">Use o cÃ³digo de uma sala criada por outro jogador.</span>
         </button>
       </div>
 
@@ -379,7 +379,7 @@
           <input id="onlinePlayerName" maxlength="18" placeholder="Jogador" autocomplete="nickname" />
         </label>
         <label>
-          Código da sala
+          CÃ³digo da sala
           <input id="roomCodeInput" maxlength="6" placeholder="ABC123" autocomplete="off" />
         </label>
         <button id="confirmJoinBtn" class="primary" type="button">Entrar na sala</button>
@@ -397,15 +397,15 @@
       <div id="onlineLobby" class="online-lobby hidden">
         <div class="online-room-summary">
           <div>
-            <span class="join-label">Código da sala</span>
+            <span class="join-label">CÃ³digo da sala</span>
             <strong id="onlineRoomCode" class="room-code">------</strong>
           </div>
           <span id="onlineHostBadge" class="online-host-badge">Jogador</span>
         </div>
 
         <div id="onlineShareBox" class="online-share-box hidden">
-          <span>Endereço para compartilhar</span>
-          <code id="onlineShareUrl">Preparando endereço…</code>
+          <span>EndereÃ§o para compartilhar</span>
+          <code id="onlineShareUrl">Preparando endereÃ§oâ€¦</code>
           <button id="copyOnlineLinkBtn" class="secondary compact-button" type="button">Copiar convite</button>
         </div>
 
@@ -414,16 +414,16 @@
             <strong>Jogadores na sala</strong>
             <p id="onlineConnectedCount">0 de 4</p>
           </div>
-          <span id="onlineLobbyStatus" class="lobby-status">Aguardando jogadores…</span>
+          <span id="onlineLobbyStatus" class="lobby-status">Aguardando jogadoresâ€¦</span>
         </div>
 
         <div id="onlinePlayers" class="connected-players"></div>
 
         <div class="online-lobby-actions">
-          <button id="startOnlineGameBtn" class="primary" type="button" disabled>Começar partida</button>
+          <button id="startOnlineGameBtn" class="primary" type="button" disabled>ComeÃ§ar partida</button>
           <button id="leaveOnlineLobbyBtn" class="secondary" type="button">Sair da sala</button>
         </div>
-        <p id="onlineLobbyHelp" class="lobby-help">São necessários pelo menos 2 jogadores.</p>
+        <p id="onlineLobbyHelp" class="lobby-help">SÃ£o necessÃ¡rios pelo menos 2 jogadores.</p>
       </div>
 
       <p id="onlineMessage" class="online-message hidden"></p>
@@ -433,27 +433,27 @@
   <section id="devMenu" class="menu-screen hidden dev-menu-screen">
     <div class="menu-card dev-menu-card">
       <button id="devBackBtn" class="back-link" type="button" aria-label="Voltar ao menu principal">
-        <span aria-hidden="true">‹</span> Voltar
+        <span aria-hidden="true">â€¹</span> Voltar
       </button>
 
       <div class="menu-heading">
-        <p class="eyebrow">Área de desenvolvimento</p>
+        <p class="eyebrow">Ãrea de desenvolvimento</p>
         <h1>Menu Dev</h1>
-        <p class="subtitle">Atalhos para testar mecânicas antes de elas entrarem na partida normal.</p>
+        <p class="subtitle">Atalhos para testar mecÃ¢nicas antes de elas entrarem na partida normal.</p>
       </div>
 
       <div class="dev-shortcut-note" aria-label="Atalho do menu Dev">
         <kbd>7</kbd>
-        <span>Abra este menu pelo número 7 enquanto estiver no menu principal.</span>
+        <span>Abra este menu pelo nÃºmero 7 enquanto estiver no menu principal.</span>
       </div>
 
       <div class="dev-grid">
         <article class="dev-tool-card">
           <div class="dev-tool-head">
-            <span class="dev-tool-icon" aria-hidden="true">🎲</span>
+            <span class="dev-tool-icon" aria-hidden="true">ðŸŽ²</span>
             <div>
-              <strong>Mecânicas do tabuleiro</strong>
-              <small>Testes rápidos sem iniciar uma partida completa.</small>
+              <strong>MecÃ¢nicas do tabuleiro</strong>
+              <small>Testes rÃ¡pidos sem iniciar uma partida completa.</small>
             </div>
           </div>
           <div class="dev-actions-row">
@@ -465,33 +465,33 @@
 
         <article class="dev-tool-card dev-tool-card-featured">
           <div class="dev-tool-head">
-            <span class="dev-tool-icon" aria-hidden="true">♪</span>
+            <span class="dev-tool-icon" aria-hidden="true">â™ª</span>
             <div>
-              <strong>Just Dance • Sensor Lab</strong>
-              <small>Base para usar movimento e rotação do celular como entrada do mini game.</small>
+              <strong>Just Dance â€¢ Sensor Lab</strong>
+              <small>Base para usar movimento e rotaÃ§Ã£o do celular como entrada do mini game.</small>
             </div>
           </div>
           <div class="dev-feature-list">
-            <span>Conexão com celulares</span>
-            <span>DeviceMotion + orientação</span>
+            <span>ConexÃ£o com celulares</span>
+            <span>DeviceMotion + orientaÃ§Ã£o</span>
             <span>Telemetria em tempo real</span>
-            <span>Pontuação de movimento temporária</span>
+            <span>PontuaÃ§Ã£o de movimento temporÃ¡ria</span>
           </div>
           <button id="openDanceLabBtn" class="primary" type="button">Abrir Sensor Lab</button>
         </article>
 
         <article class="dev-tool-card">
           <div class="dev-tool-head">
-            <span class="dev-tool-icon" aria-hidden="true">⚙</span>
+            <span class="dev-tool-icon" aria-hidden="true">âš™</span>
             <div>
               <strong>Mini Games por rodada</strong>
-              <small>Estrutura reservada para os mini games que serão adicionados depois.</small>
+              <small>Estrutura reservada para os mini games que serÃ£o adicionados depois.</small>
             </div>
           </div>
           <div class="dev-round-flow" aria-label="Fluxo planejado de mini games">
-            <span>Rodada</span><b>›</b><span>Mini Game</span><b>›</b><span>Resultado</span><b>›</b><span>Tabuleiro</span>
+            <span>Rodada</span><b>â€º</b><span>Mini Game</span><b>â€º</b><span>Resultado</span><b>â€º</b><span>Tabuleiro</span>
           </div>
-          <p class="dev-tool-status">Registro inicial: <b>Just Dance</b>. Os arquivos finais ainda podem ser adicionados depois sem refazer a conexão dos sensores.</p>
+          <p class="dev-tool-status">Registro inicial: <b>Just Dance</b>. Os arquivos finais ainda podem ser adicionados depois sem refazer a conexÃ£o dos sensores.</p>
         </article>
       </div>
     </div>
@@ -500,43 +500,43 @@
   <section id="danceDevScreen" class="menu-screen hidden dev-menu-screen">
     <div class="menu-card dev-menu-card dance-lab-card">
       <button id="danceLabBackBtn" class="back-link" type="button" aria-label="Voltar ao Menu Dev">
-        <span aria-hidden="true">‹</span> Voltar
+        <span aria-hidden="true">â€¹</span> Voltar
       </button>
 
       <div class="menu-heading">
-        <p class="eyebrow">Mini Game • desenvolvimento</p>
+        <p class="eyebrow">Mini Game â€¢ desenvolvimento</p>
         <h1>Just Dance Sensor Lab</h1>
-        <p class="subtitle">Conecte celulares e teste o fluxo completo de pontuação: julgamentos por movimento, score até 13.333, 5 estrelas, Superstar e Megastar. A comparação fina com a coreografia ainda será calibrada pelos classificadores da música.</p>
+        <p class="subtitle">Conecte celulares e teste o fluxo completo de pontuaÃ§Ã£o: julgamentos por movimento, score atÃ© 13.333, 5 estrelas, Superstar e Megastar. A comparaÃ§Ã£o fina com a coreografia ainda serÃ¡ calibrada pelos classificadores da mÃºsica.</p>
       </div>
 
 
-      <section class="dance-song-test" aria-label="Música de teste Just Dance">
+      <section class="dance-song-test" aria-label="MÃºsica de teste Just Dance">
         <div class="dance-song-info">
           <img id="danceSongCover" src="minigames/just-dance/songs/RainOverMe/rainoverme_cover@2x.jpg" alt="Capa de Rain Over Me" />
           <div>
-            <span id="danceSongBadge" class="tiny-label">Música de teste</span>
+            <span id="danceSongBadge" class="tiny-label">MÃºsica de teste</span>
             <strong id="danceSongTitle">Rain Over Me</strong>
-            <small id="danceSongMeta">Pitbull Ft. Marc Anthony • Just Dance 2020 • 1 coach</small>
+            <small id="danceSongMeta">Pitbull Ft. Marc Anthony â€¢ Just Dance 2020 â€¢ 1 coach</small>
             <p id="danceSongAssetStatus">Low / Medium / High + HUD real carregados no projeto.</p>
           </div>
         </div>
-        <div class="dance-player-settings" aria-label="Opções do player">
-          <label>Música
+        <div class="dance-player-settings" aria-label="OpÃ§Ãµes do player">
+          <label>MÃºsica
             <select id="danceSongSelect">
               <option value="RainOverMe">Rain Over Me</option>
-              <option value="EarthSong">Earth Song • Beta</option>
-              <option value="ItsRainingMen">It's Raining Men • Beta</option>
+              <option value="EarthSong">Earth Song â€¢ Beta</option>
+              <option value="ItsRainingMen">It's Raining Men â€¢ Beta</option>
             </select>
           </label>
-          <label>Qualidade do vídeo
+          <label>Qualidade do vÃ­deo
             <select id="danceQualityMode">
-              <option value="auto">Automática</option>
-              <option value="low">Low • 360p</option>
-              <option value="medium">Medium • 720p</option>
-              <option value="high">High • 1080p</option>
+              <option value="auto">AutomÃ¡tica</option>
+              <option value="low">Low â€¢ 360p</option>
+              <option value="medium">Medium â€¢ 720p</option>
+              <option value="high">High â€¢ 1080p</option>
             </select>
           </label>
-          <div class="dance-quality-active"><span>Em uso</span><strong id="danceQualityActive">Automática</strong></div>
+          <div class="dance-quality-active"><span>Em uso</span><strong id="danceQualityActive">AutomÃ¡tica</strong></div>
           <label>Tamanho das letras
             <select id="danceLyricsSize">
               <option value="small">Pequeno</option>
@@ -546,7 +546,7 @@
           </label>
           <label>Enquadramento
             <select id="danceVideoFit">
-              <option value="contain">Mostrar vídeo inteiro</option>
+              <option value="contain">Mostrar vÃ­deo inteiro</option>
               <option value="cover">Preencher player</option>
             </select>
           </label>
@@ -559,24 +559,24 @@
             <div id="dancePreloadOverlay" class="dance-preload-overlay" role="status" aria-live="polite">
               <div class="dance-preload-card">
                 <div class="dance-preload-spinner" aria-hidden="true"></div>
-                <strong id="dancePreloadTitle">Preparando Just Dance…</strong>
+                <strong id="dancePreloadTitle">Preparando Just Danceâ€¦</strong>
                 <span id="dancePreloadStatus">Carregando arquivos antes de iniciar.</span>
                 <div class="dance-preload-track"><span id="dancePreloadFill"></span></div>
                 <b id="dancePreloadPercent">0%</b>
               </div>
             </div>
-            <div class="dance-game-hud" aria-label="HUD de sincronização do Just Dance">
+            <div class="dance-game-hud" aria-label="HUD de sincronizaÃ§Ã£o do Just Dance">
               <div id="danceVideoJudgements" class="dance-video-judgements"></div>
-              <div id="danceStarHud" class="dance-star-hud" aria-label="Pontuação e estrelas">
+              <div id="danceStarHud" class="dance-star-hud" aria-label="PontuaÃ§Ã£o e estrelas">
                 <div id="danceHudStars" class="dance-hud-stars" aria-label="Progresso das cinco estrelas">
-                  <span class="dance-hud-star" data-threshold="2000"><img class="outline" src="minigames/just-dance/hud/ipk-base/textures/star_outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
-                  <span class="dance-hud-star" data-threshold="4000"><img class="outline" src="minigames/just-dance/hud/ipk-base/textures/star_outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
-                  <span class="dance-hud-star" data-threshold="6000"><img class="outline" src="minigames/just-dance/hud/ipk-base/textures/star_outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
-                  <span class="dance-hud-star" data-threshold="8000"><img class="outline" src="minigames/just-dance/hud/ipk-base/textures/star_outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
-                  <span class="dance-hud-star" data-threshold="10000"><img class="outline" src="minigames/just-dance/hud/ipk-base/textures/star_outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+                  <span class="dance-hud-star" data-threshold="2000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+                  <span class="dance-hud-star" data-threshold="4000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+                  <span class="dance-hud-star" data-threshold="6000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+                  <span class="dance-hud-star" data-threshold="8000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+                  <span class="dance-hud-star" data-threshold="10000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
                 </div>
               </div>
-              <div id="danceKaraoke" class="dance-karaoke" aria-label="Letra sincronizada da música" aria-live="off">
+              <div id="danceKaraoke" class="dance-karaoke" aria-label="Letra sincronizada da mÃºsica" aria-live="off">
                 <div id="danceKaraokeCurrent" class="dance-karaoke-current"></div>
                 <div id="danceKaraokeNext" class="dance-karaoke-next"></div>
               </div>
@@ -600,21 +600,21 @@
               <img class="dance-jd26-gold-sparks sparks-b" src="minigames/just-dance/hud/ipk-2026-reference/sparks.png" alt="" aria-hidden="true">
             </div>
           </div>
-          <div class="dance-player-controls" aria-label="Controles de reprodução">
-            <button id="dancePlayPauseBtn" class="dance-player-icon-button" type="button" aria-label="Reproduzir" disabled>▶</button>
+          <div class="dance-player-controls" aria-label="Controles de reproduÃ§Ã£o">
+            <button id="dancePlayPauseBtn" class="dance-player-icon-button" type="button" aria-label="Reproduzir" disabled>â–¶</button>
             <span id="dancePlayerClock" class="dance-player-clock">0:00 / 0:00</span>
-            <input id="danceSeek" class="dance-player-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Posição da música" disabled />
-            <label class="dance-volume-control" aria-label="Volume">🔊 <input id="danceVolume" type="range" min="0" max="1" value="0.9" step="0.05" /></label>
+            <input id="danceSeek" class="dance-player-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="PosiÃ§Ã£o da mÃºsica" disabled />
+            <label class="dance-volume-control" aria-label="Volume">ðŸ”Š <input id="danceVolume" type="range" min="0" max="1" value="0.9" step="0.05" /></label>
             <button id="danceWindowBtn" class="secondary compact-button" type="button">Preencher janela</button>
             <button id="danceFullscreenBtn" class="secondary compact-button" type="button">Tela cheia</button>
           </div>
         </div>
         <div class="dance-song-readout">
           <div><span>Tempo</span><strong id="danceSongTime">0:00.000</strong></div>
-          <div><span>Movimento atual</span><strong id="danceCurrentMove">—</strong></div>
-          <div><span>Próximo</span><strong id="danceNextMove">—</strong></div>
+          <div><span>Movimento atual</span><strong id="danceCurrentMove">â€”</strong></div>
+          <div><span>PrÃ³ximo</span><strong id="danceNextMove">â€”</strong></div>
         </div>
-        <div class="dance-sync-calibrator" aria-label="Calibração fina de sincronia">
+        <div class="dance-sync-calibrator" aria-label="CalibraÃ§Ã£o fina de sincronia">
           <div class="dance-sync-head">
             <div>
               <span class="tiny-label">Sincronia DEV</span>
@@ -627,47 +627,47 @@
           </div>
           <div class="dance-sync-actions">
             <button id="danceSyncDelayBtn" class="secondary compact-button" type="button">Atrasar HUD 100 ms</button>
-            <button id="danceSyncDelayFineBtn" class="secondary compact-button" type="button">−25 ms</button>
-            <button id="danceSyncResetBtn" class="secondary compact-button" type="button">Padrão (-1725 ms)</button>
+            <button id="danceSyncDelayFineBtn" class="secondary compact-button" type="button">âˆ’25 ms</button>
+            <button id="danceSyncResetBtn" class="secondary compact-button" type="button">PadrÃ£o (-1725 ms)</button>
             <button id="danceSyncAdvanceFineBtn" class="secondary compact-button" type="button">+25 ms</button>
             <button id="danceSyncAdvanceBtn" class="secondary compact-button" type="button">Adiantar HUD 100 ms</button>
           </div>
-          <p>O erro anterior era de <b>2.812 ms</b>: o <code>videoOffset</code> foi subtraído de uma timeline que já começava nesse tempo. Para <b>Rain Over Me</b>, a calibração confirmada agora é <b>-1725 ms</b> e esse passa a ser o padrão da música. Se ainda notar diferença no aparelho/tela, use os botões durante o vídeo; <kbd>[</kbd>/<kbd>]</kbd> ajustam 25 ms e <kbd>Shift</kbd> + essas teclas ajusta 250 ms.</p>
+          <p>O erro anterior era de <b>2.812 ms</b>: o <code>videoOffset</code> foi subtraÃ­do de uma timeline que jÃ¡ comeÃ§ava nesse tempo. Para <b>Rain Over Me</b>, a calibraÃ§Ã£o confirmada agora Ã© <b>-1725 ms</b> e esse passa a ser o padrÃ£o da mÃºsica. Se ainda notar diferenÃ§a no aparelho/tela, use os botÃµes durante o vÃ­deo; <kbd>[</kbd>/<kbd>]</kbd> ajustam 25 ms e <kbd>Shift</kbd> + essas teclas ajusta 250 ms.</p>
         </div>
-        <div class="dance-yeah-calibrator" aria-label="Configuração DEV do vídeo do Gold Move">
+        <div class="dance-yeah-calibrator" aria-label="ConfiguraÃ§Ã£o DEV do vÃ­deo do Gold Move">
           <div class="dance-yeah-dev-head">
             <div>
               <span class="tiny-label">GOLD MOVE DEV</span>
-              <strong>Gold Move — vídeo único Starry Cubes</strong>
+              <strong>Gold Move â€” vÃ­deo Ãºnico Starry Cubes</strong>
             </div>
-            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">MP4 único • 1080p • 60 FPS</span>
+            <span id="danceYeahDevStatus" class="dance-yeah-dev-status">MP4 Ãºnico â€¢ 1080p â€¢ 60 FPS</span>
           </div>
           <div class="dance-yeah-dev-grid">
-            <label>Começar o vídeo antes do YEAH real
+            <label>ComeÃ§ar o vÃ­deo antes do YEAH real
               <span class="dance-yeah-dev-input"><input id="danceYeahPrepareMs" type="number" min="0" max="5000" step="25" value="3250" /><b>ms antes</b></span>
             </label>
           </div>
           <div class="dance-yeah-dev-actions">
             <button id="danceYeahApplyBtn" class="secondary compact-button" type="button">Aplicar</button>
-            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar vídeo</button>
-            <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrão</button>
+            <button id="danceYeahPreviewBtn" class="secondary compact-button" type="button">Testar vÃ­deo</button>
+            <button id="danceYeahResetBtn" class="secondary compact-button" type="button">Restaurar padrÃ£o</button>
           </div>
-          <p>Agora o Gold Move usa <b>somente o vídeo Starry Cubes enviado</b>, sem separar Start Loop, Finish Loop e Finish Yeah. Ajuste o valor acima para escolher quantos milissegundos antes do <b>YEAH real</b> o vídeo deve começar. O valor fica salvo neste navegador.</p>
+          <p>Agora o Gold Move usa <b>somente o vÃ­deo Starry Cubes enviado</b>, sem separar Start Loop, Finish Loop e Finish Yeah. Ajuste o valor acima para escolher quantos milissegundos antes do <b>YEAH real</b> o vÃ­deo deve comeÃ§ar. O valor fica salvo neste navegador.</p>
         </div>
-        <div class="dance-score-rules" aria-label="Sistema de pontuação">
+        <div class="dance-score-rules" aria-label="Sistema de pontuaÃ§Ã£o">
           <div class="dance-judgement-legend">
             <span class="perfect">PERFECT</span><span class="super">SUPER</span><span class="good">GOOD</span><span class="ok">OK</span><span class="yeah">YEAH!</span><span class="miss">X</span>
           </div>
           <div class="dance-rank-legend">
-            <span>★ 2.000</span><span>★★ 4.000</span><span>★★★ 6.000</span><span>★★★★ 8.000</span><span>★★★★★ 10.000</span><b>SUPERSTAR 11.000</b><b>MEGASTAR 12.000</b><strong>MÁX. 13.333</strong>
+            <span>â˜… 2.000</span><span>â˜…â˜… 4.000</span><span>â˜…â˜…â˜… 6.000</span><span>â˜…â˜…â˜…â˜… 8.000</span><span>â˜…â˜…â˜…â˜…â˜… 10.000</span><b>SUPERSTAR 11.000</b><b>MEGASTAR 12.000</b><strong>MÃX. 13.333</strong>
           </div>
         </div>
-        <p class="dance-song-note">A timeline já produz <b>PERFECT, SUPER, GOOD, OK, YEAH! e X</b>. A barra de estrelas usa os assets enviados, com sons de 1–5 estrelas, Superstar e Megastar. O player possui qualidade automática/fixa, letras ajustáveis, modo janela cheia e fullscreen. Os Gold Moves da própria música usam <b>YEAH!</b> quando são acertados. Os pictos vêm do atlas original, entram de fora da tela, aceleram até a barra branca e desaparecem com escala/fade. Os timestamps originais da música já estão no relógio do vídeo (o primeiro beat acontece em 2.812 s), então o <code>videoOffset</code> não é descontado novamente. O painel de Sincronia DEV permite ajuste fino em milissegundos, e a letra aparece no canto inferior esquerdo em fluxo de karaokê para facilitar a checagem. Na V6, o próprio celular processa os classifiers da música, aplica uma calibração Wii/Wii U → smartphone e decide a nota localmente. O servidor apenas recebe o julgamento pronto e o PC exibe o resultado, então a latência da rede não altera a pontuação.</p>
+        <p class="dance-song-note">A timeline jÃ¡ produz <b>PERFECT, SUPER, GOOD, OK, YEAH! e X</b>. A barra de estrelas usa os assets enviados, com sons de 1â€“5 estrelas, Superstar e Megastar. O player possui qualidade automÃ¡tica/fixa, letras ajustÃ¡veis, modo janela cheia e fullscreen. Os Gold Moves da prÃ³pria mÃºsica usam <b>YEAH!</b> quando sÃ£o acertados. Os pictos vÃªm do atlas original, entram de fora da tela, aceleram atÃ© a barra branca e desaparecem com escala/fade. Os timestamps originais da mÃºsica jÃ¡ estÃ£o no relÃ³gio do vÃ­deo (o primeiro beat acontece em 2.812 s), entÃ£o o <code>videoOffset</code> nÃ£o Ã© descontado novamente. O painel de Sincronia DEV permite ajuste fino em milissegundos, e a letra aparece no canto inferior esquerdo em fluxo de karaokÃª para facilitar a checagem. Na V6, o prÃ³prio celular processa os classifiers da mÃºsica, aplica uma calibraÃ§Ã£o Wii/Wii U â†’ smartphone e decide a nota localmente. O servidor apenas recebe o julgamento pronto e o PC exibe o resultado, entÃ£o a latÃªncia da rede nÃ£o altera a pontuaÃ§Ã£o.</p>
       </section>
 
       <div id="danceLabServerWarning" class="server-warning hidden">
-        <strong>Servidor indisponível.</strong>
-        <p>O servidor online precisa estar disponível para usar os sensores. Aguarde a conexão e tente novamente.</p>
+        <strong>Servidor indisponÃ­vel.</strong>
+        <p>O servidor online precisa estar disponÃ­vel para usar os sensores. Aguarde a conexÃ£o e tente novamente.</p>
       </div>
 
       <div class="dance-lab-layout">
@@ -682,8 +682,8 @@
 
           <div class="dance-join-box">
             <span>Abra no celular:</span>
-            <code id="danceJoinUrl">Crie uma sala para começar.</code>
-            <button id="copyDanceJoinUrlBtn" class="secondary compact-button" type="button" disabled>Copiar endereço</button>
+            <code id="danceJoinUrl">Crie uma sala para comeÃ§ar.</code>
+            <button id="copyDanceJoinUrlBtn" class="secondary compact-button" type="button" disabled>Copiar endereÃ§o</button>
           </div>
 
           <div class="dev-actions-row dance-lab-buttons">
@@ -694,7 +694,7 @@
           </div>
 
           <p id="danceLabMessage" class="dev-tool-status">Nenhuma sala criada.</p>
-          <p class="dance-security-note">Em iPhone/iPad, o navegador exige um toque em <b>Ativar sensores</b> no próprio celular. Para maior compatibilidade, use a página do controle em HTTPS.</p>
+          <p class="dance-security-note">Em iPhone/iPad, o navegador exige um toque em <b>Ativar sensores</b> no prÃ³prio celular. Para maior compatibilidade, use a pÃ¡gina do controle em HTTPS.</p>
         </section>
 
         <section class="dance-lab-monitor">
@@ -712,8 +712,8 @@
       </div>
 
       <div class="dance-lab-footer-note">
-        <strong>Preparado para a próxima etapa:</strong>
-        <span>o sistema já fecha um julgamento por movimento e mantém a pontuação sincronizada com o servidor. Depois podemos trocar apenas o cálculo provisório pelos classificadores reais, sem refazer score, estrelas ou multiplayer.</span>
+        <strong>Preparado para a prÃ³xima etapa:</strong>
+        <span>o sistema jÃ¡ fecha um julgamento por movimento e mantÃ©m a pontuaÃ§Ã£o sincronizada com o servidor. Depois podemos trocar apenas o cÃ¡lculo provisÃ³rio pelos classificadores reais, sem refazer score, estrelas ou multiplayer.</span>
       </div>
     </div>
   </section>
@@ -746,7 +746,7 @@
 
         <div id="nameFields" class="name-fields"></div>
 
-        <button id="startBtn" class="primary">Começar partida</button>
+        <button id="startBtn" class="primary">ComeÃ§ar partida</button>
       </div>
 
       <div id="gameControls" class="game-controls hidden">
@@ -766,7 +766,7 @@
           <button id="rollBtn" class="primary">Jogar dado</button>
         </div>
 
-        <p id="status" class="status">Clique em “Jogar dado”.</p>
+        <p id="status" class="status">Clique em â€œJogar dadoâ€.</p>
 
         <div id="scoreboard" class="scoreboard"></div>
 
@@ -777,26 +777,26 @@
 
     <section class="board-wrap">
       <div class="board-title">
-        <span>INÍCIO</span>
-        <span>CHEGADA 🏁</span>
+        <span>INÃCIO</span>
+        <span>CHEGADA ðŸ</span>
       </div>
       <div class="board-card-bar">
         <div class="card-legend" aria-label="Tipos de casas de carta">
           <span class="legend-item legend-question"><b>?</b> Pergunta</span>
-          <span class="legend-item legend-good"><b>★</b> Boa Sorte</span>
-          <span class="legend-item legend-bad"><b>!</b> Má Sorte</span>
+          <span class="legend-item legend-good"><b>â˜…</b> Boa Sorte</span>
+          <span class="legend-item legend-bad"><b>!</b> MÃ¡ Sorte</span>
         </div>
         <div class="deck-zone">
           <button id="cardDeckBtn" class="card-deck" type="button" disabled aria-label="Baralho de cartas">
             <span class="deck-layer deck-layer-back" aria-hidden="true"></span>
             <span class="deck-layer deck-layer-mid" aria-hidden="true"></span>
             <span class="deck-top">
-              <span class="deck-symbols" aria-hidden="true">? ★ !</span>
+              <span class="deck-symbols" aria-hidden="true">? â˜… !</span>
               <strong>BARALHO</strong>
               <small id="deckTypeText">Cartas</small>
             </span>
           </button>
-          <p id="deckHint" class="deck-hint">O baralho será liberado quando você cair em uma casa de carta.</p>
+          <p id="deckHint" class="deck-hint">O baralho serÃ¡ liberado quando vocÃª cair em uma casa de carta.</p>
         </div>
       </div>
       <div id="board" class="board" aria-label="Tabuleiro com 40 casas"></div>
@@ -805,9 +805,9 @@
 
   <div id="winnerModal" class="modal hidden">
     <div class="modal-card">
-      <div class="trophy">🏆</div>
+      <div class="trophy">ðŸ†</div>
       <h2 id="winnerText">Jogador venceu!</h2>
-      <p>Parabéns! Você chegou primeiro à casa 40.</p>
+      <p>ParabÃ©ns! VocÃª chegou primeiro Ã  casa 40.</p>
       <button id="playAgainBtn" class="primary">Jogar novamente</button>
     </div>
   </div>
@@ -815,7 +815,7 @@
   <div id="cardModal" class="modal card-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cardTitle">
     <div class="card-stage">
       <article id="drawnCard" class="drawn-card card-question" aria-live="polite">
-        <div class="drawn-card-back" aria-hidden="true"><span>? ★ !</span><strong>CORRIDA</strong></div>
+        <div class="drawn-card-back" aria-hidden="true"><span>? â˜… !</span><strong>CORRIDA</strong></div>
         <div class="drawn-card-front">
           <div class="drawn-card-head">
             <span id="cardTypeBadge" class="card-type-badge">Carta de Pergunta</span>
@@ -833,7 +833,7 @@
     </div>
   </div>
 
-  <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
+  <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregadaâ€¦'); window.ControllerLoader?.report?.(67, 'ConexÃ£o carregadaâ€¦')"></script>
   <script type="importmap">
     {
       "imports": {
@@ -842,13 +842,14 @@
     }
   </script>
   <script type="module">
-    window.SiteLoader?.report(20, "Baixando motor 3D…");
+    window.SiteLoader?.report(20, "Baixando motor 3Dâ€¦");
     import("./dice3d.js?v=040-earthsong-server-gate").catch(error => {
       console.error("Falha ao carregar o dado 3D:", error);
       window.dispatchEvent(new CustomEvent("dice3d-error", { detail: String(error?.message || error) }));
     });
   </script>
-  <script src="script.js?v=040-earthsong-server-gate" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <script src="script.js?v=040-earthsong-server-gate" onload="window.SiteLoader?.report(24, 'LÃ³gica do jogo carregadaâ€¦'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <span class="version-badge" data-version>V. 0.2.4 (Teste)</span>
 </body>
 </html>
+
