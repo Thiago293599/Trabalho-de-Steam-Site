@@ -360,7 +360,7 @@ const DANCE_SONGS = Object.freeze({
     base: "minigames/just-dance/songs/EarthSong", mapFile: "EarthSong.json", movesFile: "EarthSong_moves0.json",
     videos: Object.freeze({ low: "EarthSong_Coach_Low.mp4", medium: "EarthSong_Coach_Medium.mp4", high: "EarthSong_Coach_High.mp4" }),
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 10 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
   }),
   ItsRainingMen: Object.freeze({
@@ -3548,17 +3548,27 @@ function pictoAtlasPosition(name) {
   if (!Array.isArray(coords) || coords.length < 2) return null;
 
   const tile = dancePictoAtlas?.imageSize || { width: 256, height: 256 };
-  // Cada música pode ter um spritesheet de tamanho diferente.
-  // Rain Over Me / Earth Song = 6x6 (1536x1536).
-  // It's Raining Men = 5x5 (1280x1280).
+  const tileWidth = Math.max(1, Number(tile.width || 256));
+  const tileHeight = Math.max(1, Number(tile.height || 256));
+
+  // Descobre automaticamente o tamanho real da grade usando as coordenadas do
+  // atlas. Isso evita repetir o bug do EarthSong: o atlas antigo era menor,
+  // enquanto o arquivo atualizado passou a ter 6 colunas x 10 linhas.
+  const atlasCoords = Object.values(dancePictoAtlas?.images || {}).filter(value => Array.isArray(value) && value.length >= 2);
+  const detectedColumns = atlasCoords.length
+    ? Math.max(...atlasCoords.map(value => Math.floor(Math.max(0, Number(value[0] || 0)) / tileWidth))) + 1
+    : 0;
+  const detectedRows = atlasCoords.length
+    ? Math.max(...atlasCoords.map(value => Math.floor(Math.max(0, Number(value[1] || 0)) / tileHeight))) + 1
+    : 0;
+
+  const configuredGrid = getDanceSongConfig()?.atlasGrid || {};
+  const columns = Math.max(1, detectedColumns || Number(configuredGrid.columns || 6));
+  const rows = Math.max(1, detectedRows || Number(configuredGrid.rows || 6));
+
   // background-position em CSS é relativo ao espaço restante depois de aplicar
   // background-size, então o divisor correto é (colunas - 1)/(linhas - 1),
   // e não a largura/altura total do atlas.
-  const configuredGrid = getDanceSongConfig()?.atlasGrid || { columns: 6, rows: 6 };
-  const columns = Math.max(1, Number(configuredGrid.columns || 6));
-  const rows = Math.max(1, Number(configuredGrid.rows || 6));
-  const tileWidth = Math.max(1, Number(tile.width || 256));
-  const tileHeight = Math.max(1, Number(tile.height || 256));
   const positionSpanX = tileWidth * Math.max(1, columns - 1);
   const positionSpanY = tileHeight * Math.max(1, rows - 1);
 
