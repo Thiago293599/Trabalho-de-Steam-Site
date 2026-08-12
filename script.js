@@ -43,7 +43,7 @@ themeToggle?.addEventListener("click", () => {
 applyTheme(getCurrentTheme(), false);
 
 const BOARD_SIZE = 40;
-const REQUIRED_SERVER_PROTOCOL = 8;
+const REQUIRED_SERVER_PROTOCOL = 9;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 const colors = ["#ef4444", "#3b82f6", "#22c55e", "#a855f7"];
 
@@ -416,6 +416,10 @@ let danceJudgeActiveMoveIndex = -1;
 let danceJudgeAccumulators = new Map();
 const danceLocallyJudgedMoves = new Set();
 let danceLastVideoTimeMs = 0;
+let dancePhoneSyncLastSentAt = 0;
+let dancePhoneSessionRevision = 0;
+let danceHostServerRttMs = 80;
+let danceHostLatencyMeasuredAt = 0;
 const danceClassifierProfiles = new Map();
 let danceClassifierLoadSummary = { loaded: 0, total: 0, format: "" };
 const DANCE_QUALITY_STORAGE_KEY = "jdVideoQualityModeV1";
@@ -1591,7 +1595,7 @@ function ensureRemoteSocket() {
     if (!payload || payload.roomCode !== devSensorRoomCode) return;
     devSensorModeEnabled = Boolean(payload.enabled);
     setDanceLabBadge(devSensorModeEnabled ? "active" : "idle", devSensorModeEnabled ? "Sensores ativos" : "Parado");
-    if (danceLabMessage) danceLabMessage.textContent = devSensorModeEnabled ? "Os celulares receberam o pedido para ativar os sensores." : "Envio de sensores pausado.";
+    if (danceLabMessage) danceLabMessage.textContent = devSensorModeEnabled ? "Os celulares estão pontuando localmente; o servidor só transporta os resultados." : "Envio de sensores pausado.";
   });
 
   remoteSocket.on("game:roll", async payload => {
@@ -2858,7 +2862,7 @@ async function playDanceMedia() {
     danceStartSoundPlayed = true;
     playDanceHudSound("start-song");
   }
-  syncDanceMoveJudging();
+  broadcastDancePhoneSession("play", true);
   startDanceVisualHud();
   updateDancePlayerControls();
 }
@@ -2868,7 +2872,7 @@ function pauseDanceMedia() {
   danceTestVideo?.pause();
   // Ao retomar, o vídeo do Gold Move é reconstruído pela posição atual da música.
   resetDanceGoldMoveFx(true);
-  syncDanceMoveJudging();
+  broadcastDancePhoneSession("pause", true);
   stopDanceVisualHud();
   updateDancePlayerControls();
 }
@@ -2883,6 +2887,7 @@ function seekDanceMedia(seconds) {
   danceJudgeAccumulators = new Map();
   resetDanceGoldMoveFx(true);
   updateDanceSongTimeline();
+  broadcastDancePhoneSession("seek", true);
   if (wasPlaying) {
     danceTestVideo?.play().catch(() => {});
     startDanceVisualHud();
@@ -3380,6 +3385,7 @@ async function switchDanceSong(songId, announce = true) {
   updateDancePlayerHudOverlay(Math.max(1, Number(devSensorState?.players?.length || 1)));
   if (danceSongSelect) danceSongSelect.disabled = false;
   if (announce && danceLabMessage) danceLabMessage.textContent = ready ? `${next.title}${next.beta ? " (Beta)" : ""} pronta.` : `Falha ao carregar ${next.title}.`;
+  if (ready) broadcastDancePhoneSession("song", true);
   return ready;
 }
 
@@ -3526,6 +3532,42 @@ function pictoAtlasPosition(name) {
     x: Math.max(0, Math.min(100, Number(coords[0] || 0) / maxX * 100)),
     y: Math.max(0, Math.min(100, Number(coords[1] || 0) / maxY * 100))
   };
+}
+
+
+function measureDanceHostServerLatency(force = false) {
+  if (!remoteSocket?.connected || !devSensorRoomCode) return;
+  const now = performance.now();
+  if (!force && now - danceHostLatencyMeasuredAt < 5000) return;
+  danceHostLatencyMeasuredAt = now;
+  const started = performance.now();
+  remoteSocket.emit("host:dance-clock-ping", { roomCode: devSensorRoomCode }, response => {
+    if (!response?.ok) return;
+    const rtt = Math.max(0, Math.min(4000, performance.now() - started));
+    danceHostServerRttMs = danceHostServerRttMs * 0.72 + rtt * 0.28;
+  });
+}
+
+function broadcastDancePhoneSession(reason = "sync", force = false) {
+  if (!remoteSocket?.connected || !devSensorRoomCode || !danceTestMoves.length) return;
+  const now = performance.now();
+  if (!force && now - dancePhoneSyncLastSentAt < 900) return;
+  dancePhoneSyncLastSentAt = now;
+  measureDanceHostServerLatency(force);
+  const payload = {
+    roomCode: devSensorRoomCode,
+    songId: danceActiveSongId,
+    positionMs: getDanceMediaCurrentTime() * 1000,
+    timelineMs: getDanceTimelineTimeMs(),
+    syncOffsetMs: danceManualSyncOffsetMs,
+    playing: isDanceMediaPlaying(),
+    totalMoves: danceTestMoves.length,
+    hostOneWayMs: Math.max(0, Math.min(1000, danceHostServerRttMs / 2)),
+    reason
+  };
+  remoteSocket.emit("host:dance-session", payload, response => {
+    if (response?.ok) dancePhoneSessionRevision = Number(response.revision || dancePhoneSessionRevision);
+  });
 }
 
 function getDanceTimelineTimeMs() {
@@ -4162,26 +4204,8 @@ function finalizeDanceMoveJudging(index) {
 }
 
 function syncDanceMoveJudging() {
-  if (!danceTestVideo || !danceTestMoves.length) return;
-  if (!devSensorModeEnabled || !(devSensorState?.players?.length)) {
-    danceJudgeActiveMoveIndex = -1;
-    danceJudgeAccumulators = new Map();
-    return;
-  }
-  const timeMs = getDanceTimelineTimeMs();
-  const currentIndex = danceMoveIndexAt(timeMs);
-
-  // Saltos grandes no vídeo encerram apenas a janela que estava realmente ativa;
-  // movimentos pulados não são pontuados automaticamente.
-  if (danceJudgeActiveMoveIndex >= 0 && currentIndex !== danceJudgeActiveMoveIndex) {
-    finalizeDanceMoveJudging(danceJudgeActiveMoveIndex);
-    danceJudgeActiveMoveIndex = -1;
-    danceJudgeAccumulators = new Map();
-  }
-  if (isDanceMediaPlaying() && currentIndex >= 0 && !danceLocallyJudgedMoves.has(currentIndex) && danceJudgeActiveMoveIndex !== currentIndex) {
-    beginDanceMoveJudging(currentIndex);
-  }
-  danceLastVideoTimeMs = timeMs;
+  // V5: PC não calcula mais o movimento. Só mantém o relógio do celular sincronizado.
+  broadcastDancePhoneSession("sync", false);
 }
 
 function collectDanceJudgementSample(payload) {
@@ -4389,12 +4413,13 @@ async function loadDanceTestSongData(force = false) {
       danceManualSyncOffsetMs = songConfig.defaultSyncMs;
     }
     dancePictoAtlas = atlas && typeof atlas === "object" ? atlas : null;
-    const classifierSummary = await preloadDanceClassifiers(danceTestMoves, songConfig);
+    // V5: classifiers são carregados e interpretados no celular, não no PC.
+    const classifierSummary = { loaded: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, total: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, format: `${songConfig?.classifierFormat || ""}→PHONE` };
     danceTestSongLoaded = true;
     const goldCount = danceTestMoves.filter(move => move.goldMove).length;
     if (danceSongAssetStatus) {
       const betaText = songConfig.beta ? " • BETA" : "";
-      const classifierLabel = classifierSummary.total ? ` • classifiers ${classifierSummary.loaded}/${classifierSummary.total} (${String(classifierSummary.format || "").toUpperCase()})` : "";
+      const classifierLabel = classifierSummary.total ? ` • classifiers processados no celular (${String(classifierSummary.format || "").toUpperCase()})` : "";
       danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel} • vídeo 360p/720p/1080p.`;
     }
     renderDanceSyncCalibration();
@@ -4568,7 +4593,7 @@ function applyDevSensorState(state) {
 function handleDevSensorData(payload) {
   if (!payload?.playerId) return;
   devSensorLive.set(payload.playerId, { ...payload, receivedAt: Date.now() });
-  collectDanceJudgementSample(payload);
+  // V5: telemetria é só visual; julgamento acontece no celular.
   const card = danceSensorPlayers?.querySelector(`[data-player-id="${CSS.escape(payload.playerId)}"]`);
   if (!card) {
     if (devSensorState) renderDanceSensorPlayers(devSensorState.players || []);
@@ -4628,6 +4653,7 @@ async function createDanceSensorRoom() {
     if (copyDanceJoinUrlBtn) copyDanceJoinUrlBtn.disabled = false;
     danceLabServerWarning?.classList.add("hidden");
     applyDevSensorState(response.state);
+    broadcastDancePhoneSession("room", true);
   });
 }
 
@@ -4645,6 +4671,7 @@ function setDanceSensorMode(enabled) {
     if (enableDanceSensorsBtn) enableDanceSensorsBtn.disabled = enabled || !(devSensorState?.players?.length);
     if (stopDanceSensorsBtn) stopDanceSensorsBtn.disabled = !enabled;
     setDanceLabBadge(enabled ? "active" : "idle", enabled ? "Sensores ativos" : "Parado");
+    broadcastDancePhoneSession(enabled ? "sensors-on" : "sensors-off", true);
   });
 }
 
@@ -4699,12 +4726,12 @@ function testDevCard() {
 
 /* ---------- Eventos ---------- */
 
-danceSongAudio?.addEventListener("timeupdate", () => { updateDanceSongTimeline(); updateDancePlayerControls(); });
+danceSongAudio?.addEventListener("timeupdate", () => { updateDanceSongTimeline(); updateDancePlayerControls(); broadcastDancePhoneSession("sync", false); });
 danceSongAudio?.addEventListener("loadedmetadata", () => { updateDanceSongTimeline(); updateDancePlayerControls(); });
 danceSongAudio?.addEventListener("play", () => { syncDanceMoveJudging(); startDanceVisualHud(); updateDancePlayerControls(); });
 danceSongAudio?.addEventListener("pause", () => { syncDanceMoveJudging(); stopDanceVisualHud(); updateDancePlayerControls(); });
 danceSongAudio?.addEventListener("ended", () => {
-  if (danceJudgeActiveMoveIndex >= 0) finalizeDanceMoveJudging(danceJudgeActiveMoveIndex);
+  broadcastDancePhoneSession("ended", true);
   danceJudgeActiveMoveIndex = -1;
   danceTestVideo?.pause();
   stopDanceVisualHud();

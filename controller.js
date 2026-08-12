@@ -42,7 +42,7 @@ themeToggle?.addEventListener("click", () => {
 
 applyTheme(getCurrentTheme(), false);
 
-const REQUIRED_SERVER_PROTOCOL = 8;
+const REQUIRED_SERVER_PROTOCOL = 9;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 const configuredServerUrl = String(window.GAME_CONFIG?.SERVER_URL || "").trim();
 
@@ -140,7 +140,40 @@ let sensorLastStatusSignature = "";
 let sensorWatchdogTimer = null;
 let sensorGenericSensors = [];
 let sensorGenericErrors = [];
+let sensorGenericFusionTimer = 0;
+let sensorLastMotionReadingAt = 0;
+let sensorLastGenericAccelAt = 0;
+
 let sensorObserved = { motion: false, orientation: false, gyro: false, accelerometer: false, orientationFallback: false };
+
+/* ---------- Just Dance V5: julgamento 100% no celular ---------- */
+const PHONE_DANCE_MAX_SCORE = 13333;
+const PHONE_DANCE_WEIGHTS = Object.freeze({ PERFECT: 1, SUPER: 0.8, GOOD: 0.6, OK: 0.35, YEAH: 1, X: 0 });
+const PHONE_DANCE_SONGS = Object.freeze({
+  RainOverMe: Object.freeze({ id:"RainOverMe", base:"minigames/just-dance/songs/RainOverMe", movesFile:"RainOverMe_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
+  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"livemove", classifierFolder:"classifiers_WII_source" })
+});
+const PHONE_EARTH_CLASSIFIERS = Object.freeze({
+  "earthsong_bras_genou":"00_Bras_Genou.livemove.bin","earthsong_poing_terre":"01_Poing_Terre.livemove.bin","earthsong_bras_sol":"02_Bras_Sol.livemove.bin","earthsong_jette":"03_Jette.livemove.bin","earthsong_lever":"04_Lever.livemove.bin","earthsong_poitrine_l":"05_Poitrine_L.livemove.bin","earthsong_spin":"06_Spin.livemove.bin","earthsong_bras_u":"07_Bras_U.livemove.bin","earthsong_bras_down":"08_Bras_Down.livemove.bin","earthsong_allemand":"09_Allemand.livemove.bin","earthsong_pointer_sol":"10_Pointer_Sol.livemove.bin","earthsong_poitrine_r":"11_Poitrine_R.livemove.bin","earthsong_main":"12_Main.livemove.bin","earthsong_bras":"13_Bras.livemove.bin","earthsong_ski_l":"14_Ski_L.livemove.bin","earthsong_saut_r":"15_Saut_R.livemove.bin","earthsong_saut_l":"16_Saut_L.livemove.bin","earthsong_bras_tendu":"17_Bras_Tendu.livemove.bin","earthsong_poing_lever_l":"18_Poing_Lever_L.livemove.bin","earthsong_poing_lever_r":"19_Poing_Lever_R.livemove.bin","earthsong_ski_r":"20_Ski_R.livemove.bin","earthsong_poing_l":"21_Poing_L.livemove.bin","earthsong_poing_r":"22_Poing_R.livemove.bin","earthsong_poing_f":"23_Poing_F.livemove.bin","earthsong_main_r":"24_Main_R.livemove.bin","earthsong_genou_tape":"25_Genou_Tape.livemove.bin","earthsong_genou_moi":"26_Genou_Moi.livemove.bin","earthsong_main_l":"27_Main_L.livemove.bin","earthsong_pose_fin":"28_Pose_Fin.livemove.bin","earthsong_poing_lever_f":"29_Poing_Lever_F.livemove.bin","earthsong_shake":"30_Shake.livemove.bin"
+});
+let phoneDanceSession = null;
+let phoneDanceMoves = [];
+let phoneDanceProfiles = new Map();
+let phoneDanceClassifierSummary = { loaded:0, total:0, format:"" };
+let phoneDanceReady = false;
+let phoneDanceLoadToken = 0;
+let phoneDanceClock = { timelineMs:0, anchorPerf:performance.now(), playing:false, initialized:false };
+let phoneDanceActiveMoveIndex = -1;
+let phoneDanceStats = null;
+let phoneDanceJudgedMoves = new Set();
+let phoneDancePendingResults = new Map();
+let phoneDanceLocal = null;
+let phoneDanceLastTelemetryAt = 0;
+let phoneDanceServerRttMs = 90;
+let phoneDanceServerOffsetMs = 0;
+let phoneDanceLatencyMeasuredAt = 0;
+let phoneDanceCalibration = { gravity:9.81, motionScale:3.2, rotationScale:180, noiseMotion:0.035, noiseRotation:3, quietSamples:0 };
+
 
 const params = new URLSearchParams(location.search);
 const initialRoom = (params.get("room") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
@@ -215,9 +248,49 @@ function sensorSourceLabel(source) {
     "generic-gyroscope": "Giroscópio",
     "generic-accelerometer": "Acelerômetro",
     "generic-linear-acceleration": "Acel. linear",
+    "generic-fused": "Sensores fundidos",
     "mixed": "Misto"
   })[source] || "—";
 }
+
+
+function phoneClamp01(value){ return Math.max(0, Math.min(1, Number(value || 0))); }
+function phoneMagnitude(v){ const x=Number(v?.x||0),y=Number(v?.y||0),z=Number(v?.z||0); return Math.sqrt(x*x+y*y+z*z); }
+function phoneUnit(v){ const m=phoneMagnitude(v); return m>1e-5?{x:Number(v?.x||0)/m,y:Number(v?.y||0)/m,z:Number(v?.z||0)/m}:null; }
+function phoneDot(a,b){ return Number(a?.x||0)*Number(b?.x||0)+Number(a?.y||0)*Number(b?.y||0)+Number(a?.z||0)*Number(b?.z||0); }
+function phoneDanceClassifierFile(song, moveName){ const n=String(moveName||"").toLowerCase(); return song?.classifierFormat==="msm"?`${n}.msm`:PHONE_EARTH_CLASSIFIERS[n]||""; }
+function phoneFindAscii(bytes,text){ const t=Array.from(String(text||""),c=>c.charCodeAt(0)&255); outer:for(let i=0;i<=bytes.length-t.length;i++){for(let j=0;j<t.length;j++)if(bytes[i+j]!==t[j])continue outer;return i;} return -1; }
+function phoneParseMsm(buffer,moveName=""){ if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<260)return null; const v=new DataView(buffer),count=v.getUint32(232,false),channels=v.getUint32(236,false),duration=v.getFloat32(200,false),start=244; if(!count||count>512||channels!==2||start+(count*2+2)*4>buffer.byteLength)return null; const primary=[],secondary=[]; for(let i=0;i<count;i++)primary.push(v.getFloat32(start+i*4,false)); for(let i=0;i<count;i++)secondary.push(v.getFloat32(start+(count+i)*4,false)); if(![...primary,...secondary].every(Number.isFinite))return null; return {format:"msm",moveName,count,duration,primary,secondary}; }
+function phoneParseLiveMove(buffer,moveName=""){ if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<512)return null; const bytes=new Uint8Array(buffer),mi=phoneFindAscii(bytes,"motion"); if(mi<0)return null; let co=mi+6; while(co<bytes.length&&bytes[co]===0)co++; if(co+4>bytes.length)return null; const v=new DataView(buffer),count=v.getUint32(co,true),start=co+4; if(!count||count>512||start+count*12>buffer.byteLength)return null; const axes=[[],[],[]]; for(let a=0;a<3;a++)for(let i=0;i<count;i++){const x=v.getFloat32(start+(a*count+i)*4,true);if(!Number.isFinite(x)||Math.abs(x)>1000)return null;axes[a].push(x);} return {format:"livemove",moveName,count,axes}; }
+function phoneNormalize(values){ const a=(values||[]).map(x=>Number(x||0)); if(!a.length)return[]; const mean=a.reduce((s,x)=>s+x,0)/a.length, variance=a.reduce((s,x)=>s+(x-mean)**2,0)/a.length,sd=Math.sqrt(Math.max(variance,1e-8)); return a.map(x=>(x-mean)/sd); }
+function phoneResample(values,target){ const s=(values||[]).map(x=>Number(x||0)),n=Math.max(1,Math.round(target||1)); if(!s.length)return Array(n).fill(0); if(s.length===1)return Array(n).fill(s[0]); const out=[]; for(let i=0;i<n;i++){const p=i*(s.length-1)/Math.max(1,n-1),l=Math.floor(p),r=Math.min(s.length-1,l+1),m=p-l;out.push(s[l]*(1-m)+s[r]*m);} return out; }
+function phoneShiftCorr(ref,obs,signFlip=true){ const n=Math.min(ref?.length||0,obs?.length||0); if(n<4)return 0; const a=phoneNormalize(ref.slice(0,n)),b=phoneNormalize(obs.slice(0,n)),maxShift=Math.max(1,Math.floor(n*.22)); let best=-1; for(let sh=-maxShift;sh<=maxShift;sh++){let dot=0,used=0;for(let i=0;i<n;i++){const j=i+sh;if(j<0||j>=n)continue;dot+=a[i]*b[j];used++;} if(used>=Math.max(3,n*.58)){const c=dot/used;best=Math.max(best,signFlip?Math.abs(c):c);}} return phoneClamp01(best); }
+function phoneDirectionChanges(vectors){ const out=[];let prev=null;for(const v of vectors){const u=phoneUnit(v);if(!u||!prev){out.push(0);if(u)prev=u;continue;}out.push(1-Math.max(-1,Math.min(1,phoneDot(u,prev))));prev=u;}return out; }
+function phoneModelMagnitude(profile){ if(profile?.format!=="livemove")return[]; const n=profile.count;return Array.from({length:n},(_,i)=>Math.sqrt(profile.axes[0][i]**2+profile.axes[1][i]**2+profile.axes[2][i]**2)); }
+function phoneLiveMatch(profile,stats){ const samples=stats?.samples||[],n=Number(profile?.count||0);if(!profile||n<4||samples.length<4)return 0; const rawAxes=["x","y","z"].map(axis=>phoneResample(samples.map(s=>Number(s.motion?.[axis]||0)),n)); const modelAxes=profile.axes.map(a=>phoneResample(a,n)); const perms=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];let axisBest=0; for(const p of perms){let sum=0;for(let a=0;a<3;a++)sum+=phoneShiftCorr(modelAxes[a],rawAxes[p[a]],true);axisBest=Math.max(axisBest,sum/3);} const modelMag=phoneModelMagnitude(profile); const obsMag=phoneResample(samples.map(s=>s.motionMag),n); const mag=phoneShiftCorr(modelMag,obsMag,false); const modelDirs=phoneDirectionChanges(Array.from({length:n},(_,i)=>({x:profile.axes[0][i],y:profile.axes[1][i],z:profile.axes[2][i]}))); const obsDirs=phoneResample(phoneDirectionChanges(samples.map(s=>s.motion)),n); const dir=phoneShiftCorr(modelDirs,obsDirs,false); return phoneClamp01(axisBest*.50+mag*.32+dir*.18); }
+function phoneMsmMatch(profile,stats){ const samples=stats?.samples||[],n=Number(profile?.count||0);if(!profile||n<4||samples.length<4)return 0; const features=[
+  samples.map(s=>s.motionMag),samples.map(s=>s.horizontal),samples.map(s=>s.vertical),samples.map(s=>s.rotationMag),samples.map(s=>s.jerk),samples.map(s=>s.motion.x),samples.map(s=>s.motion.y),samples.map(s=>s.motion.z)
+].map(x=>phoneResample(x,n)); let p=0,s=0;for(const f of features){p=Math.max(p,phoneShiftCorr(profile.primary,f,true));s=Math.max(s,phoneShiftCorr(profile.secondary,f,true));} const energy=phoneShiftCorr(profile.secondary,phoneResample(samples.map(x=>x.motionMag+x.rotationMag/180),n),true); const raw=p*.52+s*.28+energy*.20; return phoneClamp01((raw-.08)/.82); }
+function phoneClassifierMatch(profile,stats){ return profile?.format==="livemove"?phoneLiveMatch(profile,stats):profile?.format==="msm"?phoneMsmMatch(profile,stats):0; }
+function phoneIsShake(move){ return /(?:^|[^a-z0-9])shake(?:[^a-z0-9]|\d|$)/i.test(String(move?.name||"")); }
+function phoneMakeStats(){return{count:0,active:0,motionSum:0,motionPeak:0,rotationSum:0,rotationPeak:0,jerkSum:0,jerkPeak:0,reversals:0,strongReversals:0,prevMotion:null,prevUnit:null,prevTime:0,samples:[]};}
+function phoneDanceResetLocal(clearQueue=true){phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;phoneDanceJudgedMoves.clear();if(clearQueue)phoneDancePendingResults.clear();phoneDanceLocal={totalMoves:phoneDanceMoves.length,judgedMoves:0,rawScore:0,score:0,stars:0,rank:"SEM ESTRELAS",lastJudgement:"",judgementCounts:{PERFECT:0,SUPER:0,GOOD:0,OK:0,YEAH:0,X:0}};renderControllerDanceScore(phoneDanceLocal);}
+function phoneDanceRank(d){const score=Math.max(0,Math.min(PHONE_DANCE_MAX_SCORE,Number(d.score||0))),stars=[2000,4000,6000,8000,10000].filter(x=>score>=x).length;d.stars=stars;d.rank=score>=12000?"MEGASTAR":score>=11000?"SUPERSTAR":stars?`${stars} ESTRELA${stars===1?"":"S"}`:"SEM ESTRELAS";}
+function phoneDanceApplyLocalResult(move,result){if(!phoneDanceLocal)phoneDanceResetLocal(false);const per=PHONE_DANCE_MAX_SCORE/Math.max(1,phoneDanceMoves.length);phoneDanceLocal.rawScore=Math.min(PHONE_DANCE_MAX_SCORE,Number(phoneDanceLocal.rawScore||0)+per*PHONE_DANCE_WEIGHTS[result.judgement]);phoneDanceLocal.score=Math.round(phoneDanceLocal.rawScore);phoneDanceLocal.judgedMoves++;phoneDanceLocal.totalMoves=phoneDanceMoves.length;phoneDanceLocal.lastJudgement=result.judgement;phoneDanceLocal.lastMoveName=move?.name||"";phoneDanceLocal.lastQuality=result.quality;phoneDanceLocal.judgementCounts[result.judgement]=(phoneDanceLocal.judgementCounts[result.judgement]||0)+1;phoneDanceRank(phoneDanceLocal);renderControllerDanceScore(phoneDanceLocal,true);}
+function phoneMeasureServerClock(force=false){if(!socket?.connected||!joinedRoom)return;const now=performance.now();if(!force&&now-phoneDanceLatencyMeasuredAt<5000)return;phoneDanceLatencyMeasuredAt=now;const wallStart=Date.now(),perfStart=performance.now();socket.emit("controller:dance-clock-ping",{roomCode:joinedRoom},response=>{if(!response?.ok)return;const rtt=Math.max(0,Math.min(4000,performance.now()-perfStart));const midpoint=wallStart+rtt/2;const offset=Number(response.serverTime||Date.now())-midpoint;phoneDanceServerRttMs=phoneDanceServerRttMs*.72+rtt*.28;phoneDanceServerOffsetMs=phoneDanceServerOffsetMs*.72+offset*.28;});}
+function phoneUpdateCalibration(sample){const motion=phoneMagnitude(sample?.acceleration),rot=phoneMagnitude(sample?.rotationRate),g=phoneMagnitude(sample?.accelerationIncludingGravity);if(g>6&&g<13)phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.992+g*.008;if(motion<.30&&rot<18){phoneDanceCalibration.noiseMotion=phoneDanceCalibration.noiseMotion*.992+motion*.008;phoneDanceCalibration.noiseRotation=phoneDanceCalibration.noiseRotation*.992+rot*.008;phoneDanceCalibration.quietSamples++;}else{const targetM=Math.max(1.8,Math.min(7.5,motion*1.10));const targetR=Math.max(90,Math.min(520,rot*1.08));phoneDanceCalibration.motionScale=phoneDanceCalibration.motionScale*.997+targetM*.003;phoneDanceCalibration.rotationScale=phoneDanceCalibration.rotationScale*.997+targetR*.003;}}
+
+function phoneDanceClockNow(){if(!phoneDanceClock.initialized)return 0;return phoneDanceClock.timelineMs+(phoneDanceClock.playing?(performance.now()-phoneDanceClock.anchorPerf):0);}
+function phoneDanceSyncClock(payload){const now=performance.now(),reason=String(payload?.reason||"sync"),playing=Boolean(payload?.playing);phoneMeasureServerClock(false);const serverNowEstimate=Date.now()+phoneDanceServerOffsetMs;const serverAge=Number.isFinite(Number(payload?.serverTime))?Math.max(0,Math.min(1800,serverNowEstimate-Number(payload.serverTime))):Math.max(0,phoneDanceServerRttMs/2);const hostLeg=Math.max(0,Math.min(1000,Number(payload?.hostOneWayMs||0)));const target=Number(payload?.timelineMs||0)+(playing?serverAge+hostLeg:0); if(!phoneDanceClock.initialized||["song","seek","room","play","pause","ended"].includes(reason)){phoneDanceClock={timelineMs:target,anchorPerf:now,playing,initialized:true};return;} const predicted=phoneDanceClockNow(),drift=target-predicted; const correction=Math.max(-55,Math.min(55,drift*.14)); phoneDanceClock={timelineMs:predicted+correction,anchorPerf:now,playing,initialized:true};}
+async function phoneLoadDanceSong(songId){const song=PHONE_DANCE_SONGS[songId]||PHONE_DANCE_SONGS.RainOverMe,token=++phoneDanceLoadToken;phoneDanceReady=false;phoneDanceProfiles=new Map();if(sensorNotice)sensorNotice.textContent=`Carregando movimentos ${song.classifierFormat.toUpperCase()} e recalibrando para este celular…`;try{const r=await fetch(`${song.base}/moves/${song.movesFile}`,{cache:"force-cache"});if(!r.ok)throw new Error(`moves HTTP ${r.status}`);const moves=await r.json();if(token!==phoneDanceLoadToken)return;phoneDanceMoves=Array.isArray(moves)?moves.slice().sort((a,b)=>Number(a.time||0)-Number(b.time||0)):[];const names=[...new Set(phoneDanceMoves.map(m=>String(m?.name||"")).filter(Boolean))];let loaded=0;await Promise.all(names.map(async name=>{const file=phoneDanceClassifierFile(song,name);if(!file)return;try{const fr=await fetch(`${song.base}/${song.classifierFolder}/${file}`,{cache:"force-cache"});if(!fr.ok)return;const buf=await fr.arrayBuffer();const p=song.classifierFormat==="msm"?phoneParseMsm(buf,name):phoneParseLiveMove(buf,name);if(p){phoneDanceProfiles.set(String(name).toLowerCase(),p);loaded++;}}catch{}}));if(token!==phoneDanceLoadToken)return;phoneDanceClassifierSummary={loaded,total:names.length,format:song.classifierFormat.toUpperCase()};phoneDanceReady=true;phoneDanceResetLocal(true);if(sensorNotice)sensorNotice.textContent=`Pontuação local V5 pronta • ${loaded}/${names.length} classifiers ${song.classifierFormat.toUpperCase()} → CELULAR. A rede não decide sua nota.`;}catch(error){console.error("Falha ao preparar classifiers no celular",error);if(sensorNotice)sensorNotice.textContent="Não foi possível carregar os classifiers no celular. A pontuação ficará pausada para não gerar notas falsas.";}}
+async function phoneApplyDanceSession(payload){if(!payload||payload.roomCode!==joinedRoom)return;const changed=!phoneDanceSession||phoneDanceSession.songId!==payload.songId;phoneDanceSession={...payload};phoneDanceSyncClock(payload);if(changed){await phoneLoadDanceSong(payload.songId);phoneDanceSyncClock(payload);}if(sensorModeRequested&&sensorPermissionGranted&&!sensorStreaming)startSensorStreaming();}
+function phoneMoveIndexAt(ms){for(let i=0;i<phoneDanceMoves.length;i++){const m=phoneDanceMoves[i],start=Number(m.time||0)-130,end=Number(m.time||0)+Number(m.duration||0)+170;if(ms>=start&&ms<=end)return i;if(start>ms)break;}return-1;}
+function phoneJudge(stats,move){if(!stats||stats.count<4)return{judgement:"X",quality:0,classifierMatch:0};const n=Math.max(1,stats.count),coverage=stats.active/n,avgMotion=stats.motionSum/n,avgRot=stats.rotationSum/n,motionEvidence=Math.max(phoneClamp01(avgMotion/(phoneDanceCalibration.motionScale*1.15)),phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*1.25))),peakEvidence=Math.max(phoneClamp01(stats.motionPeak/(phoneDanceCalibration.motionScale*2.1)),phoneClamp01(stats.rotationPeak/(phoneDanceCalibration.rotationScale*2.8)));const profile=phoneDanceProfiles.get(String(move?.name||"").toLowerCase())||null;let classifier=profile?phoneClassifierMatch(profile,stats):0;if(phoneIsShake(move)){const rev=phoneClamp01(stats.reversals/Math.max(3,n*.16)),strong=phoneClamp01(stats.strongReversals/Math.max(2,n*.08)),jerk=phoneClamp01((stats.jerkSum/n)/(phoneDanceCalibration.motionScale*14));const shake=rev*.46+strong*.24+jerk*.18+phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*.85))*.12;classifier=Math.max(classifier,shake*.92);}const clear=coverage>=.10&&(avgMotion>=Math.max(phoneDanceCalibration.noiseMotion*2.2,phoneDanceCalibration.motionScale*.075)||avgRot>=Math.max(phoneDanceCalibration.noiseRotation*2.4,phoneDanceCalibration.rotationScale*.06));if(!clear)return{judgement:"X",quality:.02,classifierMatch:classifier};let q=profile?classifier*.64+phoneClamp01((coverage-.06)/.60)*.21+motionEvidence*.10+peakEvidence*.05:Math.min(.50,phoneClamp01((coverage-.06)/.60)*.55+motionEvidence*.30+peakEvidence*.15);if(profile&&classifier<.16)q=Math.min(q,.20);else if(profile&&classifier<.27)q=Math.min(q,.37);q=phoneClamp01(q);const quality=Math.round(q*1000)/1000,cm=Math.round(classifier*1000)/1000;if(move?.goldMove)return{judgement:(classifier>=.27&&q>=.34)?"YEAH":"X",quality,classifierMatch:cm};const judgement=q>=.72?"PERFECT":q>=.55?"SUPER":q>=.38?"GOOD":q>=.20?"OK":"X";return{judgement,quality,classifierMatch:cm};}
+function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,...result,scoredAt:Date.now(),source:"phone-v5"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
+function phoneFlushDanceResults(){if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;for(const [index,payload] of [...phoneDancePendingResults]){socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:dance-judgement",payload,(error,response)=>{if(!error&&response?.ok){phoneDancePendingResults.delete(index);if(response.state)applyState(response.state);}});}}
+function phoneFinalizeActiveMove(){const i=phoneDanceActiveMoveIndex;if(i<0||phoneDanceJudgedMoves.has(i))return;const move=phoneDanceMoves[i];if(!move)return;const result=phoneJudge(phoneDanceStats,move);phoneDanceJudgedMoves.add(i);phoneQueueResult(i,move,result);phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;}
+function phoneSyncMoveWindow(){if(!phoneDanceReady||!phoneDanceClock.playing||!sensorStreaming)return;const current=phoneMoveIndexAt(phoneDanceClockNow());if(phoneDanceActiveMoveIndex>=0&&current!==phoneDanceActiveMoveIndex)phoneFinalizeActiveMove();if(current>=0&&!phoneDanceJudgedMoves.has(current)&&phoneDanceActiveMoveIndex!==current){phoneDanceActiveMoveIndex=current;phoneDanceStats=phoneMakeStats();}}
+function phoneCollectDanceSample(sample){if(!phoneDanceReady||!phoneDanceSession||!phoneDanceClock.playing||!sensorStreaming)return;phoneSyncMoveWindow();if(phoneDanceActiveMoveIndex<0||!phoneDanceStats)return;const st=phoneDanceStats,now=performance.now(),linear={x:Number(sample.acceleration?.x||0),y:Number(sample.acceleration?.y||0),z:Number(sample.acceleration?.z||0)},gravity={x:Number(sample.accelerationIncludingGravity?.x||0),y:Number(sample.accelerationIncludingGravity?.y||0),z:Number(sample.accelerationIncludingGravity?.z||0)},rotation={x:Number(sample.rotationRate?.x||0),y:Number(sample.rotationRate?.y||0),z:Number(sample.rotationRate?.z||0)};let motion=linear;if(phoneMagnitude(linear)<.04&&st.prevGravity){motion={x:gravity.x-st.prevGravity.x,y:gravity.y-st.prevGravity.y,z:gravity.z-st.prevGravity.z};}st.prevGravity={...gravity};const gmag=phoneMagnitude(gravity);if(gmag>6&&gmag<13&&phoneMagnitude(motion)<.35){phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.985+gmag*.015;phoneDanceCalibration.quietSamples++;}const gu=phoneUnit(gravity)||{x:0,y:0,z:1},vertical=phoneDot(motion,gu),motionMag=phoneMagnitude(motion),horizontal=Math.sqrt(Math.max(0,motionMag*motionMag-vertical*vertical)),rotationMag=phoneMagnitude(rotation),dt=st.prevTime?Math.max(.018,Math.min(.12,(now-st.prevTime)/1000)):.035;st.prevTime=now;let jerk=0;if(st.prevMotion)jerk=phoneMagnitude({x:(motion.x-st.prevMotion.x)/dt,y:(motion.y-st.prevMotion.y)/dt,z:(motion.z-st.prevMotion.z)/dt});st.prevMotion={...motion};const unit=motionMag>.10?phoneUnit(motion):null;if(unit&&st.prevUnit){const dot=Math.max(-1,Math.min(1,phoneDot(unit,st.prevUnit)));if(dot<-.18)st.reversals++;if(dot<-.52)st.strongReversals++;}if(unit)st.prevUnit=unit;st.count++;if(motionMag>=.20||rotationMag>=18)st.active++;st.motionSum+=motionMag;st.motionPeak=Math.max(st.motionPeak,motionMag);st.rotationSum+=rotationMag;st.rotationPeak=Math.max(st.rotationPeak,rotationMag);st.jerkSum+=jerk;st.jerkPeak=Math.max(st.jerkPeak,jerk);st.samples.push({time:now,motion,gravity,rotation,motionMag,rotationMag,vertical,horizontal,jerk});if(st.samples.length>220)st.samples.shift();}
 
 function reportSensorStatus(active = sensorStreaming, force = false) {
   if (!socket || !socket.connected || !joinedRoom) return;
@@ -280,62 +353,57 @@ function showSensorReceivingUi() {
   if (sensorModeTitle) sensorModeTitle.textContent = "Sensores ativos";
   if (sensorModeText) {
     sensorModeText.textContent = sensorObserved.gyro
-      ? "Giroscópio/aceleração detectados. Mova o celular para testar a telemetria."
-      : "Movimento detectado. Se o giroscópio direto não estiver disponível, a rotação é estimada pela orientação do celular.";
+      ? "Giroscópio/aceleração detectados. O julgamento dos movimentos acontece neste celular."
+      : "Movimento detectado. A rotação pode ser estimada pela orientação; a nota continua sendo calculada localmente.";
   }
   if (enableSensorsBtn) {
     enableSensorsBtn.textContent = "Sensores ativados";
     enableSensorsBtn.disabled = true;
   }
   if (sensorNotice) {
+    const cls = phoneDanceClassifierSummary.total ? ` • ${phoneDanceClassifierSummary.loaded}/${phoneDanceClassifierSummary.total} ${phoneDanceClassifierSummary.format}` : "";
     sensorNotice.textContent = sensorObserved.gyro
-      ? "Giro direto detectado. A pontuação ainda é somente diagnóstico."
-      : "Fallback de orientação ativo: já dá para testar, mesmo sem rotação direta do navegador.";
+      ? `Pontuação V5 local ativa${cls}. O servidor recebe apenas os resultados prontos.`
+      : `Fallback de orientação ativo${cls}. O servidor não calcula sua posição nem sua nota.`;
   }
 }
 
 function sendLatestSensorSample(source = "mixed", interval = 0) {
-  if (!sensorStreaming || !sensorModeRequested || !socket?.connected || !joinedRoom) return;
+  if (!sensorStreaming || !sensorModeRequested) return;
   const now = performance.now();
-  if (now - sensorLastSentAt < 28) return;
+  if (now - sensorLastSentAt < 26) return;
   sensorLastSentAt = now;
 
-  const rotationRate = sensorVectorMagnitude(sensorLatestRotation) > 0.001
-    ? sensorLatestRotation
-    : sensorDerivedRotation;
+  const rotationRate = sensorVectorMagnitude(sensorLatestRotation) > 0.001 ? sensorLatestRotation : sensorDerivedRotation;
   if (sensorVectorMagnitude(sensorLatestRotation) <= 0.001 && sensorVectorMagnitude(sensorDerivedRotation) > 0.001) {
     source = source === "deviceorientation" ? "orientation-fallback" : source;
     markObserved("orientationFallback");
   }
-
-  sensorLatestIntensity = localSensorIntensity(
-    sensorLatestAcceleration,
-    sensorLatestAccelerationIncludingGravity,
-    rotationRate
-  );
+  sensorLatestIntensity = localSensorIntensity(sensorLatestAcceleration, sensorLatestAccelerationIncludingGravity, rotationRate);
   sensorLatestSource = source || "mixed";
   sensorPacketCount += 1;
   renderLocalSensorMeter(sensorLatestIntensity);
   showSensorReceivingUi();
+  if (sensorWatchdogTimer) { clearTimeout(sensorWatchdogTimer); sensorWatchdogTimer = null; }
 
-  if (sensorWatchdogTimer) {
-    clearTimeout(sensorWatchdogTimer);
-    sensorWatchdogTimer = null;
+  const sample = {
+    acceleration: { ...sensorLatestAcceleration },
+    accelerationIncludingGravity: { ...sensorLatestAccelerationIncludingGravity },
+    rotationRate: { ...rotationRate },
+    orientation: { ...sensorLatestOrientation },
+    interval: Number(interval || 0), clientTime: Date.now(), source: sensorLatestSource
+  };
+
+  phoneUpdateCalibration(sample);
+  // CRÍTICO: primeiro pontua localmente. Isto não depende de ping, Render ou PC.
+  phoneCollectDanceSample(sample);
+
+  // Telemetria visual bem mais leve; se a rede cair ela simplesmente é descartada.
+  if (socket?.connected && joinedRoom && now - phoneDanceLastTelemetryAt >= 240) {
+    phoneDanceLastTelemetryAt = now;
+    const emitter = socket.volatile || socket;
+    emitter.emit("controller:sensor-data", { roomCode: joinedRoom, sample });
   }
-
-  const emitter = socket.volatile || socket;
-  emitter.emit("controller:sensor-data", {
-    roomCode: joinedRoom,
-    sample: {
-      acceleration: sensorLatestAcceleration,
-      accelerationIncludingGravity: sensorLatestAccelerationIncludingGravity,
-      rotationRate,
-      orientation: sensorLatestOrientation,
-      interval: Number(interval || 0),
-      clientTime: Date.now(),
-      source: sensorLatestSource
-    }
-  });
 }
 
 function handleDeviceOrientation(event) {
@@ -356,11 +424,16 @@ function handleDeviceOrientation(event) {
   }
   sensorOrientationPrevious = { value: next, at: now };
   sensorLatestOrientation = next;
-  sendLatestSensorSample("deviceorientation");
+  // Orientação é fallback. Quando há DeviceMotion/acelerômetro recente, não deixa
+  // este evento ocupar a janela de amostragem com aceleração antiga.
+  if (now - sensorLastMotionReadingAt > 140 && now - sensorLastGenericAccelAt > 140) {
+    sendLatestSensorSample("deviceorientation");
+  }
 }
 
 function handleDeviceMotion(event) {
   markObserved("motion");
+  sensorLastMotionReadingAt = performance.now();
   if (event.acceleration) {
     sensorLatestAcceleration = {
       x: Number(event.acceleration.x ?? 0),
@@ -388,12 +461,21 @@ function handleDeviceMotion(event) {
   sendLatestSensorSample("devicemotion", Number(event.interval || 0));
 }
 
+function scheduleGenericSensorSample() {
+  if (sensorGenericFusionTimer) return;
+  sensorGenericFusionTimer = window.setTimeout(() => {
+    sensorGenericFusionTimer = 0;
+    sendLatestSensorSample("generic-fused", 1000 / 40);
+  }, 7);
+}
+
 function registerGenericSensor(sensor, source, onReading) {
   if (!sensor) return;
   sensor.onreading = () => {
     try {
       onReading(sensor);
-      sendLatestSensorSample(source, 1000 / 40);
+      if (source.includes("acceleration") || source.includes("accelerometer")) sensorLastGenericAccelAt = performance.now();
+      scheduleGenericSensorSample();
     } catch {}
   };
   sensor.onerror = event => {
@@ -442,6 +524,7 @@ function startGenericSensors() {
 }
 
 function stopGenericSensors() {
+  if (sensorGenericFusionTimer) { clearTimeout(sensorGenericFusionTimer); sensorGenericFusionTimer = 0; }
   for (const sensor of sensorGenericSensors) {
     try { sensor.stop(); } catch {}
   }
@@ -487,6 +570,8 @@ function startSensorStreaming() {
   sensorDerivedRotation = { x: 0, y: 0, z: 0 };
   sensorLatestSource = "";
   sensorGenericErrors = [];
+  sensorLastMotionReadingAt = 0;
+  sensorLastGenericAccelAt = 0;
   sensorPacketCount = 0;
   sensorLastSentAt = 0;
   sensorStreaming = true;
@@ -602,13 +687,15 @@ function applySensorLabState(nextState, me) {
 
   sensorModeRequested = Boolean(nextState.sensorMode);
   const serverSensor = me?.sensor || {};
-  renderControllerDanceScore(me?.dance || {});
+  const serverDance = me?.dance || {};
+  const displayDance = phoneDanceLocal && Number(phoneDanceLocal.judgedMoves || 0) >= Number(serverDance.judgedMoves || 0) ? phoneDanceLocal : serverDance;
+  renderControllerDanceScore(displayDance);
   if (sensorPacketValue) sensorPacketValue.textContent = String(Number(serverSensor.packetCount || sensorPacketCount));
   if (sensorMovementValue) sensorMovementValue.textContent = `${Math.round(Number(serverSensor.intensity || sensorLatestIntensity) * 100)}%`;
   if (sensorMotionFill) sensorMotionFill.style.width = `${Math.round(Number(serverSensor.intensity || sensorLatestIntensity) * 100)}%`;
   if (sensorSourceValue && serverSensor.lastSource && !sensorStreaming) sensorSourceValue.textContent = sensorSourceLabel(serverSensor.lastSource);
 
-  turnKicker.textContent = "Mini Game em desenvolvimento";
+  turnKicker.textContent = "Just Dance • pontuação no celular";
   playerPosition.textContent = "—";
   mobileDeckArea.classList.add("hidden");
   mobileRollBtn.disabled = true;
@@ -631,7 +718,7 @@ function applySensorLabState(nextState, me) {
     setSensorBadge("waiting", "Permissão");
     sensorModePanel?.classList.remove("is-error", "is-live");
     sensorModeTitle.textContent = "Ative os sensores";
-    sensorModeText.textContent = "O computador está pronto. Toque no botão abaixo para permitir o uso do movimento deste celular.";
+    sensorModeText.textContent = "O computador está pronto. Ative os sensores: classifiers e julgamento serão processados neste celular.";
     enableSensorsBtn.disabled = false;
     enableSensorsBtn.textContent = "Ativar sensores deste celular";
     sensorNotice.textContent = window.isSecureContext ? "Pronto para solicitar a permissão do navegador." : "Recomendado abrir esta página por HTTPS para liberar os sensores.";
@@ -878,10 +965,26 @@ mobileCardContinue.addEventListener("click", () => {
 });
 
 if (socket) {
+  socket.on("dev:dance-session", payload => {
+    if (!joinedRoom || payload?.roomCode !== joinedRoom) return;
+    phoneApplyDanceSession(payload);
+  });
+
+  socket.on("dev:dance-reset", payload => {
+    if (!joinedRoom || payload?.roomCode !== joinedRoom) return;
+    phoneDanceResetLocal(true);
+    if (payload.state) applyState(payload.state);
+    if (sensorNotice) sensorNotice.textContent = "Pontuação local zerada pelo computador. Classifiers continuam carregados no celular.";
+  });
+
   socket.on("dev:dance-judgement", payload => {
     if (!joinedRoom || payload?.roomCode !== joinedRoom) return;
     const result = (payload.results || []).find(item => item.playerId === myPlayerId);
-    if (result?.dance) renderControllerDanceScore(result.dance, true);
+    if (result?.dance) {
+      const serverDance = result.dance;
+      const displayDance = phoneDanceLocal && Number(phoneDanceLocal.judgedMoves || 0) > Number(serverDance.judgedMoves || 0) ? phoneDanceLocal : serverDance;
+      renderControllerDanceScore(displayDance, false);
+    }
     if (payload.state) applyState(payload.state);
   });
 
@@ -928,6 +1031,8 @@ if (socket) {
   socket.on("room:closed", payload => {
     if (!joinedRoom || payload.roomCode !== joinedRoom) return;
     stopSensorStreaming();
+    phoneDanceResetLocal(true);
+    phoneDanceSession = null;
     sensorModeRequested = false;
     sensorLastReportedActive = null;
     joinedRoom = "";
@@ -940,15 +1045,27 @@ if (socket) {
   });
 
   socket.on("disconnect", () => {
-    connectionBadge.textContent = "Sem conexão";
+    connectionBadge.textContent = sensorStreaming ? "Sem conexão • pontuando localmente" : "Sem conexão";
     mobileRollBtn.disabled = true;
-    stopSensorStreaming();
+    // Não desliga os sensores: a nota continua sendo calculada e entra numa fila local.
+    if (sensorNotice && sensorStreaming) sensorNotice.textContent = "Internet instável: continuando a pontuar neste celular. Os resultados serão enviados quando reconectar.";
   });
 
   socket.on("connect", () => {
-    if (myPlayerId) {
-      connectionBadge.textContent = "Conectado";
-      reportSensorStatus(sensorStreaming, true);
+    if (myPlayerId && joinedRoom) {
+      connectionBadge.textContent = "Reconectando sala…";
+      socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:resume", { roomCode: joinedRoom, playerId: myPlayerId }, (error, response) => {
+        if (!error && response?.ok) {
+          connectionBadge.textContent = "Conectado";
+          if (response.state) applyState(response.state);
+          if (response.danceSession) phoneApplyDanceSession(response.danceSession);
+          reportSensorStatus(sensorStreaming, true);
+          phoneMeasureServerClock(true);
+          phoneFlushDanceResults();
+        } else {
+          connectionBadge.textContent = "Reconexão pendente";
+        }
+      });
     }
   });
 }
