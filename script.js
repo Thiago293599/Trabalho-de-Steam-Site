@@ -2715,10 +2715,21 @@ function danceGoogleDriveStreamCandidates(source) {
   const id = value.slice("gdrive:".length).trim();
   if (!id) return [];
   const encoded = encodeURIComponent(id);
-  return [
+  const candidates = [];
+
+  // V9: caminho principal. O servidor do jogo busca o MP4 no Drive e
+  // retransmite os bytes/Range para o <video>. Assim não dependemos dos
+  // cookies cross-site do Google Drive e nenhuma interface do Drive aparece.
+  const proxy = serverEndpoint(`/api/media/gdrive/${encoded}`);
+  if (proxy) candidates.push(proxy);
+
+  // Mantemos o acesso direto apenas como segunda tentativa, caso o servidor
+  // esteja em uma versão antiga ou o proxy esteja temporariamente inacessível.
+  candidates.push(
     `https://drive.usercontent.google.com/download?id=${encoded}&export=download&confirm=t`,
-    `https://drive.google.com/uc?export=download&id=${encoded}`
-  ];
+    `https://drive.google.com/uc?export=download&id=${encoded}&confirm=t`
+  );
+  return candidates;
 }
 
 function isDanceDirectStreamSource(source) {
@@ -2862,10 +2873,10 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       const videoSource = DANCE_VIDEO_SOURCES[quality];
       const directStream = isDanceDirectStreamSource(videoSource);
       if (directStream) {
-        setDancePreloadUi(12, `Conectando ao vídeo ${label} no Google Drive…`, "Preparando stream externo");
+        setDancePreloadUi(12, `Conectando ao vídeo ${label} no Google Drive…`, "Preparando stream pelo servidor");
         try {
           await installDanceDirectVideoStream(videoSource, danceTestVideo);
-          setDancePreloadUi(videoEnd, `Stream ${label} pronto • player do site, sem interface do Drive.`);
+          setDancePreloadUi(videoEnd, `Stream ${label} pronto • Google Drive via servidor, sem interface do Drive.`);
         } catch (driveError) {
           // Se o Drive bloquear o stream direto, mantemos a música jogável usando o Low local.
           const fallbackSource = DANCE_VIDEO_SOURCES.low;
@@ -2876,7 +2887,7 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
             setDancePreloadUi(18 + (videoEnd - 18) * ratio, `Drive indisponível • carregando Low local…`);
           });
           await installDanceMediaBlob("video", fallbackBlob, danceTestVideo);
-          if (danceLabMessage) danceLabMessage.textContent = `O Google Drive não liberou ${label} como stream direto; Low local foi usado automaticamente.`;
+          if (danceLabMessage) danceLabMessage.textContent = `O servidor não conseguiu obter ${label} do Google Drive; Low local foi usado automaticamente.`;
         }
       } else {
         setDancePreloadUi(0, `Carregando vídeo + áudio ${label}…`, "Carregando antes de iniciar");
