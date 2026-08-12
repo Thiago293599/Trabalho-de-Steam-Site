@@ -1,4 +1,4 @@
-﻿
+
 /* ---------- Tema ---------- */
 const THEME_STORAGE_KEY = "corridaTabuleiroTheme";
 const themeToggle = document.getElementById("themeToggle");
@@ -14,7 +14,7 @@ function applyTheme(theme, save = true) {
   document.documentElement.dataset.theme = nextTheme;
 
   if (themeToggleIcon) {
-    themeToggleIcon.textContent = nextTheme === "dark" ? "â˜€" : "â˜¾";
+    themeToggleIcon.textContent = nextTheme === "dark" ? "☀" : "☾";
   }
 
   if (themeToggleText) {
@@ -47,7 +47,7 @@ const REQUIRED_SERVER_PROTOCOL = 9;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 const colors = ["#ef4444", "#3b82f6", "#22c55e", "#a855f7"];
 
-/* ---------- Baralho temporÃ¡rio interativo ---------- */
+/* ---------- Baralho temporário interativo ---------- */
 const CARD_SPACES = {
   question: [4, 13, 22, 31],
   good: [7, 16, 25, 34],
@@ -56,27 +56,27 @@ const CARD_SPACES = {
 
 const CARD_META = {
   question: { label: "Pergunta", badge: "Carta de Pergunta", icon: "?" },
-  good: { label: "Boa Sorte", badge: "Carta de Boa Sorte", icon: "â˜…" },
-  bad: { label: "MÃ¡ Sorte", badge: "Carta de MÃ¡ Sorte", icon: "!" }
+  good: { label: "Boa Sorte", badge: "Carta de Boa Sorte", icon: "★" },
+  bad: { label: "Má Sorte", badge: "Carta de Má Sorte", icon: "!" }
 };
 
 const TEMP_CARDS = {
   question: [
-    { id: "q1", title: "Conta rÃ¡pida", text: "Quanto Ã© 2 + 3?", options: ["4", "5", "6"], correctIndex: 1, successDelta: 1, failDelta: -2 },
+    { id: "q1", title: "Conta rápida", text: "Quanto é 2 + 3?", options: ["4", "5", "6"], correctIndex: 1, successDelta: 1, failDelta: -2 },
     { id: "q2", title: "Formas", text: "Quantos lados tem um quadrado?", options: ["3 lados", "4 lados", "5 lados"], correctIndex: 1, successDelta: 0, failDelta: -1 },
-    { id: "q3", title: "NÃºmero do dado", text: "Qual Ã© o maior nÃºmero de um dado comum?", options: ["5", "6", "8"], correctIndex: 1, successDelta: 2, failDelta: -2 },
-    { id: "q4", title: "Conta simples", text: "Quanto Ã© 10 - 4?", options: ["5", "6", "7"], correctIndex: 1, successDelta: 1, failDelta: -2 },
-    { id: "q5", title: "SequÃªncia", text: "Qual nÃºmero vem depois de 7?", options: ["6", "8", "9"], correctIndex: 1, successDelta: 0, failDelta: -1 }
+    { id: "q3", title: "Número do dado", text: "Qual é o maior número de um dado comum?", options: ["5", "6", "8"], correctIndex: 1, successDelta: 2, failDelta: -2 },
+    { id: "q4", title: "Conta simples", text: "Quanto é 10 - 4?", options: ["5", "6", "7"], correctIndex: 1, successDelta: 1, failDelta: -2 },
+    { id: "q5", title: "Sequência", text: "Qual número vem depois de 7?", options: ["6", "8", "9"], correctIndex: 1, successDelta: 0, failDelta: -1 }
   ],
   good: [
-    { id: "g1", title: "Passo extra", text: "A sorte estÃ¡ do seu lado. Avance 1 casa.", delta: 1 },
-    { id: "g2", title: "Caminho livre", text: "VocÃª encontrou um atalho. Avance 2 casas.", delta: 2 },
-    { id: "g3", title: "Grande sorte", text: "Ã“tima jogada! Avance 3 casas.", delta: 3 }
+    { id: "g1", title: "Passo extra", text: "A sorte está do seu lado. Avance 1 casa.", delta: 1 },
+    { id: "g2", title: "Caminho livre", text: "Você encontrou um atalho. Avance 2 casas.", delta: 2 },
+    { id: "g3", title: "Grande sorte", text: "Ótima jogada! Avance 3 casas.", delta: 3 }
   ],
   bad: [
     { id: "b1", title: "Pequeno atraso", text: "Algo deu errado. Volte 1 casa.", delta: -1 },
-    { id: "b2", title: "Caminho bloqueado", text: "VocÃª precisou retornar. Volte 2 casas.", delta: -2 },
-    { id: "b3", title: "Azar no caminho", text: "Hoje nÃ£o foi seu dia. Volte 3 casas.", delta: -3 }
+    { id: "b2", title: "Caminho bloqueado", text: "Você precisou retornar. Volte 2 casas.", delta: -2 },
+    { id: "b3", title: "Azar no caminho", text: "Hoje não foi seu dia. Volte 3 casas.", delta: -3 }
   ]
 };
 
@@ -96,7 +96,7 @@ function createLocalPendingCard(player) {
 
 function formatCardMove(delta) {
   const amount = Math.abs(Number(delta) || 0);
-  if (!delta) return "VocÃª permanece na mesma casa.";
+  if (!delta) return "Você permanece na mesma casa.";
   if (delta > 0) return `Avance ${amount} ${amount === 1 ? "casa" : "casas"}.`;
   return `Volte ${amount} ${amount === 1 ? "casa" : "casas"}.`;
 }
@@ -343,7 +343,7 @@ let dancePictoAtlas = null;
 let danceTestLyrics = [];
 let danceLyricLines = [];
 let danceLastLyricLineIndex = -999;
-// Os timestamps de cada mapa jÃ¡ seguem o relÃ³gio do vÃ­deo; videoOffset Ã© mantido apenas como metadado.
+// Os timestamps de cada mapa já seguem o relógio do vídeo; videoOffset é mantido apenas como metadado.
 let danceSourceVideoOffsetMs = 0;
 const DANCE_SONG_STORAGE_KEY = "jdSelectedSongV1";
 const DANCE_SONGS = Object.freeze({
@@ -524,7 +524,7 @@ const DANCE_CRITICAL_IMAGE_SOURCES = [
   "minigames/just-dance/hud/ipk-2026-reference/sparks.png",
   "minigames/just-dance/hud/ipk-2026-reference/sparks_multi.png"
 ];
-const DANCE_QUALITY_LABELS = { low: "Low â€¢ 360p", medium: "Medium â€¢ 720p", high: "High â€¢ 1080p" };
+const DANCE_QUALITY_LABELS = { low: "Low • 360p", medium: "Medium • 720p", high: "High • 1080p" };
 const DANCE_SCORING_BASE = "minigames/just-dance/hud/scoring";
 const DANCE_STAR_VISUALS = {
   normal: "minigames/just-dance/hud/images/Star.png",
@@ -533,7 +533,7 @@ const DANCE_STAR_VISUALS = {
 };
 let danceHudVisualRank = "normal";
 let danceStageResizeObserver = null;
-// Texturas/FX extraÃ­dos do patch_pc.ipk fornecido para reconstruir os feedbacks originais.
+// Texturas/FX extraídos do patch_pc.ipk fornecido para reconstruir os feedbacks originais.
 const DANCE_FEEDBACK_ASSETS = {
   X: { image: "feedback_bad.png", flare: null, profile: "bad" },
   GOLD_X: { image: "feedback_gold_bad.png", flare: "feedback_gold_flare.png", profile: "gold-bad" },
@@ -588,7 +588,7 @@ let danceGoldVideoMoveIndex = -1;
 let danceGoldVideoStartedAtTimelineMs = -1;
 
 
-/* ---------- Gold Move global: vÃ­deo Ãºnico Starry Cubes ---------- */
+/* ---------- Gold Move global: vídeo único Starry Cubes ---------- */
 function stopDanceGoldTransientAudios() {
   for (const sound of Array.from(danceGoldTransientAudios)) {
     try { sound.pause(); sound.currentTime = 0; } catch {}
@@ -706,13 +706,13 @@ function startDanceGoldSingleVideo(moveIndex, { elapsedMs = 0, preview = false }
   if (playPromise?.catch) {
     playPromise.catch(() => {
       if (token !== danceGoldVideoToken) return;
-      // Fallback visual para navegadores que bloqueiam uma nova mÃ­dia com Ã¡udio.
+      // Fallback visual para navegadores que bloqueiam uma nova mídia com áudio.
       danceGoldMoveVideo.muted = true;
       danceGoldMoveVideo.play().catch(() => danceGoldMoveVideo.classList.remove("active"));
     });
   }
   if (preview && danceLabMessage) {
-    danceLabMessage.textContent = `PrÃ©via: o YEAH de referÃªncia acontece ${danceGoldPrepareMs} ms depois do inÃ­cio do vÃ­deo.`;
+    danceLabMessage.textContent = `Prévia: o YEAH de referência acontece ${danceGoldPrepareMs} ms depois do início do vídeo.`;
   }
   return true;
 }
@@ -778,8 +778,8 @@ function updateDanceGoldMoveFx(timeMs) {
     const move = danceTestMoves[index];
     if (!move?.goldMove) continue;
 
-    // move.time continua sendo o ponto real do YEAH. O usuÃ¡rio decide quanto antes
-    // o MP4 deve comeÃ§ar, sem precisar separar Start/Finish/FinishYeah.
+    // move.time continua sendo o ponto real do YEAH. O usuário decide quanto antes
+    // o MP4 deve começar, sem precisar separar Start/Finish/FinishYeah.
     const yeahTime = Number(move.time || 0) + Number(danceGoldFinishOffsetMs || 0);
     const videoStart = yeahTime - leadMs;
     const videoEnd = videoStart + knownVideoDurationMs + 150;
@@ -847,15 +847,15 @@ async function openPhoneLocalMode() {
   gameMode = "phone-host";
   resetRemoteLobbyVisuals();
   showOnly(localPhoneMenuEl);
-  lobbyStatus.textContent = "Verificando servidorâ€¦";
+  lobbyStatus.textContent = "Verificando servidor…";
 
   if (!(await verifyMultiplayerServer({ mode: "phone" }))) return;
   createRemoteRoom();
 }
 
 function openControlsMode() {
-  // Abre a pÃ¡gina pÃºblica do controle; ela usa o mesmo servidor online configurado.
-  // O jogador pode digitar o cÃ³digo manualmente.
+  // Abre a página pública do controle; ela usa o mesmo servidor online configurado.
+  // O jogador pode digitar o código manualmente.
   window.location.href = "/controller.html";
 }
 
@@ -939,7 +939,7 @@ async function fetchServerStatus({ timeoutMs = 4000 } = {}) {
 }
 
 function multiplayerUpdateMessage() {
-  return "O servidor online estÃ¡ em uma versÃ£o antiga. Atualize a implantaÃ§Ã£o do servidor para esta versÃ£o; cartas, perguntas e turnos multiplayer dependem do protocolo novo.";
+  return "O servidor online está em uma versão antiga. Atualize a implantação do servidor para esta versão; cartas, perguntas e turnos multiplayer dependem do protocolo novo.";
 }
 
 async function verifyMultiplayerServer({ mode = "online" } = {}) {
@@ -951,13 +951,13 @@ async function verifyMultiplayerServer({ mode = "online" } = {}) {
       phoneLobby.classList.add("hidden");
       const title = phoneServerWarning.querySelector("strong");
       const text = phoneServerWarning.querySelector("p");
-      if (title) title.textContent = result.reason === "not-configured" ? "O servidor nÃ£o estÃ¡ configurado." : "O servidor online nÃ£o estÃ¡ acessÃ­vel.";
-      if (text) text.textContent = result.reason === "not-configured" ? "Configure o endereÃ§o do servidor e publique o site novamente." : "Aguarde o serviÃ§o online iniciar e tente novamente.";
+      if (title) title.textContent = result.reason === "not-configured" ? "O servidor não está configurado." : "O servidor online não está acessível.";
+      if (text) text.textContent = result.reason === "not-configured" ? "Configure o endereço do servidor e publique o site novamente." : "Aguarde o serviço online iniciar e tente novamente.";
     } else if (mode === "dev") {
       danceLabServerWarning?.classList.remove("hidden");
-      if (danceLabMessage) danceLabMessage.textContent = result.reason === "not-configured" ? "Configure o endereÃ§o do servidor antes de testar sensores." : "NÃ£o foi possÃ­vel alcanÃ§ar o servidor online.";
+      if (danceLabMessage) danceLabMessage.textContent = result.reason === "not-configured" ? "Configure o endereço do servidor antes de testar sensores." : "Não foi possível alcançar o servidor online.";
     } else {
-      showOnlineMessage(result.reason === "not-configured" ? "O servidor ainda nÃ£o foi configurado neste site." : "NÃ£o foi possÃ­vel alcanÃ§ar o servidor online.");
+      showOnlineMessage(result.reason === "not-configured" ? "O servidor ainda não foi configurado neste site." : "Não foi possível alcançar o servidor online.");
       setServerStatus("offline", "Servidor offline");
     }
     return false;
@@ -974,7 +974,7 @@ async function verifyMultiplayerServer({ mode = "online" } = {}) {
       if (text) text.textContent = multiplayerUpdateMessage();
     } else if (mode === "dev") {
       danceLabServerWarning?.classList.remove("hidden");
-      if (danceLabMessage) danceLabMessage.textContent = "O servidor aberto ainda nÃ£o possui suporte ao Sensor Lab. Reinicie usando SERVIDOR_PC desta versÃ£o.";
+      if (danceLabMessage) danceLabMessage.textContent = "O servidor aberto ainda não possui suporte ao Sensor Lab. Reinicie usando SERVIDOR_PC desta versão.";
     } else {
       showOnlineMessage(multiplayerUpdateMessage());
       setServerStatus("offline", "Servidor desatualizado");
@@ -986,11 +986,11 @@ async function verifyMultiplayerServer({ mode = "online" } = {}) {
 }
 
 async function checkServerStatus() {
-  setServerStatus("checking", "Verificando servidorâ€¦");
+  setServerStatus("checking", "Verificando servidor…");
   const result = await fetchServerStatus();
 
   if (!result.ok) {
-    setServerStatus("offline", result.reason === "not-configured" ? "Servidor nÃ£o configurado" : "Servidor offline");
+    setServerStatus("offline", result.reason === "not-configured" ? "Servidor não configurado" : "Servidor offline");
     return false;
   }
 
@@ -1064,7 +1064,7 @@ function confirmLeaveOnlineRoom() {
 
   if (onlineIsHost) {
     return window.confirm(
-      "VocÃª Ã© o host. Se sair, a sala serÃ¡ encerrada para todos. Deseja continuar?"
+      "Você é o host. Se sair, a sala será encerrada para todos. Deseja continuar?"
     );
   }
 
@@ -1077,7 +1077,7 @@ function resetDeckDisplay() {
   cardDeckBtn.disabled = true;
   cardDeckBtn.className = "card-deck";
   if (deckTypeText) deckTypeText.textContent = "Cartas";
-  if (deckHint) deckHint.textContent = "O baralho serÃ¡ liberado quando vocÃª cair em uma casa de carta.";
+  if (deckHint) deckHint.textContent = "O baralho será liberado quando você cair em uma casa de carta.";
 }
 
 function setDeckPending(type, { interactive = false, hint = "" } = {}) {
@@ -1086,14 +1086,14 @@ function setDeckPending(type, { interactive = false, hint = "" } = {}) {
   cardDeckBtn.className = `card-deck deck-${type || "question"} is-ready`;
   cardDeckBtn.disabled = !interactive;
   if (deckTypeText) deckTypeText.textContent = meta.label;
-  if (deckHint) deckHint.textContent = hint || (interactive ? `VocÃª caiu em uma casa de ${meta.label}. Clique no baralho para puxar a carta.` : `Aguardando o jogador puxar a carta de ${meta.label}.`);
+  if (deckHint) deckHint.textContent = hint || (interactive ? `Você caiu em uma casa de ${meta.label}. Clique no baralho para puxar a carta.` : `Aguardando o jogador puxar a carta de ${meta.label}.`);
 }
 
 function setDeckDrawing(type) {
   if (!cardDeckBtn) return;
   cardDeckBtn.disabled = true;
   cardDeckBtn.className = `card-deck deck-${type || "question"} is-drawing`;
-  if (deckHint) deckHint.textContent = "Carta sendo puxadaâ€¦";
+  if (deckHint) deckHint.textContent = "Carta sendo puxada…";
 }
 
 function getDeckFlightOffset() {
@@ -1134,7 +1134,7 @@ function showCardEvent(card, playerName = "Jogador", options = {}) {
   drawnCard.style.setProperty("--deck-x", `${offset.x}px`);
   drawnCard.style.setProperty("--deck-y", `${offset.y}px`);
   cardTypeBadge.textContent = meta.badge; cardIcon.textContent = meta.icon; cardPlayerName.textContent = playerName;
-  cardTitle.textContent = card.title || meta.label; cardText.textContent = card.text || "Carta temporÃ¡ria.";
+  cardTitle.textContent = card.title || meta.label; cardText.textContent = card.text || "Carta temporária.";
   cardFeedback.className = "card-feedback hidden"; cardFeedback.textContent = "";
   buildAnswerButtons(card, interactive);
   if (card.type === "question") {
@@ -1146,12 +1146,12 @@ function showCardEvent(card, playerName = "Jogador", options = {}) {
   }
   if (!interactive) {
     cardFeedback.classList.remove("hidden");
-    cardFeedback.textContent = card.type === "question" ? "Aguardando o jogador escolher uma respostaâ€¦" : "Aguardando o jogador continuarâ€¦";
+    cardFeedback.textContent = card.type === "question" ? "Aguardando o jogador escolher uma resposta…" : "Aguardando o jogador continuar…";
   }
   cardModal.classList.remove("hidden"); void drawnCard.offsetWidth; drawnCard.classList.add("card-entering");
 }
 
-function setCardWaiting(text = "Aguardandoâ€¦") {
+function setCardWaiting(text = "Aguardando…") {
   if (!activeCardSession) return;
   activeCardSession.waitingForServer = true;
   cardAnswers.querySelectorAll("button").forEach(button => button.disabled = true);
@@ -1268,7 +1268,7 @@ function getDice3D() {
   dice3DReadyPromise = new Promise(resolve => {
     const finish = () => resolve(window.Dice3D || null);
     window.addEventListener("dice3d-ready", finish, { once: true });
-    // NÃ£o deixa o jogo preso se o mÃ³dulo externo nÃ£o carregar.
+    // Não deixa o jogo preso se o módulo externo não carregar.
     window.setTimeout(finish, 2500);
   });
 
@@ -1327,7 +1327,7 @@ function startGame() {
   closeCardModal();
   resetDeckDisplay();
   setDiceFace(1);
-  statusEl.textContent = "Clique em â€œJogar dadoâ€.";
+  statusEl.textContent = "Clique em “Jogar dado”.";
   setupEl.classList.add("hidden");
   controlsEl.classList.remove("hidden");
   winnerModal.classList.add("hidden");
@@ -1368,8 +1368,8 @@ function render() {
     name.className = "player-name";
     name.textContent =
       player.name +
-      (player.connected === false ? " â€¢ reconectando" : "") +
-      (index === currentPlayer && !gameOver ? " â†" : "");
+      (player.connected === false ? " • reconectando" : "") +
+      (index === currentPlayer && !gameOver ? " ←" : "");
 
     if (player.connected === false) {
       row.classList.add("player-disconnected");
@@ -1385,7 +1385,7 @@ function render() {
   });
 
   if (players.length && !gameOver) {
-    turnNameEl.textContent = players[currentPlayer]?.name || "â€”";
+    turnNameEl.textContent = players[currentPlayer]?.name || "—";
     turnNameEl.style.color = players[currentPlayer]?.color || "";
   }
 }
@@ -1396,14 +1396,14 @@ async function rollDice() {
   if (gameMode !== "same-device" || localPendingCard) return;
   rollBtn.disabled = true;
   const player = players[currentPlayer]; const result = Math.floor(Math.random() * 6) + 1;
-  statusEl.textContent = `${player.name} estÃ¡ jogando o dado...`; await animateDiceTo(result);
+  statusEl.textContent = `${player.name} está jogando o dado...`; await animateDiceTo(result);
   const target = player.position + result; let cardEvent = null;
-  if (target > BOARD_SIZE) statusEl.textContent = `${player.name} tirou ${result}, mas precisa do nÃºmero exato para chegar Ã  casa ${BOARD_SIZE}.`;
+  if (target > BOARD_SIZE) statusEl.textContent = `${player.name} tirou ${result}, mas precisa do número exato para chegar à casa ${BOARD_SIZE}.`;
   else {
     player.position = target;
     if (player.position !== BOARD_SIZE) cardEvent = createLocalPendingCard(player);
     if (cardEvent) statusEl.textContent = `${player.name} tirou ${result} e caiu na casa ${target}. Clique no baralho para puxar a carta de ${CARD_META[cardEvent.type].label}.`;
-    else statusEl.textContent = `${player.name} tirou ${result} e avanÃ§ou para a casa ${player.position}.`;
+    else statusEl.textContent = `${player.name} tirou ${result} e avançou para a casa ${player.position}.`;
   }
   render();
   if (cardEvent) { await waitForLocalDeckDraw(cardEvent, player); statusEl.textContent = `${player.name} terminou a jogada na casa ${player.position}.`; }
@@ -1423,7 +1423,7 @@ function resetLocalGame(rebuildNames = true) {
   setupEl.classList.remove("hidden");
   winnerModal.classList.add("hidden");
   rollBtn.disabled = false;
-  statusEl.textContent = "Clique em â€œJogar dadoâ€.";
+  statusEl.textContent = "Clique em “Jogar dado”.";
   setDiceFace(1);
   createBoard();
   if (rebuildNames) updateNameFields();
@@ -1434,10 +1434,10 @@ function resetToSetup() {
     if (remoteSocket && remoteRoomCode) {
       remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("host:restart-game", { roomCode: remoteRoomCode }, (error, response) => {
         if (error) {
-          statusEl.textContent = "O servidor nÃ£o respondeu ao reiniciar.";
+          statusEl.textContent = "O servidor não respondeu ao reiniciar.";
           return;
         }
-        if (!response?.ok) statusEl.textContent = response?.message || "NÃ£o foi possÃ­vel reiniciar a partida.";
+        if (!response?.ok) statusEl.textContent = response?.message || "Não foi possível reiniciar a partida.";
       });
     }
     return;
@@ -1453,12 +1453,12 @@ function resetToSetup() {
       restartBtn.disabled = true;
       remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("online:restart-game", { roomCode: onlineRoomCode }, (error, response) => {
         if (error) {
-          statusEl.textContent = "O servidor nÃ£o respondeu ao reiniciar.";
+          statusEl.textContent = "O servidor não respondeu ao reiniciar.";
           restartBtn.disabled = false;
           return;
         }
         if (!response?.ok) {
-          statusEl.textContent = response?.message || "NÃ£o foi possÃ­vel reiniciar a partida.";
+          statusEl.textContent = response?.message || "Não foi possível reiniciar a partida.";
           restartBtn.disabled = false;
         }
       });
@@ -1475,13 +1475,13 @@ function resetRemoteLobbyVisuals() {
   phoneServerWarning.classList.add("hidden");
   phoneLobby.classList.remove("hidden");
   phoneRoomCode.textContent = "------";
-  phoneJoinUrl.textContent = "Preparando endereÃ§oâ€¦";
+  phoneJoinUrl.textContent = "Preparando endereço…";
   phoneQr.classList.add("hidden");
   qrLoading.classList.remove("hidden");
-  qrLoading.textContent = "Preparando QR Codeâ€¦";
+  qrLoading.textContent = "Preparando QR Code…";
   connectedPlayers.innerHTML = "";
   connectedCount.textContent = "0 de 4";
-  lobbyStatus.textContent = "Aguardando celularesâ€¦";
+  lobbyStatus.textContent = "Aguardando celulares…";
   startPhoneGameBtn.disabled = true;
   networkChoiceWrap.classList.add("hidden");
   networkAddressSelect.innerHTML = "";
@@ -1504,11 +1504,11 @@ function ensureRemoteSocket() {
   if (!serverUrl) {
     if (gameMode === "online") {
       showOnlineMessage(
-        "O endereÃ§o do servidor ainda nÃ£o foi configurado. Execute CONFIGURAR_SITE.bat antes de publicar na Netlify."
+        "O endereço do servidor ainda não foi configurado. Execute CONFIGURAR_SITE.bat antes de publicar na Netlify."
       );
     } else if (gameMode === "dev-sensor") {
       danceLabServerWarning?.classList.remove("hidden");
-      if (danceLabMessage) danceLabMessage.textContent = "O endereÃ§o do servidor ainda nÃ£o foi configurado.";
+      if (danceLabMessage) danceLabMessage.textContent = "O endereço do servidor ainda não foi configurado.";
     } else {
       phoneServerWarning.classList.remove("hidden");
       phoneLobby.classList.add("hidden");
@@ -1543,24 +1543,24 @@ function ensureRemoteSocket() {
   remoteSocket.on("disconnect", () => {
     if (gameMode === "phone-host") {
       lobbyStatus.textContent = "Servidor desconectado.";
-      statusEl.textContent = "A conexÃ£o com os celulares foi perdida.";
+      statusEl.textContent = "A conexão com os celulares foi perdida.";
     }
 
     if (gameMode === "dev-sensor") {
-      setDanceLabBadge("idle", "Sem conexÃ£o");
-      if (danceLabMessage) danceLabMessage.textContent = "A conexÃ£o com o servidor foi perdida.";
+      setDanceLabBadge("idle", "Sem conexão");
+      if (danceLabMessage) danceLabMessage.textContent = "A conexão com o servidor foi perdida.";
     }
 
     if (gameMode === "online" && !onlineExplicitLeave) {
-      setServerStatus("reconnecting", "Reconectandoâ€¦");
+      setServerStatus("reconnecting", "Reconectando…");
 
       if (!gameAppEl.classList.contains("hidden")) {
         statusEl.textContent =
-          "ConexÃ£o perdida. Tentando reconectar sem remover vocÃª da partidaâ€¦";
+          "Conexão perdida. Tentando reconectar sem remover você da partida…";
         rollBtn.disabled = true;
       } else if (!onlineMenuEl.classList.contains("hidden")) {
         onlineLobbyStatus.textContent =
-          "ConexÃ£o perdida. Tentando reconectarâ€¦";
+          "Conexão perdida. Tentando reconectar…";
       }
     }
   });
@@ -1576,7 +1576,7 @@ function ensureRemoteSocket() {
 
       if (!onlineRoomCode) {
         showOnlineMessage(
-          "NÃ£o foi possÃ­vel conectar ao servidor do jogo."
+          "Não foi possível conectar ao servidor do jogo."
         );
       }
     }
@@ -1605,7 +1605,7 @@ function ensureRemoteSocket() {
     if (!payload || payload.roomCode !== devSensorRoomCode) return;
     devSensorModeEnabled = Boolean(payload.enabled);
     setDanceLabBadge(devSensorModeEnabled ? "active" : "idle", devSensorModeEnabled ? "Sensores ativos" : "Parado");
-    if (danceLabMessage) danceLabMessage.textContent = devSensorModeEnabled ? "Os celulares estÃ£o pontuando localmente; o servidor sÃ³ transporta os resultados." : "Envio de sensores pausado.";
+    if (danceLabMessage) danceLabMessage.textContent = devSensorModeEnabled ? "Os celulares estão pontuando localmente; o servidor só transporta os resultados." : "Envio de sensores pausado.";
   });
 
   remoteSocket.on("game:roll", async payload => {
@@ -1681,7 +1681,7 @@ function ensureRemoteSocket() {
   remoteSocket.on("online:kicked", payload => {
     if (!payload || payload.roomCode !== onlineRoomCode) return;
 
-    const message = payload.message || "VocÃª foi removido da sala.";
+    const message = payload.message || "Você foi removido da sala.";
     clearStoredOnlineSession();
     clearOnlineClientState();
 
@@ -1698,7 +1698,7 @@ function createRemoteRoom() {
   if (!ensureRemoteSocket()) return;
 
   if (!remoteSocket.connected) {
-    lobbyStatus.textContent = "Conectando ao servidor onlineâ€¦";
+    lobbyStatus.textContent = "Conectando ao servidor online…";
     remoteSocket.once("connect", () => createRemoteRoom());
     return;
   }
@@ -1709,8 +1709,8 @@ function createRemoteRoom() {
       phoneLobby.classList.add("hidden");
       const title = phoneServerWarning.querySelector("strong");
       const text = phoneServerWarning.querySelector("p");
-      if (title) title.textContent = "O servidor nÃ£o respondeu.";
-      if (text) text.textContent = "O serviÃ§o online nÃ£o respondeu. Aguarde alguns segundos e tente novamente.";
+      if (title) title.textContent = "O servidor não respondeu.";
+      if (text) text.textContent = "O serviço online não respondeu. Aguarde alguns segundos e tente novamente.";
       return;
     }
     if (!response?.ok) {
@@ -1734,8 +1734,8 @@ function setupNetworkChoices() {
   networkAddressSelect.innerHTML = "";
 
   if (!joinUrls.length) {
-    phoneJoinUrl.textContent = "Nenhum endereÃ§o de rede foi encontrado.";
-    qrLoading.textContent = "NÃ£o foi possÃ­vel gerar o QR Code.";
+    phoneJoinUrl.textContent = "Nenhum endereço de rede foi encontrado.";
+    qrLoading.textContent = "Não foi possível gerar o QR Code.";
     return;
   }
 
@@ -1761,7 +1761,7 @@ function updateJoinAddress(index) {
   phoneJoinUrl.textContent = url;
   qrLoading.classList.remove("hidden");
   phoneQr.classList.add("hidden");
-  qrLoading.textContent = "Gerando QR Codeâ€¦";
+  qrLoading.textContent = "Gerando QR Code…";
 
   phoneQr.onload = () => {
     qrLoading.classList.add("hidden");
@@ -1769,7 +1769,7 @@ function updateJoinAddress(index) {
   };
   phoneQr.onerror = () => {
     qrLoading.classList.remove("hidden");
-    qrLoading.textContent = "NÃ£o foi possÃ­vel carregar o QR Code.";
+    qrLoading.textContent = "Não foi possível carregar o QR Code.";
     phoneQr.classList.add("hidden");
   };
   phoneQr.src = `${serverEndpoint("/api/qr")}?text=${encodeURIComponent(url)}&t=${Date.now()}`;
@@ -1802,8 +1802,8 @@ function renderLobbyPlayers(remotePlayers) {
   startPhoneGameBtn.disabled = remotePlayers.length < 2 || remotePlayers.length > 4;
   lobbyStatus.textContent =
     remotePlayers.length < 2
-      ? "Aguardando pelo menos 2 jogadoresâ€¦"
-      : "Pronto para comeÃ§ar.";
+      ? "Aguardando pelo menos 2 jogadores…"
+      : "Pronto para começar.";
 }
 
 function applyRemoteState(state) {
@@ -1820,7 +1820,7 @@ function applyRemoteState(state) {
   if (state.started || state.winnerId) {
     gameMode = "phone-host";
     gameAppEl.classList.add("remote-board");
-    gameEyebrow.textContent = "Jogo local â€¢ celulares";
+    gameEyebrow.textContent = "Jogo local • celulares";
     setupEl.classList.add("hidden");
     controlsEl.classList.remove("hidden");
     showOnly(gameAppEl);
@@ -1841,7 +1841,7 @@ function applyRemoteState(state) {
       const pendingPlayer = state.players?.find(player => player.id === pending.playerId);
       if (pending.drawn) {
         setDeckDrawing(pending.type);
-        statusEl.textContent = `${pendingPlayer?.name || "Jogador"} estÃ¡ com uma carta aberta.`;
+        statusEl.textContent = `${pendingPlayer?.name || "Jogador"} está com uma carta aberta.`;
         if (pending.card && (!activeCardSession || activeCardSession.card?.id !== pending.card.id)) {
           closeCardModal();
           showCardEvent(pending.card, pendingPlayer?.name || "Jogador", { interactive: false, mode: "phone-host" });
@@ -1868,10 +1868,10 @@ function applyRemoteState(state) {
 async function handleRemoteRoll(payload) {
   if (remoteRollAnimating) return; remoteRollAnimating = true;
   const rollingPlayer = payload.state?.players?.find(p => p.id === payload.playerId) || remoteState?.players?.find(p => p.id === payload.playerId);
-  statusEl.textContent = `${rollingPlayer?.name || "Jogador"} estÃ¡ jogando o dado...`; await animateDiceTo(payload.result); applyRemoteState(payload.state);
-  if (!payload.exactMove) statusEl.textContent = `${rollingPlayer?.name || "Jogador"} tirou ${payload.result}, mas precisa do nÃºmero exato para chegar Ã  casa ${BOARD_SIZE}.`;
+  statusEl.textContent = `${rollingPlayer?.name || "Jogador"} está jogando o dado...`; await animateDiceTo(payload.result); applyRemoteState(payload.state);
+  if (!payload.exactMove) statusEl.textContent = `${rollingPlayer?.name || "Jogador"} tirou ${payload.result}, mas precisa do número exato para chegar à casa ${BOARD_SIZE}.`;
   else if (payload.cardPending) statusEl.textContent = `${rollingPlayer?.name || "Jogador"} tirou ${payload.result}, caiu na casa ${payload.rollTo} e precisa puxar uma carta de ${(CARD_META[payload.card?.type] || CARD_META.question).label} no celular.`;
-  else if (!payload.state?.winnerId) { const next=payload.state?.players?.[payload.state?.currentIndex]; statusEl.textContent = `${rollingPlayer?.name || "Jogador"} terminou na casa ${payload.to}. ` + (next ? `Agora Ã© a vez de ${next.name}.` : ""); }
+  else if (!payload.state?.winnerId) { const next=payload.state?.players?.[payload.state?.currentIndex]; statusEl.textContent = `${rollingPlayer?.name || "Jogador"} terminou na casa ${payload.to}. ` + (next ? `Agora é a vez de ${next.name}.` : ""); }
   remoteRollAnimating = false;
 }
 function handleRemoteCardDrawn(payload) {
@@ -1883,7 +1883,7 @@ async function handleRemoteCardResolved(payload) {
   if (!payload || payload.state?.roomCode !== remoteRoomCode) return;
   applyRemoteState(payload.state); if (activeCardSession) await resolveDisplayedCard(payload);
   const player=payload.state.players?.find(item=>item.id===payload.playerId); const next=payload.state.players?.[payload.state.currentIndex];
-  if (!payload.state.winnerId) statusEl.textContent = `${player?.name || "Jogador"} terminou a carta na casa ${payload.to}. ` + (next ? `Agora Ã© a vez de ${next.name}.` : "");
+  if (!payload.state.winnerId) statusEl.textContent = `${player?.name || "Jogador"} terminou a carta na casa ${payload.to}. ` + (next ? `Agora é a vez de ${next.name}.` : "");
 }
 
 function closeRemoteRoom() {
@@ -1906,9 +1906,9 @@ copyJoinUrlBtn.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(text);
     copyJoinUrlBtn.textContent = "Copiado!";
-    setTimeout(() => copyJoinUrlBtn.textContent = "Copiar endereÃ§o", 1200);
+    setTimeout(() => copyJoinUrlBtn.textContent = "Copiar endereço", 1200);
   } catch {
-    copyJoinUrlBtn.textContent = "Selecione e copie o endereÃ§o acima";
+    copyJoinUrlBtn.textContent = "Selecione e copie o endereço acima";
   }
 });
 
@@ -1916,16 +1916,16 @@ startPhoneGameBtn.addEventListener("click", () => {
   if (!remoteSocket || !remoteRoomCode) return;
 
   startPhoneGameBtn.disabled = true;
-  lobbyStatus.textContent = "Iniciando partidaâ€¦";
+  lobbyStatus.textContent = "Iniciando partida…";
 
   remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("host:start-game", { roomCode: remoteRoomCode }, (error, response) => {
     if (error) {
-      lobbyStatus.textContent = "O servidor nÃ£o respondeu. Reinicie o SERVIDOR_PC desta versÃ£o.";
+      lobbyStatus.textContent = "O servidor não respondeu. Reinicie o SERVIDOR_PC desta versão.";
       startPhoneGameBtn.disabled = false;
       return;
     }
     if (!response?.ok) {
-      lobbyStatus.textContent = response?.message || "NÃ£o foi possÃ­vel comeÃ§ar.";
+      lobbyStatus.textContent = response?.message || "Não foi possível começar.";
       startPhoneGameBtn.disabled = false;
     }
   });
@@ -1982,7 +1982,7 @@ async function ensureOnlineConnection(onReady) {
   setServerStatus("online", "Servidor online");
 
   if (!ensureRemoteSocket()) {
-    showOnlineMessage("O servidor online nÃ£o estÃ¡ disponÃ­vel. Aguarde o serviÃ§o iniciar e tente novamente.");
+    showOnlineMessage("O servidor online não está disponível. Aguarde o serviço iniciar e tente novamente.");
     return;
   }
 
@@ -1991,7 +1991,7 @@ async function ensureOnlineConnection(onReady) {
     return;
   }
 
-  showOnlineMessage("Conectando ao servidor onlineâ€¦");
+  showOnlineMessage("Conectando ao servidor online…");
 
   const timer = setTimeout(() => {
     showOnlineMessage(
@@ -2027,8 +2027,8 @@ function resumeOnlineSession({ quiet = false } = {}) {
   onlineResumeInProgress = true;
 
   if (!quiet) {
-    setServerStatus("reconnecting", "Reconectandoâ€¦");
-    showOnlineMessage("Recuperando sua salaâ€¦");
+    setServerStatus("reconnecting", "Reconectando…");
+    showOnlineMessage("Recuperando sua sala…");
   }
 
   remoteSocket.timeout(7000).emit(
@@ -2042,7 +2042,7 @@ function resumeOnlineSession({ quiet = false } = {}) {
       onlineResumeInProgress = false;
 
       if (error) {
-        setServerStatus("reconnecting", "Reconectandoâ€¦");
+        setServerStatus("reconnecting", "Reconectando…");
         return;
       }
 
@@ -2052,7 +2052,7 @@ function resumeOnlineSession({ quiet = false } = {}) {
           clearOnlineClientState();
           resetOnlineMenu();
           showOnly(onlineMenuEl);
-          showOnlineMessage(response?.message || "A sala nÃ£o existe mais.");
+          showOnlineMessage(response?.message || "A sala não existe mais.");
         }
         return;
       }
@@ -2091,7 +2091,7 @@ function restoreStoredOnlineSession() {
   gameMode = "online";
   showOnly(onlineMenuEl);
   resetOnlineMenu();
-  showOnlineMessage("Reconectando Ã  sua salaâ€¦");
+  showOnlineMessage("Reconectando à sua sala…");
   startServerStatusWatch();
 
   ensureOnlineConnection(() => {
@@ -2119,7 +2119,7 @@ function kickOnlinePlayer(playerId, playerName) {
     response => {
       if (!response?.ok) {
         onlineLobbyStatus.textContent =
-          response?.message || "NÃ£o foi possÃ­vel remover o jogador.";
+          response?.message || "Não foi possível remover o jogador.";
       }
     }
   );
@@ -2146,10 +2146,10 @@ function renderOnlineLobby(state) {
 
   onlineRoomCodeEl.textContent = state.roomCode || onlineRoomCode;
   const connectedNow = state.players.filter(player => player.connected !== false).length;
-  onlineConnectedCount.textContent = `${connectedNow} conectados â€¢ ${state.players.length} na sala`;
+  onlineConnectedCount.textContent = `${connectedNow} conectados • ${state.players.length} na sala`;
 
   const me = state.players.find(player => player.id === onlinePlayerId);
-  onlineHostBadge.textContent = onlineIsHost ? "VocÃª Ã© o host" : "Conectado";
+  onlineHostBadge.textContent = onlineIsHost ? "Você é o host" : "Conectado";
 
   onlinePlayersEl.innerHTML = "";
 
@@ -2170,7 +2170,7 @@ function renderOnlineLobby(state) {
     dot.style.background = player.color;
 
     const name = document.createElement("strong");
-    name.textContent = player.name + (player.id === onlinePlayerId ? " (vocÃª)" : "");
+    name.textContent = player.name + (player.id === onlinePlayerId ? " (você)" : "");
 
     slot.append(dot, name);
 
@@ -2184,7 +2184,7 @@ function renderOnlineLobby(state) {
     if (player.connected === false) {
       const connection = document.createElement("span");
       connection.className = "online-player-status offline";
-      connection.textContent = "Reconectandoâ€¦";
+      connection.textContent = "Reconectando…";
       slot.appendChild(connection);
     }
 
@@ -2217,18 +2217,18 @@ function renderOnlineLobby(state) {
   if (onlineIsHost) {
     onlineLobbyStatus.textContent =
       hasDisconnectedPlayer
-        ? "Aguardando reconexÃ£o de jogadorâ€¦"
+        ? "Aguardando reconexão de jogador…"
         : state.players.length < 2
-          ? "Aguardando pelo menos mais 1 jogadorâ€¦"
-          : "Pronto para comeÃ§ar.";
+          ? "Aguardando pelo menos mais 1 jogador…"
+          : "Pronto para começar.";
 
     onlineLobbyHelp.textContent =
       state.players.length < 2
-        ? "SÃ£o necessÃ¡rios pelo menos 2 jogadores."
-        : "VocÃª pode iniciar a partida.";
+        ? "São necessários pelo menos 2 jogadores."
+        : "Você pode iniciar a partida.";
   } else {
-    onlineLobbyStatus.textContent = "Aguardando o hostâ€¦";
-    onlineLobbyHelp.textContent = "A partida comeÃ§a quando o host apertar â€œComeÃ§ar partidaâ€.";
+    onlineLobbyStatus.textContent = "Aguardando o host…";
+    onlineLobbyHelp.textContent = "A partida começa quando o host apertar “Começar partida”.";
   }
 
   if (onlineIsHost && onlineShareUrls.length) {
@@ -2243,7 +2243,7 @@ function applyOnlineState(state) {
   if (!state) return;
   onlineState = state; onlineRoomCode = state.roomCode || onlineRoomCode; onlineIsHost = state.hostPlayerId === onlinePlayerId;
   if (!state.started && !state.winnerId) { gameMode="online"; winnerModal.classList.add("hidden"); resetDeckDisplay(); showOnly(onlineMenuEl); renderOnlineLobby(state); return; }
-  gameMode="online"; gameAppEl.classList.remove("remote-board"); gameAppEl.classList.add("online-board"); leaveOnlineGameBtn.classList.remove("hidden"); gameEyebrow.textContent=`Jogo online â€¢ sala ${onlineRoomCode}`;
+  gameMode="online"; gameAppEl.classList.remove("remote-board"); gameAppEl.classList.add("online-board"); leaveOnlineGameBtn.classList.remove("hidden"); gameEyebrow.textContent=`Jogo online • sala ${onlineRoomCode}`;
   setupEl.classList.add("hidden"); controlsEl.classList.remove("hidden"); showOnly(gameAppEl);
   players=state.players.map(player=>({id:player.id,name:player.name,position:player.position,color:player.color,connected:player.connected!==false})); currentPlayer=Math.max(0,state.currentIndex||0); gameOver=Boolean(state.winnerId); render();
   const active=state.players[state.currentIndex]; const myTurn=!gameOver&&active?.id===onlinePlayerId; const pending=state.pendingCard; const myPending=Boolean(pending&&pending.playerId===onlinePlayerId);
@@ -2252,25 +2252,25 @@ function applyOnlineState(state) {
     const pp=state.players.find(player=>player.id===pending.playerId);
     if (pending.drawn) {
       setDeckDrawing(pending.type);
-      statusEl.textContent=myPending?"Sua carta estÃ¡ aberta. Resolva a carta para continuar.":`${pp?.name||"Jogador"} estÃ¡ resolvendo uma carta.`;
+      statusEl.textContent=myPending?"Sua carta está aberta. Resolva a carta para continuar.":`${pp?.name||"Jogador"} está resolvendo uma carta.`;
       if (pending.card && (!activeCardSession || activeCardSession.card?.id !== pending.card.id)) {
         closeCardModal();
         showCardEvent(pending.card,pp?.name||"Jogador",{interactive:myPending,mode:"online",onAnswer:index=>resolveOnlineCard(index),onContinue:()=>resolveOnlineCard()});
       }
     }
-    else { setDeckPending(pending.type,{interactive:myPending&&!onlineRollAnimating,hint:myPending?"VocÃª caiu em uma casa de carta. Clique no baralho para puxar.":`Aguardando ${pp?.name||"o jogador"} puxar a carta.`}); statusEl.textContent=myPending?"VocÃª caiu em uma casa de carta. Clique no baralho.":`Aguardando ${pp?.name||"Jogador"} puxar uma carta.`; }
+    else { setDeckPending(pending.type,{interactive:myPending&&!onlineRollAnimating,hint:myPending?"Você caiu em uma casa de carta. Clique no baralho para puxar.":`Aguardando ${pp?.name||"o jogador"} puxar a carta.`}); statusEl.textContent=myPending?"Você caiu em uma casa de carta. Clique no baralho.":`Aguardando ${pp?.name||"Jogador"} puxar uma carta.`; }
   } else {
     resetDeckDisplay();
-    if (!gameOver&&active) { if (active.connected===false) {statusEl.textContent=`${active.name} perdeu a conexÃ£o. A partida aguarda a reconexÃ£o por alguns segundosâ€¦`; rollBtn.disabled=true;} else statusEl.textContent=myTurn?"Ã‰ a sua vez. Jogue o dado.":`Aguardando ${active.name} jogar.`; }
+    if (!gameOver&&active) { if (active.connected===false) {statusEl.textContent=`${active.name} perdeu a conexão. A partida aguarda a reconexão por alguns segundos…`; rollBtn.disabled=true;} else statusEl.textContent=myTurn?"É a sua vez. Jogue o dado.":`Aguardando ${active.name} jogar.`; }
   }
-  if (gameOver) { const winner=state.players.find(player=>player.id===state.winnerId); rollBtn.disabled=true; winnerText.textContent=winner?.id===onlinePlayerId?"VocÃª venceu!":`${winner?.name||"Jogador"} venceu!`; playAgainBtn.textContent=onlineIsHost?"Jogar novamente":"Fechar"; setTimeout(()=>winnerModal.classList.remove("hidden"),250); } else playAgainBtn.textContent="Jogar novamente";
+  if (gameOver) { const winner=state.players.find(player=>player.id===state.winnerId); rollBtn.disabled=true; winnerText.textContent=winner?.id===onlinePlayerId?"Você venceu!":`${winner?.name||"Jogador"} venceu!`; playAgainBtn.textContent=onlineIsHost?"Jogar novamente":"Fechar"; setTimeout(()=>winnerModal.classList.remove("hidden"),250); } else playAgainBtn.textContent="Jogar novamente";
 }
 
 function createOnlineRoom() {
   const name = hostPlayerName.value.trim() || "Jogador";
 
   confirmCreateBtn.disabled = true;
-  showOnlineMessage("Criando salaâ€¦");
+  showOnlineMessage("Criando sala…");
 
   ensureOnlineConnection(() => {
     remoteSocket.timeout(6000).emit("online:create-room", { name }, (error, response) => {
@@ -2278,13 +2278,13 @@ function createOnlineRoom() {
 
       if (error) {
         showOnlineMessage(
-          "O servidor online nÃ£o respondeu ao pedido para criar a sala. Aguarde alguns segundos e tente novamente."
+          "O servidor online não respondeu ao pedido para criar a sala. Aguarde alguns segundos e tente novamente."
         );
         return;
       }
 
       if (!response?.ok) {
-        showOnlineMessage(response?.message || "NÃ£o foi possÃ­vel criar a sala.");
+        showOnlineMessage(response?.message || "Não foi possível criar a sala.");
         return;
       }
 
@@ -2308,12 +2308,12 @@ function joinOnlineRoom() {
   const code = normalizeRoomCode(roomCodeInput.value);
 
   if (code.length !== 6) {
-    showOnlineMessage("Digite o cÃ³digo de 6 caracteres da sala.");
+    showOnlineMessage("Digite o código de 6 caracteres da sala.");
     return;
   }
 
   confirmJoinBtn.disabled = true;
-  showOnlineMessage("Entrando na salaâ€¦");
+  showOnlineMessage("Entrando na sala…");
 
   ensureOnlineConnection(() => {
     remoteSocket.timeout(6000).emit(
@@ -2324,13 +2324,13 @@ function joinOnlineRoom() {
 
         if (error) {
           showOnlineMessage(
-            "O servidor nÃ£o respondeu. Confirme que todos estÃ£o usando esta versÃ£o do servidor."
+            "O servidor não respondeu. Confirme que todos estão usando esta versão do servidor."
           );
           return;
         }
 
         if (!response?.ok) {
-          showOnlineMessage(response?.message || "NÃ£o foi possÃ­vel entrar na sala.");
+          showOnlineMessage(response?.message || "Não foi possível entrar na sala.");
           return;
         }
 
@@ -2352,16 +2352,16 @@ function startOnlineGame() {
   if (!remoteSocket || !onlineRoomCode || !onlineIsHost) return;
 
   startOnlineGameBtn.disabled = true;
-  onlineLobbyStatus.textContent = "Iniciando partidaâ€¦";
+  onlineLobbyStatus.textContent = "Iniciando partida…";
 
   remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("online:start-game", { roomCode: onlineRoomCode }, (error, response) => {
     if (error) {
-      onlineLobbyStatus.textContent = "O servidor nÃ£o respondeu. Reinicie o SERVIDOR_PC desta versÃ£o.";
+      onlineLobbyStatus.textContent = "O servidor não respondeu. Reinicie o SERVIDOR_PC desta versão.";
       startOnlineGameBtn.disabled = false;
       return;
     }
     if (!response?.ok) {
-      onlineLobbyStatus.textContent = response?.message || "NÃ£o foi possÃ­vel comeÃ§ar.";
+      onlineLobbyStatus.textContent = response?.message || "Não foi possível começar.";
       startOnlineGameBtn.disabled = false;
     }
   });
@@ -2372,7 +2372,7 @@ function rollOnlineDice() {
 
   const active = onlineState.players[onlineState.currentIndex];
   if (!active || active.id !== onlinePlayerId) {
-    statusEl.textContent = "Ainda nÃ£o Ã© a sua vez.";
+    statusEl.textContent = "Ainda não é a sua vez.";
     return;
   }
 
@@ -2383,19 +2383,19 @@ function rollOnlineDice() {
 
   onlineRollAnimating = true;
   rollBtn.disabled = true;
-  statusEl.textContent = "Jogando o dadoâ€¦";
+  statusEl.textContent = "Jogando o dado…";
 
   remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("online:roll", { roomCode: onlineRoomCode }, (error, response) => {
     if (error) {
       onlineRollAnimating = false;
-      statusEl.textContent = "O servidor nÃ£o respondeu. Confirme que o SERVIDOR_PC desta versÃ£o estÃ¡ aberto.";
+      statusEl.textContent = "O servidor não respondeu. Confirme que o SERVIDOR_PC desta versão está aberto.";
       applyOnlineState(onlineState);
       return;
     }
 
     if (!response?.ok) {
       onlineRollAnimating = false;
-      statusEl.textContent = response?.message || "NÃ£o foi possÃ­vel jogar o dado.";
+      statusEl.textContent = response?.message || "Não foi possível jogar o dado.";
       applyOnlineState(onlineState);
     }
   });
@@ -2404,10 +2404,10 @@ function rollOnlineDice() {
 async function handleOnlineRoll(payload) {
   if (payload.state?.roomCode !== onlineRoomCode) return;
   const prev=onlineState; const rp=prev?.players?.find(player=>player.id===payload.playerId)||payload.state?.players?.find(player=>player.id===payload.playerId);
-  onlineRollAnimating=true; rollBtn.disabled=true; statusEl.textContent=`${rp?.name||"Jogador"} estÃ¡ jogando o dadoâ€¦`; await animateDiceTo(payload.result); applyOnlineState(payload.state); onlineRollAnimating=false; applyOnlineState(payload.state);
-  if (!payload.exactMove) statusEl.textContent=`${rp?.name||"Jogador"} tirou ${payload.result}, mas precisa do nÃºmero exato para chegar Ã  casa ${BOARD_SIZE}.`;
-  else if (payload.cardPending) statusEl.textContent=payload.playerId===onlinePlayerId?`VocÃª caiu na casa ${payload.rollTo}. Clique no baralho para puxar a carta.`:`${rp?.name||"Jogador"} caiu na casa ${payload.rollTo} e precisa puxar uma carta.`;
-  else if (!payload.state?.winnerId) { const next=payload.state.players[payload.state.currentIndex]; statusEl.textContent=`${rp?.name||"Jogador"} terminou na casa ${payload.to}. `+(next?`Agora Ã© a vez de ${next.name}.`:""); }
+  onlineRollAnimating=true; rollBtn.disabled=true; statusEl.textContent=`${rp?.name||"Jogador"} está jogando o dado…`; await animateDiceTo(payload.result); applyOnlineState(payload.state); onlineRollAnimating=false; applyOnlineState(payload.state);
+  if (!payload.exactMove) statusEl.textContent=`${rp?.name||"Jogador"} tirou ${payload.result}, mas precisa do número exato para chegar à casa ${BOARD_SIZE}.`;
+  else if (payload.cardPending) statusEl.textContent=payload.playerId===onlinePlayerId?`Você caiu na casa ${payload.rollTo}. Clique no baralho para puxar a carta.`:`${rp?.name||"Jogador"} caiu na casa ${payload.rollTo} e precisa puxar uma carta.`;
+  else if (!payload.state?.winnerId) { const next=payload.state.players[payload.state.currentIndex]; statusEl.textContent=`${rp?.name||"Jogador"} terminou na casa ${payload.to}. `+(next?`Agora é a vez de ${next.name}.`:""); }
 }
 function handleOnlineCardDrawn(payload) {
   if (!payload||payload.state?.roomCode!==onlineRoomCode) return; applyOnlineState(payload.state); const player=payload.state.players?.find(item=>item.id===payload.playerId); const interactive=payload.playerId===onlinePlayerId; setDeckDrawing(payload.card?.type);
@@ -2424,12 +2424,12 @@ function drawOnlineCard() {
   setDeckDrawing(pending.type);
   remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("online:draw-card", { roomCode: onlineRoomCode }, (error, response) => {
     if (error) {
-      statusEl.textContent = "O servidor nÃ£o respondeu ao puxar a carta. Atualize/reinicie o SERVIDOR_PC.";
+      statusEl.textContent = "O servidor não respondeu ao puxar a carta. Atualize/reinicie o SERVIDOR_PC.";
       applyOnlineState(onlineState);
       return;
     }
     if (!response?.ok) {
-      statusEl.textContent = response?.message || "NÃ£o foi possÃ­vel puxar a carta.";
+      statusEl.textContent = response?.message || "Não foi possível puxar a carta.";
       applyOnlineState(onlineState);
     }
   });
@@ -2437,7 +2437,7 @@ function drawOnlineCard() {
 
 function resolveOnlineCard(answerIndex) {
   if (!remoteSocket || !onlineRoomCode || !onlineState?.pendingCard) return;
-  setCardWaiting("Verificando a cartaâ€¦");
+  setCardWaiting("Verificando a carta…");
 
   remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit(
     "online:resolve-card",
@@ -2448,7 +2448,7 @@ function resolveOnlineCard(answerIndex) {
       if (error) {
         activeCardSession.waitingForServer = false;
         cardFeedback.className = "card-feedback wrong";
-        cardFeedback.textContent = "O servidor nÃ£o respondeu. Atualize/reinicie o SERVIDOR_PC e tente novamente.";
+        cardFeedback.textContent = "O servidor não respondeu. Atualize/reinicie o SERVIDOR_PC e tente novamente.";
         cardAnswers.querySelectorAll("button").forEach(button => button.disabled = false);
         if (activeCardSession.card.type !== "question") closeCardBtn.disabled = false;
         return;
@@ -2457,7 +2457,7 @@ function resolveOnlineCard(answerIndex) {
       if (!response?.ok) {
         activeCardSession.waitingForServer = false;
         cardFeedback.className = "card-feedback wrong";
-        cardFeedback.textContent = response?.message || "NÃ£o foi possÃ­vel resolver a carta.";
+        cardFeedback.textContent = response?.message || "Não foi possível resolver a carta.";
         cardAnswers.querySelectorAll("button").forEach(button => button.disabled = false);
         if (activeCardSession.card.type !== "question") closeCardBtn.disabled = false;
       }
@@ -2504,7 +2504,7 @@ const DEV_TEST_CARD = {
   id: "dev-question-1",
   type: "question",
   title: "Teste de carta",
-  text: "Qual nÃºmero vem depois de 4?",
+  text: "Qual número vem depois de 4?",
   options: ["3", "5", "6"],
   correctIndex: 1,
   successDelta: 1,
@@ -2551,7 +2551,7 @@ function updateDancePlayerControls() {
   const duration = getDanceMediaDuration();
   if (dancePlayPauseBtn) {
     const playing = isDanceMediaPlaying();
-    dancePlayPauseBtn.textContent = playing ? "âšâš" : "â–¶";
+    dancePlayPauseBtn.textContent = playing ? "❚❚" : "▶";
     dancePlayPauseBtn.setAttribute("aria-label", playing ? "Pausar" : "Reproduzir");
   }
   if (dancePlayerClock) {
@@ -2604,7 +2604,7 @@ function playDanceIpkGoldImpactAudio() {
 }
 
 
-function setDancePreloadUi(percent = 0, status = "", title = "Preparando Just Danceâ€¦") {
+function setDancePreloadUi(percent = 0, status = "", title = "Preparando Just Dance…") {
   const value = Math.max(0, Math.min(100, Number(percent || 0)));
   dancePreloadOverlay?.classList.remove("hidden", "error");
   if (dancePreloadTitle) dancePreloadTitle.textContent = title;
@@ -2670,10 +2670,10 @@ function waitDanceMediaMetadata(element, timeoutMs = 12000) {
       element.removeEventListener("error", fail);
     };
     const ok = () => { cleanup(); resolve(); };
-    const fail = () => { cleanup(); reject(new Error("Falha ao preparar mÃ­dia.")); };
+    const fail = () => { cleanup(); reject(new Error("Falha ao preparar mídia.")); };
     element.addEventListener("loadedmetadata", ok, { once: true });
     element.addEventListener("error", fail, { once: true });
-    timer = window.setTimeout(() => { cleanup(); reject(new Error("Tempo esgotado ao preparar mÃ­dia.")); }, timeoutMs);
+    timer = window.setTimeout(() => { cleanup(); reject(new Error("Tempo esgotado ao preparar mídia.")); }, timeoutMs);
   });
 }
 
@@ -2794,22 +2794,22 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
     try {
       const coreNeeded = !danceCoreMediaPreloaded;
       const videoEnd = coreNeeded ? 70 : 95;
-      setDancePreloadUi(0, `Carregando vÃ­deo ${label}â€¦`, "Carregando antes de iniciar");
+      setDancePreloadUi(0, `Carregando vídeo ${label}…`, "Carregando antes de iniciar");
       const videoBlob = await fetchDanceBlob(DANCE_VIDEO_SOURCES[quality], ratio => {
         if (generation !== dancePreloadGeneration) return;
-        setDancePreloadUi(videoEnd * ratio, `Carregando vÃ­deo ${label}â€¦`);
+        setDancePreloadUi(videoEnd * ratio, `Carregando vídeo ${label}…`);
       });
       await installDanceMediaBlob("video", videoBlob, danceTestVideo);
       dancePreloadedVideoQuality = quality;
 
       if (coreNeeded) {
-        setDancePreloadUi(70, "Carregando Ã¡udio principalâ€¦");
-        const audioBlob = await fetchDanceBlob(DANCE_AUDIO_SOURCE, ratio => setDancePreloadUi(70 + ratio * 14, "Carregando Ã¡udio principalâ€¦"));
+        setDancePreloadUi(70, "Carregando áudio principal…");
+        const audioBlob = await fetchDanceBlob(DANCE_AUDIO_SOURCE, ratio => setDancePreloadUi(70 + ratio * 14, "Carregando áudio principal…"));
         await installDanceMediaBlob("audio", audioBlob, danceSongAudio);
 
-        setDancePreloadUi(84, "Carregando vÃ­deo do Gold Moveâ€¦");
+        setDancePreloadUi(84, "Carregando vídeo do Gold Move…");
         if (danceGoldMoveVideo) {
-          const goldVideoBlob = await fetchDanceBlob(DANCE_YEAH_FINAL_SOURCE, ratio => setDancePreloadUi(84 + ratio * 10, "Carregando vÃ­deo do Gold Moveâ€¦"));
+          const goldVideoBlob = await fetchDanceBlob(DANCE_YEAH_FINAL_SOURCE, ratio => setDancePreloadUi(84 + ratio * 10, "Carregando vídeo do Gold Move…"));
           await installDanceMediaBlob("gold-video", goldVideoBlob, danceGoldMoveVideo);
           danceGoldMoveVideo.muted = false;
           danceGoldMoveVideo.volume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
@@ -2819,17 +2819,17 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
 
       const hudStart = coreNeeded ? 94 : 95;
       const imageStart = coreNeeded ? 97 : 98;
-      setDancePreloadUi(hudStart, "Carregando sons da HUDâ€¦");
-      await preloadDanceHudSounds(ratio => setDancePreloadUi(hudStart + ratio * (imageStart - hudStart), "Carregando sons da HUDâ€¦"));
-      setDancePreloadUi(imageStart, "Preparando HUD, pictos e julgamentosâ€¦");
-      await preloadDanceCriticalImages(ratio => setDancePreloadUi(imageStart + ratio * (100 - imageStart), "Preparando HUD, pictos e julgamentosâ€¦"));
+      setDancePreloadUi(hudStart, "Carregando sons da HUD…");
+      await preloadDanceHudSounds(ratio => setDancePreloadUi(hudStart + ratio * (imageStart - hudStart), "Carregando sons da HUD…"));
+      setDancePreloadUi(imageStart, "Preparando HUD, pictos e julgamentos…");
+      await preloadDanceCriticalImages(ratio => setDancePreloadUi(imageStart + ratio * (100 - imageStart), "Preparando HUD, pictos e julgamentos…"));
 
       try { if (danceSongAudio) danceSongAudio.currentTime = currentTime; } catch {}
       try { if (danceTestVideo) danceTestVideo.currentTime = currentTime; } catch {}
       danceActiveQuality = quality;
       danceQualitySwitching = false;
       updateDanceQualityUi(options.reason || "");
-      setDancePreloadUi(100, "Tudo carregado. Pronto para danÃ§ar!", "Pronto");
+      setDancePreloadUi(100, "Tudo carregado. Pronto para dançar!", "Pronto");
       setDancePlayerReadyState(true);
       window.setTimeout(() => {
         if (dancePreloadReady) dancePreloadOverlay?.classList.add("hidden");
@@ -2844,8 +2844,8 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       if (danceSeek) danceSeek.disabled = true;
       if (danceQualityMode) danceQualityMode.disabled = false;
       dancePreloadOverlay?.classList.add("error");
-      setDancePreloadUi(0, "NÃ£o foi possÃ­vel carregar todos os arquivos. Troque a qualidade ou reabra o teste.", "Falha no carregamento");
-      if (danceLabMessage) danceLabMessage.textContent = `Falha ao prÃ©-carregar o player: ${error?.message || error}`;
+      setDancePreloadUi(0, "Não foi possível carregar todos os arquivos. Troque a qualidade ou reabra o teste.", "Falha no carregamento");
+      if (danceLabMessage) danceLabMessage.textContent = `Falha ao pré-carregar o player: ${error?.message || error}`;
       console.error("Dance preload failed", error);
       return false;
     }
@@ -2871,7 +2871,7 @@ async function playDanceMedia() {
     await danceSongAudio.play();
     await danceTestVideo.play().catch(() => {});
   } catch (error) {
-    if (danceLabMessage) danceLabMessage.textContent = "O navegador bloqueou a reproduÃ§Ã£o. Clique novamente em â–¶.";
+    if (danceLabMessage) danceLabMessage.textContent = "O navegador bloqueou a reprodução. Clique novamente em ▶.";
     return;
   }
   if (!danceStartSoundPlayed && getDanceMediaCurrentTime() < 1.2) {
@@ -2886,7 +2886,7 @@ async function playDanceMedia() {
 function pauseDanceMedia() {
   danceSongAudio?.pause();
   danceTestVideo?.pause();
-  // Ao retomar, o vÃ­deo do Gold Move Ã© reconstruÃ­do pela posiÃ§Ã£o atual da mÃºsica.
+  // Ao retomar, o vídeo do Gold Move é reconstruído pela posição atual da música.
   resetDanceGoldMoveFx(true);
   broadcastDancePhoneSession("pause", true);
   stopDanceVisualHud();
@@ -2928,7 +2928,7 @@ function danceQualityIndex(value) { return ["low", "medium", "high"].indexOf(val
 function updateDanceQualityUi(reason = "") {
   if (!danceQualityActive) return;
   const label = DANCE_QUALITY_LABELS[danceActiveQuality] || danceActiveQuality;
-  danceQualityActive.textContent = danceQualityPreference === "auto" ? `Auto â†’ ${label}${reason ? ` â€¢ ${reason}` : ""}` : label;
+  danceQualityActive.textContent = danceQualityPreference === "auto" ? `Auto → ${label}${reason ? ` • ${reason}` : ""}` : label;
 }
 
 async function switchDanceVideoQuality(targetQuality, options = {}) {
@@ -2953,9 +2953,9 @@ async function applyDanceQualityPreference(preference, announce = false) {
   const target = danceQualityPreference === "auto" ? chooseAutoDanceQuality() : danceQualityPreference;
   danceAutoCeiling = target;
   const reason = danceQualityPreference === "auto" ? "perfil do aparelho" : "";
-  if (announce && danceLabMessage) danceLabMessage.textContent = `Carregando ${DANCE_QUALITY_LABELS[target]} antes de continuarâ€¦`;
+  if (announce && danceLabMessage) danceLabMessage.textContent = `Carregando ${DANCE_QUALITY_LABELS[target]} antes de continuar…`;
   const ready = await switchDanceVideoQuality(target, { reason });
-  if (announce && ready && danceLabMessage) danceLabMessage.textContent = danceQualityPreference === "auto" ? `Qualidade automÃ¡tica pronta (${DANCE_QUALITY_LABELS[target]}).` : `Qualidade fixa pronta: ${DANCE_QUALITY_LABELS[target]}.`;
+  if (announce && ready && danceLabMessage) danceLabMessage.textContent = danceQualityPreference === "auto" ? `Qualidade automática pronta (${DANCE_QUALITY_LABELS[target]}).` : `Qualidade fixa pronta: ${DANCE_QUALITY_LABELS[target]}.`;
   return ready;
 }
 
@@ -3001,14 +3001,14 @@ async function toggleDanceFullscreen() {
     if (document.fullscreenElement) await document.exitFullscreen();
     else await dancePlayerShell.requestFullscreen();
   } catch {
-    if (danceLabMessage) danceLabMessage.textContent = "O navegador nÃ£o permitiu entrar em tela cheia.";
+    if (danceLabMessage) danceLabMessage.textContent = "O navegador não permitiu entrar em tela cheia.";
   }
 }
 
 function syncDanceStageUiScale() {
   if (!danceVideoStage) return;
 
-  // Em janela cheia/fullscreen, calcula o espaÃ§o REAL que sobrou depois dos controles.
+  // Em janela cheia/fullscreen, calcula o espaço REAL que sobrou depois dos controles.
   // Assim o 16:9 nunca estoura a tela mesmo quando os controles quebram em duas linhas no celular.
   const immersive = Boolean(dancePlayerShell?.classList.contains("window-mode") || document.fullscreenElement === dancePlayerShell);
   if (immersive && dancePlayerShell) {
@@ -3082,8 +3082,8 @@ function updateDanceScoreBarVisual(score = 0) {
   const safeScore = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
   const progress = DANCE_MAX_SCORE > 0 ? safeScore / DANCE_MAX_SCORE : 0;
 
-  // A barra Ã© o recorte original do IPK/HUD e sobe inteira dentro de uma mÃ¡scara.
-  // Dessa forma a ponta arredondada original Ã© sempre a borda que lidera o preenchimento.
+  // A barra é o recorte original do IPK/HUD e sobe inteira dentro de uma máscara.
+  // Dessa forma a ponta arredondada original é sempre a borda que lidera o preenchimento.
   if (danceScoreBarFill) {
     danceScoreBarFill.style.transform = `translateY(${((1 - progress) * 100).toFixed(4)}%)`;
     danceScoreBarFill.style.opacity = progress > 0 ? "1" : "0";
@@ -3144,7 +3144,7 @@ function renderDanceYeahDevSettings() {
   if (danceYeahPrepareMsInput) danceYeahPrepareMsInput.value = String(danceGoldPrepareMs);
   if (danceYeahScalePctInput) danceYeahScalePctInput.value = String(danceYeahScalePct);
   if (danceGoldMoveVideo) danceGoldMoveVideo.style.setProperty("--dance-yeah-scale", String(danceYeahScalePct / 100));
-  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `MP4 Ãºnico â€¢ 1080p â€¢ 60 FPS â€¢ comeÃ§a ${danceGoldPrepareMs} ms antes do YEAH`;
+  if (danceYeahDevStatus) danceYeahDevStatus.textContent = `MP4 único • 1080p • 60 FPS • começa ${danceGoldPrepareMs} ms antes do YEAH`;
 }
 
 function saveDanceYeahDevSettings() {
@@ -3161,7 +3161,7 @@ function loadDanceYeahDevSettings() {
   try { saved = JSON.parse(localStorage.getItem(DANCE_YEAH_DEV_STORAGE_KEY) || "null"); } catch {}
   danceGoldPrepareMs = clampDanceYeahSetting(saved?.prepareMs, 0, 5000, DANCE_GOLD_DEFAULTS.prepareMs);
   danceYeahScalePct = clampDanceYeahSetting(saved?.finalScalePct, 60, 160, DANCE_GOLD_DEFAULTS.finalScalePct);
-  // Os offsets/loops antigos deixam de participar da reproduÃ§Ã£o.
+  // Os offsets/loops antigos deixam de participar da reprodução.
   danceGoldLoopRestartMs = 0;
   danceGoldFinishOffsetMs = 0;
   danceYeahFinalDelayMs = 0;
@@ -3174,7 +3174,7 @@ function applyDanceYeahDevSettings(announce = true) {
   saveDanceYeahDevSettings();
   renderDanceYeahDevSettings();
   resetDanceGoldMoveFx(false);
-  if (announce && danceLabMessage) danceLabMessage.textContent = `Gold Move salvo: vÃ­deo comeÃ§a ${danceGoldPrepareMs} ms antes do YEAH.`;
+  if (announce && danceLabMessage) danceLabMessage.textContent = `Gold Move salvo: vídeo começa ${danceGoldPrepareMs} ms antes do YEAH.`;
 }
 
 function resetDanceYeahDevSettings() {
@@ -3186,7 +3186,7 @@ function resetDanceYeahDevSettings() {
   saveDanceYeahDevSettings();
   renderDanceYeahDevSettings();
   resetDanceGoldMoveFx(false);
-  if (danceLabMessage) danceLabMessage.textContent = `Gold Move restaurado: vÃ­deo comeÃ§a ${danceGoldPrepareMs} ms antes do YEAH.`;
+  if (danceLabMessage) danceLabMessage.textContent = `Gold Move restaurado: vídeo começa ${danceGoldPrepareMs} ms antes do YEAH.`;
 }
 
 function scheduleDanceYeahFinalFx() {
@@ -3334,8 +3334,8 @@ function startDanceGoldStartLoopPlayback(moveIndex, { requireSongPlaying = true 
   danceStartLoopCycleToken += 1;
   danceStartLoopGoldIndex = moveIndex;
 
-  // Visual idÃªntico ao Start Loop original, mas reproduzido quadro a quadro em canvas.
-  // O Ã¡udio continua separado: toca apenas na primeira volta e nunca entra nas repetiÃ§Ãµes.
+  // Visual idêntico ao Start Loop original, mas reproduzido quadro a quadro em canvas.
+  // O áudio continua separado: toca apenas na primeira volta e nunca entra nas repetições.
   playDanceStartLoopFirstAudio();
   return startDanceGoldCanvasAnimation("start", {
     loop: true,
@@ -3362,9 +3362,9 @@ function updateDanceSongIdentityUi() {
     danceSongCover.alt = `Capa de ${song.title}`;
   }
   if (danceSongTitle) danceSongTitle.textContent = song.title;
-  if (danceSongMeta) danceSongMeta.textContent = `${song.artist} â€¢ ${song.edition} â€¢ ${song.coaches} coach${song.coaches === 1 ? "" : "es"}`;
-  if (danceSongBadge) danceSongBadge.textContent = song.beta ? "MÃºsica de teste â€¢ BETA" : "MÃºsica de teste";
-  if (danceSyncResetBtn) danceSyncResetBtn.textContent = `PadrÃ£o (${formatDanceSyncOffset(song.defaultSyncMs)})`;
+  if (danceSongMeta) danceSongMeta.textContent = `${song.artist} • ${song.edition} • ${song.coaches} coach${song.coaches === 1 ? "" : "es"}`;
+  if (danceSongBadge) danceSongBadge.textContent = song.beta ? "Música de teste • BETA" : "Música de teste";
+  if (danceSyncResetBtn) danceSyncResetBtn.textContent = `Padrão (${formatDanceSyncOffset(song.defaultSyncMs)})`;
   if (danceKaraoke) danceKaraoke.style.setProperty("--dance-lyric-color", song.lyricsColor || "#FFFFFF");
   if (danceTestVideo) danceTestVideo.poster = `${song.base}/${song.posterFile}`;
 }
@@ -3403,8 +3403,8 @@ async function switchDanceSong(songId, announce = true) {
   dancePictoAtlas = null;
   safeLocalStorageSet(DANCE_SONG_STORAGE_KEY, next.id);
   updateDanceSongIdentityUi();
-  setDancePreloadUi(2, `Preparando ${next.title}${next.beta ? " (Beta)" : ""}â€¦`);
-  if (announce && danceLabMessage) danceLabMessage.textContent = `Carregando ${next.title}${next.beta ? " (Beta)" : ""}â€¦`;
+  setDancePreloadUi(2, `Preparando ${next.title}${next.beta ? " (Beta)" : ""}…`);
+  if (announce && danceLabMessage) danceLabMessage.textContent = `Carregando ${next.title}${next.beta ? " (Beta)" : ""}…`;
   const dataReady = await loadDanceTestSongData(true);
   if (!dataReady) { if (danceSongSelect) danceSongSelect.disabled = false; return false; }
   const target = danceQualityPreference === "auto" ? chooseAutoDanceQuality() : danceQualityPreference;
@@ -3445,7 +3445,7 @@ function danceRankLabel(dance = {}) {
 }
 
 function danceJudgementDisplay(judgement) {
-  return String(judgement || "").toUpperCase() === "YEAH" ? "YEAH!" : (judgement || "â€”");
+  return String(judgement || "").toUpperCase() === "YEAH" ? "YEAH!" : (judgement || "—");
 }
 
 function danceJudgementClass(judgement) {
@@ -3484,8 +3484,8 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
     if (!keepIds.has(String(oldItem.dataset.playerId || ""))) oldItem.remove();
   }
 
-  // hud_players.isc do IPK usa slots espaÃ§ados em 200 unidades ao redor do centro.
-  // No nosso canvas de referÃªncia 960px, isso equivale Ã  metade das coordenadas 1920x1080.
+  // hud_players.isc do IPK usa slots espaçados em 200 unidades ao redor do centro.
+  // No nosso canvas de referência 960px, isso equivale à metade das coordenadas 1920x1080.
   const slotPositions = {
     1: [0],
     2: [-100, 100],
@@ -3540,12 +3540,12 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
   flare.hidden = !asset.flare;
   feedback.setAttribute("aria-label", danceJudgementDisplay(judgement));
   feedback.className = `dance-video-feedback feedback-${asset.profile}`;
-  // Reinicia a animaÃ§Ã£o para julgamentos consecutivos do mesmo tipo.
+  // Reinicia a animação para julgamentos consecutivos do mesmo tipo.
   void feedback.offsetWidth;
   feedback.classList.add("active");
 
   const normalizedJudgement = String(judgement || "").toUpperCase();
-  // A explosÃ£o global e seu Ã¡udio pertencem Ã  timeline; aqui toca sÃ³ o feedback YEAH do jogador.
+  // A explosão global e seu áudio pertencem à timeline; aqui toca só o feedback YEAH do jogador.
   if (normalizedJudgement.startsWith("YEAH") && !danceExactGoldSequenceActive) playDanceHudSound("yeah");
 }
 
@@ -3554,12 +3554,12 @@ function pictoAtlasPosition(name) {
   if (!Array.isArray(coords) || coords.length < 2) return null;
 
   const tile = dancePictoAtlas?.imageSize || { width: 256, height: 256 };
-  // Cada mÃºsica pode ter um spritesheet de tamanho diferente.
+  // Cada música pode ter um spritesheet de tamanho diferente.
   // Rain Over Me / Earth Song = 6x6 (1536x1536).
   // It's Raining Men = 5x5 (1280x1280).
-  // background-position em CSS Ã© relativo ao espaÃ§o restante depois de aplicar
-  // background-size, entÃ£o o divisor correto Ã© (colunas - 1)/(linhas - 1),
-  // e nÃ£o a largura/altura total do atlas.
+  // background-position em CSS é relativo ao espaço restante depois de aplicar
+  // background-size, então o divisor correto é (colunas - 1)/(linhas - 1),
+  // e não a largura/altura total do atlas.
   const configuredGrid = getDanceSongConfig()?.atlasGrid || { columns: 6, rows: 6 };
   const columns = Math.max(1, Number(configuredGrid.columns || 6));
   const rows = Math.max(1, Number(configuredGrid.rows || 6));
@@ -3614,8 +3614,8 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
 
 function getDanceTimelineTimeMs() {
   if (!danceTestVideo) return 0;
-  // Os tempos de beats, pictos, lyrics e moves jÃ¡ estÃ£o no mesmo relÃ³gio do vÃ­deo.
-  // O ajuste manual existe apenas para calibraÃ§Ã£o fina no Menu Dev.
+  // Os tempos de beats, pictos, lyrics e moves já estão no mesmo relógio do vídeo.
+  // O ajuste manual existe apenas para calibração fina no Menu Dev.
   return getDanceMediaCurrentTime() * 1000 + danceManualSyncOffsetMs;
 }
 
@@ -3759,12 +3759,12 @@ function updateDancePictoBeatPulse(timeMs) {
   if (beatIndex === danceLastPictoBeatIndex) return;
   danceLastPictoBeatIndex = beatIndex;
 
-  // Ao arrastar o vÃ­deo para o meio de um beat, nÃ£o dispara uma pulsaÃ§Ã£o atrasada.
-  // Durante reproduÃ§Ã£o normal cruzamos o beat em poucos milissegundos.
+  // Ao arrastar o vídeo para o meio de um beat, não dispara uma pulsação atrasada.
+  // Durante reprodução normal cruzamos o beat em poucos milissegundos.
   const beatAgeMs = timeMs - Number(danceTestBeats[beatIndex] || 0);
   if (beatAgeMs > 180) return;
 
-  // Reinicia a animaÃ§Ã£o mesmo quando os beats sÃ£o muito prÃ³ximos.
+  // Reinicia a animação mesmo quando os beats são muito próximos.
   dancePictoLane.classList.remove("jd-beat-pulse", "jd-two-beat-pulse");
   void dancePictoLane.offsetWidth;
   dancePictoLane.classList.add("jd-beat-pulse");
@@ -3780,7 +3780,7 @@ function renderDancePictos(timeMs) {
     const position = pictoAtlasPosition(picto.name);
     if (!position) continue;
 
-    // Antes do alvo: entra de fora da tela e corre rapidamente atÃ© a barra branca.
+    // Antes do alvo: entra de fora da tela e corre rapidamente até a barra branca.
     // Depois do alvo: permanece no ponto, cresce e some suavemente.
     const beforeHit = delta >= 0;
     const travel = beforeHit ? Math.max(0, Math.min(1, 1 - delta / DANCE_PICTO_LEAD_MS)) : 1;
@@ -3800,7 +3800,7 @@ function renderDancePictos(timeMs) {
     const songConfig = getDanceSongConfig();
     if (songConfig?.pictoIndividualFolder) {
       // V6.2: It's Raining Men usa PNGs individuais. Isso elimina por completo
-      // bleed/interpolaÃ§Ã£o entre tiles adjacentes do spritesheet 5x5.
+      // bleed/interpolação entre tiles adjacentes do spritesheet 5x5.
       const pictoFile = `${songConfig.base}/${songConfig.pictoIndividualFolder}/${encodeURIComponent(String(picto.name || ""))}.png`;
       item.style.backgroundImage = `url("${pictoFile}")`;
       item.style.backgroundSize = "contain";
@@ -3811,7 +3811,7 @@ function renderDancePictos(timeMs) {
       item.style.backgroundSize = `${position.sizeX}% ${position.sizeY}%`;
       item.style.backgroundPosition = `${position.x}% ${position.y}%`;
     }
-    item.title = `${picto.name || "picto"} â€¢ ${formatDanceTime(Number(picto.time || 0) / 1000)}`;
+    item.title = `${picto.name || "picto"} • ${formatDanceTime(Number(picto.time || 0) / 1000)}`;
     dancePictoItems.appendChild(item);
   }
 }
@@ -4303,7 +4303,7 @@ function finalizeDanceMoveJudging(index) {
 }
 
 function syncDanceMoveJudging() {
-  // V5: PC nÃ£o calcula mais o movimento. SÃ³ mantÃ©m o relÃ³gio do celular sincronizado.
+  // V5: PC não calcula mais o movimento. Só mantém o relógio do celular sincronizado.
   broadcastDancePhoneSession("sync", false);
 }
 
@@ -4346,7 +4346,7 @@ function collectDanceJudgementSample(payload) {
     z: Number(sample.accelerationIncludingGravity?.z || 0)
   };
 
-  // Prefere aceleraÃ§Ã£o linear. Se ela nÃ£o existir, mede a mudanÃ§a do vetor com gravidade.
+  // Prefere aceleração linear. Se ela não existir, mede a mudança do vetor com gravidade.
   let motionVector = linear;
   if (danceJudgeVectorMagnitude(linear) < 0.06 && stats.previousGravityVector) {
     motionVector = {
@@ -4456,7 +4456,7 @@ function setDanceLabBadge(kind = "idle", text = "Parado") {
 
 function resetDanceLabUi(clearMessage = true) {
   if (danceRoomCode) danceRoomCode.textContent = "------";
-  if (danceJoinUrl) danceJoinUrl.textContent = "Crie uma sala para comeÃ§ar.";
+  if (danceJoinUrl) danceJoinUrl.textContent = "Crie uma sala para começar.";
   if (copyDanceJoinUrlBtn) copyDanceJoinUrlBtn.disabled = true;
   if (enableDanceSensorsBtn) enableDanceSensorsBtn.disabled = true;
   if (stopDanceSensorsBtn) stopDanceSensorsBtn.disabled = true;
@@ -4516,22 +4516,22 @@ async function loadDanceTestSongData(force = false) {
       danceManualSyncOffsetMs = songConfig.defaultSyncMs;
     }
     dancePictoAtlas = atlas && typeof atlas === "object" ? atlas : null;
-    // V6: classifiers sÃ£o carregados, recalibrados para smartphone e interpretados no celular, nÃ£o no PC.
-    const classifierSummary = { loaded: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, total: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, format: `${songConfig?.classifierFormat || ""}â†’PHONE` };
+    // V6: classifiers são carregados, recalibrados para smartphone e interpretados no celular, não no PC.
+    const classifierSummary = { loaded: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, total: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, format: `${songConfig?.classifierFormat || ""}→PHONE` };
     danceTestSongLoaded = true;
     const goldCount = danceTestMoves.filter(move => move.goldMove).length;
     if (danceSongAssetStatus) {
-      const betaText = songConfig.beta ? " â€¢ BETA" : "";
-      const classifierLabel = classifierSummary.total ? ` â€¢ classifiers processados no celular (${String(classifierSummary.format || "").toUpperCase()})` : "";
-      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos â€¢ ${danceTestPictos.length} pictos â€¢ ${danceLyricLines.length} linhas de letra â€¢ ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel} â€¢ vÃ­deo 360p/720p/1080p.`;
+      const betaText = songConfig.beta ? " • BETA" : "";
+      const classifierLabel = classifierSummary.total ? ` • classifiers processados no celular (${String(classifierSummary.format || "").toUpperCase()})` : "";
+      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel} • vídeo 360p/720p/1080p.`;
     }
     renderDanceSyncCalibration();
     updateDanceSongTimeline();
     return true;
   } catch (error) {
-    console.error("Falha ao carregar dados da mÃºsica do Just Dance:", error);
+    console.error("Falha ao carregar dados da música do Just Dance:", error);
     danceTestSongLoaded = false;
-    if (danceSongAssetStatus) danceSongAssetStatus.textContent = "NÃ£o foi possÃ­vel ler a timeline ou os pictos da mÃºsica.";
+    if (danceSongAssetStatus) danceSongAssetStatus.textContent = "Não foi possível ler a timeline ou os pictos da música.";
     return false;
   }
 }
@@ -4542,8 +4542,8 @@ function updateDanceSongTimeline() {
   if (danceSongTime) danceSongTime.textContent = formatDanceTime(getDanceMediaCurrentTime());
   renderDanceSyncCalibration();
   if (!danceTestMoves.length) {
-    if (danceCurrentMove) danceCurrentMove.textContent = "â€”";
-    if (danceNextMove) danceNextMove.textContent = "â€”";
+    if (danceCurrentMove) danceCurrentMove.textContent = "—";
+    if (danceNextMove) danceNextMove.textContent = "—";
     return;
   }
   let current = null;
@@ -4554,8 +4554,8 @@ function updateDanceSongTimeline() {
     if (timeMs >= start && timeMs <= end) current = move;
     if (start > timeMs) { next = move; break; }
   }
-  if (danceCurrentMove) danceCurrentMove.textContent = current?.name || "â€”";
-  if (danceNextMove) danceNextMove.textContent = next ? `${next.name}${next.goldMove ? " â€¢ GOLD/YEAH!" : ""} â€¢ ${formatDanceTime(next.time / 1000)}` : "Fim";
+  if (danceCurrentMove) danceCurrentMove.textContent = current?.name || "—";
+  if (danceNextMove) danceNextMove.textContent = next ? `${next.name}${next.goldMove ? " • GOLD/YEAH!" : ""} • ${formatDanceTime(next.time / 1000)}` : "Fim";
   renderDancePictos(timeMs);
   renderDanceLyrics(timeMs);
   updateDancePictoBeatPulse(timeMs);
@@ -4570,7 +4570,7 @@ async function openDanceSensorLab() {
   gameMode = "dev-sensor";
   resetDanceLabUi();
   showOnly(danceDevScreenEl);
-  if (danceLabMessage) danceLabMessage.textContent = "Carregando mÃºsica, vÃ­deo e HUD antes de iniciarâ€¦";
+  if (danceLabMessage) danceLabMessage.textContent = "Carregando música, vídeo e HUD antes de iniciar…";
   const storedSong = safeLocalStorageGet(DANCE_SONG_STORAGE_KEY, "RainOverMe");
   applyDanceSongSources(DANCE_SONGS[storedSong] ? storedSong : "RainOverMe");
   updateDanceSongIdentityUi();
@@ -4578,7 +4578,7 @@ async function openDanceSensorLab() {
   await loadDanceTestSongData(true);
   const playerReady = await initializeDancePlayerSettings();
   if (!playerReady) return;
-  if (danceLabMessage) danceLabMessage.textContent = "Arquivos prontos. Verificando o servidorâ€¦";
+  if (danceLabMessage) danceLabMessage.textContent = "Arquivos prontos. Verificando o servidor…";
   const compatible = await verifyMultiplayerServer({ mode: "dev" });
   if (compatible) {
     danceLabServerWarning?.classList.add("hidden");
@@ -4612,14 +4612,14 @@ function closeDevSensorRoom() {
 function sensorCapabilitiesText(sensor) {
   const caps = sensor?.capabilities || {};
   const names = [];
-  if (caps.observedGyro) names.push("giroscÃ³pio âœ“");
-  else if (caps.genericGyroscope) names.push("giroscÃ³pio API");
-  if (caps.observedAccelerometer) names.push("acelerÃ´metro âœ“");
-  else if (caps.motion || caps.genericAccelerometer || caps.genericLinearAcceleration) names.push("acelerÃ´metro API");
-  if (caps.observedOrientation) names.push(caps.orientationFallback ? "orientaÃ§Ã£o/fallback âœ“" : "orientaÃ§Ã£o âœ“");
-  else if (caps.orientation) names.push("orientaÃ§Ã£o API");
+  if (caps.observedGyro) names.push("giroscópio ✓");
+  else if (caps.genericGyroscope) names.push("giroscópio API");
+  if (caps.observedAccelerometer) names.push("acelerômetro ✓");
+  else if (caps.motion || caps.genericAccelerometer || caps.genericLinearAcceleration) names.push("acelerômetro API");
+  if (caps.observedOrientation) names.push(caps.orientationFallback ? "orientação/fallback ✓" : "orientação ✓");
+  else if (caps.orientation) names.push("orientação API");
   if (caps.secureContext === false) names.push("SEM HTTPS");
-  return names.length ? names.join(" â€¢ ") : "aguardando informaÃ§Ãµes do aparelho";
+  return names.length ? names.join(" • ") : "aguardando informações do aparelho";
 }
 
 function renderDanceSensorPlayers(players = []) {
@@ -4654,19 +4654,19 @@ function renderDanceSensorPlayers(players = []) {
         <div class="dance-player-metric"><span>Movimento</span><strong data-metric="intensity">${Math.round(intensity * 100)}%</strong></div>
         <div class="dance-player-metric"><span>Score</span><strong data-metric="score" data-dance-score>${Number(dance.score || 0).toLocaleString("pt-BR")}</strong></div>
         <div class="dance-player-metric"><span>Pacotes</span><strong data-metric="packets">${packets}</strong></div>
-        <div class="dance-player-metric"><span>Giro</span><strong data-metric="rotation">0Â°/s</strong></div>
+        <div class="dance-player-metric"><span>Giro</span><strong data-metric="rotation">0°/s</strong></div>
       </div>
       <div class="dance-intensity-track"><span class="dance-intensity-fill" style="width:${Math.round(intensity * 100)}%"></span></div>
       <div class="dance-score-panel">
-        <div class="dance-score-topline"><div class="dance-stars" aria-label="Estrelas"><span class="dance-star">â˜…</span><span class="dance-star">â˜…</span><span class="dance-star">â˜…</span><span class="dance-star">â˜…</span><span class="dance-star">â˜…</span></div><span data-dance-rank class="dance-rank-badge">SEM ESTRELAS</span></div>
-        <div class="dance-score-detail"><span data-dance-progress>0 / ${danceTestMoves.length || 0} movimentos</span><span>mÃ¡x. 13.333</span></div>
+        <div class="dance-score-topline"><div class="dance-stars" aria-label="Estrelas"><span class="dance-star">★</span><span class="dance-star">★</span><span class="dance-star">★</span><span class="dance-star">★</span><span class="dance-star">★</span></div><span data-dance-rank class="dance-rank-badge">SEM ESTRELAS</span></div>
+        <div class="dance-score-detail"><span data-dance-progress>0 / ${danceTestMoves.length || 0} movimentos</span><span>máx. 13.333</span></div>
         <div class="dance-judgement-row"><strong data-dance-judgement class="dance-last-judgement ${danceJudgementClass(dance.lastJudgement)}">${danceJudgementDisplay(dance.lastJudgement)}</strong><span data-dance-last-move>${dance.lastMoveName || "Aguardando movimento"}</span></div>
         <div class="dance-judgement-counts"><span>P <b data-count="PERFECT">0</b></span><span>S <b data-count="SUPER">0</b></span><span>G <b data-count="GOOD">0</b></span><span>OK <b data-count="OK">0</b></span><span>Y! <b data-count="YEAH">0</b></span><span>X <b data-count="X">0</b></span></div>
       </div>
       <div class="dance-capabilities"></div>`;
     card.querySelector(".dance-player-dot").style.background = player.color || "#888";
     card.querySelector(".dance-player-name strong").textContent = player.name || "Jogador";
-    card.querySelector(".dance-capabilities").textContent = `${sensorCapabilitiesText(sensor)} â€¢ diagnÃ³stico ${diagnosticScore}`;
+    card.querySelector(".dance-capabilities").textContent = `${sensorCapabilitiesText(sensor)} • diagnóstico ${diagnosticScore}`;
     danceSensorPlayers.appendChild(card);
     renderDanceStars(card, dance);
   }
@@ -4689,15 +4689,15 @@ function applyDevSensorState(state) {
   setDanceLabBadge(devSensorModeEnabled ? "active" : (count ? "waiting" : "idle"), devSensorModeEnabled ? "Sensores ativos" : (count ? "Celular conectado" : "Sala pronta"));
   if (danceLabMessage) {
     danceLabMessage.textContent = count
-      ? `${count} ${count === 1 ? "celular conectado" : "celulares conectados"}. ${devSensorModeEnabled ? "Aguardando o usuÃ¡rio liberar os sensores no aparelho." : "Clique em Ativar sensores quando estiver pronto."}`
-      : "Sala criada. Abra o endereÃ§o no celular e conecte como controle.";
+      ? `${count} ${count === 1 ? "celular conectado" : "celulares conectados"}. ${devSensorModeEnabled ? "Aguardando o usuário liberar os sensores no aparelho." : "Clique em Ativar sensores quando estiver pronto."}`
+      : "Sala criada. Abra o endereço no celular e conecte como controle.";
   }
 }
 
 function handleDevSensorData(payload) {
   if (!payload?.playerId) return;
   devSensorLive.set(payload.playerId, { ...payload, receivedAt: Date.now() });
-  // V5: telemetria Ã© sÃ³ visual; julgamento acontece no celular.
+  // V5: telemetria é só visual; julgamento acontece no celular.
   const card = danceSensorPlayers?.querySelector(`[data-player-id="${CSS.escape(payload.playerId)}"]`);
   if (!card) {
     if (devSensorState) renderDanceSensorPlayers(devSensorState.players || []);
@@ -4719,7 +4719,7 @@ function handleDevSensorData(payload) {
   if (rotationText) {
     const r = payload.sample?.rotationRate || {};
     const rotation = Math.sqrt((Number(r.x)||0)**2 + (Number(r.y)||0)**2 + (Number(r.z)||0)**2);
-    rotationText.textContent = `${Math.round(rotation)}Â°/s`;
+    rotationText.textContent = `${Math.round(rotation)}°/s`;
   }
   if (fill) fill.style.width = `${Math.round(intensity * 100)}%`;
   if (stateText) { stateText.textContent = "recebendo"; stateText.classList.add("live"); }
@@ -4732,7 +4732,7 @@ async function createDanceSensorRoom() {
 
   if (!remoteSocket.connected) {
     setDanceLabBadge("waiting", "Conectando");
-    if (danceLabMessage) danceLabMessage.textContent = "Conectando ao servidorâ€¦";
+    if (danceLabMessage) danceLabMessage.textContent = "Conectando ao servidor…";
     remoteSocket.once("connect", createDanceSensorRoom);
     return;
   }
@@ -4745,7 +4745,7 @@ async function createDanceSensorRoom() {
     if (error || !response?.ok) {
       danceLabServerWarning?.classList.remove("hidden");
       setDanceLabBadge("idle", "Erro");
-      if (danceLabMessage) danceLabMessage.textContent = response?.message || "O servidor nÃ£o respondeu ao criar a sala de sensores.";
+      if (danceLabMessage) danceLabMessage.textContent = response?.message || "O servidor não respondeu ao criar a sala de sensores.";
       return;
     }
 
@@ -4767,7 +4767,7 @@ function setDanceSensorMode(enabled) {
   if (button) button.disabled = true;
   remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("host:sensor-mode", { roomCode: devSensorRoomCode, enabled: Boolean(enabled) }, (error, response) => {
     if (error || !response?.ok) {
-      if (danceLabMessage) danceLabMessage.textContent = response?.message || "NÃ£o foi possÃ­vel alterar o modo de sensores.";
+      if (danceLabMessage) danceLabMessage.textContent = response?.message || "Não foi possível alterar o modo de sensores.";
       if (button) button.disabled = false;
       return;
     }
@@ -4785,7 +4785,7 @@ function resetDanceSensorTest() {
   remoteSocket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("host:sensor-reset", { roomCode: devSensorRoomCode }, (error, response) => {
     resetDanceScoreBtn.disabled = false;
     if (error || !response?.ok) {
-      if (danceLabMessage) danceLabMessage.textContent = response?.message || "NÃ£o foi possÃ­vel zerar o teste.";
+      if (danceLabMessage) danceLabMessage.textContent = response?.message || "Não foi possível zerar o teste.";
       return;
     }
     devSensorLive.clear();
@@ -4799,9 +4799,9 @@ function resetDanceSensorTest() {
 async function testDevDice() {
   if (devTestDiceBtn) devTestDiceBtn.disabled = true;
   const value = Math.floor(Math.random() * 6) + 1;
-  if (devMechanicStatus) devMechanicStatus.textContent = `Rolando o dado atÃ© ${value}â€¦`;
+  if (devMechanicStatus) devMechanicStatus.textContent = `Rolando o dado até ${value}…`;
   await animateDiceTo(value);
-  if (devMechanicStatus) devMechanicStatus.textContent = `Teste concluÃ­do: face ${value}.`;
+  if (devMechanicStatus) devMechanicStatus.textContent = `Teste concluído: face ${value}.`;
   if (devTestDiceBtn) devTestDiceBtn.disabled = false;
 }
 
@@ -4890,9 +4890,9 @@ copyDanceJoinUrlBtn?.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(devSensorJoinUrl);
     copyDanceJoinUrlBtn.textContent = "Copiado!";
-    setTimeout(() => copyDanceJoinUrlBtn.textContent = "Copiar endereÃ§o", 1200);
+    setTimeout(() => copyDanceJoinUrlBtn.textContent = "Copiar endereço", 1200);
   } catch {
-    copyDanceJoinUrlBtn.textContent = "Copie o endereÃ§o acima";
+    copyDanceJoinUrlBtn.textContent = "Copie o endereço acima";
   }
 });
 
@@ -4964,7 +4964,7 @@ copyOnlineLinkBtn.addEventListener("click", async () => {
     copyOnlineLinkBtn.textContent = "Copiado!";
     setTimeout(() => copyOnlineLinkBtn.textContent = "Copiar convite", 1200);
   } catch {
-    copyOnlineLinkBtn.textContent = "Copie o endereÃ§o acima";
+    copyOnlineLinkBtn.textContent = "Copie o endereço acima";
   }
 });
 
