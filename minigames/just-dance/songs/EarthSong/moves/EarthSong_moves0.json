@@ -2,17 +2,17 @@
   {
     "name": "earthsong_bras_genou",
     "time": 20821,
-    "duration": 2603
+    "duration": 1735
   },
   {
     "name": "earthsong_poing_terre",
     "time": 24291,
-    "duration": 1735
+    "duration": 1736
   },
   {
     "name": "earthsong_bras_sol",
     "time": 27762,
-    "duration": 2603
+    "duration": 1735
   },
   {
     "name": "earthsong_jette",
@@ -22,7 +22,7 @@
   {
     "name": "earthsong_bras_genou",
     "time": 34702,
-    "duration": 2603
+    "duration": 1735
   },
   {
     "name": "earthsong_poing_terre",
@@ -32,7 +32,7 @@
   {
     "name": "earthsong_bras_sol",
     "time": 41642,
-    "duration": 2603
+    "duration": 1736
   },
   {
     "name": "earthsong_jette",
@@ -57,12 +57,12 @@
   {
     "name": "earthsong_poitrine_r",
     "time": 52921,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poitrine_l",
     "time": 54656,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poitrine_l",
@@ -72,7 +72,7 @@
   {
     "name": "earthsong_poitrine_l",
     "time": 56391,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_spin",
@@ -92,7 +92,7 @@
   {
     "name": "earthsong_allemand",
     "time": 68537,
-    "duration": 2603
+    "duration": 2602
   },
   {
     "name": "earthsong_pointer_sol",
@@ -102,7 +102,7 @@
   {
     "name": "earthsong_bras_genou",
     "time": 76344,
-    "duration": 2603
+    "duration": 1736
   },
   {
     "name": "earthsong_poing_terre",
@@ -112,17 +112,17 @@
   {
     "name": "earthsong_bras_sol",
     "time": 83285,
-    "duration": 2603
+    "duration": 1735
   },
   {
     "name": "earthsong_jette",
     "time": 85888,
-    "duration": 2603
+    "duration": 2602
   },
   {
     "name": "earthsong_bras_genou",
     "time": 90225,
-    "duration": 2603
+    "duration": 1735
   },
   {
     "name": "earthsong_poing_terre",
@@ -132,7 +132,7 @@
   {
     "name": "earthsong_bras_sol",
     "time": 97166,
-    "duration": 2603
+    "duration": 1735
   },
   {
     "name": "earthsong_jette",
@@ -147,7 +147,7 @@
   {
     "name": "earthsong_poitrine_r",
     "time": 106709,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poitrine_r",
@@ -157,7 +157,7 @@
   {
     "name": "earthsong_poitrine_r",
     "time": 108444,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poitrine_l",
@@ -167,7 +167,7 @@
   {
     "name": "earthsong_poitrine_l",
     "time": 111047,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poitrine_l",
@@ -182,7 +182,8 @@
   {
     "name": "earthsong_bras_u",
     "time": 117119,
-    "duration": 1735
+    "duration": 1735,
+    "goldMove": 1
   },
   {
     "name": "earthsong_bras_down",
@@ -192,17 +193,17 @@
   {
     "name": "earthsong_allemand",
     "time": 124060,
-    "duration": 2603
+    "duration": 2602
   },
   {
     "name": "earthsong_pointer_sol",
     "time": 126662,
-    "duration": 1735
+    "duration": 1736
   },
   {
     "name": "earthsong_bras_u",
     "time": 130986,
-    "duration": 1750
+    "duration": 1749
   },
   {
     "name": "earthsong_bras_down",
@@ -212,7 +213,7 @@
   {
     "name": "earthsong_allemand",
     "time": 137941,
-    "duration": 2603
+    "duration": 2602
   },
   {
     "name": "earthsong_pointer_sol",
@@ -232,7 +233,7 @@
   {
     "name": "earthsong_poitrine_r",
     "time": 147484,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_bras",
@@ -242,7 +243,7 @@
   {
     "name": "earthsong_poitrine_l",
     "time": 150092,
-    "duration": 852
+    "duration": 816
   },
   {
     "name": "earthsong_poitrine_l",
@@ -257,7 +258,7 @@
   {
     "name": "earthsong_poitrine_r",
     "time": 153571,
-    "duration": 853
+    "duration": 817
   },
   {
     "name": "earthsong_poitrine_r",
@@ -272,12 +273,13 @@
   {
     "name": "earthsong_ski_r",
     "time": 157027,
-    "duration": 868
+    "duration": 433
   },
   {
     "name": "earthsong_ski_r",
     "time": 157894,
-    "duration": 868
+    "duration": 434,
+    "goldMove": 1
   },
   {
     "name": "earthsong_bras_u",
@@ -312,22 +314,23 @@
   {
     "name": "earthsong_allemand",
     "time": 179593,
-    "duration": 2593
+    "duration": 2557
   },
   {
     "name": "earthsong_pointer_sol",
     "time": 182186,
-    "duration": 1735
+    "duration": 1735,
+    "goldMove": 1
   },
   {
     "name": "earthsong_shake",
     "time": 185656,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poing_lever_r",
     "time": 186523,
-    "duration": 1735
+    "duration": 1736
   },
   {
     "name": "earthsong_bras_u",
@@ -352,7 +355,7 @@
   {
     "name": "earthsong_bras_u",
     "time": 203874,
-    "duration": 1735
+    "duration": 1736
   },
   {
     "name": "earthsong_poing_lever_l",
@@ -362,7 +365,8 @@
   {
     "name": "earthsong_bras_tendu",
     "time": 210815,
-    "duration": 1744
+    "duration": 1744,
+    "goldMove": 1
   },
   {
     "name": "earthsong_poing_lever_r",
@@ -372,28 +376,27 @@
   {
     "name": "earthsong_ski_l",
     "time": 216892,
-    "duration": 863
+    "duration": 432
   },
   {
     "name": "earthsong_ski_l",
     "time": 217755,
-    "duration": 880
+    "duration": 440
   },
   {
     "name": "earthsong_poing_l",
     "time": 218635,
-    "duration": 1729
+    "duration": 1693
   },
   {
     "name": "earthsong_ski_r",
     "time": 220364,
-    "duration": 861,
-    "goldMove": 1
+    "duration": 430
   },
   {
     "name": "earthsong_ski_r",
     "time": 221225,
-    "duration": 875
+    "duration": 437
   },
   {
     "name": "earthsong_poing_r",
@@ -403,12 +406,12 @@
   {
     "name": "earthsong_ski_l",
     "time": 223842,
-    "duration": 854
+    "duration": 427
   },
   {
     "name": "earthsong_ski_l",
     "time": 224696,
-    "duration": 880
+    "duration": 440
   },
   {
     "name": "earthsong_poing_l",
@@ -418,44 +421,43 @@
   {
     "name": "earthsong_ski_r",
     "time": 227321,
-    "duration": 845,
-    "goldMove": 1
+    "duration": 423
   },
   {
     "name": "earthsong_ski_r",
     "time": 228166,
-    "duration": 876
+    "duration": 438
   },
   {
     "name": "earthsong_poing_r",
     "time": 229042,
-    "duration": 1734
+    "duration": 1698
   },
   {
     "name": "earthsong_ski_l",
     "time": 230777,
-    "duration": 869
+    "duration": 434
   },
   {
     "name": "earthsong_ski_l",
     "time": 231645,
-    "duration": 868
+    "duration": 434
   },
   {
     "name": "earthsong_poing_l",
     "time": 232513,
-    "duration": 1748
+    "duration": 1749
   },
   {
     "name": "earthsong_ski_r",
     "time": 234262,
-    "duration": 858,
-    "goldMove": 1
+    "duration": 429
   },
   {
     "name": "earthsong_ski_r",
     "time": 235120,
-    "duration": 868
+    "duration": 434,
+    "goldMove": 1
   },
   {
     "name": "earthsong_poing_f",
@@ -465,32 +467,33 @@
   {
     "name": "earthsong_spin",
     "time": 240326,
-    "duration": 1735
+    "duration": 867,
+    "goldMove": 1
   },
   {
     "name": "earthsong_main_r",
     "time": 242928,
-    "duration": 1735
+    "duration": 1736
   },
   {
     "name": "earthsong_genou_tape",
     "time": 244664,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_genou_moi",
     "time": 245531,
-    "duration": 878
+    "duration": 879
   },
   {
     "name": "earthsong_main_l",
     "time": 246410,
-    "duration": 1724
+    "duration": 1688
   },
   {
     "name": "earthsong_genou_tape",
     "time": 248134,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_genou_moi",
@@ -505,27 +508,23 @@
   {
     "name": "earthsong_genou_tape",
     "time": 251604,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_shake",
     "time": 252471,
-    "duration": 868
-  },
-  {
-    "name": "earthsong_shake",
-    "time": 253339,
-    "duration": 868
+    "duration": 1881
   },
   {
     "name": "earthsong_bras_u",
     "time": 256809,
-    "duration": 1735
+    "duration": 1735,
+    "goldMove": 1
   },
   {
     "name": "earthsong_bras_u",
     "time": 260279,
-    "duration": 1735
+    "duration": 1736
   },
   {
     "name": "earthsong_shake",
@@ -539,13 +538,8 @@
   },
   {
     "name": "earthsong_shake",
-    "time": 267220,
-    "duration": 868
-  },
-  {
-    "name": "earthsong_shake",
     "time": 268087,
-    "duration": 868
+    "duration": 1735
   },
   {
     "name": "earthsong_poing_lever_f",
@@ -555,12 +549,12 @@
   {
     "name": "earthsong_poing_lever_f",
     "time": 272434,
-    "duration": 858
+    "duration": 823
   },
   {
     "name": "earthsong_poing_lever_f",
     "time": 274168,
-    "duration": 860
+    "duration": 824
   },
   {
     "name": "earthsong_poing_lever_f",
@@ -570,22 +564,22 @@
   {
     "name": "earthsong_poing_lever_f",
     "time": 277657,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poing_lever_f",
     "time": 279392,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poing_lever_f",
     "time": 281127,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poing_lever_f",
     "time": 282862,
-    "duration": 868
+    "duration": 867
   },
   {
     "name": "earthsong_poing_lever_f",
@@ -605,11 +599,12 @@
   {
     "name": "earthsong_poing_lever_f",
     "time": 289802,
-    "duration": 868
+    "duration": 868,
+    "goldMove": 1
   },
   {
     "name": "earthsong_pose_fin",
     "time": 293273,
-    "duration": 2603
+    "duration": 2602
   }
 ]

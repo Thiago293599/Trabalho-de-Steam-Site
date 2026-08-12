@@ -1,19 +1,15 @@
-﻿{
-    "artist":  "Michael Jackson",
-    "name":  "Earth Song",
-    "coaches":  1,
-    "status":  "WII_CONVERTED",
-    "credits":  [
-                    "Performed by Michael Jackson. Words and music by Michael Jackson. Â© 1995 Mijac Music (BMI). All rights administered by Warner-Tamerlane Publishing Corp. All rights reserved. Courtesy of MJJ Productions Inc./Epic Records. By arrangement with Sony Music Licensing."
-                ],
-    "avatars":  [
-
-                ],
-    "duration":  317400,
-    "hlsVideo":  "",
-    "dashVideo":  "",
-    "mp4Video":  "",
-    "version":  1786470375773,
-    "mainVideo":  "EarthSong_Coach_High.mp4",
-    "renderState":  "coach_only_audio_embedded"
+{
+  "artist": "Michael Jackson",
+  "name": "Earth Song",
+  "coaches": 1,
+  "status": "WEB_READY_NO_VIDEOS",
+  "credits": [
+    "Performed by Michael Jackson. Words and music by Michael Jackson. © 1995 Mijac Music (BMI). All rights administered by Warner-Tamerlane Publishing Corp. All rights reserved. Courtesy of MJJ Productions Inc./Epic Records. By arrangement with Sony Music Licensing."
+  ],
+  "avatars": [],
+  "duration": 314584,
+  "hlsVideo": "",
+  "dashVideo": "",
+  "mp4Video": "",
+  "version": 7000000000000
 }

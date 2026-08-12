@@ -4,141 +4,237 @@
     "height": 256
   },
   "images": {
-    "earthsong_bras_genou": [
+    "a_genou": [
       0,
       0
     ],
-    "earthsong_poing_terre": [
+    "bras_genou": [
       256,
       0
     ],
-    "earthsong_bras_sol": [
+    "poing_terre": [
       512,
       0
     ],
-    "earthsong_jette": [
+    "bras_sol": [
       768,
       0
     ],
-    "earthsong_lever": [
+    "jettestrt_ar": [
       1024,
       0
     ],
-    "earthsong_poitrine_l": [
+    "jette": [
       1280,
       0
     ],
-    "earthsong_spin": [
+    "lever": [
       0,
       256
     ],
-    "earthsong_bras_u": [
+    "poitrine_r": [
       256,
       256
     ],
-    "earthsong_bras_down": [
+    "poitrine_l": [
       512,
       256
     ],
-    "earthsong_allemand": [
+    "spin": [
       768,
       256
     ],
-    "earthsong_pointer_sol": [
+    "bras_u": [
       1024,
       256
     ],
-    "earthsong_poitrine_r": [
+    "head_sh": [
       1280,
       256
     ],
-    "earthsong_main": [
+    "bras_down": [
       0,
       512
     ],
-    "earthsong_bras": [
+    "allemand": [
       256,
       512
     ],
-    "earthsong_ski_l": [
+    "pointer_sol": [
       512,
       512
     ],
-    "earthsong_saut_r": [
+    "sit_ar": [
       768,
       512
     ],
-    "earthsong_saut_l": [
+    "brasup_ar_gold": [
       1024,
       512
     ],
-    "earthsong_bras_tendu": [
+    "main": [
       1280,
       512
     ],
-    "earthsong_poing_lever_l": [
+    "bras": [
       0,
       768
     ],
-    "earthsong_poing_lever_r": [
+    "saut_r": [
       256,
       768
     ],
-    "earthsong_ski_r": [
+    "poitrinedwn_r_ar": [
       512,
       768
     ],
-    "earthsong_poing_l": [
+    "saut_l": [
       768,
       768
     ],
-    "earthsong_poing_r": [
+    "ski_r": [
       1024,
       768
     ],
-    "earthsong_poing_f": [
+    "_ski_r": [
       1280,
       768
     ],
-    "earthsong_main_r": [
+    "bras_u_ar": [
       0,
       1024
     ],
-    "earthsong_genou_tape": [
+    "pointersol_ar_gold": [
       256,
       1024
     ],
-    "earthsong_genou_moi": [
+    "shake": [
       512,
       1024
     ],
-    "earthsong_main_l": [
+    "poing_lever_r": [
       768,
       1024
     ],
-    "earthsong_pose_fin": [
+    "poing_sh": [
       1024,
       1024
     ],
-    "earthsong_poing_lever_f": [
+    "poingup_ar": [
       1280,
       1024
     ],
-    "earthsong_shake": [
+    "poing_lever_l": [
       0,
       1280
     ],
-    "earthsong_kiss": [
+    "poinglever2_l_ar_mo": [
       256,
       1280
     ],
-    "earthsong_a_genou": [
+    "beginkiss_ar": [
       512,
       1280
     ],
-    "earthsong__ski_r": [
+    "brastendu_gold": [
       768,
       1280
+    ],
+    "heyhey_sh": [
+      1024,
+      1280
+    ],
+    "ski_l": [
+      1280,
+      1280
+    ],
+    "poing_f": [
+      0,
+      1536
+    ],
+    "breakdown_sh": [
+      256,
+      1536
+    ],
+    "strtspin_po": [
+      512,
+      1536
+    ],
+    "spin_ar_gold": [
+      768,
+      1536
+    ],
+    "dwn_po": [
+      1024,
+      1536
+    ],
+    "main_r": [
+      1280,
+      1536
+    ],
+    "genou_tape": [
+      0,
+      1792
+    ],
+    "genou_moi": [
+      256,
+      1792
+    ],
+    "main_l": [
+      512,
+      1792
+    ],
+    "main2_r_po": [
+      768,
+      1792
+    ],
+    "shakeup_sh": [
+      1024,
+      1792
+    ],
+    "breakdown2_sh": [
+      1280,
+      1792
+    ],
+    "walk_r_mo": [
+      0,
+      2048
+    ],
+    "walkshake_l_sh_mo": [
+      256,
+      2048
+    ],
+    "dowegive_sh": [
+      512,
+      2048
+    ],
+    "damn_sh": [
+      768,
+      2048
+    ],
+    "stance_po": [
+      1024,
+      2048
+    ],
+    "poing_lever_f": [
+      1280,
+      2048
+    ],
+    "heymid_sh": [
+      0,
+      2304
+    ],
+    "heymid2_sh": [
+      256,
+      2304
+    ],
+    "poinglever_pu_gold": [
+      512,
+      2304
+    ],
+    "kiss": [
+      768,
+      2304
     ]
   }
 }
