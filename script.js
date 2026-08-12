@@ -336,6 +336,7 @@ let devSensorState = null;
 let devSensorJoinUrl = "";
 let devSensorModeEnabled = false;
 let danceTestMoves = [];
+let danceTestMovesRevision = "";
 let danceTestPictos = [];
 let danceTestBeats = [];
 let danceLastPictoBeatIndex = -1;
@@ -3385,6 +3386,7 @@ async function switchDanceSong(songId, announce = true) {
   applyDanceSongSources(next.id);
   danceTestSongLoaded = false;
   danceTestMoves = [];
+  danceTestMovesRevision = "";
   danceTestPictos = [];
   danceTestBeats = [];
   danceLastPictoBeatIndex = -1;
@@ -3594,6 +3596,19 @@ function measureDanceHostServerLatency(force = false) {
   });
 }
 
+function danceMovesRevisionOf(moves) {
+  let hash = 2166136261 >>> 0;
+  const list = Array.isArray(moves) ? moves : [];
+  for (const move of list) {
+    const text = `${String(move?.name || "").toLowerCase()}|${Math.round(Number(move?.time || 0))}|${Math.round(Number(move?.duration || 0))}|${move?.goldMove ? 1 : 0};`;
+    for (let index = 0; index < text.length; index += 1) {
+      hash ^= text.charCodeAt(index);
+      hash = Math.imul(hash, 16777619) >>> 0;
+    }
+  }
+  return `${list.length}-${hash.toString(36)}`;
+}
+
 function broadcastDancePhoneSession(reason = "sync", force = false) {
   if (!remoteSocket?.connected || !devSensorRoomCode || !danceTestMoves.length) return;
   const now = performance.now();
@@ -3608,6 +3623,7 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
     syncOffsetMs: danceManualSyncOffsetMs,
     playing: isDanceMediaPlaying(),
     totalMoves: danceTestMoves.length,
+    movesRevision: danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves),
     hostOneWayMs: Math.max(0, Math.min(1000, danceHostServerRttMs / 2)),
     reason
   };
@@ -4774,6 +4790,7 @@ async function loadDanceTestSongData(force = false) {
     if (!movesResponse.ok || !songResponse.ok || !atlasResponse.ok) throw new Error("Falha ao carregar timeline/pictos.");
     const [moves, song, atlas] = await Promise.all([movesResponse.json(), songResponse.json(), atlasResponse.json()]);
     danceTestMoves = Array.isArray(moves) ? moves.slice().sort((a, b) => Number(a.time || 0) - Number(b.time || 0)) : [];
+    danceTestMovesRevision = danceMovesRevisionOf(danceTestMoves);
     danceTestPictos = Array.isArray(song?.pictos) ? song.pictos.slice().sort((a, b) => Number(a.time || 0) - Number(b.time || 0)) : [];
     danceTestBeats = Array.isArray(song?.beats)
       ? song.beats.map(value => Number(value)).filter(Number.isFinite).sort((a, b) => a - b)
