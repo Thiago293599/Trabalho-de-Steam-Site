@@ -1,0 +1,3028 @@
+{
+  "MapName": "ItsRainingMen",
+  "JDVersion": 2016,
+  "OriginalJDVersion": 2,
+  "Artist": "The Weather Girls",
+  "Title": "It's Raining Men",
+  "Credits": "Written by Paul Jabara and Paul Shaffer. Published by EMI Sosaha Music Inc (BMI), Postvalda Music (SESAC), Martin Bander Music (BMI), Charles Koppelman Music (BMI) and Jonathan Three Music (BMI). All rights on behalf Postvalda Music administered by W.B.M. Music Corp. All rights reserved. Used by permission. Courtesy of Sony Music Entertainment. By arrangement with Sony Music Entertainment Canada Inc. All rights of the producer and other rightholders to the recorded work reserved. Unless otherwise authorized, the duplication, rental, loan, exchange or use of this video game for public performance, broadcasting and online distribution to the public are prohibited.",
+  "NumCoach": 1,
+  "CountInProgression": 1,
+  "DancerName": "Unknown Dancer",
+  "LocaleID": 4294967295,
+  "MojoValue": 0,
+  "Mode": 6,
+  "Status": 3,
+  "LyricsType": 0,
+  "BackgroundType": 0,
+  "Difficulty": 1,
+  "DefaultColors": {
+    "lyrics": "0xFF35C5ED",
+    "theme": "0xFFFFFFFF",
+    "songColor_1A": "0xFFD00FB8",
+    "songColor_1B": "0xFF000000",
+    "songColor_2A": "0xFF3CCBFF",
+    "songColor_2B": "0xFF150169"
+  },
+  "lyricsColor": "#35C5ED",
+  "videoOffset": 0,
+  "beats": [
+    0,
+    575,
+    1151,
+    1727,
+    2166,
+    2606,
+    3045,
+    3485,
+    3924,
+    4364,
+    4803,
+    5243,
+    5682,
+    6122,
+    6562,
+    7001,
+    7441,
+    7880,
+    8320,
+    8759,
+    9199,
+    9638,
+    10078,
+    10517,
+    10957,
+    11397,
+    11836,
+    12276,
+    12715,
+    13155,
+    13594,
+    14034,
+    14473,
+    14913,
+    15352,
+    15792,
+    16232,
+    16671,
+    17111,
+    17550,
+    18010,
+    18449,
+    18889,
+    19329,
+    19768,
+    20208,
+    20647,
+    21087,
+    21526,
+    21966,
+    22405,
+    22845,
+    23284,
+    23724,
+    24164,
+    24603,
+    25043,
+    25482,
+    25922,
+    26361,
+    26801,
+    27240,
+    27680,
+    28119,
+    28559,
+    29018,
+    29457,
+    29897,
+    30336,
+    30776,
+    31215,
+    31655,
+    32094,
+    32534,
+    32973,
+    33413,
+    33853,
+    34292,
+    34732,
+    35171,
+    35611,
+    36050,
+    36490,
+    36929,
+    37369,
+    37809,
+    38248,
+    38688,
+    39127,
+    39567,
+    40006,
+    40446,
+    40885,
+    41325,
+    41764,
+    42204,
+    42644,
+    43083,
+    43523,
+    43962,
+    44402,
+    44841,
+    45281,
+    45739,
+    46178,
+    46618,
+    47057,
+    47497,
+    47937,
+    48376,
+    48816,
+    49255,
+    49695,
+    50148,
+    50588,
+    51027,
+    51467,
+    51906,
+    52346,
+    52785,
+    53225,
+    53664,
+    54104,
+    54544,
+    54983,
+    55423,
+    55862,
+    56302,
+    56741,
+    57181,
+    57620,
+    58060,
+    58499,
+    58939,
+    59379,
+    59818,
+    60258,
+    60697,
+    61137,
+    61576,
+    62016,
+    62455,
+    62895,
+    63334,
+    63774,
+    64214,
+    64653,
+    65093,
+    65532,
+    65972,
+    66411,
+    66851,
+    67290,
+    67730,
+    68170,
+    68609,
+    69049,
+    69488,
+    69928,
+    70367,
+    70807,
+    71246,
+    71686,
+    72125,
+    72565,
+    73005,
+    73444,
+    73884,
+    74323,
+    74746,
+    75186,
+    75625,
+    76065,
+    76504,
+    76944,
+    77383,
+    77823,
+    78262,
+    78702,
+    79141,
+    79581,
+    80021,
+    80460,
+    80900,
+    81339,
+    81779,
+    82218,
+    82658,
+    83070,
+    83509,
+    83949,
+    84388,
+    84828,
+    85267,
+    85707,
+    86146,
+    86586,
+    87026,
+    87465,
+    87905,
+    88344,
+    88784,
+    89223,
+    89663,
+    90094,
+    90533,
+    90973,
+    91413,
+    91852,
+    92292,
+    92731,
+    93171,
+    93601,
+    94040,
+    94480,
+    94919,
+    95342,
+    95782,
+    96221,
+    96661,
+    97101,
+    97540,
+    97980,
+    98419,
+    98859,
+    99298,
+    99738,
+    100177,
+    100617,
+    101056,
+    101496,
+    101936,
+    102375,
+    102815,
+    103254,
+    103694,
+    104133,
+    104573,
+    105012,
+    105452,
+    105891,
+    106331,
+    106771,
+    107196,
+    107636,
+    108075,
+    108512,
+    108952,
+    109391,
+    109831,
+    110271,
+    110710,
+    111150,
+    111589,
+    112029,
+    112468,
+    112908,
+    113347,
+    113787,
+    114227,
+    114666,
+    115106,
+    115545,
+    115985,
+    116424,
+    116864,
+    117303,
+    117730,
+    118169,
+    118609,
+    119048,
+    119488,
+    119928,
+    120367,
+    120807,
+    121246,
+    121686,
+    122125,
+    122565,
+    123004,
+    123444,
+    123883,
+    124323,
+    124763,
+    125202,
+    125642,
+    126081,
+    126503,
+    126943,
+    127382,
+    127822,
+    128262,
+    128701,
+    129124,
+    129564,
+    130003,
+    130443,
+    130882,
+    131322,
+    131762,
+    132201,
+    132620,
+    133060,
+    133499,
+    133939,
+    134379,
+    134818,
+    135258,
+    135697,
+    136137,
+    136576,
+    137016,
+    137455,
+    137895,
+    138334,
+    138774,
+    139214,
+    139653,
+    140093,
+    140532,
+    140972,
+    141411,
+    141851,
+    142290,
+    142730,
+    143159,
+    143599,
+    144038,
+    144478,
+    144917,
+    145357,
+    145797,
+    146236,
+    146676,
+    147115,
+    147555,
+    148007,
+    148423,
+    148863,
+    149302,
+    149742,
+    150181,
+    150597,
+    151037,
+    151477,
+    151916,
+    152356,
+    152795,
+    153235,
+    153674,
+    154114,
+    154553,
+    154993,
+    155432,
+    155872,
+    156312,
+    156741,
+    157181,
+    157620,
+    158054,
+    158494,
+    158933,
+    159373,
+    159812,
+    160252,
+    160691,
+    161131,
+    161570,
+    162010,
+    162449,
+    162889,
+    163329,
+    163751,
+    164190,
+    164630,
+    165069,
+    165509,
+    165948,
+    166388,
+    166828,
+    167267,
+    167707,
+    168123,
+    168562,
+    169002,
+    169442,
+    169881,
+    170321,
+    170760,
+    171200,
+    171639,
+    172079,
+    172501,
+    172941,
+    173380,
+    173820,
+    174259,
+    174699,
+    175138,
+    175578,
+    176017,
+    176443,
+    176883,
+    177322,
+    177762,
+    178201,
+    178641,
+    179098,
+    179493,
+    179952,
+    180392,
+    180831,
+    181258,
+    181698,
+    182137,
+    182577,
+    183016,
+    183456,
+    183881,
+    184321,
+    184760,
+    185200,
+    185639,
+    186079,
+    186518,
+    186958,
+    187397,
+    187837,
+    188277,
+    188716,
+    189156,
+    189595,
+    190035,
+    190458,
+    190897,
+    191337,
+    191776,
+    192216,
+    192655,
+    193095,
+    193534,
+    193974,
+    194414,
+    194853,
+    195285,
+    195725,
+    196164,
+    196604,
+    197043,
+    197466,
+    197906,
+    198345,
+    198785,
+    199224,
+    199664,
+    200104,
+    200543,
+    200983,
+    201422,
+    201844,
+    202283,
+    202723,
+    203162,
+    203602,
+    204041,
+    204481,
+    204921,
+    205360,
+    205800,
+    206239,
+    206679,
+    207107,
+    207547,
+    207987,
+    208426,
+    208866,
+    209305,
+    209727,
+    210166,
+    210606,
+    211045,
+    211485,
+    211924,
+    212364,
+    212804,
+    213243,
+    213683,
+    214113,
+    214528,
+    214967,
+    215407,
+    215846,
+    216286,
+    216725,
+    217165,
+    217604,
+    218044,
+    218484,
+    218923,
+    219363,
+    219802,
+    220242,
+    220681,
+    221121,
+    221560,
+    222000,
+    222439,
+    222879,
+    223319,
+    223785,
+    224250,
+    224716,
+    225182,
+    225648,
+    226114,
+    226580,
+    227046,
+    227512,
+    227978
+  ],
+  "lyrics": [
+    {
+      "time": 33414,
+      "duration": 864,
+      "text": "Hi - ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 34073,
+      "duration": 576,
+      "text": "Hi!",
+      "isLineEnding": 1
+    },
+    {
+      "time": 34952,
+      "duration": 360,
+      "text": "We're ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 35227,
+      "duration": 360,
+      "text": "your ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 35501,
+      "duration": 144,
+      "text": "wea",
+      "isLineEnding": 0
+    },
+    {
+      "time": 35611,
+      "duration": 216,
+      "text": "ther ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 35776,
+      "duration": 192,
+      "text": "girls",
+      "isLineEnding": 1
+    },
+    {
+      "time": 36051,
+      "duration": 312,
+      "text": "Ah-",
+      "isLineEnding": 0
+    },
+    {
+      "time": 36289,
+      "duration": 312,
+      "text": "huh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 36600,
+      "duration": 432,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 36930,
+      "duration": 432,
+      "text": "have ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 37260,
+      "duration": 576,
+      "text": "we ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 37699,
+      "duration": 576,
+      "text": "got ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 38139,
+      "duration": 744,
+      "text": "news",
+      "isLineEnding": 1
+    },
+    {
+      "time": 39128,
+      "duration": 264,
+      "text": "For ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 39329,
+      "duration": 240,
+      "text": "you",
+      "isLineEnding": 1
+    },
+    {
+      "time": 39549,
+      "duration": 264,
+      "text": "You ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 39750,
+      "duration": 144,
+      "text": "bet",
+      "isLineEnding": 0
+    },
+    {
+      "time": 39860,
+      "duration": 192,
+      "text": "ter ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 40007,
+      "duration": 168,
+      "text": "lis",
+      "isLineEnding": 0
+    },
+    {
+      "time": 40135,
+      "duration": 168,
+      "text": "ten",
+      "isLineEnding": 1
+    },
+    {
+      "time": 40776,
+      "duration": 288,
+      "text": "Get ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 40996,
+      "duration": 432,
+      "text": "rea",
+      "isLineEnding": 0
+    },
+    {
+      "time": 41325,
+      "duration": 288,
+      "text": "dy",
+      "isLineEnding": 1
+    },
+    {
+      "time": 41930,
+      "duration": 288,
+      "text": "All ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 42150,
+      "duration": 288,
+      "text": "you ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 42370,
+      "duration": 288,
+      "text": "lone",
+      "isLineEnding": 0
+    },
+    {
+      "time": 42589,
+      "duration": 216,
+      "text": "ly ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 42754,
+      "duration": 432,
+      "text": "girls",
+      "isLineEnding": 1
+    },
+    {
+      "time": 43523,
+      "duration": 336,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 43780,
+      "duration": 240,
+      "text": "leave ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 43963,
+      "duration": 432,
+      "text": "those",
+      "isLineEnding": 1
+    },
+    {
+      "time": 44347,
+      "duration": 360,
+      "text": "Um",
+      "isLineEnding": 0
+    },
+    {
+      "time": 44622,
+      "duration": 240,
+      "text": "bre",
+      "isLineEnding": 0
+    },
+    {
+      "time": 44805,
+      "duration": 624,
+      "text": "llas ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 45281,
+      "duration": 288,
+      "text": "at ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 45510,
+      "duration": 408,
+      "text": "home",
+      "isLineEnding": 1
+    },
+    {
+      "time": 45831,
+      "duration": 432,
+      "text": "Al",
+      "isLineEnding": 0
+    },
+    {
+      "time": 46161,
+      "duration": 1103,
+      "text": "right",
+      "isLineEnding": 1
+    },
+    {
+      "time": 47498,
+      "duration": 120,
+      "text": "Hu",
+      "isLineEnding": 0
+    },
+    {
+      "time": 47589,
+      "duration": 120,
+      "text": "mi",
+      "isLineEnding": 0
+    },
+    {
+      "time": 47681,
+      "duration": 120,
+      "text": "di",
+      "isLineEnding": 0
+    },
+    {
+      "time": 47772,
+      "duration": 216,
+      "text": "ty ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 47937,
+      "duration": 288,
+      "text": "is ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 48157,
+      "duration": 576,
+      "text": "ri",
+      "isLineEnding": 0
+    },
+    {
+      "time": 48597,
+      "duration": 864,
+      "text": "sing",
+      "isLineEnding": 1
+    },
+    {
+      "time": 51028,
+      "duration": 72,
+      "text": "Ba",
+      "isLineEnding": 0
+    },
+    {
+      "time": 51083,
+      "duration": 72,
+      "text": "ro",
+      "isLineEnding": 0
+    },
+    {
+      "time": 51138,
+      "duration": 144,
+      "text": "me",
+      "isLineEnding": 0
+    },
+    {
+      "time": 51248,
+      "duration": 288,
+      "text": "ter's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 51467,
+      "duration": 144,
+      "text": "get",
+      "isLineEnding": 0
+    },
+    {
+      "time": 51577,
+      "duration": 432,
+      "text": "ting ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 51907,
+      "duration": 1151,
+      "text": "low",
+      "isLineEnding": 1
+    },
+    {
+      "time": 54325,
+      "duration": 288,
+      "text": "A",
+      "isLineEnding": 0
+    },
+    {
+      "time": 54544,
+      "duration": 288,
+      "text": "ccor",
+      "isLineEnding": 0
+    },
+    {
+      "time": 54764,
+      "duration": 288,
+      "text": "ding ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 54984,
+      "duration": 288,
+      "text": "to ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 55204,
+      "duration": 576,
+      "text": "all ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 55643,
+      "duration": 576,
+      "text": "sour",
+      "isLineEnding": 0
+    },
+    {
+      "time": 56083,
+      "duration": 864,
+      "text": "ces",
+      "isLineEnding": 1
+    },
+    {
+      "time": 57823,
+      "duration": 312,
+      "text": "The ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 58061,
+      "duration": 576,
+      "text": "street's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 58500,
+      "duration": 288,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 58720,
+      "duration": 576,
+      "text": "place ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 59160,
+      "duration": 576,
+      "text": "to ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 59599,
+      "duration": 1463,
+      "text": "go",
+      "isLineEnding": 1
+    },
+    {
+      "time": 61137,
+      "duration": 288,
+      "text": "Cause ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 61357,
+      "duration": 288,
+      "text": "to",
+      "isLineEnding": 0
+    },
+    {
+      "time": 61577,
+      "duration": 576,
+      "text": "night ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 62016,
+      "duration": 1151,
+      "text": "for",
+      "isLineEnding": 1
+    },
+    {
+      "time": 62896,
+      "duration": 288,
+      "text": "The ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 63116,
+      "duration": 576,
+      "text": "first ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 63555,
+      "duration": 864,
+      "text": "ti",
+      "isLineEnding": 0
+    },
+    {
+      "time": 64214,
+      "duration": 792,
+      "text": "me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 65093,
+      "duration": 288,
+      "text": "Just ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 65313,
+      "duration": 288,
+      "text": "a",
+      "isLineEnding": 0
+    },
+    {
+      "time": 65533,
+      "duration": 576,
+      "text": "bout ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 65972,
+      "duration": 576,
+      "text": "half ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 66412,
+      "duration": 576,
+      "text": "past ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 66851,
+      "duration": 1727,
+      "text": "ten",
+      "isLineEnding": 1
+    },
+    {
+      "time": 68170,
+      "duration": 288,
+      "text": "For ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 68390,
+      "duration": 288,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 68610,
+      "duration": 576,
+      "text": "first ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 69049,
+      "duration": 1151,
+      "text": "time",
+      "isLineEnding": 1
+    },
+    {
+      "time": 69928,
+      "duration": 288,
+      "text": "In ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 70148,
+      "duration": 576,
+      "text": "his",
+      "isLineEnding": 0
+    },
+    {
+      "time": 70588,
+      "duration": 576,
+      "text": "to",
+      "isLineEnding": 0
+    },
+    {
+      "time": 71027,
+      "duration": 792,
+      "text": "ry",
+      "isLineEnding": 1
+    },
+    {
+      "time": 71888,
+      "duration": 312,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 72126,
+      "duration": 288,
+      "text": "gon",
+      "isLineEnding": 0
+    },
+    {
+      "time": 72346,
+      "duration": 288,
+      "text": "na ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 72566,
+      "duration": 576,
+      "text": "start",
+      "isLineEnding": 1
+    },
+    {
+      "time": 73005,
+      "duration": 576,
+      "text": "Rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 73445,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 73665,
+      "duration": 2387,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 76065,
+      "duration": 576,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 76505,
+      "duration": 576,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 76944,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 77164,
+      "duration": 864,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 78483,
+      "duration": 288,
+      "text": "Hal",
+      "isLineEnding": 0
+    },
+    {
+      "time": 78703,
+      "duration": 288,
+      "text": "le",
+      "isLineEnding": 0
+    },
+    {
+      "time": 78923,
+      "duration": 576,
+      "text": "lu",
+      "isLineEnding": 0
+    },
+    {
+      "time": 79362,
+      "duration": 288,
+      "text": "jah",
+      "isLineEnding": 1
+    },
+    {
+      "time": 79582,
+      "duration": 576,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 80021,
+      "duration": 576,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 80461,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 80681,
+      "duration": 576,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 81981,
+      "duration": 600,
+      "text": "A",
+      "isLineEnding": 0
+    },
+    {
+      "time": 82439,
+      "duration": 864,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 83730,
+      "duration": 288,
+      "text": "I'm ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 83949,
+      "duration": 288,
+      "text": "gon",
+      "isLineEnding": 0
+    },
+    {
+      "time": 84169,
+      "duration": 288,
+      "text": "na ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 84389,
+      "duration": 576,
+      "text": "go ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 84828,
+      "duration": 432,
+      "text": "out",
+      "isLineEnding": 1
+    },
+    {
+      "time": 85488,
+      "duration": 288,
+      "text": "To ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 85708,
+      "duration": 288,
+      "text": "run ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 85928,
+      "duration": 288,
+      "text": "and ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 86147,
+      "duration": 288,
+      "text": "let ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 86367,
+      "duration": 288,
+      "text": "my",
+      "isLineEnding": 0
+    },
+    {
+      "time": 86587,
+      "duration": 288,
+      "text": "self",
+      "isLineEnding": 1
+    },
+    {
+      "time": 87026,
+      "duration": 288,
+      "text": "Get",
+      "isLineEnding": 1
+    },
+    {
+      "time": 87905,
+      "duration": 576,
+      "text": "Ab",
+      "isLineEnding": 0
+    },
+    {
+      "time": 88345,
+      "duration": 288,
+      "text": "so",
+      "isLineEnding": 0
+    },
+    {
+      "time": 88565,
+      "duration": 576,
+      "text": "lute",
+      "isLineEnding": 0
+    },
+    {
+      "time": 89004,
+      "duration": 576,
+      "text": "ly ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 89444,
+      "duration": 576,
+      "text": "soa",
+      "isLineEnding": 0
+    },
+    {
+      "time": 89880,
+      "duration": 576,
+      "text": "king ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 90315,
+      "duration": 1439,
+      "text": "wet",
+      "isLineEnding": 1
+    },
+    {
+      "time": 91853,
+      "duration": 576,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 92292,
+      "duration": 576,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 92732,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 92952,
+      "duration": 720,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 94261,
+      "duration": 288,
+      "text": "Hal",
+      "isLineEnding": 0
+    },
+    {
+      "time": 94480,
+      "duration": 288,
+      "text": "le",
+      "isLineEnding": 0
+    },
+    {
+      "time": 94700,
+      "duration": 576,
+      "text": "lu",
+      "isLineEnding": 0
+    },
+    {
+      "time": 95132,
+      "duration": 288,
+      "text": "jah",
+      "isLineEnding": 1
+    },
+    {
+      "time": 95343,
+      "duration": 576,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 95783,
+      "duration": 576,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 96222,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 96442,
+      "duration": 576,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 97761,
+      "duration": 288,
+      "text": "Eve",
+      "isLineEnding": 0
+    },
+    {
+      "time": 97980,
+      "duration": 288,
+      "text": "ry ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 98200,
+      "duration": 576,
+      "text": "spe",
+      "isLineEnding": 0
+    },
+    {
+      "time": 98640,
+      "duration": 576,
+      "text": "ci",
+      "isLineEnding": 0
+    },
+    {
+      "time": 99079,
+      "duration": 552,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 100178,
+      "duration": 576,
+      "text": "Tall",
+      "isLineEnding": 1
+    },
+    {
+      "time": 101057,
+      "duration": 576,
+      "text": "Blonde",
+      "isLineEnding": 1
+    },
+    {
+      "time": 101936,
+      "duration": 576,
+      "text": "Dark ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 102376,
+      "duration": 288,
+      "text": "and ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 102596,
+      "duration": 864,
+      "text": "lean",
+      "isLineEnding": 1
+    },
+    {
+      "time": 103694,
+      "duration": 576,
+      "text": "Rough ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 104134,
+      "duration": 288,
+      "text": "and ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 104354,
+      "duration": 408,
+      "text": "tough",
+      "isLineEnding": 1
+    },
+    {
+      "time": 104775,
+      "duration": 600,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 105233,
+      "duration": 576,
+      "text": "strong ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 105673,
+      "duration": 576,
+      "text": "and ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 106112,
+      "duration": 3046,
+      "text": "mean",
+      "isLineEnding": 1
+    },
+    {
+      "time": 108953,
+      "duration": 576,
+      "text": "God ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 109392,
+      "duration": 576,
+      "text": "bless ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 109832,
+      "duration": 288,
+      "text": "Mo",
+      "isLineEnding": 0
+    },
+    {
+      "time": 110052,
+      "duration": 576,
+      "text": "ther ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 110491,
+      "duration": 576,
+      "text": "Na",
+      "isLineEnding": 0
+    },
+    {
+      "time": 110931,
+      "duration": 864,
+      "text": "ture",
+      "isLineEnding": 1
+    },
+    {
+      "time": 112909,
+      "duration": 288,
+      "text": "She's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 113129,
+      "duration": 288,
+      "text": "a ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 113348,
+      "duration": 576,
+      "text": "sin",
+      "isLineEnding": 0
+    },
+    {
+      "time": 113788,
+      "duration": 360,
+      "text": "gle ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 114062,
+      "duration": 504,
+      "text": "wo",
+      "isLineEnding": 0
+    },
+    {
+      "time": 114447,
+      "duration": 576,
+      "text": "man ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 114887,
+      "duration": 864,
+      "text": "too",
+      "isLineEnding": 1
+    },
+    {
+      "time": 114887,
+      "duration": 288,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 115106,
+      "duration": 576,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 116425,
+      "duration": 288,
+      "text": "She ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 116645,
+      "duration": 288,
+      "text": "took ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 117029,
+      "duration": 360,
+      "text": "on ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 117304,
+      "duration": 216,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 117464,
+      "duration": 648,
+      "text": "hea",
+      "isLineEnding": 0
+    },
+    {
+      "time": 117951,
+      "duration": 1439,
+      "text": "vens",
+      "isLineEnding": 1
+    },
+    {
+      "time": 119489,
+      "duration": 288,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 119709,
+      "duration": 288,
+      "text": "she ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 119928,
+      "duration": 432,
+      "text": "did",
+      "isLineEnding": 1
+    },
+    {
+      "time": 120368,
+      "duration": 576,
+      "text": "What ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 120807,
+      "duration": 576,
+      "text": "she ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 121247,
+      "duration": 576,
+      "text": "had ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 121686,
+      "duration": 576,
+      "text": "to ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 122126,
+      "duration": 576,
+      "text": "do",
+      "isLineEnding": 1
+    },
+    {
+      "time": 123445,
+      "duration": 288,
+      "text": "She ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 123665,
+      "duration": 432,
+      "text": "taught ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 123994,
+      "duration": 432,
+      "text": "eve",
+      "isLineEnding": 0
+    },
+    {
+      "time": 124324,
+      "duration": 288,
+      "text": "ry ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 124544,
+      "duration": 576,
+      "text": "an",
+      "isLineEnding": 0
+    },
+    {
+      "time": 124983,
+      "duration": 1295,
+      "text": "gel",
+      "isLineEnding": 1
+    },
+    {
+      "time": 126724,
+      "duration": 288,
+      "text": "To ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 126944,
+      "duration": 216,
+      "text": "re",
+      "isLineEnding": 0
+    },
+    {
+      "time": 127109,
+      "duration": 336,
+      "text": "arr",
+      "isLineEnding": 0
+    },
+    {
+      "time": 127365,
+      "duration": 600,
+      "text": "ange ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 127823,
+      "duration": 288,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 128043,
+      "duration": 864,
+      "text": "sky",
+      "isLineEnding": 1
+    },
+    {
+      "time": 129345,
+      "duration": 288,
+      "text": "So ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 129565,
+      "duration": 288,
+      "text": "that ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 129785,
+      "duration": 288,
+      "text": "each",
+      "isLineEnding": 1
+    },
+    {
+      "time": 130224,
+      "duration": 576,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 130664,
+      "duration": 576,
+      "text": "eve",
+      "isLineEnding": 0
+    },
+    {
+      "time": 131103,
+      "duration": 576,
+      "text": "ry ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 131543,
+      "duration": 576,
+      "text": "wo",
+      "isLineEnding": 0
+    },
+    {
+      "time": 131982,
+      "duration": 864,
+      "text": "man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 133281,
+      "duration": 288,
+      "text": "Could ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 133500,
+      "duration": 576,
+      "text": "find ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 133940,
+      "duration": 288,
+      "text": "her",
+      "isLineEnding": 1
+    },
+    {
+      "time": 134160,
+      "duration": 576,
+      "text": "Per",
+      "isLineEnding": 0
+    },
+    {
+      "time": 134599,
+      "duration": 576,
+      "text": "fect ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 135039,
+      "duration": 4145,
+      "text": "guy",
+      "isLineEnding": 1
+    },
+    {
+      "time": 139214,
+      "duration": 576,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 139654,
+      "duration": 576,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 140093,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 140313,
+      "duration": 864,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 141632,
+      "duration": 288,
+      "text": "Hal",
+      "isLineEnding": 0
+    },
+    {
+      "time": 141852,
+      "duration": 288,
+      "text": "le",
+      "isLineEnding": 0
+    },
+    {
+      "time": 142072,
+      "duration": 576,
+      "text": "lu",
+      "isLineEnding": 0
+    },
+    {
+      "time": 142511,
+      "duration": 288,
+      "text": "jah",
+      "isLineEnding": 1
+    },
+    {
+      "time": 142731,
+      "duration": 576,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 143160,
+      "duration": 576,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 143600,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 143820,
+      "duration": 576,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 145138,
+      "duration": 576,
+      "text": "A",
+      "isLineEnding": 0
+    },
+    {
+      "time": 145578,
+      "duration": 864,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 146237,
+      "duration": 552,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 146658,
+      "duration": 600,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 147116,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 147336,
+      "duration": 552,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 148644,
+      "duration": 288,
+      "text": "Hal",
+      "isLineEnding": 0
+    },
+    {
+      "time": 148863,
+      "duration": 288,
+      "text": "le",
+      "isLineEnding": 0
+    },
+    {
+      "time": 149083,
+      "duration": 576,
+      "text": "lu",
+      "isLineEnding": 0
+    },
+    {
+      "time": 149523,
+      "duration": 288,
+      "text": "jah",
+      "isLineEnding": 1
+    },
+    {
+      "time": 149742,
+      "duration": 552,
+      "text": "It's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 150164,
+      "duration": 600,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 150598,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 150818,
+      "duration": 576,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 152137,
+      "duration": 576,
+      "text": "A",
+      "isLineEnding": 0
+    },
+    {
+      "time": 152576,
+      "duration": 7661,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 159813,
+      "duration": 1151,
+      "text": "I ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 160692,
+      "duration": 1151,
+      "text": "feel ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 161571,
+      "duration": 1151,
+      "text": "stor",
+      "isLineEnding": 0
+    },
+    {
+      "time": 162450,
+      "duration": 576,
+      "text": "my",
+      "isLineEnding": 1
+    },
+    {
+      "time": 163329,
+      "duration": 1151,
+      "text": "Wea",
+      "isLineEnding": 0
+    },
+    {
+      "time": 164191,
+      "duration": 1151,
+      "text": "ther ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 165070,
+      "duration": 1151,
+      "text": "mo",
+      "isLineEnding": 0
+    },
+    {
+      "time": 165949,
+      "duration": 1151,
+      "text": "ving",
+      "isLineEnding": 1
+    },
+    {
+      "time": 166828,
+      "duration": 3485,
+      "text": "In",
+      "isLineEnding": 1
+    },
+    {
+      "time": 166828,
+      "duration": 1151,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 167707,
+      "duration": 2606,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 170321,
+      "duration": 216,
+      "text": "Ab",
+      "isLineEnding": 0
+    },
+    {
+      "time": 170486,
+      "duration": 360,
+      "text": "out ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 170761,
+      "duration": 576,
+      "text": "to ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 171201,
+      "duration": 504,
+      "text": "be",
+      "isLineEnding": 0
+    },
+    {
+      "time": 171585,
+      "duration": 360,
+      "text": "gin",
+      "isLineEnding": 1
+    },
+    {
+      "time": 171860,
+      "duration": 216,
+      "text": "Ab",
+      "isLineEnding": 0
+    },
+    {
+      "time": 172025,
+      "duration": 432,
+      "text": "out ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 172344,
+      "duration": 504,
+      "text": "to ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 172722,
+      "duration": 288,
+      "text": "be",
+      "isLineEnding": 0
+    },
+    {
+      "time": 172941,
+      "duration": 576,
+      "text": "gin",
+      "isLineEnding": 1
+    },
+    {
+      "time": 173820,
+      "duration": 1151,
+      "text": "Hear ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 174700,
+      "duration": 1151,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 175579,
+      "duration": 1151,
+      "text": "thun",
+      "isLineEnding": 0
+    },
+    {
+      "time": 176444,
+      "duration": 576,
+      "text": "der",
+      "isLineEnding": 1
+    },
+    {
+      "time": 177323,
+      "duration": 1151,
+      "text": "Don't ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 178202,
+      "duration": 1151,
+      "text": "you ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 179099,
+      "duration": 1151,
+      "text": "lose",
+      "isLineEnding": 1
+    },
+    {
+      "time": 179953,
+      "duration": 1151,
+      "text": "Your ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 180832,
+      "duration": 1151,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 180832,
+      "duration": 3485,
+      "text": "head",
+      "isLineEnding": 1
+    },
+    {
+      "time": 181698,
+      "duration": 2606,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 184321,
+      "duration": 288,
+      "text": "Rip ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 184541,
+      "duration": 288,
+      "text": "off ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 184761,
+      "duration": 288,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 184981,
+      "duration": 288,
+      "text": "roof",
+      "isLineEnding": 1
+    },
+    {
+      "time": 185402,
+      "duration": 600,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 185860,
+      "duration": 576,
+      "text": "stay ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 186300,
+      "duration": 576,
+      "text": "in ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 186739,
+      "duration": 3266,
+      "text": "bed",
+      "isLineEnding": 1
+    },
+    {
+      "time": 191338,
+      "duration": 576,
+      "text": "God ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 191777,
+      "duration": 576,
+      "text": "bless ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 192217,
+      "duration": 288,
+      "text": "Mo",
+      "isLineEnding": 0
+    },
+    {
+      "time": 192437,
+      "duration": 576,
+      "text": "ther ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 192876,
+      "duration": 576,
+      "text": "Na",
+      "isLineEnding": 0
+    },
+    {
+      "time": 193316,
+      "duration": 864,
+      "text": "ture",
+      "isLineEnding": 1
+    },
+    {
+      "time": 195286,
+      "duration": 288,
+      "text": "She's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 195506,
+      "duration": 288,
+      "text": "a ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 195725,
+      "duration": 576,
+      "text": "sin",
+      "isLineEnding": 0
+    },
+    {
+      "time": 196165,
+      "duration": 360,
+      "text": "gle ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 196440,
+      "duration": 504,
+      "text": "wo",
+      "isLineEnding": 0
+    },
+    {
+      "time": 196825,
+      "duration": 576,
+      "text": "man ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 197256,
+      "duration": 864,
+      "text": "too",
+      "isLineEnding": 1
+    },
+    {
+      "time": 197256,
+      "duration": 576,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 197687,
+      "duration": 288,
+      "text": "",
+      "isLineEnding": 0
+    },
+    {
+      "time": 198786,
+      "duration": 288,
+      "text": "She ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 199006,
+      "duration": 288,
+      "text": "took ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 199390,
+      "duration": 360,
+      "text": "on ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 199665,
+      "duration": 216,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 199830,
+      "duration": 648,
+      "text": "hea",
+      "isLineEnding": 0
+    },
+    {
+      "time": 200324,
+      "duration": 1439,
+      "text": "vens",
+      "isLineEnding": 1
+    },
+    {
+      "time": 202284,
+      "duration": 288,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 202504,
+      "duration": 288,
+      "text": "she ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 202724,
+      "duration": 288,
+      "text": "did",
+      "isLineEnding": 1
+    },
+    {
+      "time": 202944,
+      "duration": 216,
+      "text": "What ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 203108,
+      "duration": 360,
+      "text": "she ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 203383,
+      "duration": 576,
+      "text": "had ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 203823,
+      "duration": 576,
+      "text": "to ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 204262,
+      "duration": 576,
+      "text": "do",
+      "isLineEnding": 1
+    },
+    {
+      "time": 205801,
+      "duration": 288,
+      "text": "She ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 206021,
+      "duration": 432,
+      "text": "taught ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 206350,
+      "duration": 432,
+      "text": "eve",
+      "isLineEnding": 0
+    },
+    {
+      "time": 206680,
+      "duration": 288,
+      "text": "ry ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 206894,
+      "duration": 576,
+      "text": "an",
+      "isLineEnding": 0
+    },
+    {
+      "time": 207328,
+      "duration": 432,
+      "text": "gel",
+      "isLineEnding": 1
+    },
+    {
+      "time": 208866,
+      "duration": 576,
+      "text": "She ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 209306,
+      "duration": 216,
+      "text": "re",
+      "isLineEnding": 0
+    },
+    {
+      "time": 209464,
+      "duration": 336,
+      "text": "arr",
+      "isLineEnding": 0
+    },
+    {
+      "time": 209710,
+      "duration": 600,
+      "text": "anged ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 210167,
+      "duration": 288,
+      "text": "the ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 210387,
+      "duration": 864,
+      "text": "sky",
+      "isLineEnding": 1
+    },
+    {
+      "time": 211706,
+      "duration": 288,
+      "text": "So ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 211925,
+      "duration": 288,
+      "text": "that ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 212145,
+      "duration": 288,
+      "text": "each",
+      "isLineEnding": 1
+    },
+    {
+      "time": 212585,
+      "duration": 576,
+      "text": "And ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 213024,
+      "duration": 576,
+      "text": "eve",
+      "isLineEnding": 0
+    },
+    {
+      "time": 213464,
+      "duration": 576,
+      "text": "ry ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 213899,
+      "duration": 576,
+      "text": "wo",
+      "isLineEnding": 0
+    },
+    {
+      "time": 214322,
+      "duration": 864,
+      "text": "man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 215628,
+      "duration": 288,
+      "text": "Could ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 215847,
+      "duration": 576,
+      "text": "find ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 216287,
+      "duration": 288,
+      "text": "her",
+      "isLineEnding": 1
+    },
+    {
+      "time": 216507,
+      "duration": 576,
+      "text": "Per",
+      "isLineEnding": 0
+    },
+    {
+      "time": 216946,
+      "duration": 576,
+      "text": "fect ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 217386,
+      "duration": 4145,
+      "text": "guy",
+      "isLineEnding": 1
+    },
+    {
+      "time": 221506,
+      "duration": 288,
+      "text": "Oh ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 221726,
+      "duration": 360,
+      "text": "it's ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 222001,
+      "duration": 216,
+      "text": "rai",
+      "isLineEnding": 0
+    },
+    {
+      "time": 222166,
+      "duration": 288,
+      "text": "ning ",
+      "isLineEnding": 0
+    },
+    {
+      "time": 222385,
+      "duration": 504,
+      "text": "men",
+      "isLineEnding": 1
+    },
+    {
+      "time": 222880,
+      "duration": 1151,
+      "text": "Yeah!",
+      "isLineEnding": 1
+    }
+  ],
+  "pictos": [
+    {
+      "time": 5243,
+      "duration": 312,
+      "name": "voltd_p"
+    },
+    {
+      "time": 6122,
+      "duration": 456,
+      "name": "voltg_p"
+    },
+    {
+      "time": 12276,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 15793,
+      "duration": 384,
+      "name": "sexydescend2_f"
+    },
+    {
+      "time": 17551,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 19329,
+      "duration": 312,
+      "name": "voltd_p"
+    },
+    {
+      "time": 20208,
+      "duration": 456,
+      "name": "voltg_p"
+    },
+    {
+      "time": 26362,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 29897,
+      "duration": 384,
+      "name": "sexydescend2_f"
+    },
+    {
+      "time": 31655,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 40446,
+      "duration": 360,
+      "name": "posed_p"
+    },
+    {
+      "time": 42205,
+      "duration": 336,
+      "name": "poseg_p"
+    },
+    {
+      "time": 43963,
+      "duration": 360,
+      "name": "posed_p"
+    },
+    {
+      "time": 45739,
+      "duration": 336,
+      "name": "poseg_p"
+    },
+    {
+      "time": 47718,
+      "duration": 336,
+      "name": "snap_g"
+    },
+    {
+      "time": 54544,
+      "duration": 192,
+      "name": "aerobicd_p"
+    },
+    {
+      "time": 55423,
+      "duration": 192,
+      "name": "aerobicg_p"
+    },
+    {
+      "time": 61577,
+      "duration": 216,
+      "name": "pointe_p"
+    },
+    {
+      "time": 63335,
+      "duration": 552,
+      "name": "pointeyeux_f"
+    },
+    {
+      "time": 65093,
+      "duration": 192,
+      "name": "aerobicd_p"
+    },
+    {
+      "time": 65972,
+      "duration": 192,
+      "name": "aerobicg_p"
+    },
+    {
+      "time": 68610,
+      "duration": 216,
+      "name": "pointe_p"
+    },
+    {
+      "time": 70368,
+      "duration": 552,
+      "name": "pointeyeux_f"
+    },
+    {
+      "time": 72126,
+      "duration": 240,
+      "name": "course_p"
+    },
+    {
+      "time": 75626,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 76505,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 77823,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 80021,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 81340,
+      "duration": 336,
+      "name": "goldfame_p"
+    },
+    {
+      "time": 84389,
+      "duration": 264,
+      "name": "flash_p"
+    },
+    {
+      "time": 91413,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 92292,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 93601,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 95783,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 97101,
+      "duration": 336,
+      "name": "goldfame_p"
+    },
+    {
+      "time": 100178,
+      "duration": 264,
+      "name": "flash_p"
+    },
+    {
+      "time": 109392,
+      "duration": 312,
+      "name": "clapd_p"
+    },
+    {
+      "time": 110271,
+      "duration": 312,
+      "name": "clapg_p"
+    },
+    {
+      "time": 111700,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 115216,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 118720,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 122236,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 125752,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 129235,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 129785,
+      "duration": 360,
+      "name": "posed_p"
+    },
+    {
+      "time": 130664,
+      "duration": 336,
+      "name": "poseg_p"
+    },
+    {
+      "time": 131543,
+      "duration": 360,
+      "name": "posed_p"
+    },
+    {
+      "time": 132412,
+      "duration": 336,
+      "name": "poseg_p"
+    },
+    {
+      "time": 133500,
+      "duration": 240,
+      "name": "course_p"
+    },
+    {
+      "time": 138775,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 139654,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 140972,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 143160,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 144479,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 146676,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 148008,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 150182,
+      "duration": 384,
+      "name": "pluie_f"
+    },
+    {
+      "time": 151477,
+      "duration": 336,
+      "name": "goldfame_p"
+    },
+    {
+      "time": 159813,
+      "duration": 312,
+      "name": "voltd_p"
+    },
+    {
+      "time": 160692,
+      "duration": 456,
+      "name": "voltg_p"
+    },
+    {
+      "time": 166828,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 170321,
+      "duration": 384,
+      "name": "sexydescend2_f"
+    },
+    {
+      "time": 172080,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 173820,
+      "duration": 312,
+      "name": "voltd_p"
+    },
+    {
+      "time": 174700,
+      "duration": 456,
+      "name": "voltg_p"
+    },
+    {
+      "time": 180832,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 184321,
+      "duration": 384,
+      "name": "sexydescend2_f"
+    },
+    {
+      "time": 186080,
+      "duration": 384,
+      "name": "sexydescend_f"
+    },
+    {
+      "time": 187838,
+      "duration": 240,
+      "name": "course_p"
+    },
+    {
+      "time": 191777,
+      "duration": 312,
+      "name": "clapd_p"
+    },
+    {
+      "time": 192656,
+      "duration": 312,
+      "name": "clapg_p"
+    },
+    {
+      "time": 194085,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 197577,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 201093,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 204592,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 208097,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 211596,
+      "duration": 264,
+      "name": "clapclap_g"
+    },
+    {
+      "time": 212145,
+      "duration": 360,
+      "name": "posed_p"
+    },
+    {
+      "time": 213024,
+      "duration": 336,
+      "name": "poseg_p"
+    },
+    {
+      "time": 213899,
+      "duration": 360,
+      "name": "posed_p"
+    },
+    {
+      "time": 214749,
+      "duration": 336,
+      "name": "poseg_p"
+    },
+    {
+      "time": 215847,
+      "duration": 240,
+      "name": "course_p"
+    },
+    {
+      "time": 221122,
+      "duration": 336,
+      "name": "fame_p"
+    },
+    {
+      "time": 222880,
+      "duration": 408,
+      "name": "yeah_f"
+    }
+  ],
+  "AudioPreview": {
+    "coverflow": {
+      "startbeat": 171
+    },
+    "prelobby": {
+      "startbeat": 171
+    }
+  },
+  "AudioPreviewFadeTime": 0.5
+}

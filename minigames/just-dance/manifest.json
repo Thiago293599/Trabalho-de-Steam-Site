@@ -1,10 +1,10 @@
 {
   "id": "just-dance",
   "name": "Just Dance",
-  "status": "sensor-fallbacks-first-song",
+  "status": "phone-side-classifiers-v6",
   "input": {
     "source": "phone-motion",
-    "targetSampleRateHz": 20,
+    "targetSampleRateHz": 40,
     "fallbacks": [
       "DeviceMotion",
       "DeviceOrientation-derived rotation",
@@ -43,10 +43,31 @@
       "map": "songs/EarthSong/EarthSong.json",
       "metadata": "songs/EarthSong/metadata.json",
       "moves": "songs/EarthSong/moves/EarthSong_moves0.json",
-      "classifiers": "songs/EarthSong/classifiers_WIIU/",
+      "classifiers": "songs/EarthSong/classifiers_WII_source/",
       "pictosAtlas": "songs/EarthSong/pictos-atlas.png",
       "pictosAtlasData": "songs/EarthSong/pictos-atlas.json",
       "cover": "songs/EarthSong/earthsong_cover@2x.jpg"
+    },
+    {
+      "id": "ItsRainingMen",
+      "mapName": "ItsRainingMen",
+      "title": "It's Raining Men",
+      "artist": "The Weather Girls",
+      "jdVersion": 2,
+      "status": "beta",
+      "coaches": 1,
+      "video": "songs/ItsRainingMen/ItsRainingMen_Low.mp4",
+      "videoLow": "songs/ItsRainingMen/ItsRainingMen_Low.mp4",
+      "videoMedium": "songs/ItsRainingMen/ItsRainingMen_Medium.mp4",
+      "videoHigh": "songs/ItsRainingMen/ItsRainingMen_High.mp4",
+      "audio": "songs/ItsRainingMen/ItsRainingMen_Audio.mp3",
+      "map": "songs/ItsRainingMen/ItsRainingMen.json",
+      "metadata": "songs/ItsRainingMen/metadata.json",
+      "moves": "songs/ItsRainingMen/moves/ItsRainingMen_moves0.json",
+      "classifiers": "songs/ItsRainingMen/classifiers_WIIU/",
+      "pictosAtlas": "songs/ItsRainingMen/pictos-atlas.png",
+      "pictosAtlasData": "songs/ItsRainingMen/pictos-atlas.json",
+      "cover": "songs/ItsRainingMen/itsrainingmen_cover@2x.jpg"
     }
   ]
 }

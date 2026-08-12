@@ -151,8 +151,15 @@ const PHONE_DANCE_MAX_SCORE = 13333;
 const PHONE_DANCE_WEIGHTS = Object.freeze({ PERFECT: 1, SUPER: 0.8, GOOD: 0.6, OK: 0.35, YEAH: 1, X: 0 });
 const PHONE_DANCE_SONGS = Object.freeze({
   RainOverMe: Object.freeze({ id:"RainOverMe", base:"minigames/just-dance/songs/RainOverMe", movesFile:"RainOverMe_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
-  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"livemove", classifierFolder:"classifiers_WII_source" })
+  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"livemove", classifierFolder:"classifiers_WII_source" }),
+  ItsRainingMen: Object.freeze({ id:"ItsRainingMen", base:"minigames/just-dance/songs/ItsRainingMen", movesFile:"ItsRainingMen_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" })
 });
+const PHONE_DANCE_SCORE_TUNING = Object.freeze({
+  RainOverMe: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 }),
+  EarthSong: Object.freeze({ floor:.22, perfectRef:.56, minRef:.46, maxRef:.66, perfectQ:.74, superQ:.57, goodQ:.38, okQ:.19 }),
+  ItsRainingMen: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 })
+});
+const PHONE_DANCE_CALIBRATION_STORAGE_KEY = "jdPhoneClassifierCalibrationV6";
 const PHONE_EARTH_CLASSIFIERS = Object.freeze({
   "earthsong_bras_genou":"00_Bras_Genou.livemove.bin","earthsong_poing_terre":"01_Poing_Terre.livemove.bin","earthsong_bras_sol":"02_Bras_Sol.livemove.bin","earthsong_jette":"03_Jette.livemove.bin","earthsong_lever":"04_Lever.livemove.bin","earthsong_poitrine_l":"05_Poitrine_L.livemove.bin","earthsong_spin":"06_Spin.livemove.bin","earthsong_bras_u":"07_Bras_U.livemove.bin","earthsong_bras_down":"08_Bras_Down.livemove.bin","earthsong_allemand":"09_Allemand.livemove.bin","earthsong_pointer_sol":"10_Pointer_Sol.livemove.bin","earthsong_poitrine_r":"11_Poitrine_R.livemove.bin","earthsong_main":"12_Main.livemove.bin","earthsong_bras":"13_Bras.livemove.bin","earthsong_ski_l":"14_Ski_L.livemove.bin","earthsong_saut_r":"15_Saut_R.livemove.bin","earthsong_saut_l":"16_Saut_L.livemove.bin","earthsong_bras_tendu":"17_Bras_Tendu.livemove.bin","earthsong_poing_lever_l":"18_Poing_Lever_L.livemove.bin","earthsong_poing_lever_r":"19_Poing_Lever_R.livemove.bin","earthsong_ski_r":"20_Ski_R.livemove.bin","earthsong_poing_l":"21_Poing_L.livemove.bin","earthsong_poing_r":"22_Poing_R.livemove.bin","earthsong_poing_f":"23_Poing_F.livemove.bin","earthsong_main_r":"24_Main_R.livemove.bin","earthsong_genou_tape":"25_Genou_Tape.livemove.bin","earthsong_genou_moi":"26_Genou_Moi.livemove.bin","earthsong_main_l":"27_Main_L.livemove.bin","earthsong_pose_fin":"28_Pose_Fin.livemove.bin","earthsong_poing_lever_f":"29_Poing_Lever_F.livemove.bin","earthsong_shake":"30_Shake.livemove.bin"
 });
@@ -173,6 +180,7 @@ let phoneDanceServerRttMs = 90;
 let phoneDanceServerOffsetMs = 0;
 let phoneDanceLatencyMeasuredAt = 0;
 let phoneDanceCalibration = { gravity:9.81, motionScale:3.2, rotationScale:180, noiseMotion:0.035, noiseRotation:3, quietSamples:0 };
+let phoneDanceMobileTuning = { songId:"", perfectRef:0, samples:[] };
 
 
 const params = new URLSearchParams(location.search);
@@ -280,13 +288,143 @@ function phoneDanceApplyLocalResult(move,result){if(!phoneDanceLocal)phoneDanceR
 function phoneMeasureServerClock(force=false){if(!socket?.connected||!joinedRoom)return;const now=performance.now();if(!force&&now-phoneDanceLatencyMeasuredAt<5000)return;phoneDanceLatencyMeasuredAt=now;const wallStart=Date.now(),perfStart=performance.now();socket.emit("controller:dance-clock-ping",{roomCode:joinedRoom},response=>{if(!response?.ok)return;const rtt=Math.max(0,Math.min(4000,performance.now()-perfStart));const midpoint=wallStart+rtt/2;const offset=Number(response.serverTime||Date.now())-midpoint;phoneDanceServerRttMs=phoneDanceServerRttMs*.72+rtt*.28;phoneDanceServerOffsetMs=phoneDanceServerOffsetMs*.72+offset*.28;});}
 function phoneUpdateCalibration(sample){const motion=phoneMagnitude(sample?.acceleration),rot=phoneMagnitude(sample?.rotationRate),g=phoneMagnitude(sample?.accelerationIncludingGravity);if(g>6&&g<13)phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.992+g*.008;if(motion<.30&&rot<18){phoneDanceCalibration.noiseMotion=phoneDanceCalibration.noiseMotion*.992+motion*.008;phoneDanceCalibration.noiseRotation=phoneDanceCalibration.noiseRotation*.992+rot*.008;phoneDanceCalibration.quietSamples++;}else{const targetM=Math.max(1.8,Math.min(7.5,motion*1.10));const targetR=Math.max(90,Math.min(520,rot*1.08));phoneDanceCalibration.motionScale=phoneDanceCalibration.motionScale*.997+targetM*.003;phoneDanceCalibration.rotationScale=phoneDanceCalibration.rotationScale*.997+targetR*.003;}}
 
+function phoneDanceGetScoreTuning(songId=phoneDanceSession?.songId){
+  return PHONE_DANCE_SCORE_TUNING[songId] || PHONE_DANCE_SCORE_TUNING.RainOverMe;
+}
+function phoneDanceLoadMobileTuning(songId){
+  const cfg=phoneDanceGetScoreTuning(songId);
+  let savedRef=0;
+  try{
+    const all=JSON.parse(localStorage.getItem(PHONE_DANCE_CALIBRATION_STORAGE_KEY)||"{}");
+    savedRef=Number(all?.[songId]?.perfectRef||0);
+  }catch{}
+  phoneDanceMobileTuning={songId,perfectRef:Number.isFinite(savedRef)&&savedRef>=cfg.minRef&&savedRef<=cfg.maxRef?savedRef:cfg.perfectRef,samples:[]};
+}
+function phoneDancePersistMobileTuning(){
+  const songId=phoneDanceMobileTuning.songId;
+  if(!songId)return;
+  try{
+    const all=JSON.parse(localStorage.getItem(PHONE_DANCE_CALIBRATION_STORAGE_KEY)||"{}");
+    all[songId]={perfectRef:Math.round(phoneDanceMobileTuning.perfectRef*10000)/10000,updatedAt:Date.now()};
+    localStorage.setItem(PHONE_DANCE_CALIBRATION_STORAGE_KEY,JSON.stringify(all));
+  }catch{}
+}
+function phoneDanceCalibratedClassifier(raw,songId=phoneDanceSession?.songId){
+  const cfg=phoneDanceGetScoreTuning(songId);
+  const ref=Math.max(cfg.floor+.08,Number(phoneDanceMobileTuning.perfectRef||cfg.perfectRef));
+  const t=phoneClamp01((Number(raw||0)-cfg.floor)/(ref-cfg.floor));
+  return phoneClamp01(t*t*(3-2*t));
+}
+function phoneDanceLearnMobileCeiling(raw,stats){
+  const songId=phoneDanceSession?.songId;
+  if(!songId||!stats)return;
+  const cfg=phoneDanceGetScoreTuning(songId);
+  const n=Math.max(1,Number(stats.count||0));
+  const coverage=Number(stats.active||0)/n;
+  if(coverage<.30||Number(raw||0)<cfg.floor+.08)return;
+  const arr=phoneDanceMobileTuning.samples;
+  arr.push(Number(raw||0));
+  if(arr.length>48)arr.shift();
+  if(arr.length<8)return;
+  const sorted=arr.slice().sort((a,b)=>a-b);
+  const p80=sorted[Math.min(sorted.length-1,Math.floor((sorted.length-1)*.80))];
+  const target=Math.max(cfg.minRef,Math.min(cfg.maxRef,p80*1.10));
+  phoneDanceMobileTuning.perfectRef=phoneDanceMobileTuning.perfectRef*.86+target*.14;
+  phoneDancePersistMobileTuning();
+}
+function phoneDanceChaosScore(stats){
+  const n=Math.max(1,Number(stats?.count||0));
+  const rev=phoneClamp01(Number(stats?.reversals||0)/Math.max(4,n*.28));
+  const strong=phoneClamp01(Number(stats?.strongReversals||0)/Math.max(3,n*.14));
+  const jerkAvg=Number(stats?.jerkSum||0)/n;
+  const jerk=phoneClamp01(jerkAvg/Math.max(8,phoneDanceCalibration.motionScale*18));
+  return rev*.46+strong*.34+jerk*.20;
+}
+
 function phoneDanceClockNow(){if(!phoneDanceClock.initialized)return 0;return phoneDanceClock.timelineMs+(phoneDanceClock.playing?(performance.now()-phoneDanceClock.anchorPerf):0);}
 function phoneDanceSyncClock(payload){const now=performance.now(),reason=String(payload?.reason||"sync"),playing=Boolean(payload?.playing);phoneMeasureServerClock(false);const serverNowEstimate=Date.now()+phoneDanceServerOffsetMs;const serverAge=Number.isFinite(Number(payload?.serverTime))?Math.max(0,Math.min(1800,serverNowEstimate-Number(payload.serverTime))):Math.max(0,phoneDanceServerRttMs/2);const hostLeg=Math.max(0,Math.min(1000,Number(payload?.hostOneWayMs||0)));const target=Number(payload?.timelineMs||0)+(playing?serverAge+hostLeg:0); if(!phoneDanceClock.initialized||["song","seek","room","play","pause","ended"].includes(reason)){phoneDanceClock={timelineMs:target,anchorPerf:now,playing,initialized:true};return;} const predicted=phoneDanceClockNow(),drift=target-predicted; const correction=Math.max(-55,Math.min(55,drift*.14)); phoneDanceClock={timelineMs:predicted+correction,anchorPerf:now,playing,initialized:true};}
-async function phoneLoadDanceSong(songId){const song=PHONE_DANCE_SONGS[songId]||PHONE_DANCE_SONGS.RainOverMe,token=++phoneDanceLoadToken;phoneDanceReady=false;phoneDanceProfiles=new Map();if(sensorNotice)sensorNotice.textContent=`Carregando movimentos ${song.classifierFormat.toUpperCase()} e recalibrando para este celular…`;try{const r=await fetch(`${song.base}/moves/${song.movesFile}`,{cache:"force-cache"});if(!r.ok)throw new Error(`moves HTTP ${r.status}`);const moves=await r.json();if(token!==phoneDanceLoadToken)return;phoneDanceMoves=Array.isArray(moves)?moves.slice().sort((a,b)=>Number(a.time||0)-Number(b.time||0)):[];const names=[...new Set(phoneDanceMoves.map(m=>String(m?.name||"")).filter(Boolean))];let loaded=0;await Promise.all(names.map(async name=>{const file=phoneDanceClassifierFile(song,name);if(!file)return;try{const fr=await fetch(`${song.base}/${song.classifierFolder}/${file}`,{cache:"force-cache"});if(!fr.ok)return;const buf=await fr.arrayBuffer();const p=song.classifierFormat==="msm"?phoneParseMsm(buf,name):phoneParseLiveMove(buf,name);if(p){phoneDanceProfiles.set(String(name).toLowerCase(),p);loaded++;}}catch{}}));if(token!==phoneDanceLoadToken)return;phoneDanceClassifierSummary={loaded,total:names.length,format:song.classifierFormat.toUpperCase()};phoneDanceReady=true;phoneDanceResetLocal(true);if(sensorNotice)sensorNotice.textContent=`Pontuação local V5 pronta • ${loaded}/${names.length} classifiers ${song.classifierFormat.toUpperCase()} → CELULAR. A rede não decide sua nota.`;}catch(error){console.error("Falha ao preparar classifiers no celular",error);if(sensorNotice)sensorNotice.textContent="Não foi possível carregar os classifiers no celular. A pontuação ficará pausada para não gerar notas falsas.";}}
+async function phoneLoadDanceSong(songId){
+  const song=PHONE_DANCE_SONGS[songId]||PHONE_DANCE_SONGS.RainOverMe,token=++phoneDanceLoadToken;
+  phoneDanceReady=false;
+  phoneDanceProfiles=new Map();
+  phoneDanceLoadMobileTuning(song.id);
+  if(sensorNotice)sensorNotice.textContent=`Carregando movimentos ${song.classifierFormat.toUpperCase()} e recalibrando para este celular…`;
+  try{
+    const r=await fetch(`${song.base}/moves/${song.movesFile}`,{cache:"force-cache"});
+    if(!r.ok)throw new Error(`moves HTTP ${r.status}`);
+    const moves=await r.json();
+    if(token!==phoneDanceLoadToken)return;
+    phoneDanceMoves=Array.isArray(moves)?moves.slice().sort((a,b)=>Number(a.time||0)-Number(b.time||0)):[];
+    const names=[...new Set(phoneDanceMoves.map(m=>String(m?.name||"")).filter(Boolean))];
+    let loaded=0;
+    await Promise.all(names.map(async name=>{
+      const file=phoneDanceClassifierFile(song,name);
+      if(!file)return;
+      try{
+        const fr=await fetch(`${song.base}/${song.classifierFolder}/${file}`,{cache:"force-cache"});
+        if(!fr.ok)return;
+        const buf=await fr.arrayBuffer();
+        const p=song.classifierFormat==="msm"?phoneParseMsm(buf,name):phoneParseLiveMove(buf,name);
+        if(p){phoneDanceProfiles.set(String(name).toLowerCase(),p);loaded++;}
+      }catch{}
+    }));
+    if(token!==phoneDanceLoadToken)return;
+    phoneDanceClassifierSummary={loaded,total:names.length,format:song.classifierFormat.toUpperCase()};
+    phoneDanceReady=true;
+    phoneDanceResetLocal(true);
+    const ref=Math.round(phoneDanceMobileTuning.perfectRef*100);
+    if(sensorNotice)sensorNotice.textContent=`Pontuação local V6 pronta • ${loaded}/${names.length} classifiers ${song.classifierFormat.toUpperCase()} → CELULAR • calibração mobile ${ref}%. A rede não decide sua nota.`;
+  }catch(error){
+    console.error("Falha ao preparar classifiers no celular",error);
+    if(sensorNotice)sensorNotice.textContent="Não foi possível carregar os classifiers no celular. A pontuação ficará pausada para não gerar notas falsas.";
+  }
+}
 async function phoneApplyDanceSession(payload){if(!payload||payload.roomCode!==joinedRoom)return;const changed=!phoneDanceSession||phoneDanceSession.songId!==payload.songId;phoneDanceSession={...payload};phoneDanceSyncClock(payload);if(changed){await phoneLoadDanceSong(payload.songId);phoneDanceSyncClock(payload);}if(sensorModeRequested&&sensorPermissionGranted&&!sensorStreaming)startSensorStreaming();}
 function phoneMoveIndexAt(ms){for(let i=0;i<phoneDanceMoves.length;i++){const m=phoneDanceMoves[i],start=Number(m.time||0)-130,end=Number(m.time||0)+Number(m.duration||0)+170;if(ms>=start&&ms<=end)return i;if(start>ms)break;}return-1;}
-function phoneJudge(stats,move){if(!stats||stats.count<4)return{judgement:"X",quality:0,classifierMatch:0};const n=Math.max(1,stats.count),coverage=stats.active/n,avgMotion=stats.motionSum/n,avgRot=stats.rotationSum/n,motionEvidence=Math.max(phoneClamp01(avgMotion/(phoneDanceCalibration.motionScale*1.15)),phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*1.25))),peakEvidence=Math.max(phoneClamp01(stats.motionPeak/(phoneDanceCalibration.motionScale*2.1)),phoneClamp01(stats.rotationPeak/(phoneDanceCalibration.rotationScale*2.8)));const profile=phoneDanceProfiles.get(String(move?.name||"").toLowerCase())||null;let classifier=profile?phoneClassifierMatch(profile,stats):0;if(phoneIsShake(move)){const rev=phoneClamp01(stats.reversals/Math.max(3,n*.16)),strong=phoneClamp01(stats.strongReversals/Math.max(2,n*.08)),jerk=phoneClamp01((stats.jerkSum/n)/(phoneDanceCalibration.motionScale*14));const shake=rev*.46+strong*.24+jerk*.18+phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*.85))*.12;classifier=Math.max(classifier,shake*.92);}const clear=coverage>=.10&&(avgMotion>=Math.max(phoneDanceCalibration.noiseMotion*2.2,phoneDanceCalibration.motionScale*.075)||avgRot>=Math.max(phoneDanceCalibration.noiseRotation*2.4,phoneDanceCalibration.rotationScale*.06));if(!clear)return{judgement:"X",quality:.02,classifierMatch:classifier};let q=profile?classifier*.64+phoneClamp01((coverage-.06)/.60)*.21+motionEvidence*.10+peakEvidence*.05:Math.min(.50,phoneClamp01((coverage-.06)/.60)*.55+motionEvidence*.30+peakEvidence*.15);if(profile&&classifier<.16)q=Math.min(q,.20);else if(profile&&classifier<.27)q=Math.min(q,.37);q=phoneClamp01(q);const quality=Math.round(q*1000)/1000,cm=Math.round(classifier*1000)/1000;if(move?.goldMove)return{judgement:(classifier>=.27&&q>=.34)?"YEAH":"X",quality,classifierMatch:cm};const judgement=q>=.72?"PERFECT":q>=.55?"SUPER":q>=.38?"GOOD":q>=.20?"OK":"X";return{judgement,quality,classifierMatch:cm};}
-function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,...result,scoredAt:Date.now(),source:"phone-v5"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
+function phoneJudge(stats,move){
+  if(!stats||stats.count<4)return{judgement:"X",quality:0,classifierMatch:0,classifierRaw:0};
+  const n=Math.max(1,stats.count);
+  const coverage=stats.active/n;
+  const avgMotion=stats.motionSum/n;
+  const avgRot=stats.rotationSum/n;
+  const coverageQ=phoneClamp01((coverage-.06)/.58);
+  const motionEvidence=Math.max(phoneClamp01(avgMotion/(phoneDanceCalibration.motionScale*1.10)),phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*1.18)));
+  const peakEvidence=Math.max(phoneClamp01(stats.motionPeak/(phoneDanceCalibration.motionScale*1.95)),phoneClamp01(stats.rotationPeak/(phoneDanceCalibration.rotationScale*2.55)));
+  const profile=phoneDanceProfiles.get(String(move?.name||"").toLowerCase())||null;
+  let rawClassifier=profile?phoneClassifierMatch(profile,stats):0;
+  if(phoneIsShake(move)){
+    const rev=phoneClamp01(stats.reversals/Math.max(3,n*.16));
+    const strong=phoneClamp01(stats.strongReversals/Math.max(2,n*.08));
+    const jerk=phoneClamp01((stats.jerkSum/n)/(phoneDanceCalibration.motionScale*14));
+    const shake=rev*.46+strong*.24+jerk*.18+phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*.85))*.12;
+    rawClassifier=Math.max(rawClassifier,shake*.92);
+  }
+  const clear=coverage>=.10&&(avgMotion>=Math.max(phoneDanceCalibration.noiseMotion*2.2,phoneDanceCalibration.motionScale*.070)||avgRot>=Math.max(phoneDanceCalibration.noiseRotation*2.4,phoneDanceCalibration.rotationScale*.055));
+  if(!clear)return{judgement:"X",quality:.02,classifierMatch:0,classifierRaw:Math.round(rawClassifier*1000)/1000};
+  const songId=phoneDanceSession?.songId||"RainOverMe";
+  const cfg=phoneDanceGetScoreTuning(songId);
+  const mobileClassifier=profile?phoneDanceCalibratedClassifier(rawClassifier,songId):0;
+  phoneDanceLearnMobileCeiling(rawClassifier,stats);
+  let q=profile?mobileClassifier*.62+coverageQ*.20+motionEvidence*.11+peakEvidence*.07:Math.min(.54,coverageQ*.55+motionEvidence*.30+peakEvidence*.15);
+  if(profile&&!phoneIsShake(move)){
+    const chaos=phoneDanceChaosScore(stats);
+    const ref=Math.max(cfg.floor+.08,Number(phoneDanceMobileTuning.perfectRef||cfg.perfectRef));
+    if(chaos>.80)q=Math.min(q,cfg.superQ+.08);
+  }
+  if(profile&&rawClassifier<cfg.floor*.78)q=Math.min(q,cfg.okQ+.02);
+  q=phoneClamp01(q);
+  const quality=Math.round(q*1000)/1000;
+  const cm=Math.round(mobileClassifier*1000)/1000;
+  const raw=Math.round(rawClassifier*1000)/1000;
+  const ref=Math.round(Number(phoneDanceMobileTuning.perfectRef||cfg.perfectRef)*1000)/1000;
+  if(move?.goldMove){
+    const yeah=profile?(mobileClassifier>=.42&&q>=.44):q>=.48;
+    return{judgement:yeah?"YEAH":"X",quality,classifierMatch:cm,classifierRaw:raw,calibrationRef:ref};
+  }
+  const judgement=q>=cfg.perfectQ?"PERFECT":q>=cfg.superQ?"SUPER":q>=cfg.goodQ?"GOOD":q>=cfg.okQ?"OK":"X";
+  return{judgement,quality,classifierMatch:cm,classifierRaw:raw,calibrationRef:ref};
+}
+function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,...result,scoredAt:Date.now(),source:"phone-v6"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
 function phoneFlushDanceResults(){if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;for(const [index,payload] of [...phoneDancePendingResults]){socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:dance-judgement",payload,(error,response)=>{if(!error&&response?.ok){phoneDancePendingResults.delete(index);if(response.state)applyState(response.state);}});}}
 function phoneFinalizeActiveMove(){const i=phoneDanceActiveMoveIndex;if(i<0||phoneDanceJudgedMoves.has(i))return;const move=phoneDanceMoves[i];if(!move)return;const result=phoneJudge(phoneDanceStats,move);phoneDanceJudgedMoves.add(i);phoneQueueResult(i,move,result);phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;}
 function phoneSyncMoveWindow(){if(!phoneDanceReady||!phoneDanceClock.playing||!sensorStreaming)return;const current=phoneMoveIndexAt(phoneDanceClockNow());if(phoneDanceActiveMoveIndex>=0&&current!==phoneDanceActiveMoveIndex)phoneFinalizeActiveMove();if(current>=0&&!phoneDanceJudgedMoves.has(current)&&phoneDanceActiveMoveIndex!==current){phoneDanceActiveMoveIndex=current;phoneDanceStats=phoneMakeStats();}}
@@ -718,7 +856,7 @@ function applySensorLabState(nextState, me) {
     setSensorBadge("waiting", "Permissão");
     sensorModePanel?.classList.remove("is-error", "is-live");
     sensorModeTitle.textContent = "Ative os sensores";
-    sensorModeText.textContent = "O computador está pronto. Ative os sensores: classifiers e julgamento serão processados neste celular.";
+    sensorModeText.textContent = "O computador está pronto. Ative os sensores: classifiers, recalibração Wii→celular e julgamento serão processados neste celular.";
     enableSensorsBtn.disabled = false;
     enableSensorsBtn.textContent = "Ativar sensores deste celular";
     sensorNotice.textContent = window.isSecureContext ? "Pronto para solicitar a permissão do navegador." : "Recomendado abrir esta página por HTTPS para liberar os sensores.";

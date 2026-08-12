@@ -360,6 +360,14 @@ const DANCE_SONGS = Object.freeze({
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
     classifierFormat: "livemove", classifierFolder: "classifiers_WII_source"
+  }),
+  ItsRainingMen: Object.freeze({
+    id: "ItsRainingMen", title: "It's Raining Men", artist: "The Weather Girls", edition: "Just Dance 2", coaches: 1, beta: true, lyricsColor: "#35C5ED",
+    base: "minigames/just-dance/songs/ItsRainingMen", mapFile: "ItsRainingMen.json", movesFile: "ItsRainingMen_moves0.json",
+    videos: Object.freeze({ low: "ItsRainingMen_Low.mp4", medium: "ItsRainingMen_Medium.mp4", high: "ItsRainingMen_High.mp4" }),
+    audioFile: "ItsRainingMen_Audio.mp3", coverFile: "itsrainingmen_cover@2x.jpg", posterFile: "ItsRainingMen.jpg", avatarFile: "itsrainingmen_thumb_kiwi.jpg",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: 0, syncStorageKey: "jdItsRainingMenSyncOffsetMsV1",
+    classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
   })
 });
 const EARTHSONG_CLASSIFIER_FILES = Object.freeze({
@@ -4413,7 +4421,7 @@ async function loadDanceTestSongData(force = false) {
       danceManualSyncOffsetMs = songConfig.defaultSyncMs;
     }
     dancePictoAtlas = atlas && typeof atlas === "object" ? atlas : null;
-    // V5: classifiers são carregados e interpretados no celular, não no PC.
+    // V6: classifiers são carregados, recalibrados para smartphone e interpretados no celular, não no PC.
     const classifierSummary = { loaded: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, total: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, format: `${songConfig?.classifierFormat || ""}→PHONE` };
     danceTestSongLoaded = true;
     const goldCount = danceTestMoves.filter(move => move.goldMove).length;

@@ -1,0 +1,88 @@
+{
+  "imageSize": {
+    "width": 256,
+    "height": 256
+  },
+  "images": {
+    "voltd_p": [
+      0,
+      0
+    ],
+    "voltg_p": [
+      256,
+      0
+    ],
+    "sexydescend_f": [
+      512,
+      0
+    ],
+    "posed_p": [
+      768,
+      0
+    ],
+    "poseg_p": [
+      1024,
+      0
+    ],
+    "snap_g": [
+      0,
+      256
+    ],
+    "aerobicd_p": [
+      256,
+      256
+    ],
+    "aerobicg_p": [
+      512,
+      256
+    ],
+    "pointe_p": [
+      768,
+      256
+    ],
+    "pointeyeux_f": [
+      1024,
+      256
+    ],
+    "course_p": [
+      0,
+      512
+    ],
+    "fame_p": [
+      256,
+      512
+    ],
+    "pluie_f": [
+      512,
+      512
+    ],
+    "goldfame_p": [
+      768,
+      512
+    ],
+    "flash_p": [
+      1024,
+      512
+    ],
+    "clapd_p": [
+      0,
+      768
+    ],
+    "clapg_p": [
+      256,
+      768
+    ],
+    "clapclap_g": [
+      512,
+      768
+    ],
+    "yeah_f": [
+      768,
+      768
+    ],
+    "sexydescend2_f": [
+      1024,
+      768
+    ]
+  }
+}

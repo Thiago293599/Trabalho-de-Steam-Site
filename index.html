@@ -525,6 +525,7 @@
             <select id="danceSongSelect">
               <option value="RainOverMe">Rain Over Me</option>
               <option value="EarthSong">Earth Song • Beta</option>
+              <option value="ItsRainingMen">It's Raining Men • Beta</option>
             </select>
           </label>
           <label>Qualidade do vídeo
@@ -661,7 +662,7 @@
             <span>★ 2.000</span><span>★★ 4.000</span><span>★★★ 6.000</span><span>★★★★ 8.000</span><span>★★★★★ 10.000</span><b>SUPERSTAR 11.000</b><b>MEGASTAR 12.000</b><strong>MÁX. 13.333</strong>
           </div>
         </div>
-        <p class="dance-song-note">A timeline já produz <b>PERFECT, SUPER, GOOD, OK, YEAH! e X</b>. A barra de estrelas usa os assets enviados, com sons de 1–5 estrelas, Superstar e Megastar. O player possui qualidade automática/fixa, letras ajustáveis, modo janela cheia e fullscreen. Os Gold Moves da própria música usam <b>YEAH!</b> quando são acertados. Os pictos vêm do atlas original, entram de fora da tela, aceleram até a barra branca e desaparecem com escala/fade. Os timestamps originais da música já estão no relógio do vídeo (o primeiro beat acontece em 2.812 s), então o <code>videoOffset</code> não é descontado novamente. O painel de Sincronia DEV permite ajuste fino em milissegundos, e a letra aparece no canto inferior esquerdo em fluxo de karaokê para facilitar a checagem. Nesta fase o julgamento ainda usa a qualidade do movimento captado pelo celular; os classificadores <code>.msm</code> serão usados depois para comparar a coreografia de verdade.</p>
+        <p class="dance-song-note">A timeline já produz <b>PERFECT, SUPER, GOOD, OK, YEAH! e X</b>. A barra de estrelas usa os assets enviados, com sons de 1–5 estrelas, Superstar e Megastar. O player possui qualidade automática/fixa, letras ajustáveis, modo janela cheia e fullscreen. Os Gold Moves da própria música usam <b>YEAH!</b> quando são acertados. Os pictos vêm do atlas original, entram de fora da tela, aceleram até a barra branca e desaparecem com escala/fade. Os timestamps originais da música já estão no relógio do vídeo (o primeiro beat acontece em 2.812 s), então o <code>videoOffset</code> não é descontado novamente. O painel de Sincronia DEV permite ajuste fino em milissegundos, e a letra aparece no canto inferior esquerdo em fluxo de karaokê para facilitar a checagem. Na V6, o próprio celular processa os classifiers da música, aplica uma calibração Wii/Wii U → smartphone e decide a nota localmente. O servidor apenas recebe o julgamento pronto e o PC exibe o resultado, então a latência da rede não altera a pontuação.</p>
       </section>
 
       <div id="danceLabServerWarning" class="server-warning hidden">
