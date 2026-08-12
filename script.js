@@ -43,7 +43,7 @@ themeToggle?.addEventListener("click", () => {
 applyTheme(getCurrentTheme(), false);
 
 const BOARD_SIZE = 40;
-const REQUIRED_SERVER_PROTOCOL = 10;
+const REQUIRED_SERVER_PROTOCOL = 11;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 const colors = ["#ef4444", "#3b82f6", "#22c55e", "#a855f7"];
 
@@ -3626,15 +3626,8 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
     playing: isDanceMediaPlaying(),
     totalMoves: danceTestMoves.length,
     movesRevision,
-    // V9: em sincronizações forçadas o próprio PC envia a timeline canônica ao
-    // servidor. O servidor guarda e replica isso ao celular, eliminando JSON
-    // antigo/cacheado como fonte para movimentos e Gold Moves/YEAH.
-    timeline: force ? danceTestMoves.map(move => ({
-      name: String(move?.name || "").slice(0, 80),
-      time: Math.round(Number(move?.time || 0)),
-      duration: Math.max(0, Math.round(Number(move?.duration || 0))),
-      goldMove: Boolean(move?.goldMove)
-    })) : undefined,
+    // V11: o PC NÃO envia os movimentos para o servidor. Ele envia apenas a
+    // revisão para o celular conferir se carregou o mesmo JSON diretamente.
     hostOneWayMs: Math.max(0, Math.min(1000, danceHostServerRttMs / 2)),
     reason
   };
@@ -4604,7 +4597,7 @@ function finalizeDanceMoveJudging(index) {
 }
 
 function syncDanceMoveJudging() {
-  // V5: PC não calcula mais o movimento. Só mantém o relógio do celular sincronizado.
+  // V11: PC não calcula o movimento. Só mantém o relógio do celular sincronizado.
   broadcastDancePhoneSession("sync", false);
 }
 

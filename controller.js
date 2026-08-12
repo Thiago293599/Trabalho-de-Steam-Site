@@ -42,7 +42,7 @@ themeToggle?.addEventListener("click", () => {
 
 applyTheme(getCurrentTheme(), false);
 
-const REQUIRED_SERVER_PROTOCOL = 10;
+const REQUIRED_SERVER_PROTOCOL = 11;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 const configuredServerUrl = String(window.GAME_CONFIG?.SERVER_URL || "").trim();
 
@@ -146,12 +146,12 @@ let sensorLastGenericAccelAt = 0;
 
 let sensorObserved = { motion: false, orientation: false, gyro: false, accelerometer: false, orientationFallback: false };
 
-/* ---------- Just Dance V8: classifiers validados + timeline PC/celular sincronizada ---------- */
+/* ---------- Just Dance V11: cálculo autoritativo no celular + servidor relay ---------- */
 const PHONE_DANCE_MAX_SCORE = 13333;
 const PHONE_DANCE_WEIGHTS = Object.freeze({ PERFECT: 1, SUPER: 0.8, GOOD: 0.6, OK: 0.35, YEAH: 1, X: 0 });
 const PHONE_DANCE_SONGS = Object.freeze({
   RainOverMe: Object.freeze({ id:"RainOverMe", base:"minigames/just-dance/songs/RainOverMe", movesFile:"RainOverMe_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
-  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"auto", classifierFolder:"classifiers_WIIU", fallbackClassifierFolder:"classifiers_WII_source", sourceSongAliases:["EarthSong","Earth Song"] }),
+  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
   ItsRainingMen: Object.freeze({ id:"ItsRainingMen", base:"minigames/just-dance/songs/ItsRainingMen", movesFile:"ItsRainingMen_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" })
 });
 const PHONE_DANCE_SCORE_TUNING = Object.freeze({
@@ -512,36 +512,30 @@ function phoneDanceChaosScore(stats){
 
 function phoneDanceClockNow(){if(!phoneDanceClock.initialized)return 0;return phoneDanceClock.timelineMs+(phoneDanceClock.playing?(performance.now()-phoneDanceClock.anchorPerf):0);}
 function phoneDanceSyncClock(payload){const now=performance.now(),reason=String(payload?.reason||"sync"),playing=Boolean(payload?.playing);phoneMeasureServerClock(false);const serverNowEstimate=Date.now()+phoneDanceServerOffsetMs;const serverAge=Number.isFinite(Number(payload?.serverTime))?Math.max(0,Math.min(1800,serverNowEstimate-Number(payload.serverTime))):Math.max(0,phoneDanceServerRttMs/2);const hostLeg=Math.max(0,Math.min(1000,Number(payload?.hostOneWayMs||0)));const target=Number(payload?.timelineMs||0)+(playing?serverAge+hostLeg:0); if(!phoneDanceClock.initialized||["song","seek","room","play","pause","ended"].includes(reason)){phoneDanceClock={timelineMs:target,anchorPerf:now,playing,initialized:true};return;} const predicted=phoneDanceClockNow(),drift=target-predicted; const correction=Math.max(-55,Math.min(55,drift*.14)); phoneDanceClock={timelineMs:predicted+correction,anchorPerf:now,playing,initialized:true};}
-async function phoneLoadDanceSong(songId,serverTimeline=null,expectedRevision=""){
+async function phoneLoadDanceSong(songId,expectedRevision="") {
   const song=PHONE_DANCE_SONGS[songId]||PHONE_DANCE_SONGS.RainOverMe,token=++phoneDanceLoadToken;
   phoneDanceReady=false;
   phoneDanceProfiles=new Map();
   phoneDanceCompetitors=new Map();
   phoneDanceLoadMobileTuning(song.id);
-  if(sensorNotice)sensorNotice.textContent=`Carregando classifiers reais e validando os arquivos desta música…`;
+  if(sensorNotice)sensorNotice.textContent=`Carregando movimentos e classifiers ${String(song.classifierFormat||"").toUpperCase()} diretamente neste celular…`;
   try{
+    // O celular é a fonte do julgamento. Ele próprio lê o moves atual, sem cache.
     let moves=[];
-    if(Array.isArray(serverTimeline)&&serverTimeline.length){
-      // V9: esta é a mesma timeline que o PC carregou. O servidor apenas a
-      // replica; portanto movimentos e YEAH não podem voltar para um JSON antigo.
-      moves=serverTimeline.map(move=>({
-        name:String(move?.name||"").slice(0,80),
-        time:Math.round(Number(move?.time||0)),
-        duration:Math.max(0,Math.round(Number(move?.duration||0))),
-        goldMove:Boolean(move?.goldMove)
-      }));
-    }else{
+    let loadedRevision="";
+    for(let attempt=0;attempt<2;attempt++){
       const r=await fetch(phoneDanceFreshUrl(`${song.base}/moves/${song.movesFile}`),{cache:"no-store"});
       if(!r.ok)throw new Error(`moves HTTP ${r.status}`);
-      moves=await r.json();
+      const body=await r.json();
+      moves=Array.isArray(body)?body.slice().sort((a,b)=>Number(a.time||0)-Number(b.time||0)):[];
+      loadedRevision=phoneDanceMovesRevisionOf(moves);
+      if(!expectedRevision||loadedRevision===String(expectedRevision))break;
     }
     if(token!==phoneDanceLoadToken)return;
-    phoneDanceMoves=Array.isArray(moves)?moves.slice().sort((a,b)=>Number(a.time||0)-Number(b.time||0)):[];
-    phoneDanceMovesRevision=phoneDanceMovesRevisionOf(phoneDanceMoves);
-    if(expectedRevision&&phoneDanceMovesRevision!==String(expectedRevision)){
-      throw new Error(`timeline revision mismatch: PC=${expectedRevision} PHONE=${phoneDanceMovesRevision}`);
-    }
+    phoneDanceMoves=moves;
+    phoneDanceMovesRevision=loadedRevision;
     phoneDanceLoadedSongId=song.id;
+
     const names=[...new Set(phoneDanceMoves.map(m=>String(m?.name||"")).filter(Boolean))];
     const candidates=new Map();
     await Promise.all(names.map(async name=>{
@@ -559,69 +553,56 @@ async function phoneLoadDanceSong(songId,serverTimeline=null,expectedRevision=""
     }));
     if(token!==phoneDanceLoadToken)return;
 
+    // IMPORTANT: o arquivo pertencente ao nome do movimento é usado se for
+    // parseável. MSMs com conteúdo igual NÃO são descartados: isso é decisão
+    // do pacote da música, não do servidor nem de uma heurística nossa.
     const msmSignatureCounts=new Map();
-    for(const found of candidates.values())for(const item of found)if(item.profile?.format==="msm"){const sig=item.profile.signature||phoneMsmSignature(item.profile);msmSignatureCounts.set(sig,(msmSignatureCounts.get(sig)||0)+1);}
-    const aliases=(song.sourceSongAliases||[song.id]).map(phoneNormalizeId);
-    let loaded=0,rejectedMsm=0,duplicateMsm=0,fallbackLive=0,sourceMismatch=0;
+    for(const found of candidates.values())for(const item of found)if(item.profile?.format==="msm"){
+      const sig=item.profile.signature||phoneMsmSignature(item.profile);
+      msmSignatureCounts.set(sig,(msmSignatureCounts.get(sig)||0)+1);
+    }
+    let loaded=0,duplicateMsm=0;
     for(const name of names){
       const found=candidates.get(String(name).toLowerCase())||[];
-      const msm=found.find(x=>x.profile?.format==="msm")||null;
-      const live=found.find(x=>x.profile?.format==="livemove")||null;
-      let chosen=null;
-      if(msm){
-        const p=msm.profile,sig=p.signature||phoneMsmSignature(p),duplicates=Number(msmSignatureCounts.get(sig)||0),source=phoneNormalizeId(p.sourceSong),sourceOk=!source||aliases.includes(source);
-        const uniqueOk=duplicates<=1;
-        if(sourceOk&&uniqueOk)chosen=p;
-        else{
-          rejectedMsm++;
-          if(!uniqueOk)duplicateMsm++;
-          if(!sourceOk)sourceMismatch++;
-        }
+      const chosen=(found.find(x=>x.profile?.format==="msm")||found[0]||null)?.profile||null;
+      if(chosen){
+        phoneDanceProfiles.set(String(name).toLowerCase(),chosen);
+        loaded++;
+        if(chosen.format==="msm"&&Number(msmSignatureCounts.get(chosen.signature||phoneMsmSignature(chosen))||0)>1)duplicateMsm++;
       }
-      if(!chosen&&live){chosen=live.profile;fallbackLive++;}
-      if(chosen){phoneDanceProfiles.set(String(name).toLowerCase(),chosen);loaded++;}
     }
     if(token!==phoneDanceLoadToken)return;
     phoneBuildMsmCompetitors();
     const activeFormats=[...new Set([...phoneDanceProfiles.values()].map(p=>String(p.format||"").toUpperCase()))];
-    phoneDanceClassifierSummary={loaded,total:names.length,format:activeFormats.join("+")||String(song.classifierFormat||"").toUpperCase(),rejectedMsm,duplicateMsm,fallbackLive,sourceMismatch};
-    // A timeline continua avançando mesmo sem classifier confiável. Nesse caso
-    // phoneJudge retorna X, em vez de inventar nota ou ficar preso em eventos antigos.
+    phoneDanceClassifierSummary={loaded,total:names.length,format:activeFormats.join("+")||String(song.classifierFormat||"").toUpperCase(),duplicateMsm};
     phoneDanceReady=phoneDanceMoves.length>0;
     phoneDanceResetLocal(true);
+
+    const revisionOk=!expectedRevision||phoneDanceMovesRevision===String(expectedRevision);
     if(sensorNotice){
-      if(!loaded)sensorNotice.textContent=`Timeline sincronizada pelo servidor • 0/${names.length} classifiers confiáveis. Os movimentos serão marcados no tempo correto como X, sem inventar pontuação. MSM rejeitados: ${rejectedMsm} (${duplicateMsm} duplicados, ${sourceMismatch} de outra música).`;
-      else{
-        const extra=[rejectedMsm?`${rejectedMsm} MSM rejeitados`:"",fallbackLive?`${fallbackLive} LiveMove usados como fallback`:""].filter(Boolean).join(" • ");
-        sensorNotice.textContent=`Pontuação local V8 pronta • ${loaded}/${names.length} classifiers reais (${activeFormats.join("+")})${extra?` • ${extra}`:""} • o celular faz o julgamento.`;
-      }
+      const duplicateInfo=duplicateMsm?` • ${duplicateMsm} nomes usam MSM de conteúdo repetido (ainda assim são usados)`:"";
+      const revisionInfo=revisionOk?"":` • AVISO: revisão PC ${expectedRevision} / celular ${phoneDanceMovesRevision}`;
+      sensorNotice.textContent=`Celular pronto • ${loaded}/${names.length} classifiers ${activeFormats.join("+")||"—"}${duplicateInfo}${revisionInfo} • julgamento é calculado aqui e enviado pronto ao servidor.`;
     }
   }catch(error){
     console.error("Falha ao preparar classifiers no celular",error);
-    if(sensorNotice)sensorNotice.textContent="A timeline continua sincronizada, mas os classifiers falharam. Os eventos serão marcados como X para não gerar pontuação falsa.";
+    phoneDanceReady=false;
+    if(sensorNotice)sensorNotice.textContent="Não foi possível carregar movimentos/classifiers no celular. O servidor não gera nota de substituição.";
   }
 }
 async function phoneApplyDanceSession(payload){
   if(!payload||payload.roomCode!==joinedRoom)return;
   const previousSongId=phoneDanceSession?.songId||"";
   const incomingRevision=String(payload?.movesRevision||"");
-  const serverTimeline=Array.isArray(payload?.timeline)?payload.timeline:null;
   const songChanged=previousSongId!==String(payload.songId||"");
   const songNotLoaded=phoneDanceLoadedSongId!==String(payload.songId||"");
   const timelineMismatch=Boolean(incomingRevision&&phoneDanceMovesRevision&&incomingRevision!==phoneDanceMovesRevision);
   const explicitSongRefresh=String(payload?.reason||"")==="song";
   phoneDanceSession={...payload};
   phoneDanceSyncClock(payload);
-
-  // V9: quando o servidor possui a timeline canônica, ela tem prioridade total.
-  // Assim o celular usa exatamente os mesmos movimentos e Gold Moves/YEAH do PC.
-  if(songChanged||songNotLoaded||timelineMismatch||explicitSongRefresh||(serverTimeline&&serverTimeline.length&&phoneDanceMoves.length!==serverTimeline.length)){
-    await phoneLoadDanceSong(payload.songId,serverTimeline,incomingRevision);
+  if(songChanged||songNotLoaded||timelineMismatch||explicitSongRefresh){
+    await phoneLoadDanceSong(payload.songId,incomingRevision);
     phoneDanceSyncClock(payload);
-    if(incomingRevision&&phoneDanceMovesRevision!==incomingRevision){
-      console.warn("Timeline do controle ainda difere do PC",{pc:incomingRevision,phone:phoneDanceMovesRevision,songId:payload.songId});
-      if(sensorNotice)sensorNotice.textContent=`O servidor detectou timeline diferente. Reabra o controle após reiniciar o SERVIDOR_PC.`;
-    }
   }
   if(sensorModeRequested&&sensorPermissionGranted&&!sensorStreaming)startSensorStreaming();
 }
@@ -676,7 +657,7 @@ function phoneJudge(stats,move){
   const judgement=q>=cfg.perfectQ?"PERFECT":q>=cfg.superQ?"SUPER":q>=cfg.goodQ?"GOOD":q>=cfg.okQ?"OK":"X";
   return{judgement,quality,classifierMatch:cm,classifierRaw:raw,classifierRunnerUp:Math.round(classifierRunnerUp*1000)/1000,classifierMargin:Math.round(classifierMargin*1000)/1000,calibrationRef:ref};
 }
-function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,movesRevision:phoneDanceMovesRevision,...result,scoredAt:Date.now(),source:"phone-v9-server-timeline"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
+function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,movesRevision:phoneDanceMovesRevision,...result,scoredAt:Date.now(),source:"phone-v11-direct-msm"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
 function phoneFlushDanceResults(){if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;for(const [index,payload] of [...phoneDancePendingResults]){socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:dance-judgement",payload,(error,response)=>{if(!error&&response?.ok){phoneDancePendingResults.delete(index);if(response.state)applyState(response.state);}});}}
 function phoneFinalizeActiveMove(){const i=phoneDanceActiveMoveIndex;if(i<0||phoneDanceJudgedMoves.has(i))return;const move=phoneDanceMoves[i];if(!move)return;const result=phoneJudge(phoneDanceStats,move);phoneDanceJudgedMoves.add(i);phoneQueueResult(i,move,result);phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;}
 function phoneSyncMoveWindow(){if(!phoneDanceReady||!phoneDanceClock.playing||!sensorStreaming)return;const current=phoneMoveIndexAt(phoneDanceClockNow());if(phoneDanceActiveMoveIndex>=0&&current!==phoneDanceActiveMoveIndex)phoneFinalizeActiveMove();if(current>=0&&!phoneDanceJudgedMoves.has(current)&&phoneDanceActiveMoveIndex!==current){phoneDanceActiveMoveIndex=current;phoneDanceStats=phoneMakeStats();}}
