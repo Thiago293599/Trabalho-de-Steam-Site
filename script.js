@@ -337,6 +337,8 @@ let devSensorJoinUrl = "";
 let devSensorModeEnabled = false;
 let danceTestMoves = [];
 let danceTestPictos = [];
+let danceTestBeats = [];
+let danceLastPictoBeatIndex = -1;
 let dancePictoAtlas = null;
 let danceTestLyrics = [];
 let danceLyricLines = [];
@@ -3385,6 +3387,8 @@ async function switchDanceSong(songId, announce = true) {
   danceTestSongLoaded = false;
   danceTestMoves = [];
   danceTestPictos = [];
+  danceTestBeats = [];
+  danceLastPictoBeatIndex = -1;
   danceTestLyrics = [];
   danceLyricLines = [];
   dancePictoAtlas = null;
@@ -3716,6 +3720,48 @@ function renderDanceLyrics(timeMs) {
   });
 }
 
+// V6.3: a barra dos pictos usa os beats reais da timeline.
+// A barrinha branca pulsa a cada beat; o brilho vertical por baixo alterna a cada 2 beats.
+function dancePictoBeatIndexAt(timeMs) {
+  if (!danceTestBeats.length) return -1;
+  let low = 0;
+  let high = danceTestBeats.length - 1;
+  let found = -1;
+  while (low <= high) {
+    const middle = (low + high) >> 1;
+    if (danceTestBeats[middle] <= timeMs) {
+      found = middle;
+      low = middle + 1;
+    } else {
+      high = middle - 1;
+    }
+  }
+  return found;
+}
+
+function updateDancePictoBeatPulse(timeMs) {
+  if (!dancePictoLane || !danceTestBeats.length) return;
+  const beatIndex = dancePictoBeatIndexAt(timeMs);
+  if (beatIndex < 0) {
+    danceLastPictoBeatIndex = -1;
+    dancePictoLane.classList.remove("jd-beat-pulse", "jd-two-beat-pulse");
+    return;
+  }
+  if (beatIndex === danceLastPictoBeatIndex) return;
+  danceLastPictoBeatIndex = beatIndex;
+
+  // Ao arrastar o vídeo para o meio de um beat, não dispara uma pulsação atrasada.
+  // Durante reprodução normal cruzamos o beat em poucos milissegundos.
+  const beatAgeMs = timeMs - Number(danceTestBeats[beatIndex] || 0);
+  if (beatAgeMs > 180) return;
+
+  // Reinicia a animação mesmo quando os beats são muito próximos.
+  dancePictoLane.classList.remove("jd-beat-pulse", "jd-two-beat-pulse");
+  void dancePictoLane.offsetWidth;
+  dancePictoLane.classList.add("jd-beat-pulse");
+  if ((beatIndex & 1) === 0) dancePictoLane.classList.add("jd-two-beat-pulse");
+}
+
 function renderDancePictos(timeMs) {
   if (!dancePictoItems || !dancePictoAtlas || !danceTestPictos.length) return;
   dancePictoItems.innerHTML = "";
@@ -3766,6 +3812,7 @@ function updateDanceVisualHud() {
   const timeMs = getDanceTimelineTimeMs();
   renderDancePictos(timeMs);
   renderDanceLyrics(timeMs);
+  updateDancePictoBeatPulse(timeMs);
   updateDanceGoldMoveFx(timeMs);
   syncDanceVideoToAudio(false);
   updateDancePlayerControls();
@@ -3799,6 +3846,8 @@ function resetLocalDanceJudging() {
   danceLocallyJudgedMoves.clear();
   danceLastVideoTimeMs = 0;
   danceLastLyricLineIndex = -999;
+  danceLastPictoBeatIndex = -1;
+  dancePictoLane?.classList.remove("jd-beat-pulse", "jd-two-beat-pulse");
   resetDanceGoldMoveFx(true);
 }
 
@@ -4443,6 +4492,10 @@ async function loadDanceTestSongData(force = false) {
     const [moves, song, atlas] = await Promise.all([movesResponse.json(), songResponse.json(), atlasResponse.json()]);
     danceTestMoves = Array.isArray(moves) ? moves.slice().sort((a, b) => Number(a.time || 0) - Number(b.time || 0)) : [];
     danceTestPictos = Array.isArray(song?.pictos) ? song.pictos.slice().sort((a, b) => Number(a.time || 0) - Number(b.time || 0)) : [];
+    danceTestBeats = Array.isArray(song?.beats)
+      ? song.beats.map(value => Number(value)).filter(Number.isFinite).sort((a, b) => a - b)
+      : [];
+    danceLastPictoBeatIndex = -1;
     danceTestLyrics = Array.isArray(song?.lyrics) ? song.lyrics.slice().sort((a, b) => Number(a.time || 0) - Number(b.time || 0)) : [];
     danceLyricLines = buildDanceLyricLines(danceTestLyrics);
     danceSourceVideoOffsetMs = Math.max(0, Number(song?.videoOffset ?? 0));
@@ -4496,6 +4549,7 @@ function updateDanceSongTimeline() {
   if (danceNextMove) danceNextMove.textContent = next ? `${next.name}${next.goldMove ? " • GOLD/YEAH!" : ""} • ${formatDanceTime(next.time / 1000)}` : "Fim";
   renderDancePictos(timeMs);
   renderDanceLyrics(timeMs);
+  updateDancePictoBeatPulse(timeMs);
   syncDanceMoveJudging();
 }
 

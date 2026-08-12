@@ -1,4 +1,4 @@
-* {
+﻿* {
   box-sizing: border-box;
 }
 
@@ -344,7 +344,7 @@ input:focus {
     border: 1px solid var(--card-border);
     border-radius: 999px;
     background: rgba(36, 35, 35, 0.82);
-    /* No tema claro, o texto da versão fica branco para ganhar contraste. */
+    /* No tema claro, o texto da versÃ£o fica branco para ganhar contraste. */
     color: #ffffff;
     font-size: 0.82rem;
     font-weight: 800;
@@ -1078,7 +1078,7 @@ input:focus {
 }
 
 .remote-board .dice-area::after {
-  content: "O dado é controlado pelo dispositivo do jogador da vez.";
+  content: "O dado Ã© controlado pelo dispositivo do jogador da vez.";
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
@@ -1099,7 +1099,7 @@ input:focus {
 }
 
 
-/* ---------- Botão Controles no menu principal ---------- */
+/* ---------- BotÃ£o Controles no menu principal ---------- */
 .controls-mode-card {
   position: relative;
 }
@@ -1438,7 +1438,7 @@ html[data-theme="dark"] .online-kick-button {
 }
 
 
-/* ---------- Correções do tema escuro v2 ---------- */
+/* ---------- CorreÃ§Ãµes do tema escuro v2 ---------- */
 html[data-theme="dark"] {
   --bg: #101115;
   --panel: #191a1f;
@@ -1610,7 +1610,7 @@ html[data-theme="dark"] .modal {
   background: rgba(0,0,0,.72);
 }
 
-/* No tema escuro, mantém a cor anterior do texto da versão. */
+/* No tema escuro, mantÃ©m a cor anterior do texto da versÃ£o. */
 html[data-theme="dark"] .version-badge {
   color: var(--muted);
 }
@@ -1627,9 +1627,9 @@ html[data-theme="dark"] .pip {
 }
 
 
-/* ---------- Correção mínima do dado 3D ---------- */
+/* ---------- CorreÃ§Ã£o mÃ­nima do dado 3D ---------- */
 /*
-  Mantém o cubo original da v3.3.
+  MantÃ©m o cubo original da v3.3.
   Nenhum elemento extra, SVG ou WebGL.
   O tamanho continua 70x70px (64x64px no mobile).
 */
@@ -1643,7 +1643,7 @@ html[data-theme="dark"] .pip {
     0 1px 1px rgba(255,255,255,.85);
 }
 
-/* O corpo/base permanece branco também no tema escuro. */
+/* O corpo/base permanece branco tambÃ©m no tema escuro. */
 html[data-theme="dark"] .dice-cube {
   background:
     radial-gradient(circle at 28% 18%, rgba(255,255,255,.98), transparent 37%),
@@ -1680,7 +1680,7 @@ html[data-theme="dark"] .dice-face {
   background: transparent;
 }
 
-/* O WebGL já desenha uma sombra suave no próprio canvas. */
+/* O WebGL jÃ¡ desenha uma sombra suave no prÃ³prio canvas. */
 .dice-webgl + .dice-shadow {
   display: none;
 }
@@ -1867,7 +1867,7 @@ body.site-loading {
 
 
 /* ---------- Menu Dev + Just Dance Sensor Lab ---------- */
-.dev-menu-screen{padding-top:72px;padding-bottom:42px}.dev-menu-card{width:min(980px,calc(100% - 28px));}.dev-shortcut-note{display:flex;align-items:center;gap:11px;margin:0 0 20px;padding:11px 13px;border:1px solid var(--line);border-radius:15px;background:rgba(127,127,140,.07);color:var(--muted);font-size:13px;font-weight:750}.dev-shortcut-note kbd{min-width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-bottom-width:3px;border-radius:9px;background:var(--panel);color:var(--text);font-weight:900}.dev-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.dev-tool-card{min-width:0;padding:18px;border:1px solid var(--line);border-radius:20px;background:rgba(127,127,140,.045)}.dev-tool-card-featured{grid-row:span 2}.dev-tool-head{display:flex;align-items:flex-start;gap:12px}.dev-tool-icon{width:43px;height:43px;flex:0 0 auto;display:grid;place-items:center;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:20px}.dev-tool-head strong{display:block;font-size:15px}.dev-tool-head small{display:block;margin-top:4px;color:var(--muted);line-height:1.45}.dev-actions-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.dev-actions-row .primary,.dev-actions-row .secondary{flex:1 1 150px}.dev-tool-status{margin:12px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.dev-feature-list{display:grid;gap:8px;margin:17px 0}.dev-feature-list span{position:relative;padding:8px 10px 8px 31px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:12px;font-weight:750}.dev-feature-list span:before{content:'✓';position:absolute;left:11px;color:#4c8a5c;font-weight:950}.dev-round-flow{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:17px}.dev-round-flow span{padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:11px;font-weight:850}.dev-round-flow b{color:var(--muted)}
+.dev-menu-screen{padding-top:72px;padding-bottom:42px}.dev-menu-card{width:min(980px,calc(100% - 28px));}.dev-shortcut-note{display:flex;align-items:center;gap:11px;margin:0 0 20px;padding:11px 13px;border:1px solid var(--line);border-radius:15px;background:rgba(127,127,140,.07);color:var(--muted);font-size:13px;font-weight:750}.dev-shortcut-note kbd{min-width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-bottom-width:3px;border-radius:9px;background:var(--panel);color:var(--text);font-weight:900}.dev-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.dev-tool-card{min-width:0;padding:18px;border:1px solid var(--line);border-radius:20px;background:rgba(127,127,140,.045)}.dev-tool-card-featured{grid-row:span 2}.dev-tool-head{display:flex;align-items:flex-start;gap:12px}.dev-tool-icon{width:43px;height:43px;flex:0 0 auto;display:grid;place-items:center;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:20px}.dev-tool-head strong{display:block;font-size:15px}.dev-tool-head small{display:block;margin-top:4px;color:var(--muted);line-height:1.45}.dev-actions-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.dev-actions-row .primary,.dev-actions-row .secondary{flex:1 1 150px}.dev-tool-status{margin:12px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.dev-feature-list{display:grid;gap:8px;margin:17px 0}.dev-feature-list span{position:relative;padding:8px 10px 8px 31px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:12px;font-weight:750}.dev-feature-list span:before{content:'âœ“';position:absolute;left:11px;color:#4c8a5c;font-weight:950}.dev-round-flow{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:17px}.dev-round-flow span{padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:11px;font-weight:850}.dev-round-flow b{color:var(--muted)}
 
 .dance-lab-card{width:min(1080px,calc(100% - 28px));}.dance-lab-layout{display:grid;grid-template-columns:minmax(280px,.82fr) minmax(360px,1.18fr);gap:15px;align-items:start}.dance-lab-connect,.dance-lab-monitor{padding:18px;border:1px solid var(--line);border-radius:20px;background:rgba(127,127,140,.045)}.dance-lab-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.dance-lab-section-head .tiny-label{display:block;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}.sensor-lab-badge{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.sensor-lab-badge.active{background:#e9f7ed;border-color:#a5cfaf;color:#346940}.sensor-lab-badge.waiting{background:#fff8e5;border-color:#ead39a;color:#805f18}.dance-join-box{display:grid;gap:8px;margin-top:15px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.dance-join-box>span{font-size:11px;color:var(--muted);font-weight:800}.dance-join-box code{display:block;overflow-wrap:anywhere;padding:9px 10px;border-radius:10px;background:rgba(127,127,140,.08);font-size:11px}.dance-lab-buttons .secondary,.dance-lab-buttons .primary{padding:10px 12px;font-size:12px}.dance-security-note{margin:13px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.dance-sensor-players{display:grid;gap:10px;margin-top:14px}.dance-empty-state{padding:24px 14px;border:1px dashed var(--line);border-radius:15px;color:var(--muted);text-align:center;font-size:12px}.dance-sensor-player{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}.dance-player-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.dance-player-name{display:flex;align-items:center;gap:8px;min-width:0}.dance-player-dot{width:10px;height:10px;border-radius:999px;flex:0 0 auto}.dance-player-name strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dance-sensor-state{font-size:10px;font-weight:850;color:var(--muted)}.dance-sensor-state.live{color:#3c7a4b}.dance-player-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}.dance-player-metric{padding:8px;border-radius:11px;background:rgba(127,127,140,.075)}.dance-player-metric span{display:block;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}.dance-player-metric strong{display:block;margin-top:3px;font-size:14px}.dance-intensity-track{height:8px;margin-top:10px;border-radius:999px;background:rgba(127,127,140,.16);overflow:hidden}.dance-intensity-fill{display:block;height:100%;width:0;border-radius:inherit;background:currentColor;color:#4f80da;transition:width .08s linear}.dance-capabilities{margin-top:8px;color:var(--muted);font-size:10px;line-height:1.4}.dance-lab-footer-note{display:flex;gap:8px;align-items:flex-start;margin-top:14px;padding:13px 15px;border:1px solid var(--line);border-radius:16px;background:rgba(127,127,140,.055);font-size:11px;line-height:1.5}.dance-lab-footer-note span{color:var(--muted)}
 
@@ -1875,7 +1875,7 @@ html[data-theme="dark"] .dev-tool-card,html[data-theme="dark"] .dance-lab-connec
 
 @media(max-width:780px){.dev-grid,.dance-lab-layout{grid-template-columns:1fr}.dev-tool-card-featured{grid-row:auto}.dev-menu-screen{padding-top:62px}.dance-player-metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:500px){.dev-menu-card,.dance-lab-card{width:min(100% - 18px,1080px)}.dev-tool-card,.dance-lab-connect,.dance-lab-monitor{padding:14px}.dev-actions-row{display:grid;grid-template-columns:1fr}.dev-actions-row .primary,.dev-actions-row .secondary{width:100%}.dance-player-metrics{grid-template-columns:1fr 1fr}.dance-player-metric:last-child{grid-column:1/-1}.dance-lab-footer-note{display:block}.dance-lab-footer-note strong{display:block;margin-bottom:5px}}
 
-/* Just Dance - primeira música de teste */
+/* Just Dance - primeira mÃºsica de teste */
 .dance-song-test{display:grid;grid-template-columns:minmax(240px,.72fr) minmax(360px,1.28fr);gap:14px;align-items:start;margin:0 0 15px;padding:16px;border:1px solid var(--line);border-radius:20px;background:rgba(127,127,140,.045)}
 .dance-song-info{display:flex;gap:12px;align-items:center}.dance-song-info img{width:96px;aspect-ratio:1/1;object-fit:cover;border-radius:15px;border:1px solid var(--line)}.dance-song-info strong{display:block;font-size:20px}.dance-song-info small,.dance-song-info p{display:block;margin-top:4px;color:var(--muted);font-size:11px;line-height:1.4}.dance-test-video{width:100%;aspect-ratio:16/9;border-radius:15px;background:#000;display:block}.dance-song-readout{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.dance-song-readout>div{padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:var(--panel);min-width:0}.dance-song-readout span{display:block;color:var(--muted);font-size:9px;font-weight:850;text-transform:uppercase}.dance-song-readout strong{display:block;margin-top:3px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dance-song-note{grid-column:1/-1;margin:0;color:var(--muted);font-size:10px;line-height:1.45}.dance-song-note code{font-size:10px}
 html[data-theme="dark"] .dance-song-test{background:#202126}
@@ -1906,8 +1906,8 @@ html[data-theme="dark"] .dance-judgement-legend .yeah{color:#ffe66a;border-color
 @media(max-width:780px){.dance-picto-lane{width:60%;height:88px}.dance-video-judgements{left:2%;right:2%;gap:1%}}@media(max-width:500px){.dance-picto-lane{right:1%;width:65%;height:72px}.dance-video-player-name{padding:1px 4px}.dance-video-judge-text{-webkit-text-stroke:.5px rgba(255,255,255,.65)}.dance-judgement-counts{grid-template-columns:repeat(3,1fr)}}
 
 
-/* ---------- Just Dance: sync de vídeo + pictos rápidos + karaokê ---------- */
-/* O trilho se estende para fora da direita do vídeo. Assim os pictos nascem fora da área visível. */
+/* ---------- Just Dance: sync de vÃ­deo + pictos rÃ¡pidos + karaokÃª ---------- */
+/* O trilho se estende para fora da direita do vÃ­deo. Assim os pictos nascem fora da Ã¡rea visÃ­vel. */
 .dance-picto-lane{right:-12%;bottom:2.5%;width:62%;height:clamp(66px,11.5vw,110px);overflow:visible}
 .dance-picto-item{bottom:12px;opacity:.94;transform:scale(.86);transition:none;will-change:left,transform,opacity}
 .dance-picto-item.hit{filter:drop-shadow(0 3px 5px rgba(0,0,0,.82)) drop-shadow(0 0 8px rgba(255,255,255,.62))}
@@ -1930,7 +1930,7 @@ html[data-theme="dark"] .dance-judgement-legend .yeah{color:#ffe66a;border-color
 @media(max-width:500px){.dance-picto-lane{right:-17%;width:74%;height:74px}.dance-karaoke{left:2.2%;bottom:4.5%;width:48%;gap:2px}.dance-karaoke-current{font-size:clamp(10px,3vw,16px)}.dance-karaoke-next{font-size:clamp(8px,2.3vw,12px)}}
 
 
-/* ---------- Just Dance: calibração fina de sincronia ---------- */
+/* ---------- Just Dance: calibraÃ§Ã£o fina de sincronia ---------- */
 .dance-sync-calibrator{grid-column:1/-1;padding:11px 12px;border:1px dashed var(--line);border-radius:14px;background:rgba(127,127,140,.055);display:grid;gap:9px}
 .dance-sync-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .dance-sync-head>div:first-child{display:grid;gap:2px}.dance-sync-head strong{font-size:18px}
@@ -1947,15 +1947,15 @@ html[data-theme="dark"] .dance-sync-calibrator{background:rgba(255,255,255,.035)
 .dance-song-info{grid-column:1/-1}.dance-player-shell{grid-column:1/-1;min-width:0;display:grid;gap:0;border-radius:15px;overflow:hidden;background:#050505}.dance-player-shell .dance-video-stage{border-radius:15px 15px 0 0}.dance-player-controls{display:grid;grid-template-columns:auto auto minmax(100px,1fr) auto auto auto;align-items:center;gap:8px;padding:8px 9px;background:#101114;color:#fff}.dance-player-icon-button{width:34px;height:32px;border:0;border-radius:8px;background:#fff;color:#111;font-weight:900;cursor:pointer}.dance-player-clock{font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}.dance-player-seek{width:100%;accent-color:#fff}.dance-volume-control{display:flex;align-items:center;gap:5px;font-size:11px}.dance-volume-control input{width:76px;accent-color:#fff}.dance-player-controls .secondary{border-color:rgba(255,255,255,.24);background:#202228;color:#fff}
 .dance-test-video{height:100%;object-fit:contain}.dance-video-stage[data-video-fit="cover"] .dance-test-video{object-fit:cover}.dance-video-stage{aspect-ratio:16/9}.dance-player-hud-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:2;pointer-events:none}.dance-yeah-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:9;pointer-events:none;opacity:0;transform:scale(var(--dance-yeah-scale,1));transform-origin:center;transition:opacity .06s linear,transform .12s ease}.dance-yeah-canvas.active{opacity:1}
 .dance-star-hud{position:absolute;left:2.3%;top:17%;z-index:6;display:grid;gap:3px;min-width:140px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.78));transform-origin:left top}.dance-hud-stars{display:flex;gap:1px}.dance-hud-star{position:relative;width:clamp(17px,2.7vw,31px);aspect-ratio:1/1}.dance-hud-star img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.dance-hud-star .fill{opacity:0;transform:scale(.55);transition:opacity .25s ease,transform .3s cubic-bezier(.2,.85,.2,1)}.dance-hud-star.filled .fill{opacity:1;transform:scale(1)}.dance-hud-star.filled .outline{opacity:.15}.dance-hud-score-row{display:flex;align-items:center;gap:5px}.dance-hud-score-row strong{color:#fff;font-size:clamp(10px,1.55vw,18px);font-weight:1000;text-shadow:0 2px 3px #000;font-variant-numeric:tabular-nums}.dance-hud-rank-icon{width:clamp(18px,3vw,34px);height:clamp(18px,3vw,34px);object-fit:contain}.dance-star-hud.milestone{animation:danceStarMilestone .72s cubic-bezier(.18,.85,.2,1)}@keyframes danceStarMilestone{0%{transform:scale(.78);opacity:.5}50%{transform:scale(1.16);opacity:1}100%{transform:scale(1)}}
-/* Letras menores por padrão; tamanho pode ser trocado sem recarregar a música. */
+/* Letras menores por padrÃ£o; tamanho pode ser trocado sem recarregar a mÃºsica. */
 .dance-video-stage[data-lyrics-size="small"] .dance-karaoke-current{font-size:clamp(9px,1.35vw,18px)}.dance-video-stage[data-lyrics-size="small"] .dance-karaoke-next{font-size:clamp(7px,1vw,13px)}.dance-video-stage[data-lyrics-size="normal"] .dance-karaoke-current{font-size:clamp(11px,1.65vw,22px)}.dance-video-stage[data-lyrics-size="normal"] .dance-karaoke-next{font-size:clamp(8px,1.18vw,15px)}.dance-video-stage[data-lyrics-size="large"] .dance-karaoke-current{font-size:clamp(13px,2.1vw,27px)}.dance-video-stage[data-lyrics-size="large"] .dance-karaoke-next{font-size:clamp(10px,1.45vw,18px)}
 body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{position:fixed;inset:0;z-index:10000;border-radius:0;background:#000;display:flex;flex-direction:column}.dance-player-shell.window-mode .dance-video-stage{flex:1;min-height:0;width:100%;aspect-ratio:auto;border-radius:0}.dance-player-shell.window-mode .dance-test-video{width:100%;height:100%}.dance-player-shell.window-mode .dance-player-controls{flex:0 0 auto;border-radius:0}.dance-player-shell:fullscreen{display:flex;flex-direction:column;background:#000;border-radius:0}.dance-player-shell:fullscreen .dance-video-stage{flex:1;min-height:0;width:100%;aspect-ratio:auto;border-radius:0}.dance-player-shell:fullscreen .dance-test-video{width:100%;height:100%}.dance-player-shell:fullscreen .dance-player-controls{flex:0 0 auto}
 @media(max-width:900px){.dance-player-settings{grid-template-columns:1fr 1fr}.dance-player-shell{grid-column:1/-1}.dance-star-hud{top:15%}.dance-player-controls{grid-template-columns:auto auto 1fr auto}.dance-volume-control{display:none}.dance-player-controls #danceWindowBtn,.dance-player-controls #danceFullscreenBtn{font-size:9px}}
 @media(max-width:560px){.dance-player-settings{grid-template-columns:1fr}.dance-player-controls{grid-template-columns:auto 1fr auto}.dance-player-clock{display:none}.dance-player-seek{grid-column:1/-1;grid-row:2}.dance-player-controls #danceWindowBtn{display:none}.dance-star-hud{left:2%;top:14%;min-width:100px}.dance-hud-star{width:clamp(14px,5vw,22px)}}
 
 
-/* ---------- Just Dance: quadro 16:9 obrigatório + Scoring FX do IPK ---------- */
-/* O palco do gameplay nunca muda de proporção. Em telas ultrawide/verticais, sobra preto ao redor. */
+/* ---------- Just Dance: quadro 16:9 obrigatÃ³rio + Scoring FX do IPK ---------- */
+/* O palco do gameplay nunca muda de proporÃ§Ã£o. Em telas ultrawide/verticais, sobra preto ao redor. */
 .dance-video-stage{
   aspect-ratio:16/9;
   width:100%;
@@ -2012,7 +2012,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
   }
 }
 
-/* Feedbacks visuais originais: imagens + flares extraídos do patch_pc.ipk. */
+/* Feedbacks visuais originais: imagens + flares extraÃ­dos do patch_pc.ipk. */
 .dance-video-judgements{
   top:2.4%;
   left:3%;
@@ -2258,8 +2258,8 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 
 
 /* ---------- Just Dance HUD v0.2.5: escala pelo quadro + estados IPK ---------- */
-/* Referência visual: star_hud_players do patch_pc.ipk fornecido pelo usuário.
-   O stage é a unidade de escala; nada abaixo depende de vw/vh da página. */
+/* ReferÃªncia visual: star_hud_players do patch_pc.ipk fornecido pelo usuÃ¡rio.
+   O stage Ã© a unidade de escala; nada abaixo depende de vw/vh da pÃ¡gina. */
 .dance-video-stage{
   --jd-ui-scale:1;
   container-type:inline-size;
@@ -2296,8 +2296,8 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 .dance-hud-stars[data-rank-visual="superstar"] .dance-hud-star.filled .fill{filter:none !important}
 .dance-hud-stars[data-rank-visual="megastar"] .dance-hud-star.filled .fill{filter:none !important}
 
-/* Win_6 / win_7 do IPK têm uma transformação global de estado; aqui as cinco estrelas
-   trocam em cascata para deixar a passagem Superstar/Megastar legível. */
+/* Win_6 / win_7 do IPK tÃªm uma transformaÃ§Ã£o global de estado; aqui as cinco estrelas
+   trocam em cascata para deixar a passagem Superstar/Megastar legÃ­vel. */
 .dance-hud-stars.rank-shift .dance-hud-star.filled{animation:jdIpkRankSwap .72s cubic-bezier(.16,.82,.18,1) both}
 .dance-hud-stars.rank-shift .dance-hud-star:nth-child(2){animation-delay:.045s}
 .dance-hud-stars.rank-shift .dance-hud-star:nth-child(3){animation-delay:.09s}
@@ -2310,7 +2310,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
   100%{filter:brightness(1);transform:translate(-50%,-50%) scale(1) rotate(0)}
 }
 
-/* Mantém o pop de cada estrela sem depender da largura da tela. */
+/* MantÃ©m o pop de cada estrela sem depender da largura da tela. */
 @keyframes danceVerticalStarWin{
   0%{opacity:0;transform:translate(-50%,-50%) scale(.18) rotate(-18deg)}
   56%{opacity:1;transform:translate(-50%,-50%) scale(1.34) rotate(5deg)}
@@ -2318,7 +2318,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
   100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
 }
 
-/* Todos os tamanhos de HUD usam a largura real do palco como referência (960 = escala 1). */
+/* Todos os tamanhos de HUD usam a largura real do palco como referÃªncia (960 = escala 1). */
 .dance-picto-lane{height:calc(140px * var(--jd-ui-scale));}
 .dance-picto-item{width:calc(92px * var(--jd-ui-scale));bottom:calc(13px * var(--jd-ui-scale));}
 .dance-picto-target{width:calc(96px * var(--jd-ui-scale));height:max(2px,calc(3px * var(--jd-ui-scale)));bottom:calc(7px * var(--jd-ui-scale));}
@@ -2352,7 +2352,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 }
 
 /* ---------- Just Dance HUD v0.2.6: preload + players/pictos IPK + gold sequence ---------- */
-/* Pré-carregamento real: fica por cima do quadro 16:9 até vídeo/áudio/FX estarem prontos. */
+/* PrÃ©-carregamento real: fica por cima do quadro 16:9 atÃ© vÃ­deo/Ã¡udio/FX estarem prontos. */
 .dance-preload-overlay{
   position:absolute;inset:0;z-index:30;display:grid;place-items:center;
   background:rgba(0,0,0,.88);color:#fff;pointer-events:auto;
@@ -2377,7 +2377,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 .dance-preload-overlay.error .dance-preload-spinner{animation:none;border-color:#ff6b75}
 .dance-player-icon-button:disabled,.dance-player-seek:disabled{opacity:.42;cursor:not-allowed}
 
-/* Gold Move: os MP4s têm centro preto; screen deixa apenas o FX luminoso por cima do gameplay. */
+/* Gold Move: os MP4s tÃªm centro preto; screen deixa apenas o FX luminoso por cima do gameplay. */
 .dance-gold-loop{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:8;
   opacity:0;visibility:hidden;pointer-events:none;mix-blend-mode:screen;
@@ -2386,7 +2386,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 .dance-gold-loop.active{opacity:1;visibility:visible}
 .dance-yeah-canvas{z-index:9}
 
-/* Barra de score: sem trilho/fundo. O PNG original sobe de baixo para cima dentro da máscara,
+/* Barra de score: sem trilho/fundo. O PNG original sobe de baixo para cima dentro da mÃ¡scara,
    preservando a ponta arredondada original em qualquer score. */
 .dance-score-bar{
   --jd-scorebar-width:.7291667%;position:absolute;z-index:6;
@@ -2401,7 +2401,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 }
 .dance-player-hud-track,.dance-player-hud-fill{display:none!important}
 
-/* Players: estrutura reconstruída a partir de hud_players.isc / hud_player.tpl do patch_pc.ipk. */
+/* Players: estrutura reconstruÃ­da a partir de hud_players.isc / hud_player.tpl do patch_pc.ipk. */
 .dance-video-judgements{
   position:absolute;left:0;right:0;top:2.1%;height:calc(112px * var(--jd-ui-scale));
   display:block;z-index:11;overflow:visible;
@@ -2462,7 +2462,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 .dance-picto-progress-line{left:22%;right:0;bottom:calc(7px * var(--jd-ui-scale));height:max(1px,calc(2px * var(--jd-ui-scale)));background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.82) 56%,rgba(255,255,255,0) 100%);box-shadow:0 1px 2px rgba(0,0,0,.72)}
 .dance-picto-target{left:22%;bottom:calc(5px * var(--jd-ui-scale));width:calc(96px * var(--jd-ui-scale));height:max(2px,calc(5px * var(--jd-ui-scale)));background:#fff;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.82),0 0 calc(5px * var(--jd-ui-scale)) rgba(255,255,255,.58)}
 
-/* Score numérico/rank visual não pertencem mais ao gameplay. */
+/* Score numÃ©rico/rank visual nÃ£o pertencem mais ao gameplay. */
 .dance-hud-score-row,.dance-hud-rank-icon{display:none!important}
 
 @media(max-width:780px){
@@ -2477,12 +2477,12 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 }
 
 
-/* ---------- Just Dance HUD v0.2.7: cartão quadrado + sync Rain Over Me ---------- */
+/* ---------- Just Dance HUD v0.2.7: cartÃ£o quadrado + sync Rain Over Me ---------- */
 /*
   O patch_pc.ipk trabalha o avatar e a barra do jogador como elementos separados.
-  A versão anterior esticava bkg_player_new em 154x35 e, por isso, o trapézio do
-  material virava uma faixa enorme. Aqui o avatar volta a ser um cartão 1:1 e a
-  hud_players_line fica apenas como linha inferior, sem deformação.
+  A versÃ£o anterior esticava bkg_player_new em 154x35 e, por isso, o trapÃ©zio do
+  material virava uma faixa enorme. Aqui o avatar volta a ser um cartÃ£o 1:1 e a
+  hud_players_line fica apenas como linha inferior, sem deformaÃ§Ã£o.
 */
 .dance-video-judgements{
   top:1.7%;
@@ -2569,7 +2569,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
   background:url("minigames/just-dance/hud/ipk-base/textures/hud_players_line.png") center 66%/100% auto no-repeat;
   opacity:.92;
 }
-/* Julgamento fica logo abaixo e pode invadir levemente o cartão, como na referência. */
+/* Julgamento fica logo abaixo e pode invadir levemente o cartÃ£o, como na referÃªncia. */
 .dance-video-feedback{
   left:50%;
   top:calc(58px * var(--jd-ui-scale));
@@ -2584,7 +2584,7 @@ body.dance-window-player{overflow:hidden}.dance-player-shell.window-mode{positio
 .dance-video-feedback.feedback-yeah .dance-video-judge-image{width:92%}
 .dance-video-feedback.feedback-yeah .dance-video-judge-image{width:104%}
 
-/* Browsers antigos sem color-mix recebem uma borda de cor sólida. */
+/* Browsers antigos sem color-mix recebem uma borda de cor sÃ³lida. */
 @supports not (color:color-mix(in srgb, red 50%, blue)){
   .dance-ipk-player-color{background:linear-gradient(180deg,var(--player-color) 0 5%,transparent 5% 64%,rgba(0,0,0,.78) 100%)}
 }
@@ -2618,9 +2618,9 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 @media(max-width:520px){.dance-yeah-dev-grid{grid-template-columns:1fr}.dance-yeah-dev-actions{display:grid;grid-template-columns:1fr}.dance-yeah-dev-actions button{width:100%}}
 
 
-/* ---------- YEAH! v0.3: loops sem vídeo ---------- */
-/* Start Loop e Finish Loop são os quadros originais do MP4 em atlas WebP a 60 FPS.
-   O canvas evita seek/restart de vídeo no meio do Gold Move e mantém o fluxo contínuo. */
+/* ---------- YEAH! v0.3: loops sem vÃ­deo ---------- */
+/* Start Loop e Finish Loop sÃ£o os quadros originais do MP4 em atlas WebP a 60 FPS.
+   O canvas evita seek/restart de vÃ­deo no meio do Gold Move e mantÃ©m o fluxo contÃ­nuo. */
 .dance-gold-frame-canvas{
   position:absolute;inset:0;width:100%;height:100%;z-index:8;
   opacity:0;visibility:hidden;pointer-events:none;background:transparent;
@@ -2628,9 +2628,9 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 }
 .dance-gold-frame-canvas.active{opacity:1;visibility:visible}
 
-/* FinishYeah volta a usar o MP4 original, mas somente uma vez no fim da sequência.
-   Ele nunca entra em loop; o preto continua removido visualmente por screen e o áudio
-   permanece no arquivo separado da HUD para não disputar com a música principal. */
+/* FinishYeah volta a usar o MP4 original, mas somente uma vez no fim da sequÃªncia.
+   Ele nunca entra em loop; o preto continua removido visualmente por screen e o Ã¡udio
+   permanece no arquivo separado da HUD para nÃ£o disputar com a mÃºsica principal. */
 .dance-yeah-final-video{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:9;
   opacity:0;visibility:hidden;pointer-events:none;background:transparent;
@@ -2642,7 +2642,7 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 
 /* ---------- Gold Move nativo do patch_pc.ipk ---------- */
 /* feedbacks_move.tape: 69 ticks. No PC essa HUD trabalha a 60 ticks/s => 1,15 s.
-   Escala 0,95 -> 1,10 nos 6 primeiros ticks, depois volta a 0,95; fade começa no tick 18. */
+   Escala 0,95 -> 1,10 nos 6 primeiros ticks, depois volta a 0,95; fade comeÃ§a no tick 18. */
 .dance-video-feedback.feedback-yeah.active .dance-video-judge-image{
   animation:jdIpkGoldTape 1.15s linear both !important;
   transform-origin:50% 50%;
@@ -2663,12 +2663,12 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   26.087%{opacity:.92;transform:translate(-50%,-50%) scale(1.075) rotate(0deg)}
   100%{opacity:0;transform:translate(-50%,-50%) scale(.95) rotate(0deg)}
 }
-/* Elementos antigos de vídeo/canvas do Gold Move ficam definitivamente desativados. */
+/* Elementos antigos de vÃ­deo/canvas do Gold Move ficam definitivamente desativados. */
 .dance-gold-frame-canvas,.dance-yeah-final-video,.dance-gold-loop{display:none!important}
 
 
 /* ---------- Gold Move IPK visual fix ---------- */
-/* A versão anterior tocava o áudio do IPK, mas não tinha um ator visual de palco.
+/* A versÃ£o anterior tocava o Ã¡udio do IPK, mas nÃ£o tinha um ator visual de palco.
    Este ator usa diretamente feedback_gold + feedback_gold_flare do patch_pc.ipk. */
 .dance-ipk-gold-stage-fx{
   position:absolute;inset:0;z-index:10;overflow:hidden;pointer-events:none;
@@ -2790,7 +2790,7 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 @keyframes jd26GoldChargeParticles{from{opacity:.10;transform:translate(-50%,-50%) scale(.58) rotate(-3deg)}to{opacity:.30;transform:translate(-50%,-50%) scale(.72) rotate(3deg)}}
 @keyframes jd26GoldChargeSparks{from{opacity:.06;transform:translate(-50%,-50%) scale(.38) rotate(-4deg)}to{opacity:.26;transform:translate(-50%,-50%) scale(.54) rotate(4deg)}}
 
-/* Explosão: executada uma vez no instante do Gold Move. */
+/* ExplosÃ£o: executada uma vez no instante do Gold Move. */
 .dance-ipk-gold-stage-fx.explode .dance-ipk-gold-screen-flash{animation:jd26GoldFlash 1.30s ease-out both}
 .dance-ipk-gold-stage-fx.explode .dance-jd26-gold-halo{animation:jd26GoldExplodeHalo 1.30s ease-out both}
 .dance-ipk-gold-stage-fx.explode .dance-jd26-gold-ray.ray-a{animation:jd26GoldExplodeRayA 1.30s cubic-bezier(.12,.72,.16,1) both}
@@ -2806,7 +2806,7 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 @keyframes jd26GoldExplodeSparksA{0%{opacity:1;transform:translate(-50%,-50%) scale(.26) rotate(-12deg)}34%{opacity:.94;transform:translate(-50%,-50%) scale(1.02) rotate(6deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.46) rotate(15deg)}}
 @keyframes jd26GoldExplodeSparksB{0%{opacity:.98;transform:translate(-50%,-50%) scale(.20) rotate(14deg)}38%{opacity:.88;transform:translate(-50%,-50%) scale(.88) rotate(-6deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.30) rotate(-17deg)}}
 
-/* ---------- Gold Move exato a partir dos vídeos de referência ---------- */
+/* ---------- Gold Move exato a partir dos vÃ­deos de referÃªncia ---------- */
 .dance-gold-exact-canvas{
   position:absolute!important;
   inset:0!important;
@@ -2829,7 +2829,7 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
 .dance-ipk-gold-stage-fx{display:none!important}
 
 
-/* ---------- Gold Move v0.4: vídeo único Starry Cubes ---------- */
+/* ---------- Gold Move v0.4: vÃ­deo Ãºnico Starry Cubes ---------- */
 .dance-gold-single-video{
   position:absolute!important;
   inset:0!important;
@@ -2848,3 +2848,91 @@ html[data-theme="dark"] .dance-yeah-dev-input{background:rgba(255,255,255,.04)}
   transition:opacity .04s linear!important;
 }
 .dance-gold-single-video.active{opacity:1!important;visibility:visible!important;}
+
+/* ---------- Just Dance V6.3: barra dos pictos + pulsos por beat ---------- */
+/* Remove as duas faixas largas/cinza que ficavam por trÃ¡s dos pictos. */
+.dance-picto-bar-bkg,
+.dance-picto-bar-gradient{
+  display:none!important;
+}
+
+.dance-picto-lane{
+  isolation:isolate;
+}
+.dance-picto-items{
+  z-index:4;
+}
+
+/* Linha fina: fica ATRÃS da barrinha branca. */
+.dance-picto-progress-line{
+  z-index:2!important;
+  left:22%!important;
+  right:0!important;
+  bottom:calc(7px * var(--jd-ui-scale))!important;
+  height:max(1px,calc(2px * var(--jd-ui-scale)))!important;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,.98) 0%,
+    rgba(255,255,255,.92) 38%,
+    rgba(255,255,255,.54) 72%,
+    rgba(255,255,255,0) 100%)!important;
+  box-shadow:0 1px 2px rgba(0,0,0,.76)!important;
+}
+
+/* A barrinha branca fica na frente da linha, como na referÃªncia. */
+.dance-picto-target{
+  z-index:6!important;
+  left:22%!important;
+  bottom:calc(5px * var(--jd-ui-scale))!important;
+  width:calc(96px * var(--jd-ui-scale))!important;
+  height:max(3px,calc(5px * var(--jd-ui-scale)))!important;
+  background:#fff!important;
+  border-radius:999px!important;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.86),
+    0 0 calc(5px * var(--jd-ui-scale)) rgba(255,255,255,.54)!important;
+  transform-origin:50% 50%;
+}
+
+/* Equivalente ao #pictos:before da referÃªncia:
+   brilho branco sob o alvo, mais forte embaixo e transparente para cima. */
+.dance-picto-lane::before{
+  content:"";
+  position:absolute;
+  z-index:1;
+  left:22%;
+  bottom:calc(4px * var(--jd-ui-scale));
+  width:calc(112px * var(--jd-ui-scale));
+  height:calc(66px * var(--jd-ui-scale));
+  translate:-50% 0;
+  pointer-events:none;
+  opacity:1;
+  background:linear-gradient(to top,
+    rgba(255,255,255,.28) 0%,
+    rgba(255,255,255,.16) 31%,
+    rgba(255,255,255,.07) 58%,
+    rgba(255,255,255,0) 100%);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
+}
+
+/* Cada DOIS beats: mesmo comportamento do NewBeat1 enviado pelo usuÃ¡rio. */
+.dance-picto-lane.jd-two-beat-pulse::before{
+  animation:jdPictoNewBeat1 1s linear;
+}
+@keyframes jdPictoNewBeat1{
+  0%{opacity:1}
+  50%{opacity:0}
+  100%{opacity:1}
+}
+
+/* Cada beat: pulsa somente a barrinha branca da frente. */
+.dance-picto-lane.jd-beat-pulse .dance-picto-target{
+  animation:jdPictoNewBeat2 .5s ease-out;
+}
+@keyframes jdPictoNewBeat2{
+  0%{transform:scale3d(1,1,1)}
+  10%{transform:scale3d(1.15,1,1.15)}
+  100%{transform:scale3d(1,1,1)}
+}
+/* ---------- END Just Dance V6.3: barra dos pictos ---------- */
+
