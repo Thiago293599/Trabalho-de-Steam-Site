@@ -2898,6 +2898,7 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
         await installDanceMediaBlob("video", videoBlob, danceTestVideo);
       }
       dancePreloadedVideoQuality = quality;
+    if (getDanceSongConfig().id === "WhereHaveYou") applyDanceAutomaticVideoFraming();
 
       if (coreNeeded) {
         setDancePreloadUi(84, "Carregando vídeo do Gold Move…");
@@ -3076,38 +3077,66 @@ function applyDanceVideoFit(value, save = true) {
   if (save) safeLocalStorageSet(DANCE_VIDEO_FIT_STORAGE_KEY, fit);
 }
 
-// V10: Where Have You Been possui fontes com enquadramentos diferentes.
-// Se a fonte carregada não for realmente 16:9, preenchemos o palco sem
-// deformar: zoom proporcional (cover), centro horizontal e base ancorada.
+// V12: enquadramento FORÇADO de Where Have You Been.
+// Não confiamos mais apenas no videoWidth/videoHeight, porque um MP4 pode
+// reportar 16:9 e ainda assim precisar do crop/zoom visual desejado.
+// Regras:
+// - preencher o palco inteiro sem deformar (cover);
+// - foco horizontal exatamente no centro;
+// - borda inferior fixa na borda inferior do palco;
+// - zoom uniforme extra para cortar as laterais igualmente.
+const DANCE_WHERE_HAVE_YOU_ZOOM = 1.12;
+
+function resetDanceForcedVideoFraming() {
+  if (!danceTestVideo) return;
+  [
+    "position", "left", "right", "top", "bottom",
+    "width", "height", "max-width", "max-height",
+    "object-fit", "object-position",
+    "transform", "transform-origin",
+    "margin", "inset"
+  ].forEach(property => danceTestVideo.style.removeProperty(property));
+  danceVideoStage?.removeAttribute("data-auto-video-framing");
+  danceVideoStage?.style.removeProperty("--wherehaveyou-video-zoom");
+}
+
 function applyDanceAutomaticVideoFraming() {
   if (!danceTestVideo) return;
 
-  // Sempre limpa a regra automática antes de avaliar a fonte atual.
-  danceTestVideo.style.removeProperty("object-fit");
-  danceTestVideo.style.removeProperty("object-position");
-  danceVideoStage?.removeAttribute("data-auto-video-framing");
+  resetDanceForcedVideoFraming();
 
   const song = getDanceSongConfig();
   if (song.id !== "WhereHaveYou") return;
 
+  // O vídeo ocupa fisicamente todo o canvas 16:9. O overflow:hidden do stage
+  // faz o recorte, enquanto transform-origin em CENTER BOTTOM garante que o
+  // zoom cresça para os lados e para cima sem deslocar a borda inferior.
+  danceTestVideo.style.setProperty("position", "absolute");
+  danceTestVideo.style.setProperty("left", "0");
+  danceTestVideo.style.setProperty("right", "0");
+  danceTestVideo.style.setProperty("bottom", "0");
+  danceTestVideo.style.setProperty("top", "auto");
+  danceTestVideo.style.setProperty("width", "100%");
+  danceTestVideo.style.setProperty("height", "100%");
+  danceTestVideo.style.setProperty("max-width", "none");
+  danceTestVideo.style.setProperty("max-height", "none");
+  danceTestVideo.style.setProperty("margin", "0");
+  danceTestVideo.style.setProperty("object-fit", "cover", "important");
+  danceTestVideo.style.setProperty("object-position", "50% 100%", "important");
+  danceTestVideo.style.setProperty("transform-origin", "50% 100%", "important");
+  danceTestVideo.style.setProperty("transform", `scale(${DANCE_WHERE_HAVE_YOU_ZOOM})`, "important");
+
+  danceVideoStage?.style.setProperty("--wherehaveyou-video-zoom", String(DANCE_WHERE_HAVE_YOU_ZOOM));
+  danceVideoStage?.setAttribute("data-auto-video-framing", "forced-center-bottom-zoom");
+
   const width = Number(danceTestVideo.videoWidth || 0);
   const height = Number(danceTestVideo.videoHeight || 0);
-  if (!(width > 0 && height > 0)) return;
+  const dimensions = width > 0 && height > 0 ? `${width}x${height}` : "metadata pendente";
 
-  const sourceRatio = width / height;
-  const targetRatio = 16 / 9;
-  // ~1% de tolerância evita zoom por pequenas diferenças de metadata/SAR.
-  const isSixteenNine = Math.abs(sourceRatio - targetRatio) / targetRatio <= 0.01;
-
-  if (!isSixteenNine) {
-    danceTestVideo.style.setProperty("object-fit", "cover");
-    danceTestVideo.style.setProperty("object-position", "center bottom");
-    danceVideoStage?.setAttribute("data-auto-video-framing", "cover-center-bottom");
-    console.info(`[Just Dance] ${song.title}: vídeo ${width}x${height} (${sourceRatio.toFixed(3)}), aplicando cover + center bottom.`);
-  } else {
-    danceVideoStage?.setAttribute("data-auto-video-framing", "native-16x9");
-    console.info(`[Just Dance] ${song.title}: vídeo ${width}x${height} já é 16:9; enquadramento automático não necessário.`);
-  }
+  console.info(
+    `[Just Dance] ${song.title}: ${dimensions}; ` +
+    `enquadramento forçado cover + center bottom + zoom ${DANCE_WHERE_HAVE_YOU_ZOOM.toFixed(2)}x.`
+  );
 }
 
 function setDanceWindowMode(enabled) {
