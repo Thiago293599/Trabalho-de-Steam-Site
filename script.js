@@ -351,26 +351,41 @@ const DANCE_SONGS = Object.freeze({
   RainOverMe: Object.freeze({
     id: "RainOverMe", title: "Rain Over Me", artist: "Pitbull Ft. Marc Anthony", edition: "Just Dance 2020", coaches: 1, beta: false, lyricsColor: "#FF584A",
     base: "minigames/just-dance/songs/RainOverMe", mapFile: "RainOverMe.json", movesFile: "RainOverMe_moves0.json",
-    videos: Object.freeze({ low: "RainOverMe_Low.mp4", medium: "RainOverMe_Medium.mp4", high: "RainOverMe_High.mp4" }),
+    videos: Object.freeze({
+      low: "RainOverMe_Low.mp4",
+      medium: "gdrive:1W25oD85TwgHpc0WOMGVkFcsWYHiKgDbH",
+      high: "gdrive:1ogG3xCIolWix3w5oUmAmFN6sB-tDM570"
+    }),
     audioFile: "RainOverMe_Audio.mp3", coverFile: "rainoverme_cover@2x.jpg", posterFile: "RainOverMe.jpg", avatarFile: "rainoverme_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsV4",
-    classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
+    classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
+    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
   }),
   EarthSong: Object.freeze({
     id: "EarthSong", title: "Earth Song", artist: "Michael Jackson", edition: "Michael Jackson: The Experience", coaches: 1, beta: true, lyricsColor: "#FFFFFF",
     base: "minigames/just-dance/songs/EarthSong", mapFile: "EarthSong.json", movesFile: "EarthSong_moves0.json",
-    videos: Object.freeze({ low: "EarthSong_Coach_Low.mp4", medium: "EarthSong_Coach_Medium.mp4", high: "EarthSong_Coach_High.mp4" }),
+    videos: Object.freeze({
+      low: "EarthSong_Coach_Low.mp4",
+      medium: "gdrive:1E5iQ9QYqTSh0I2e3xOM6_paKcjSUwl_p",
+      high: "gdrive:1Uo07L9tLuK-yQNvLK87o8VP_jPqwNBmt"
+    }),
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 10 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
-    classifierFormat: "auto", classifierFolder: "classifiers_WIIU", fallbackClassifierFolder: "classifiers_WII_source", sourceSongAliases: Object.freeze(["EarthSong", "Earth Song"])
+    classifierFormat: "auto", classifierFolder: "classifiers_WIIU", fallbackClassifierFolder: "classifiers_WII_source", sourceSongAliases: Object.freeze(["EarthSong", "Earth Song"]),
+    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
   }),
   ItsRainingMen: Object.freeze({
     id: "ItsRainingMen", title: "It's Raining Men", artist: "The Weather Girls", edition: "Just Dance 2", coaches: 1, beta: true, lyricsColor: "#35C5ED",
     base: "minigames/just-dance/songs/ItsRainingMen", mapFile: "ItsRainingMen.json", movesFile: "ItsRainingMen_moves0.json",
-    videos: Object.freeze({ low: "ItsRainingMen_Low.mp4", medium: "ItsRainingMen_Medium.mp4", high: "ItsRainingMen_High.mp4" }),
+    videos: Object.freeze({
+      low: "ItsRainingMen_Low.mp4",
+      medium: "gdrive:1wl6BIcYwU16GNbM646SXAFz2_ZjZDDX9",
+      high: "gdrive:1vZIEAqkriCp6Hw9j-CgeRRHxxp_zi7E5"
+    }),
     audioFile: "ItsRainingMen_Audio.mp3", coverFile: "itsrainingmen_cover@2x.jpg", posterFile: "ItsRainingMen.jpg", avatarFile: "itsrainingmen_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 5, rows: 5 }), pictoIndividualFolder: "pictos-individual", defaultSyncMs: 0, syncStorageKey: "jdItsRainingMenSyncOffsetMsV1",
-    classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
+    classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
+    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
   }),
   WhereHaveYou: Object.freeze({
     id: "WhereHaveYou", title: "Where Have You Been", artist: "Rihanna", edition: "Just Dance 2014", coaches: 1, beta: true, lyricsColor: "#F61F87",
@@ -385,7 +400,7 @@ const DANCE_SONGS = Object.freeze({
     audioFile: "WhereHaveYou_Audio.mp3", coverFile: "wherehaveyou_cover@2x.jpg", posterFile: "WhereHaveYou.jpg", avatarFile: "wherehaveyou_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 8 }), defaultSyncMs: 0, syncStorageKey: "jdWhereHaveYouSyncOffsetMsV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
-    videoQualityNote: "Low local 360p • Medium/High via Google Drive, sem interface do Drive"
+    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor, sem interface do Drive"
   })
 });
 const EARTHSONG_CLASSIFIER_FILES = Object.freeze({
@@ -2878,7 +2893,7 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
           await installDanceDirectVideoStream(videoSource, danceTestVideo);
           setDancePreloadUi(videoEnd, `Stream ${label} pronto • Google Drive via servidor, sem interface do Drive.`);
         } catch (driveError) {
-          // Se o Drive bloquear o stream direto, mantemos a música jogável usando o Low local.
+          // Se o proxy/Drive falhar, mantemos a música jogável usando o Low local.
           const fallbackSource = DANCE_VIDEO_SOURCES.low;
           if (quality === "low" || !fallbackSource || isDanceDirectStreamSource(fallbackSource)) throw driveError;
           setDancePreloadUi(18, `Drive indisponível para ${label}; usando Low local…`);
