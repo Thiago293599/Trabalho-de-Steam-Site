@@ -146,12 +146,12 @@ let sensorLastGenericAccelAt = 0;
 
 let sensorObserved = { motion: false, orientation: false, gyro: false, accelerometer: false, orientationFallback: false };
 
-/* ---------- Just Dance V5: julgamento 100% no celular ---------- */
+/* ---------- Just Dance V7: classifiers validados + julgamento 100% no celular ---------- */
 const PHONE_DANCE_MAX_SCORE = 13333;
 const PHONE_DANCE_WEIGHTS = Object.freeze({ PERFECT: 1, SUPER: 0.8, GOOD: 0.6, OK: 0.35, YEAH: 1, X: 0 });
 const PHONE_DANCE_SONGS = Object.freeze({
   RainOverMe: Object.freeze({ id:"RainOverMe", base:"minigames/just-dance/songs/RainOverMe", movesFile:"RainOverMe_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
-  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
+  EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"auto", classifierFolder:"classifiers_WIIU", fallbackClassifierFolder:"classifiers_WII_source", sourceSongAliases:["EarthSong","Earth Song"] }),
   ItsRainingMen: Object.freeze({ id:"ItsRainingMen", base:"minigames/just-dance/songs/ItsRainingMen", movesFile:"ItsRainingMen_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" })
 });
 const PHONE_DANCE_SCORE_TUNING = Object.freeze({
@@ -159,13 +159,14 @@ const PHONE_DANCE_SCORE_TUNING = Object.freeze({
   EarthSong: Object.freeze({ floor:.22, perfectRef:.56, minRef:.46, maxRef:.66, perfectQ:.74, superQ:.57, goodQ:.38, okQ:.19 }),
   ItsRainingMen: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 })
 });
-const PHONE_DANCE_CALIBRATION_STORAGE_KEY = "jdPhoneClassifierCalibrationV6";
+const PHONE_DANCE_CALIBRATION_STORAGE_KEY = "jdPhoneClassifierCalibrationV7";
 const PHONE_EARTH_CLASSIFIERS = Object.freeze({
   "earthsong_bras_genou":"00_Bras_Genou.livemove.bin","earthsong_poing_terre":"01_Poing_Terre.livemove.bin","earthsong_bras_sol":"02_Bras_Sol.livemove.bin","earthsong_jette":"03_Jette.livemove.bin","earthsong_lever":"04_Lever.livemove.bin","earthsong_poitrine_l":"05_Poitrine_L.livemove.bin","earthsong_spin":"06_Spin.livemove.bin","earthsong_bras_u":"07_Bras_U.livemove.bin","earthsong_bras_down":"08_Bras_Down.livemove.bin","earthsong_allemand":"09_Allemand.livemove.bin","earthsong_pointer_sol":"10_Pointer_Sol.livemove.bin","earthsong_poitrine_r":"11_Poitrine_R.livemove.bin","earthsong_main":"12_Main.livemove.bin","earthsong_bras":"13_Bras.livemove.bin","earthsong_ski_l":"14_Ski_L.livemove.bin","earthsong_saut_r":"15_Saut_R.livemove.bin","earthsong_saut_l":"16_Saut_L.livemove.bin","earthsong_bras_tendu":"17_Bras_Tendu.livemove.bin","earthsong_poing_lever_l":"18_Poing_Lever_L.livemove.bin","earthsong_poing_lever_r":"19_Poing_Lever_R.livemove.bin","earthsong_ski_r":"20_Ski_R.livemove.bin","earthsong_poing_l":"21_Poing_L.livemove.bin","earthsong_poing_r":"22_Poing_R.livemove.bin","earthsong_poing_f":"23_Poing_F.livemove.bin","earthsong_main_r":"24_Main_R.livemove.bin","earthsong_genou_tape":"25_Genou_Tape.livemove.bin","earthsong_genou_moi":"26_Genou_Moi.livemove.bin","earthsong_main_l":"27_Main_L.livemove.bin","earthsong_pose_fin":"28_Pose_Fin.livemove.bin","earthsong_poing_lever_f":"29_Poing_Lever_F.livemove.bin","earthsong_shake":"30_Shake.livemove.bin"
 });
 let phoneDanceSession = null;
 let phoneDanceMoves = [];
 let phoneDanceProfiles = new Map();
+let phoneDanceCompetitors = new Map();
 let phoneDanceClassifierSummary = { loaded:0, total:0, format:"" };
 let phoneDanceReady = false;
 let phoneDanceLoadToken = 0;
@@ -266,8 +267,26 @@ function phoneClamp01(value){ return Math.max(0, Math.min(1, Number(value || 0))
 function phoneMagnitude(v){ const x=Number(v?.x||0),y=Number(v?.y||0),z=Number(v?.z||0); return Math.sqrt(x*x+y*y+z*z); }
 function phoneUnit(v){ const m=phoneMagnitude(v); return m>1e-5?{x:Number(v?.x||0)/m,y:Number(v?.y||0)/m,z:Number(v?.z||0)/m}:null; }
 function phoneDot(a,b){ return Number(a?.x||0)*Number(b?.x||0)+Number(a?.y||0)*Number(b?.y||0)+Number(a?.z||0)*Number(b?.z||0); }
-function phoneDanceClassifierFile(song, moveName){ const n=String(moveName||"").toLowerCase(); return song?.classifierFormat==="msm"?`${n}.msm`:PHONE_EARTH_CLASSIFIERS[n]||""; }
-function phoneFindAscii(bytes,text){ const t=Array.from(String(text||""),c=>c.charCodeAt(0)&255); outer:for(let i=0;i<=bytes.length-t.length;i++){for(let j=0;j<t.length;j++)if(bytes[i+j]!==t[j])continue outer;return i;} return -1; }
+function phoneNormalizeId(value){return String(value||"").toLowerCase().replace(/[^a-z0-9]+/g,"");}
+function phoneReadFixedAscii(buffer,offset,length){const b=new Uint8Array(buffer,offset,Math.min(length,Math.max(0,buffer.byteLength-offset)));let out="";for(const x of b){if(!x)break;if(x>=32&&x<127)out+=String.fromCharCode(x);}return out.trim();}
+function phoneDanceClassifierCandidates(song,moveName){
+  const n=String(moveName||"").toLowerCase();
+  const live=PHONE_EARTH_CLASSIFIERS[n]||"";
+  if(song?.classifierFormat==="msm")return[{format:"msm",folder:song.classifierFolder,file:`${n}.msm`}];
+  if(song?.classifierFormat==="livemove")return live?[{format:"livemove",folder:song.classifierFolder,file:live}]:[];
+  if(song?.classifierFormat==="auto"){
+    const out=[{format:"msm",folder:song.classifierFolder||"classifiers_WIIU",file:`${n}.msm`}];
+    if(live)out.push({format:"livemove",folder:song.fallbackClassifierFolder||"classifiers_WII_source",file:live});
+    return out;
+  }
+  return[];
+}
+function phoneFindAscii(bytes,text){const t=Array.from(String(text||""),c=>c.charCodeAt(0)&255);outer:for(let i=0;i<=bytes.length-t.length;i++){for(let j=0;j<t.length;j++)if(bytes[i+j]!==t[j])continue outer;return i;}return-1;}
+function phoneMsmSignature(profile){
+  if(!profile||profile.format!=="msm")return"";
+  const pick=a=>{const v=a||[],idx=[0,1,2,Math.floor(v.length*.25),Math.floor(v.length*.5),Math.floor(v.length*.75),v.length-3,v.length-2,v.length-1];return idx.filter(i=>i>=0&&i<v.length).map(i=>Number(v[i]||0).toFixed(5)).join(",");};
+  return[profile.classifierType,profile.count,Number(profile.duration||0).toFixed(6),Number(profile.scaleA||0).toFixed(5),Number(profile.scaleB||0).toFixed(5),pick(profile.primary),pick(profile.secondary)].join("|");
+}
 function phoneParseMsm(buffer,moveName=""){
   if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<244)return null;
   const v=new DataView(buffer);
@@ -285,20 +304,128 @@ function phoneParseMsm(buffer,moveName=""){
   for(let i=0;i<count;i++)primary.push(v.getFloat32(start+i*4,false));
   for(let i=0;i<count;i++)secondary.push(v.getFloat32(start+(count+i)*4,false));
   const scaleA=v.getFloat32(start+count*8,false),scaleB=v.getFloat32(start+count*8+4,false);
-  if(![duration,scaleA,scaleB,...primary,...secondary].every(Number.isFinite))return null;
-  return {format:"msm",layout,moveName,count,duration,primary,secondary,scaleA,scaleB};
+  const sourceMove=phoneReadFixedAscii(buffer,8,64);
+  const sourceSong=phoneReadFixedAscii(buffer,72,64);
+  const classifierType=phoneReadFixedAscii(buffer,136,64);
+  const params=[204,208,212,216].map(offset=>offset+4<=buffer.byteLength?v.getFloat32(offset,false):0);
+  if(![duration,scaleA,scaleB,...params,...primary,...secondary].every(Number.isFinite))return null;
+  const profile={format:"msm",layout,moveName,sourceMove,sourceSong,classifierType,duration,count,channels,primary,secondary,scaleA,scaleB,params,sampleRate:duration>0?count/duration:0};
+  profile.signature=phoneMsmSignature(profile);
+  return profile;
 }
-function phoneParseLiveMove(buffer,moveName=""){ if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<512)return null; const bytes=new Uint8Array(buffer),mi=phoneFindAscii(bytes,"motion"); if(mi<0)return null; let co=mi+6; while(co<bytes.length&&bytes[co]===0)co++; if(co+4>bytes.length)return null; const v=new DataView(buffer),count=v.getUint32(co,true),start=co+4; if(!count||count>512||start+count*12>buffer.byteLength)return null; const axes=[[],[],[]]; for(let a=0;a<3;a++)for(let i=0;i<count;i++){const x=v.getFloat32(start+(a*count+i)*4,true);if(!Number.isFinite(x)||Math.abs(x)>1000)return null;axes[a].push(x);} return {format:"livemove",moveName,count,axes}; }
-function phoneNormalize(values){ const a=(values||[]).map(x=>Number(x||0)); if(!a.length)return[]; const mean=a.reduce((s,x)=>s+x,0)/a.length, variance=a.reduce((s,x)=>s+(x-mean)**2,0)/a.length,sd=Math.sqrt(Math.max(variance,1e-8)); return a.map(x=>(x-mean)/sd); }
-function phoneResample(values,target){ const s=(values||[]).map(x=>Number(x||0)),n=Math.max(1,Math.round(target||1)); if(!s.length)return Array(n).fill(0); if(s.length===1)return Array(n).fill(s[0]); const out=[]; for(let i=0;i<n;i++){const p=i*(s.length-1)/Math.max(1,n-1),l=Math.floor(p),r=Math.min(s.length-1,l+1),m=p-l;out.push(s[l]*(1-m)+s[r]*m);} return out; }
-function phoneShiftCorr(ref,obs,signFlip=true){ const n=Math.min(ref?.length||0,obs?.length||0); if(n<4)return 0; const a=phoneNormalize(ref.slice(0,n)),b=phoneNormalize(obs.slice(0,n)),maxShift=Math.max(1,Math.floor(n*.22)); let best=-1; for(let sh=-maxShift;sh<=maxShift;sh++){let dot=0,used=0;for(let i=0;i<n;i++){const j=i+sh;if(j<0||j>=n)continue;dot+=a[i]*b[j];used++;} if(used>=Math.max(3,n*.58)){const c=dot/used;best=Math.max(best,signFlip?Math.abs(c):c);}} return phoneClamp01(best); }
-function phoneDirectionChanges(vectors){ const out=[];let prev=null;for(const v of vectors){const u=phoneUnit(v);if(!u||!prev){out.push(0);if(u)prev=u;continue;}out.push(1-Math.max(-1,Math.min(1,phoneDot(u,prev))));prev=u;}return out; }
-function phoneModelMagnitude(profile){ if(profile?.format!=="livemove")return[]; const n=profile.count;return Array.from({length:n},(_,i)=>Math.sqrt(profile.axes[0][i]**2+profile.axes[1][i]**2+profile.axes[2][i]**2)); }
-function phoneLiveMatch(profile,stats){ const samples=stats?.samples||[],n=Number(profile?.count||0);if(!profile||n<4||samples.length<4)return 0; const rawAxes=["x","y","z"].map(axis=>phoneResample(samples.map(s=>Number(s.motion?.[axis]||0)),n)); const modelAxes=profile.axes.map(a=>phoneResample(a,n)); const perms=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];let axisBest=0; for(const p of perms){let sum=0;for(let a=0;a<3;a++)sum+=phoneShiftCorr(modelAxes[a],rawAxes[p[a]],true);axisBest=Math.max(axisBest,sum/3);} const modelMag=phoneModelMagnitude(profile); const obsMag=phoneResample(samples.map(s=>s.motionMag),n); const mag=phoneShiftCorr(modelMag,obsMag,false); const modelDirs=phoneDirectionChanges(Array.from({length:n},(_,i)=>({x:profile.axes[0][i],y:profile.axes[1][i],z:profile.axes[2][i]}))); const obsDirs=phoneResample(phoneDirectionChanges(samples.map(s=>s.motion)),n); const dir=phoneShiftCorr(modelDirs,obsDirs,false); return phoneClamp01(axisBest*.50+mag*.32+dir*.18); }
-function phoneMsmMatch(profile,stats){ const samples=stats?.samples||[],n=Number(profile?.count||0);if(!profile||n<4||samples.length<4)return 0; const features=[
-  samples.map(s=>s.motionMag),samples.map(s=>s.horizontal),samples.map(s=>s.vertical),samples.map(s=>s.rotationMag),samples.map(s=>s.jerk),samples.map(s=>s.motion.x),samples.map(s=>s.motion.y),samples.map(s=>s.motion.z)
-].map(x=>phoneResample(x,n)); let p=0,s=0;for(const f of features){p=Math.max(p,phoneShiftCorr(profile.primary,f,true));s=Math.max(s,phoneShiftCorr(profile.secondary,f,true));} const energy=phoneShiftCorr(profile.secondary,phoneResample(samples.map(x=>x.motionMag+x.rotationMag/180),n),true); const raw=p*.52+s*.28+energy*.20; return phoneClamp01((raw-.08)/.82); }
-function phoneClassifierMatch(profile,stats){ return profile?.format==="livemove"?phoneLiveMatch(profile,stats):profile?.format==="msm"?phoneMsmMatch(profile,stats):0; }
+function phoneParseLiveMove(buffer,moveName=""){if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<512)return null;const bytes=new Uint8Array(buffer),mi=phoneFindAscii(bytes,"motion");if(mi<0)return null;let co=mi+6;while(co<bytes.length&&bytes[co]===0)co++;if(co+4>bytes.length)return null;const v=new DataView(buffer),count=v.getUint32(co,true),start=co+4;if(!count||count>512||start+count*12>buffer.byteLength)return null;const axes=[[],[],[]];for(let a=0;a<3;a++)for(let i=0;i<count;i++){const x=v.getFloat32(start+(a*count+i)*4,true);if(!Number.isFinite(x)||Math.abs(x)>1000)return null;axes[a].push(x);}return{format:"livemove",moveName,count,axes};}
+function phoneNormalize(values){const a=(values||[]).map(x=>Number(x||0));if(!a.length)return[];const mean=a.reduce((s,x)=>s+x,0)/a.length,variance=a.reduce((s,x)=>s+(x-mean)**2,0)/a.length,sd=Math.sqrt(Math.max(variance,1e-8));return a.map(x=>(x-mean)/sd);}
+function phoneMedian(values){const a=(values||[]).map(Number).filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return 0;const m=Math.floor(a.length/2);return a.length%2?a[m]:(a[m-1]+a[m])/2;}
+function phoneRobustNormalize(values){const a=(values||[]).map(x=>Number(x||0));if(!a.length)return[];const med=phoneMedian(a),mad=phoneMedian(a.map(x=>Math.abs(x-med))),mean=a.reduce((s,x)=>s+x,0)/a.length,variance=a.reduce((s,x)=>s+(x-mean)**2,0)/a.length,sd=Math.sqrt(Math.max(variance,1e-8)),scale=Math.max(mad*1.4826,sd*.22,1e-4);return a.map(x=>Math.max(-6,Math.min(6,(x-med)/scale)));}
+function phoneResample(values,target){const s=(values||[]).map(x=>Number(x||0)),n=Math.max(1,Math.round(target||1));if(!s.length)return Array(n).fill(0);if(s.length===1)return Array(n).fill(s[0]);const out=[];for(let i=0;i<n;i++){const p=i*(s.length-1)/Math.max(1,n-1),l=Math.floor(p),r=Math.min(s.length-1,l+1),m=p-l;out.push(s[l]*(1-m)+s[r]*m);}return out;}
+function phoneShiftCorr(ref,obs,signFlip=true){const n=Math.min(ref?.length||0,obs?.length||0);if(n<4)return 0;const a=phoneNormalize(ref.slice(0,n)),b=phoneNormalize(obs.slice(0,n)),maxShift=Math.max(1,Math.floor(n*.16));let best=-1;for(let sh=-maxShift;sh<=maxShift;sh++){let dot=0,used=0;for(let i=0;i<n;i++){const j=i+sh;if(j<0||j>=n)continue;dot+=a[i]*b[j];used++;}if(used>=Math.max(3,n*.62)){const c=dot/used;best=Math.max(best,signFlip?Math.abs(c):c);}}return phoneClamp01(best);}
+function phoneDerivative(values){const a=(values||[]).map(Number),out=[];for(let i=0;i<a.length;i++)out.push(i?Number(a[i]||0)-Number(a[i-1]||0):0);return out;}
+function phoneDtwScore(reference,observed,allowSignFlip=false){
+  const r=phoneRobustNormalize(reference),o=phoneRobustNormalize(observed);
+  if(r.length<4||o.length<4)return 0;
+  const calc=(aa,bb)=>{
+    const n=aa.length,m=bb.length,band=Math.max(3,Math.ceil(Math.max(n,m)*.20)),inf=1e12,prev=Array(m+1).fill(inf),cur=Array(m+1).fill(inf);prev[0]=0;
+    for(let i=1;i<=n;i++){
+      cur.fill(inf);
+      const j0=Math.max(1,i-band),j1=Math.min(m,i+band);
+      for(let j=j0;j<=j1;j++){
+        const d=Math.min(4,Math.abs(aa[i-1]-bb[j-1]));
+        cur[j]=d+Math.min(cur[j-1],prev[j],prev[j-1]);
+      }
+      for(let j=0;j<=m;j++)prev[j]=cur[j];
+    }
+    const avg=prev[m]/Math.max(1,n+m);
+    return phoneClamp01(Math.exp(-avg*1.35));
+  };
+  let best=calc(r,o);
+  if(allowSignFlip)best=Math.max(best,calc(r,o.map(x=>-x)));
+  return best;
+}
+function phoneShapeScore(reference,observed,allowSignFlip=false){
+  if((reference?.length||0)<4||(observed?.length||0)<4)return 0;
+  const obs=phoneResample(observed,reference.length);
+  const corr=phoneShiftCorr(reference,obs,allowSignFlip);
+  const dtw=phoneDtwScore(reference,obs,allowSignFlip);
+  const deriv=phoneDtwScore(phoneDerivative(reference),phoneDerivative(obs),allowSignFlip);
+  return phoneClamp01(corr*.46+dtw*.40+deriv*.14);
+}
+function phoneDirectionChanges(vectors){const out=[];let prev=null;for(const v of vectors){const u=phoneUnit(v);if(!u||!prev){out.push(0);if(u)prev=u;continue;}out.push(1-Math.max(-1,Math.min(1,phoneDot(u,prev))));prev=u;}return out;}
+function phoneModelMagnitude(profile){if(profile?.format!=="livemove")return[];const n=profile.count;return Array.from({length:n},(_,i)=>Math.sqrt(profile.axes[0][i]**2+profile.axes[1][i]**2+profile.axes[2][i]**2));}
+function phoneLiveMatch(profile,stats){const samples=stats?.samples||[],n=Number(profile?.count||0);if(!profile||n<4||samples.length<4)return 0;const rawAxes=["x","y","z"].map(axis=>phoneResample(samples.map(s=>Number(s.motion?.[axis]||0)),n));const modelAxes=profile.axes.map(a=>phoneResample(a,n));const perms=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];let axisBest=0;for(const p of perms){let sum=0;for(let a=0;a<3;a++)sum+=phoneShapeScore(modelAxes[a],rawAxes[p[a]],true);axisBest=Math.max(axisBest,sum/3);}const modelMag=phoneModelMagnitude(profile),obsMag=phoneResample(samples.map(s=>s.motionMag),n),mag=phoneShapeScore(modelMag,obsMag,false),modelDirs=phoneDirectionChanges(Array.from({length:n},(_,i)=>({x:profile.axes[0][i],y:profile.axes[1][i],z:profile.axes[2][i]}))),obsDirs=phoneResample(phoneDirectionChanges(samples.map(s=>s.motion)),n),dir=phoneShapeScore(modelDirs,obsDirs,false);return phoneClamp01(axisBest*.58+mag*.27+dir*.15);}
+function phonePrincipalMotion(samples){
+  const vectors=(samples||[]).map(s=>s.motion||{x:0,y:0,z:0});
+  if(vectors.length<4)return null;
+  const mean=vectors.reduce((a,v)=>({x:a.x+Number(v.x||0),y:a.y+Number(v.y||0),z:a.z+Number(v.z||0)}),{x:0,y:0,z:0});
+  mean.x/=vectors.length;mean.y/=vectors.length;mean.z/=vectors.length;
+  let cxx=0,cxy=0,cxz=0,cyy=0,cyz=0,czz=0;
+  for(const v of vectors){const x=Number(v.x||0)-mean.x,y=Number(v.y||0)-mean.y,z=Number(v.z||0)-mean.z;cxx+=x*x;cxy+=x*y;cxz+=x*z;cyy+=y*y;cyz+=y*z;czz+=z*z;}
+  let axis={x:1,y:.37,z:.19};
+  for(let k=0;k<10;k++){const q={x:cxx*axis.x+cxy*axis.y+cxz*axis.z,y:cxy*axis.x+cyy*axis.y+cyz*axis.z,z:cxz*axis.x+cyz*axis.y+czz*axis.z},u=phoneUnit(q);if(!u)break;axis=u;}
+  const along=[],deviation=[],magnitude=[];
+  for(const v of vectors){const x=Number(v.x||0),y=Number(v.y||0),z=Number(v.z||0),p=x*axis.x+y*axis.y+z*axis.z,m=Math.sqrt(x*x+y*y+z*z);along.push(p);deviation.push(Math.sqrt(Math.max(0,m*m-p*p)));magnitude.push(m);}
+  return{axis,along,deviation,magnitude};
+}
+function phoneSeriesCrest(values){const a=(values||[]).map(x=>Math.abs(Number(x||0)));if(!a.length)return 0;const rms=Math.sqrt(a.reduce((s,x)=>s+x*x,0)/a.length);return rms>1e-5?Math.max(...a)/rms:0;}
+function phoneCrestSimilarity(a,b){const x=Math.max(.05,phoneSeriesCrest(a)),y=Math.max(.05,phoneSeriesCrest(b));return phoneClamp01(Math.exp(-Math.abs(Math.log(x/y))*.75));}
+function phoneMsmWindowCandidates(profile,stats,move){
+  const all=stats?.samples||[];if(all.length<4)return[];
+  const dur=Math.max(180,Number(profile?.duration||0)*1000),start=Number(move?.time||NaN),moveDur=Number(move?.duration||0);
+  if(!Number.isFinite(start)||!all.some(s=>Number.isFinite(Number(s.timelineMs))))return[all];
+  const latestStart=start+Math.max(0,moveDur-dur),starts=[start-80,start, start+Math.max(0,(moveDur-dur)/2),latestStart,latestStart+80];
+  const out=[];
+  for(const st of starts){const seg=all.filter(s=>Number(s.timelineMs)>=st&&Number(s.timelineMs)<=st+dur);if(seg.length>=4)out.push(seg);}
+  if(!out.length)out.push(all);
+  return out;
+}
+function phoneMsmMatchSegment(profile,samples){
+  const n=Number(profile?.count||0);if(!profile||n<4||samples.length<4)return 0;
+  const principal=phonePrincipalMotion(samples);if(!principal)return 0;
+  const type=String(profile.classifierType||"").toLowerCase();
+  let primaryScore=0,secondaryScore=0,structureScore=0;
+  if(type.includes("dir")){
+    primaryScore=phoneShapeScore(profile.primary,principal.along,true);
+    secondaryScore=phoneShapeScore(profile.secondary,principal.deviation,false);
+    structureScore=(phoneCrestSimilarity(profile.primary,principal.along)+phoneCrestSimilarity(profile.secondary,principal.deviation))/2;
+  }else{
+    const motion=samples.map(s=>Number(s.motionMag||0)),jerk=samples.map(s=>Math.log1p(Math.max(0,Number(s.jerk||0)))),horizontal=samples.map(s=>Number(s.horizontal||0)),vertical=samples.map(s=>Math.abs(Number(s.vertical||0)));
+    primaryScore=Math.max(phoneShapeScore(profile.primary,motion,false),phoneShapeScore(profile.primary,horizontal,false),phoneShapeScore(profile.primary,vertical,false));
+    secondaryScore=Math.max(phoneShapeScore(profile.secondary,jerk,false),phoneShapeScore(profile.secondary,motion,false));
+    structureScore=(phoneCrestSimilarity(profile.primary,motion)+phoneCrestSimilarity(profile.secondary,jerk))/2;
+  }
+  const span=Number(samples.at(-1)?.time||0)-Number(samples[0]?.time||0),target=Math.max(1,Number(profile.duration||0)*1000),durationScore=span>0?phoneClamp01(1-Math.abs(span-target)/(target*.75)):0.5;
+  const raw=primaryScore*.58+secondaryScore*.27+structureScore*.10+durationScore*.05;
+  return phoneClamp01((raw-.26)/.66);
+}
+function phoneMsmMatch(profile,stats,move){const windows=phoneMsmWindowCandidates(profile,stats,move);let best=0;for(const samples of windows)best=Math.max(best,phoneMsmMatchSegment(profile,samples));return best;}
+function phoneClassifierMatch(profile,stats,move){return profile?.format==="livemove"?phoneLiveMatch(profile,stats):profile?.format==="msm"?phoneMsmMatch(profile,stats,move):0;}
+function phoneMsmProfileSimilarity(a,b){
+  if(a?.format!=="msm"||b?.format!=="msm")return 0;
+  const primary=phoneShapeScore(a.primary,b.primary,true),secondary=phoneShapeScore(a.secondary,b.secondary,false);
+  const da=Math.max(.001,Number(a.duration||0)),db=Math.max(.001,Number(b.duration||0)),duration=phoneClamp01(1-Math.abs(da-db)/Math.max(da,db));
+  return phoneClamp01(primary*.62+secondary*.30+duration*.08);
+}
+function phoneBuildMsmCompetitors(){
+  phoneDanceCompetitors=new Map();
+  const entries=[...phoneDanceProfiles.entries()].filter(([,p])=>p?.format==="msm");
+  for(const [name,profile] of entries){
+    const list=entries.filter(([otherName,other])=>otherName!==name&&(other.signature||"")!==(profile.signature||"")).map(([otherName,other])=>({name:otherName,profile:other,similarity:phoneMsmProfileSimilarity(profile,other)})).sort((a,b)=>b.similarity-a.similarity).slice(0,5);
+    phoneDanceCompetitors.set(name,list);
+  }
+}
+function phoneMsmCompetitiveAdjust(profile,stats,move,targetScore){
+  if(profile?.format!=="msm"||targetScore<=0)return{score:targetScore,runnerUp:0,margin:targetScore};
+  const list=phoneDanceCompetitors.get(String(profile.moveName||"").toLowerCase())||[];
+  let runnerUp=0,runnerName="";
+  for(const item of list){const value=phoneMsmMatch(item.profile,stats,move);if(value>runnerUp){runnerUp=value;runnerName=item.name;}}
+  const delta=runnerUp-targetScore;
+  let score=targetScore;
+  if(delta>.12)score=Math.min(score*.45,.43);
+  else if(delta>.07)score*=.60;
+  else if(delta>.035)score*=.78;
+  else if(delta>.015)score*=.90;
+  return{score:phoneClamp01(score),runnerUp:phoneClamp01(runnerUp),margin:targetScore-runnerUp,runnerName};
+}
+
 function phoneIsShake(move){ return /(?:^|[^a-z0-9])shake(?:[^a-z0-9]|\d|$)/i.test(String(move?.name||"")); }
 function phoneMakeStats(){return{count:0,active:0,motionSum:0,motionPeak:0,rotationSum:0,rotationPeak:0,jerkSum:0,jerkPeak:0,reversals:0,strongReversals:0,prevMotion:null,prevUnit:null,prevTime:0,samples:[]};}
 function phoneDanceResetLocal(clearQueue=true){phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;phoneDanceJudgedMoves.clear();if(clearQueue)phoneDancePendingResults.clear();phoneDanceLocal={totalMoves:phoneDanceMoves.length,judgedMoves:0,rawScore:0,score:0,stars:0,rank:"SEM ESTRELAS",lastJudgement:"",judgementCounts:{PERFECT:0,SUPER:0,GOOD:0,OK:0,YEAH:0,X:0}};renderControllerDanceScore(phoneDanceLocal);}
@@ -328,9 +455,9 @@ function phoneDancePersistMobileTuning(){
     localStorage.setItem(PHONE_DANCE_CALIBRATION_STORAGE_KEY,JSON.stringify(all));
   }catch{}
 }
-function phoneDanceCalibratedClassifier(raw,songId=phoneDanceSession?.songId){
+function phoneDanceCalibratedClassifier(raw,songId=phoneDanceSession?.songId,lockReference=false){
   const cfg=phoneDanceGetScoreTuning(songId);
-  const ref=Math.max(cfg.floor+.08,Number(phoneDanceMobileTuning.perfectRef||cfg.perfectRef));
+  const ref=Math.max(cfg.floor+.08,lockReference?Number(cfg.perfectRef):Number(phoneDanceMobileTuning.perfectRef||cfg.perfectRef));
   const t=phoneClamp01((Number(raw||0)-cfg.floor)/(ref-cfg.floor));
   return phoneClamp01(t*t*(3-2*t));
 }
@@ -366,8 +493,9 @@ async function phoneLoadDanceSong(songId){
   const song=PHONE_DANCE_SONGS[songId]||PHONE_DANCE_SONGS.RainOverMe,token=++phoneDanceLoadToken;
   phoneDanceReady=false;
   phoneDanceProfiles=new Map();
+  phoneDanceCompetitors=new Map();
   phoneDanceLoadMobileTuning(song.id);
-  if(sensorNotice)sensorNotice.textContent=`Carregando movimentos ${song.classifierFormat.toUpperCase()} e recalibrando para este celular…`;
+  if(sensorNotice)sensorNotice.textContent=`Carregando classifiers reais e validando os arquivos desta música…`;
   try{
     const r=await fetch(`${song.base}/moves/${song.movesFile}`,{cache:"force-cache"});
     if(!r.ok)throw new Error(`moves HTTP ${r.status}`);
@@ -375,27 +503,60 @@ async function phoneLoadDanceSong(songId){
     if(token!==phoneDanceLoadToken)return;
     phoneDanceMoves=Array.isArray(moves)?moves.slice().sort((a,b)=>Number(a.time||0)-Number(b.time||0)):[];
     const names=[...new Set(phoneDanceMoves.map(m=>String(m?.name||"")).filter(Boolean))];
-    let loaded=0;
+    const candidates=new Map();
     await Promise.all(names.map(async name=>{
-      const file=phoneDanceClassifierFile(song,name);
-      if(!file)return;
-      try{
-        const fr=await fetch(`${song.base}/${song.classifierFolder}/${file}`,{cache:"force-cache"});
-        if(!fr.ok)return;
-        const buf=await fr.arrayBuffer();
-        const p=song.classifierFormat==="msm"?phoneParseMsm(buf,name):phoneParseLiveMove(buf,name);
-        if(p){phoneDanceProfiles.set(String(name).toLowerCase(),p);loaded++;}
-      }catch{}
+      const found=[];
+      for(const candidate of phoneDanceClassifierCandidates(song,name)){
+        try{
+          const fr=await fetch(`${song.base}/${candidate.folder}/${candidate.file}`,{cache:"force-cache"});
+          if(!fr.ok)continue;
+          const buf=await fr.arrayBuffer();
+          const p=candidate.format==="msm"?phoneParseMsm(buf,name):phoneParseLiveMove(buf,name);
+          if(p)found.push({...candidate,profile:p});
+        }catch{}
+      }
+      candidates.set(String(name).toLowerCase(),found);
     }));
     if(token!==phoneDanceLoadToken)return;
-    phoneDanceClassifierSummary={loaded,total:names.length,format:song.classifierFormat.toUpperCase()};
-    phoneDanceReady=true;
+
+    const msmSignatureCounts=new Map();
+    for(const found of candidates.values())for(const item of found)if(item.profile?.format==="msm"){const sig=item.profile.signature||phoneMsmSignature(item.profile);msmSignatureCounts.set(sig,(msmSignatureCounts.get(sig)||0)+1);}
+    const aliases=(song.sourceSongAliases||[song.id]).map(phoneNormalizeId);
+    let loaded=0,rejectedMsm=0,duplicateMsm=0,fallbackLive=0,sourceMismatch=0;
+    for(const name of names){
+      const found=candidates.get(String(name).toLowerCase())||[];
+      const msm=found.find(x=>x.profile?.format==="msm")||null;
+      const live=found.find(x=>x.profile?.format==="livemove")||null;
+      let chosen=null;
+      if(msm){
+        const p=msm.profile,sig=p.signature||phoneMsmSignature(p),duplicates=Number(msmSignatureCounts.get(sig)||0),source=phoneNormalizeId(p.sourceSong),sourceOk=!source||aliases.includes(source);
+        const uniqueOk=duplicates<=1;
+        if(sourceOk&&uniqueOk)chosen=p;
+        else{
+          rejectedMsm++;
+          if(!uniqueOk)duplicateMsm++;
+          if(!sourceOk)sourceMismatch++;
+        }
+      }
+      if(!chosen&&live){chosen=live.profile;fallbackLive++;}
+      if(chosen){phoneDanceProfiles.set(String(name).toLowerCase(),chosen);loaded++;}
+    }
+    if(token!==phoneDanceLoadToken)return;
+    phoneBuildMsmCompetitors();
+    const activeFormats=[...new Set([...phoneDanceProfiles.values()].map(p=>String(p.format||"").toUpperCase()))];
+    phoneDanceClassifierSummary={loaded,total:names.length,format:activeFormats.join("+")||String(song.classifierFormat||"").toUpperCase(),rejectedMsm,duplicateMsm,fallbackLive,sourceMismatch};
+    phoneDanceReady=loaded>0;
     phoneDanceResetLocal(true);
-    const ref=Math.round(phoneDanceMobileTuning.perfectRef*100);
-    if(sensorNotice)sensorNotice.textContent=`Pontuação local V6 pronta • ${loaded}/${names.length} classifiers ${song.classifierFormat.toUpperCase()} → CELULAR • calibração mobile ${ref}%. A rede não decide sua nota.`;
+    if(sensorNotice){
+      if(!loaded)sensorNotice.textContent=`Pontuação pausada: 0/${names.length} classifiers confiáveis. MSM rejeitados: ${rejectedMsm} (${duplicateMsm} duplicados, ${sourceMismatch} de outra música).`;
+      else{
+        const extra=[rejectedMsm?`${rejectedMsm} MSM rejeitados`:"",fallbackLive?`${fallbackLive} LiveMove usados como fallback`:""].filter(Boolean).join(" • ");
+        sensorNotice.textContent=`Pontuação local V7 pronta • ${loaded}/${names.length} classifiers reais (${activeFormats.join("+")})${extra?` • ${extra}`:""} • o celular faz o julgamento.`;
+      }
+    }
   }catch(error){
     console.error("Falha ao preparar classifiers no celular",error);
-    if(sensorNotice)sensorNotice.textContent="Não foi possível carregar os classifiers no celular. A pontuação ficará pausada para não gerar notas falsas.";
+    if(sensorNotice)sensorNotice.textContent="Não foi possível carregar classifiers confiáveis. A pontuação ficará pausada para não gerar notas falsas.";
   }
 }
 async function phoneApplyDanceSession(payload){if(!payload||payload.roomCode!==joinedRoom)return;const changed=!phoneDanceSession||phoneDanceSession.songId!==payload.songId;phoneDanceSession={...payload};phoneDanceSyncClock(payload);if(changed){await phoneLoadDanceSong(payload.songId);phoneDanceSyncClock(payload);}if(sensorModeRequested&&sensorPermissionGranted&&!sensorStreaming)startSensorStreaming();}
@@ -410,7 +571,14 @@ function phoneJudge(stats,move){
   const motionEvidence=Math.max(phoneClamp01(avgMotion/(phoneDanceCalibration.motionScale*1.10)),phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*1.18)));
   const peakEvidence=Math.max(phoneClamp01(stats.motionPeak/(phoneDanceCalibration.motionScale*1.95)),phoneClamp01(stats.rotationPeak/(phoneDanceCalibration.rotationScale*2.55)));
   const profile=phoneDanceProfiles.get(String(move?.name||"").toLowerCase())||null;
-  let rawClassifier=profile?phoneClassifierMatch(profile,stats):0;
+  let rawClassifier=profile?phoneClassifierMatch(profile,stats,move):0;
+  let classifierRunnerUp=0,classifierMargin=rawClassifier;
+  if(profile?.format==="msm"){
+    const competitive=phoneMsmCompetitiveAdjust(profile,stats,move,rawClassifier);
+    rawClassifier=competitive.score;
+    classifierRunnerUp=competitive.runnerUp;
+    classifierMargin=competitive.margin;
+  }
   if(phoneIsShake(move)){
     const rev=phoneClamp01(stats.reversals/Math.max(3,n*.16));
     const strong=phoneClamp01(stats.strongReversals/Math.max(2,n*.08));
@@ -422,32 +590,32 @@ function phoneJudge(stats,move){
   if(!clear)return{judgement:"X",quality:.02,classifierMatch:0,classifierRaw:Math.round(rawClassifier*1000)/1000};
   const songId=phoneDanceSession?.songId||"RainOverMe";
   const cfg=phoneDanceGetScoreTuning(songId);
-  const mobileClassifier=profile?phoneDanceCalibratedClassifier(rawClassifier,songId):0;
-  phoneDanceLearnMobileCeiling(rawClassifier,stats);
-  let q=profile?mobileClassifier*.62+coverageQ*.20+motionEvidence*.11+peakEvidence*.07:Math.min(.54,coverageQ*.55+motionEvidence*.30+peakEvidence*.15);
+  const mobileClassifier=profile?phoneDanceCalibratedClassifier(rawClassifier,songId,true):0;
+  let q=profile?mobileClassifier*.86+coverageQ*.07+motionEvidence*.05+peakEvidence*.02:0;
   if(profile&&!phoneIsShake(move)){
     const chaos=phoneDanceChaosScore(stats);
     const ref=Math.max(cfg.floor+.08,Number(phoneDanceMobileTuning.perfectRef||cfg.perfectRef));
     if(chaos>.80)q=Math.min(q,cfg.superQ+.08);
   }
+  if(!profile)q=0;
   if(profile&&rawClassifier<cfg.floor*.78)q=Math.min(q,cfg.okQ+.02);
   q=phoneClamp01(q);
   const quality=Math.round(q*1000)/1000;
   const cm=Math.round(mobileClassifier*1000)/1000;
   const raw=Math.round(rawClassifier*1000)/1000;
-  const ref=Math.round(Number(phoneDanceMobileTuning.perfectRef||cfg.perfectRef)*1000)/1000;
+  const ref=Math.round(Number(cfg.perfectRef)*1000)/1000;
   if(move?.goldMove){
     const yeah=profile?(mobileClassifier>=.42&&q>=.44):q>=.48;
-    return{judgement:yeah?"YEAH":"X",quality,classifierMatch:cm,classifierRaw:raw,calibrationRef:ref};
+    return{judgement:yeah?"YEAH":"X",quality,classifierMatch:cm,classifierRaw:raw,classifierRunnerUp:Math.round(classifierRunnerUp*1000)/1000,classifierMargin:Math.round(classifierMargin*1000)/1000,calibrationRef:ref};
   }
   const judgement=q>=cfg.perfectQ?"PERFECT":q>=cfg.superQ?"SUPER":q>=cfg.goodQ?"GOOD":q>=cfg.okQ?"OK":"X";
-  return{judgement,quality,classifierMatch:cm,classifierRaw:raw,calibrationRef:ref};
+  return{judgement,quality,classifierMatch:cm,classifierRaw:raw,classifierRunnerUp:Math.round(classifierRunnerUp*1000)/1000,classifierMargin:Math.round(classifierMargin*1000)/1000,calibrationRef:ref};
 }
-function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,...result,scoredAt:Date.now(),source:"phone-v6"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
+function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,...result,scoredAt:Date.now(),source:"phone-v7-classifier"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
 function phoneFlushDanceResults(){if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;for(const [index,payload] of [...phoneDancePendingResults]){socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:dance-judgement",payload,(error,response)=>{if(!error&&response?.ok){phoneDancePendingResults.delete(index);if(response.state)applyState(response.state);}});}}
 function phoneFinalizeActiveMove(){const i=phoneDanceActiveMoveIndex;if(i<0||phoneDanceJudgedMoves.has(i))return;const move=phoneDanceMoves[i];if(!move)return;const result=phoneJudge(phoneDanceStats,move);phoneDanceJudgedMoves.add(i);phoneQueueResult(i,move,result);phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;}
 function phoneSyncMoveWindow(){if(!phoneDanceReady||!phoneDanceClock.playing||!sensorStreaming)return;const current=phoneMoveIndexAt(phoneDanceClockNow());if(phoneDanceActiveMoveIndex>=0&&current!==phoneDanceActiveMoveIndex)phoneFinalizeActiveMove();if(current>=0&&!phoneDanceJudgedMoves.has(current)&&phoneDanceActiveMoveIndex!==current){phoneDanceActiveMoveIndex=current;phoneDanceStats=phoneMakeStats();}}
-function phoneCollectDanceSample(sample){if(!phoneDanceReady||!phoneDanceSession||!phoneDanceClock.playing||!sensorStreaming)return;phoneSyncMoveWindow();if(phoneDanceActiveMoveIndex<0||!phoneDanceStats)return;const st=phoneDanceStats,now=performance.now(),linear={x:Number(sample.acceleration?.x||0),y:Number(sample.acceleration?.y||0),z:Number(sample.acceleration?.z||0)},gravity={x:Number(sample.accelerationIncludingGravity?.x||0),y:Number(sample.accelerationIncludingGravity?.y||0),z:Number(sample.accelerationIncludingGravity?.z||0)},rotation={x:Number(sample.rotationRate?.x||0),y:Number(sample.rotationRate?.y||0),z:Number(sample.rotationRate?.z||0)};let motion=linear;if(phoneMagnitude(linear)<.04&&st.prevGravity){motion={x:gravity.x-st.prevGravity.x,y:gravity.y-st.prevGravity.y,z:gravity.z-st.prevGravity.z};}st.prevGravity={...gravity};const gmag=phoneMagnitude(gravity);if(gmag>6&&gmag<13&&phoneMagnitude(motion)<.35){phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.985+gmag*.015;phoneDanceCalibration.quietSamples++;}const gu=phoneUnit(gravity)||{x:0,y:0,z:1},vertical=phoneDot(motion,gu),motionMag=phoneMagnitude(motion),horizontal=Math.sqrt(Math.max(0,motionMag*motionMag-vertical*vertical)),rotationMag=phoneMagnitude(rotation),dt=st.prevTime?Math.max(.018,Math.min(.12,(now-st.prevTime)/1000)):.035;st.prevTime=now;let jerk=0;if(st.prevMotion)jerk=phoneMagnitude({x:(motion.x-st.prevMotion.x)/dt,y:(motion.y-st.prevMotion.y)/dt,z:(motion.z-st.prevMotion.z)/dt});st.prevMotion={...motion};const unit=motionMag>.10?phoneUnit(motion):null;if(unit&&st.prevUnit){const dot=Math.max(-1,Math.min(1,phoneDot(unit,st.prevUnit)));if(dot<-.18)st.reversals++;if(dot<-.52)st.strongReversals++;}if(unit)st.prevUnit=unit;st.count++;if(motionMag>=.20||rotationMag>=18)st.active++;st.motionSum+=motionMag;st.motionPeak=Math.max(st.motionPeak,motionMag);st.rotationSum+=rotationMag;st.rotationPeak=Math.max(st.rotationPeak,rotationMag);st.jerkSum+=jerk;st.jerkPeak=Math.max(st.jerkPeak,jerk);st.samples.push({time:now,motion,gravity,rotation,motionMag,rotationMag,vertical,horizontal,jerk});if(st.samples.length>220)st.samples.shift();}
+function phoneCollectDanceSample(sample){if(!phoneDanceReady||!phoneDanceSession||!phoneDanceClock.playing||!sensorStreaming)return;phoneSyncMoveWindow();if(phoneDanceActiveMoveIndex<0||!phoneDanceStats)return;const st=phoneDanceStats,now=performance.now(),linear={x:Number(sample.acceleration?.x||0),y:Number(sample.acceleration?.y||0),z:Number(sample.acceleration?.z||0)},gravity={x:Number(sample.accelerationIncludingGravity?.x||0),y:Number(sample.accelerationIncludingGravity?.y||0),z:Number(sample.accelerationIncludingGravity?.z||0)},rotation={x:Number(sample.rotationRate?.x||0),y:Number(sample.rotationRate?.y||0),z:Number(sample.rotationRate?.z||0)};let motion=linear;if(phoneMagnitude(linear)<.04&&st.prevGravity){motion={x:gravity.x-st.prevGravity.x,y:gravity.y-st.prevGravity.y,z:gravity.z-st.prevGravity.z};}st.prevGravity={...gravity};const gmag=phoneMagnitude(gravity);if(gmag>6&&gmag<13&&phoneMagnitude(motion)<.35){phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.985+gmag*.015;phoneDanceCalibration.quietSamples++;}const gu=phoneUnit(gravity)||{x:0,y:0,z:1},vertical=phoneDot(motion,gu),motionMag=phoneMagnitude(motion),horizontal=Math.sqrt(Math.max(0,motionMag*motionMag-vertical*vertical)),rotationMag=phoneMagnitude(rotation),dt=st.prevTime?Math.max(.018,Math.min(.12,(now-st.prevTime)/1000)):.035;st.prevTime=now;let jerk=0;if(st.prevMotion)jerk=phoneMagnitude({x:(motion.x-st.prevMotion.x)/dt,y:(motion.y-st.prevMotion.y)/dt,z:(motion.z-st.prevMotion.z)/dt});st.prevMotion={...motion};const unit=motionMag>.10?phoneUnit(motion):null;if(unit&&st.prevUnit){const dot=Math.max(-1,Math.min(1,phoneDot(unit,st.prevUnit)));if(dot<-.18)st.reversals++;if(dot<-.52)st.strongReversals++;}if(unit)st.prevUnit=unit;st.count++;if(motionMag>=.20||rotationMag>=18)st.active++;st.motionSum+=motionMag;st.motionPeak=Math.max(st.motionPeak,motionMag);st.rotationSum+=rotationMag;st.rotationPeak=Math.max(st.rotationPeak,rotationMag);st.jerkSum+=jerk;st.jerkPeak=Math.max(st.jerkPeak,jerk);st.samples.push({time:now,timelineMs:phoneDanceClockNow(),motion,gravity,rotation,motionMag,rotationMag,vertical,horizontal,jerk});if(st.samples.length>220)st.samples.shift();}
 
 function reportSensorStatus(active = sensorStreaming, force = false) {
   if (!socket || !socket.connected || !joinedRoom) return;

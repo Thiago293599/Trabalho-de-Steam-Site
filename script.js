@@ -361,7 +361,7 @@ const DANCE_SONGS = Object.freeze({
     videos: Object.freeze({ low: "EarthSong_Coach_Low.mp4", medium: "EarthSong_Coach_Medium.mp4", high: "EarthSong_Coach_High.mp4" }),
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 10 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
-    classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
+    classifierFormat: "auto", classifierFolder: "classifiers_WIIU", fallbackClassifierFolder: "classifiers_WII_source", sourceSongAliases: Object.freeze(["EarthSong", "Earth Song"])
   }),
   ItsRainingMen: Object.freeze({
     id: "ItsRainingMen", title: "It's Raining Men", artist: "The Weather Girls", edition: "Just Dance 2", coaches: 1, beta: true, lyricsColor: "#35C5ED",
@@ -3934,11 +3934,35 @@ function danceClassifierKey(songId, moveName) {
   return `${String(songId || "").toLowerCase()}::${String(moveName || "").toLowerCase()}`;
 }
 
-function danceClassifierFileForMove(songConfig, moveName) {
+function danceNormalizeClassifierId(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function danceReadFixedAscii(arrayBuffer, offset, length) {
+  const bytes = new Uint8Array(arrayBuffer, offset, Math.min(length, Math.max(0, arrayBuffer.byteLength - offset)));
+  let out = "";
+  for (const value of bytes) {
+    if (!value) break;
+    if (value >= 32 && value < 127) out += String.fromCharCode(value);
+  }
+  return out.trim();
+}
+
+function danceClassifierCandidatesForMove(songConfig, moveName) {
   const name = String(moveName || "").toLowerCase();
-  if (songConfig?.classifierFormat === "msm") return `${name}.msm`;
-  if (songConfig?.classifierFormat === "livemove") return EARTHSONG_CLASSIFIER_FILES[name] || "";
-  return "";
+  const liveFile = EARTHSONG_CLASSIFIER_FILES[name] || "";
+  if (songConfig?.classifierFormat === "msm") {
+    return [{ format: "msm", folder: songConfig.classifierFolder, file: `${name}.msm` }];
+  }
+  if (songConfig?.classifierFormat === "livemove") {
+    return liveFile ? [{ format: "livemove", folder: songConfig.classifierFolder, file: liveFile }] : [];
+  }
+  if (songConfig?.classifierFormat === "auto") {
+    const out = [{ format: "msm", folder: songConfig.classifierFolder || "classifiers_WIIU", file: `${name}.msm` }];
+    if (liveFile) out.push({ format: "livemove", folder: songConfig.fallbackClassifierFolder || "classifiers_WII_source", file: liveFile });
+    return out;
+  }
+  return [];
 }
 
 function danceFindAscii(bytes, text) {
@@ -3950,19 +3974,30 @@ function danceFindAscii(bytes, text) {
   return -1;
 }
 
+function danceMsmSignature(profile) {
+  if (!profile || profile.format !== "msm") return "";
+  const pick = values => {
+    const source = values || [];
+    const indexes = [0, 1, 2, Math.floor(source.length * .25), Math.floor(source.length * .5), Math.floor(source.length * .75), source.length - 3, source.length - 2, source.length - 1];
+    return indexes.filter(index => index >= 0 && index < source.length).map(index => Number(source[index] || 0).toFixed(5)).join(",");
+  };
+  return [
+    profile.classifierType, profile.count, Number(profile.duration || 0).toFixed(6),
+    Number(profile.scaleA || 0).toFixed(5), Number(profile.scaleB || 0).toFixed(5),
+    pick(profile.primary), pick(profile.secondary)
+  ].join("|");
+}
+
 function parseDanceMsmClassifier(arrayBuffer, moveName = "") {
   if (!(arrayBuffer instanceof ArrayBuffer) || arrayBuffer.byteLength < 244) return null;
   const view = new DataView(arrayBuffer);
   const duration = view.getFloat32(200, false);
 
-  // Layout MSM moderno (Rain Over Me / It's Raining Men).
   let count = view.getUint32(232, false);
   let channels = view.getUint32(236, false);
   let start = 244;
   let layout = "modern";
 
-  // Layout MSM legado do Wii U usado pelos classifiers novos de Earth Song.
-  // Nesse formato: count @ 224, channels @ 228 e amostras @ 236.
   const modernValid = count > 0
     && count <= 512
     && channels === 2
@@ -3983,9 +4018,19 @@ function parseDanceMsmClassifier(arrayBuffer, moveName = "") {
   for (let index = 0; index < count; index += 1) secondary.push(view.getFloat32(start + (count + index) * 4, false));
   const scaleA = view.getFloat32(start + count * 8, false);
   const scaleB = view.getFloat32(start + count * 8 + 4, false);
+  const sourceMove = danceReadFixedAscii(arrayBuffer, 8, 64);
+  const sourceSong = danceReadFixedAscii(arrayBuffer, 72, 64);
+  const classifierType = danceReadFixedAscii(arrayBuffer, 136, 64);
+  const params = [204, 208, 212, 216].map(offset => offset + 4 <= arrayBuffer.byteLength ? view.getFloat32(offset, false) : 0);
 
-  if (![duration, scaleA, scaleB, ...primary, ...secondary].every(Number.isFinite)) return null;
-  return { format: "msm", layout, moveName, duration, count, primary, secondary, scaleA, scaleB };
+  if (![duration, scaleA, scaleB, ...params, ...primary, ...secondary].every(Number.isFinite)) return null;
+  const profile = {
+    format: "msm", layout, moveName, sourceMove, sourceSong, classifierType,
+    duration, count, channels, primary, secondary, scaleA, scaleB, params,
+    sampleRate: duration > 0 ? count / duration : 0
+  };
+  profile.signature = danceMsmSignature(profile);
+  return profile;
 }
 
 function parseDanceLiveMoveClassifier(arrayBuffer, moveName = "") {
@@ -4011,35 +4056,89 @@ function parseDanceLiveMoveClassifier(arrayBuffer, moveName = "") {
   return { format: "livemove", moveName, count, axes, source: "AiLive LiveMove Pro" };
 }
 
+async function loadDanceClassifierCandidatesForMove(moveName, songConfig = getDanceSongConfig()) {
+  const found = [];
+  for (const candidate of danceClassifierCandidatesForMove(songConfig, moveName)) {
+    try {
+      const response = await fetch(`${songConfig.base}/${candidate.folder}/${candidate.file}`, { cache: "force-cache" });
+      if (!response.ok) continue;
+      const buffer = await response.arrayBuffer();
+      const profile = candidate.format === "msm"
+        ? parseDanceMsmClassifier(buffer, moveName)
+        : parseDanceLiveMoveClassifier(buffer, moveName);
+      if (profile) found.push({ ...candidate, profile });
+    } catch {}
+  }
+  return found;
+}
+
 async function loadDanceClassifierForMove(moveName, songConfig = getDanceSongConfig()) {
   const key = danceClassifierKey(songConfig?.id, moveName);
   if (danceClassifierProfiles.has(key)) return danceClassifierProfiles.get(key);
-  const fileName = danceClassifierFileForMove(songConfig, moveName);
-  if (!fileName) {
-    danceClassifierProfiles.set(key, null);
-    return null;
+  const found = await loadDanceClassifierCandidatesForMove(moveName, songConfig);
+  const aliases = (songConfig?.sourceSongAliases || [songConfig?.id]).map(danceNormalizeClassifierId);
+  const msm = found.find(item => item.profile?.format === "msm") || null;
+  const live = found.find(item => item.profile?.format === "livemove") || null;
+  let chosen = null;
+  if (msm) {
+    const source = danceNormalizeClassifierId(msm.profile.sourceSong);
+    if (!source || aliases.includes(source)) chosen = msm.profile;
   }
-  try {
-    const response = await fetch(`${songConfig.base}/${songConfig.classifierFolder}/${fileName}`, { cache: "force-cache" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const buffer = await response.arrayBuffer();
-    const profile = songConfig.classifierFormat === "msm"
-      ? parseDanceMsmClassifier(buffer, moveName)
-      : parseDanceLiveMoveClassifier(buffer, moveName);
-    danceClassifierProfiles.set(key, profile || null);
-    return profile || null;
-  } catch (error) {
-    console.warn(`Classifier indisponivel para ${moveName}:`, error);
-    danceClassifierProfiles.set(key, null);
-    return null;
-  }
+  if (!chosen && live) chosen = live.profile;
+  danceClassifierProfiles.set(key, chosen || null);
+  return chosen || null;
 }
 
 async function preloadDanceClassifiers(moves, songConfig = getDanceSongConfig()) {
   const uniqueNames = [...new Set((moves || []).map(move => String(move?.name || "")).filter(Boolean))];
-  const results = await Promise.all(uniqueNames.map(name => loadDanceClassifierForMove(name, songConfig)));
-  const loaded = results.filter(Boolean).length;
-  danceClassifierLoadSummary = { loaded, total: uniqueNames.length, format: songConfig?.classifierFormat || "" };
+  const all = await Promise.all(uniqueNames.map(async name => [name, await loadDanceClassifierCandidatesForMove(name, songConfig)]));
+  const signatureCounts = new Map();
+  for (const [, found] of all) {
+    for (const item of found) {
+      if (item.profile?.format !== "msm") continue;
+      const signature = item.profile.signature || danceMsmSignature(item.profile);
+      signatureCounts.set(signature, (signatureCounts.get(signature) || 0) + 1);
+    }
+  }
+
+  const aliases = (songConfig?.sourceSongAliases || [songConfig?.id]).map(danceNormalizeClassifierId);
+  let loaded = 0;
+  let rejectedMsm = 0;
+  let duplicateMsm = 0;
+  let sourceMismatch = 0;
+  let fallbackLive = 0;
+
+  for (const [name, found] of all) {
+    const key = danceClassifierKey(songConfig?.id, name);
+    const msm = found.find(item => item.profile?.format === "msm") || null;
+    const live = found.find(item => item.profile?.format === "livemove") || null;
+    let chosen = null;
+    if (msm) {
+      const profile = msm.profile;
+      const signature = profile.signature || danceMsmSignature(profile);
+      const source = danceNormalizeClassifierId(profile.sourceSong);
+      const sourceOk = !source || aliases.includes(source);
+      const uniqueOk = Number(signatureCounts.get(signature) || 0) <= 1;
+      if (sourceOk && uniqueOk) chosen = profile;
+      else {
+        rejectedMsm += 1;
+        if (!sourceOk) sourceMismatch += 1;
+        if (!uniqueOk) duplicateMsm += 1;
+      }
+    }
+    if (!chosen && live) {
+      chosen = live.profile;
+      fallbackLive += 1;
+    }
+    danceClassifierProfiles.set(key, chosen || null);
+    if (chosen) loaded += 1;
+  }
+
+  const activeFormats = [...new Set([...danceClassifierProfiles.values()].filter(Boolean).map(profile => String(profile.format || "").toUpperCase()))];
+  danceClassifierLoadSummary = {
+    loaded, total: uniqueNames.length, format: activeFormats.join("+") || String(songConfig?.classifierFormat || ""),
+    rejectedMsm, duplicateMsm, sourceMismatch, fallbackLive
+  };
   return danceClassifierLoadSummary;
 }
 
@@ -4159,24 +4258,176 @@ function danceClassifierMatchLiveMove(profile, stats) {
   return Math.max(0, Math.min(1, (raw - 0.18) / 0.72));
 }
 
+function danceClassifierMedian(values) {
+  const sorted = (values || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+function danceClassifierRobustNormalize(values) {
+  const safe = (values || []).map(value => Number(value || 0));
+  if (!safe.length) return [];
+  const median = danceClassifierMedian(safe);
+  const mad = danceClassifierMedian(safe.map(value => Math.abs(value - median)));
+  const mean = safe.reduce((sum, value) => sum + value, 0) / safe.length;
+  const variance = safe.reduce((sum, value) => sum + (value - mean) ** 2, 0) / safe.length;
+  const deviation = Math.sqrt(Math.max(variance, 1e-8));
+  const scale = Math.max(mad * 1.4826, deviation * .22, 1e-4);
+  return safe.map(value => Math.max(-6, Math.min(6, (value - median) / scale)));
+}
+
+function danceClassifierDerivative(values) {
+  const safe = (values || []).map(Number);
+  return safe.map((value, index) => index ? Number(value || 0) - Number(safe[index - 1] || 0) : 0);
+}
+
+function danceClassifierDtwScore(reference, observed, allowSignFlip = false) {
+  const ref = danceClassifierRobustNormalize(reference);
+  const obs = danceClassifierRobustNormalize(observed);
+  if (ref.length < 4 || obs.length < 4) return 0;
+  const calculate = (a, b) => {
+    const n = a.length;
+    const m = b.length;
+    const band = Math.max(3, Math.ceil(Math.max(n, m) * .20));
+    const inf = 1e12;
+    let previous = Array(m + 1).fill(inf);
+    let current = Array(m + 1).fill(inf);
+    previous[0] = 0;
+    for (let i = 1; i <= n; i += 1) {
+      current.fill(inf);
+      const first = Math.max(1, i - band);
+      const last = Math.min(m, i + band);
+      for (let j = first; j <= last; j += 1) {
+        const distance = Math.min(4, Math.abs(a[i - 1] - b[j - 1]));
+        current[j] = distance + Math.min(current[j - 1], previous[j], previous[j - 1]);
+      }
+      [previous, current] = [current, previous];
+    }
+    const average = previous[m] / Math.max(1, n + m);
+    return Math.max(0, Math.min(1, Math.exp(-average * 1.35)));
+  };
+  let best = calculate(ref, obs);
+  if (allowSignFlip) best = Math.max(best, calculate(ref, obs.map(value => -value)));
+  return best;
+}
+
+function danceClassifierShapeScore(reference, observed, allowSignFlip = false) {
+  if ((reference?.length || 0) < 4 || (observed?.length || 0) < 4) return 0;
+  const resampled = danceClassifierResample(observed, reference.length);
+  const correlation = danceClassifierBestShiftCorrelation(reference, resampled, allowSignFlip);
+  const dtw = danceClassifierDtwScore(reference, resampled, allowSignFlip);
+  const derivative = danceClassifierDtwScore(
+    danceClassifierDerivative(reference),
+    danceClassifierDerivative(resampled),
+    allowSignFlip
+  );
+  return Math.max(0, Math.min(1, correlation * .46 + dtw * .40 + derivative * .14));
+}
+
+function danceClassifierPrincipalMotion(samples) {
+  const vectors = (samples || []).map(sample => sample.motion || { x: 0, y: 0, z: 0 });
+  if (vectors.length < 4) return null;
+  const mean = vectors.reduce((sum, vector) => ({
+    x: sum.x + Number(vector.x || 0),
+    y: sum.y + Number(vector.y || 0),
+    z: sum.z + Number(vector.z || 0)
+  }), { x: 0, y: 0, z: 0 });
+  mean.x /= vectors.length;
+  mean.y /= vectors.length;
+  mean.z /= vectors.length;
+
+  let cxx = 0, cxy = 0, cxz = 0, cyy = 0, cyz = 0, czz = 0;
+  for (const vector of vectors) {
+    const x = Number(vector.x || 0) - mean.x;
+    const y = Number(vector.y || 0) - mean.y;
+    const z = Number(vector.z || 0) - mean.z;
+    cxx += x * x; cxy += x * y; cxz += x * z;
+    cyy += y * y; cyz += y * z; czz += z * z;
+  }
+
+  let axis = { x: 1, y: .37, z: .19 };
+  for (let step = 0; step < 10; step += 1) {
+    const next = {
+      x: cxx * axis.x + cxy * axis.y + cxz * axis.z,
+      y: cxy * axis.x + cyy * axis.y + cyz * axis.z,
+      z: cxz * axis.x + cyz * axis.y + czz * axis.z
+    };
+    const unit = danceJudgeUnitVector(next);
+    if (!unit) break;
+    axis = unit;
+  }
+
+  const along = [];
+  const deviation = [];
+  const magnitude = [];
+  for (const vector of vectors) {
+    const x = Number(vector.x || 0);
+    const y = Number(vector.y || 0);
+    const z = Number(vector.z || 0);
+    const projection = x * axis.x + y * axis.y + z * axis.z;
+    const mag = Math.sqrt(x * x + y * y + z * z);
+    along.push(projection);
+    deviation.push(Math.sqrt(Math.max(0, mag * mag - projection * projection)));
+    magnitude.push(mag);
+  }
+  return { axis, along, deviation, magnitude };
+}
+
+function danceClassifierSeriesCrest(values) {
+  const safe = (values || []).map(value => Math.abs(Number(value || 0)));
+  if (!safe.length) return 0;
+  const rms = Math.sqrt(safe.reduce((sum, value) => sum + value * value, 0) / safe.length);
+  return rms > 1e-5 ? Math.max(...safe) / rms : 0;
+}
+
+function danceClassifierCrestSimilarity(a, b) {
+  const first = Math.max(.05, danceClassifierSeriesCrest(a));
+  const second = Math.max(.05, danceClassifierSeriesCrest(b));
+  return Math.max(0, Math.min(1, Math.exp(-Math.abs(Math.log(first / second)) * .75)));
+}
+
 function danceClassifierMatchMsm(profile, stats) {
   const samples = stats?.rawSamples || [];
   const count = Number(profile?.count || 0);
   if (!profile || profile.format !== "msm" || count < 4 || samples.length < 4) return 0;
-  const axes = ["x", "y", "z"].map(axis => danceClassifierResample(danceClassifierAxisSeries(samples, axis), count));
-  const motionMagnitude = danceClassifierResample(samples.map(sample => danceJudgeVectorMagnitude(sample.motion)), count);
-  const rotationMagnitude = danceClassifierResample(samples.map(sample => danceJudgeVectorMagnitude(sample.rotation)), count);
-  const jerkMagnitude = danceClassifierResample(samples.map(sample => Number(sample.jerk || 0)), count);
-  const directionChange = danceClassifierResample(danceClassifierDirectionChangeSeries(samples.map(sample => sample.motion)), count);
+  const principal = danceClassifierPrincipalMotion(samples);
+  if (!principal) return 0;
 
-  const signedCandidates = [...axes, motionMagnitude, rotationMagnitude];
-  const energyCandidates = [motionMagnitude, jerkMagnitude, directionChange, rotationMagnitude];
+  const type = String(profile.classifierType || "").toLowerCase();
   let primaryScore = 0;
-  for (const candidate of signedCandidates) primaryScore = Math.max(primaryScore, danceClassifierBestShiftCorrelation(profile.primary, candidate, true));
   let secondaryScore = 0;
-  for (const candidate of energyCandidates) secondaryScore = Math.max(secondaryScore, danceClassifierBestShiftCorrelation(profile.secondary, candidate, false));
-  const raw = primaryScore * 0.68 + secondaryScore * 0.32;
-  return Math.max(0, Math.min(1, (raw - 0.20) / 0.70));
+  let structureScore = 0;
+
+  if (type.includes("dir")) {
+    primaryScore = danceClassifierShapeScore(profile.primary, principal.along, true);
+    secondaryScore = danceClassifierShapeScore(profile.secondary, principal.deviation, false);
+    structureScore = (
+      danceClassifierCrestSimilarity(profile.primary, principal.along)
+      + danceClassifierCrestSimilarity(profile.secondary, principal.deviation)
+    ) / 2;
+  } else {
+    const motion = samples.map(sample => danceJudgeVectorMagnitude(sample.motion));
+    const horizontal = samples.map(sample => Number(sample.horizontal || 0));
+    const vertical = samples.map(sample => Math.abs(Number(sample.vertical || 0)));
+    const jerk = samples.map(sample => Math.log1p(Math.max(0, Number(sample.jerk || 0))));
+    primaryScore = Math.max(
+      danceClassifierShapeScore(profile.primary, motion, false),
+      danceClassifierShapeScore(profile.primary, horizontal, false),
+      danceClassifierShapeScore(profile.primary, vertical, false)
+    );
+    secondaryScore = Math.max(
+      danceClassifierShapeScore(profile.secondary, jerk, false),
+      danceClassifierShapeScore(profile.secondary, motion, false)
+    );
+    structureScore = (
+      danceClassifierCrestSimilarity(profile.primary, motion)
+      + danceClassifierCrestSimilarity(profile.secondary, jerk)
+    ) / 2;
+  }
+
+  const raw = primaryScore * .63 + secondaryScore * .29 + structureScore * .08;
+  return Math.max(0, Math.min(1, (raw - .26) / .66));
 }
 
 function danceClassifierMatch(profile, stats) {
@@ -4195,7 +4446,7 @@ function beginDanceMoveJudging(index) {
 }
 
 function provisionalDanceJudgement(stats, move = null) {
-  // Pontuacao V4: o classifier da coreografia e o criterio principal.
+  // Pontuação V7: classifier validado é o critério principal.
   // Intensidade/forca so servem para confirmar que houve movimento suficiente na janela.
   if (!stats || stats.count < 3) return { judgement: "X", quality: 0, classifierMatch: 0 };
 
@@ -4223,16 +4474,16 @@ function provisionalDanceJudgement(stats, move = null) {
   const profile = danceClassifierProfiles.get(danceClassifierKey(songConfig.id, move?.name || "")) || null;
   const classifierMatch = profile ? danceClassifierMatch(profile, stats) : 0;
 
-  // Quando existe classifier, ele manda na nota. Forca so acrescenta no maximo 18%.
-  // Sem classifier, o fallback e propositalmente limitado a GOOD para evitar falsos PERFECT.
+  // V7: o classifier manda na nota. Movimento/força apenas confirmam que houve gesto real.
+  // Sem classifier confiável, não inventa nota.
   let quality;
   if (profile) {
-    quality = classifierMatch * 0.76 + coverageQ * 0.12 + motionEvidence * 0.08 + peakEvidence * 0.04;
-    if (classifierMatch < 0.15) quality = Math.min(quality, 0.17);
-    else if (classifierMatch < 0.28) quality = Math.min(quality, 0.35);
-    else if (classifierMatch < 0.43) quality = Math.min(quality, 0.57);
+    quality = classifierMatch * 0.86 + coverageQ * 0.07 + motionEvidence * 0.05 + peakEvidence * 0.02;
+    if (classifierMatch < 0.15) quality = Math.min(quality, 0.16);
+    else if (classifierMatch < 0.28) quality = Math.min(quality, 0.33);
+    else if (classifierMatch < 0.43) quality = Math.min(quality, 0.55);
   } else {
-    quality = Math.min(0.52, coverageQ * 0.46 + motionEvidence * 0.38 + peakEvidence * 0.16);
+    quality = 0;
   }
 
   quality = clamp01(quality);
@@ -4240,7 +4491,7 @@ function provisionalDanceJudgement(stats, move = null) {
   const roundedClassifier = Math.round(classifierMatch * 1000) / 1000;
 
   if (move?.goldMove) {
-    const yeah = profile ? (classifierMatch >= 0.30 && quality >= 0.34) : quality >= 0.42;
+    const yeah = profile && classifierMatch >= 0.34 && quality >= 0.38;
     return { judgement: yeah ? "YEAH" : "X", quality: roundedQuality, classifierMatch: roundedClassifier };
   }
 
@@ -4539,14 +4790,19 @@ async function loadDanceTestSongData(force = false) {
       danceManualSyncOffsetMs = songConfig.defaultSyncMs;
     }
     dancePictoAtlas = atlas && typeof atlas === "object" ? atlas : null;
-    // V6: classifiers são carregados, recalibrados para smartphone e interpretados no celular, não no PC.
-    const classifierSummary = { loaded: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, total: new Set(danceTestMoves.map(move => String(move?.name || "")).filter(Boolean)).size, format: `${songConfig?.classifierFormat || ""}→PHONE` };
+    // V7: valida os classifiers no host também, mas o julgamento oficial continua no celular.
+    const classifierSummary = await preloadDanceClassifiers(danceTestMoves, songConfig);
     danceTestSongLoaded = true;
     const goldCount = danceTestMoves.filter(move => move.goldMove).length;
     if (danceSongAssetStatus) {
       const betaText = songConfig.beta ? " • BETA" : "";
-      const classifierLabel = classifierSummary.total ? ` • classifiers processados no celular (${String(classifierSummary.format || "").toUpperCase()})` : "";
-      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel} • vídeo 360p/720p/1080p.`;
+      const classifierLabel = classifierSummary.total
+        ? ` • ${classifierSummary.loaded}/${classifierSummary.total} classifiers validados (${String(classifierSummary.format || "").toUpperCase()})`
+        : "";
+      const classifierWarning = classifierSummary.rejectedMsm
+        ? ` • ATENÇÃO: ${classifierSummary.rejectedMsm} MSM rejeitados (${classifierSummary.duplicateMsm || 0} duplicados, ${classifierSummary.sourceMismatch || 0} de outra música)`
+        : "";
+      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel}${classifierWarning} • vídeo 360p/720p/1080p.`;
     }
     renderDanceSyncCalibration();
     updateDanceSongTimeline();
