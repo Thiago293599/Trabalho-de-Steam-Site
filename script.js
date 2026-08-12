@@ -3092,12 +3092,21 @@ function updateDanceScoreBarVisual(score = 0) {
   applyDanceHudStarRankVisual(safeScore);
 
   const barSpan = DANCE_SCORE_BAR_BOTTOM_PERCENT - DANCE_SCORE_BAR_TOP_PERCENT;
-  danceHudStars?.querySelectorAll(".dance-hud-star").forEach(slot => {
+  const starSlots = Array.from(danceHudStars?.querySelectorAll(".dance-hud-star") || []);
+  let nextOutlineAssigned = false;
+  starSlots.forEach(slot => {
     const threshold = Number(slot.dataset.threshold || 0);
     const ratio = Math.max(0, Math.min(1, threshold / DANCE_MAX_SCORE));
     const top = DANCE_SCORE_BAR_BOTTOM_PERCENT - barSpan * ratio;
+    const filled = safeScore >= threshold;
     slot.style.top = `${top.toFixed(4)}%`;
-    slot.classList.toggle("filled", safeScore >= threshold);
+    slot.classList.toggle("filled", filled);
+
+    // V6.5: mostra SOMENTE a proxima estrela ainda nao conquistada como outline.
+    // 0 estrelas -> outline da 1a; 1 estrela -> outline da 2a; etc.
+    const nextOutline = !filled && !nextOutlineAssigned;
+    slot.classList.toggle("next-outline", nextOutline);
+    if (nextOutline) nextOutlineAssigned = true;
   });
 }
 
