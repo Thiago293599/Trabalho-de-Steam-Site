@@ -350,16 +350,52 @@ const DANCE_SONGS = Object.freeze({
     base: "minigames/just-dance/songs/RainOverMe", mapFile: "RainOverMe.json", movesFile: "RainOverMe_moves0.json",
     videos: Object.freeze({ low: "RainOverMe_Low.mp4", medium: "RainOverMe_Medium.mp4", high: "RainOverMe_High.mp4" }),
     audioFile: "RainOverMe_Audio.mp3", coverFile: "rainoverme_cover@2x.jpg", posterFile: "RainOverMe.jpg", avatarFile: "rainoverme_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsV4"
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsV4",
+    classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
   }),
   EarthSong: Object.freeze({
     id: "EarthSong", title: "Earth Song", artist: "Michael Jackson", edition: "Michael Jackson: The Experience", coaches: 1, beta: true, lyricsColor: "#FFFFFF",
     base: "minigames/just-dance/songs/EarthSong", mapFile: "EarthSong.json", movesFile: "EarthSong_moves0.json",
     videos: Object.freeze({ low: "EarthSong_Coach_Low.mp4", medium: "EarthSong_Coach_Medium.mp4", high: "EarthSong_Coach_High.mp4" }),
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1"
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
+    classifierFormat: "livemove", classifierFolder: "classifiers_WII_source"
   })
 });
+const EARTHSONG_CLASSIFIER_FILES = Object.freeze({
+  "earthsong_bras_genou": "00_Bras_Genou.livemove.bin",
+  "earthsong_poing_terre": "01_Poing_Terre.livemove.bin",
+  "earthsong_bras_sol": "02_Bras_Sol.livemove.bin",
+  "earthsong_jette": "03_Jette.livemove.bin",
+  "earthsong_lever": "04_Lever.livemove.bin",
+  "earthsong_poitrine_l": "05_Poitrine_L.livemove.bin",
+  "earthsong_spin": "06_Spin.livemove.bin",
+  "earthsong_bras_u": "07_Bras_U.livemove.bin",
+  "earthsong_bras_down": "08_Bras_Down.livemove.bin",
+  "earthsong_allemand": "09_Allemand.livemove.bin",
+  "earthsong_pointer_sol": "10_Pointer_Sol.livemove.bin",
+  "earthsong_poitrine_r": "11_Poitrine_R.livemove.bin",
+  "earthsong_main": "12_Main.livemove.bin",
+  "earthsong_bras": "13_Bras.livemove.bin",
+  "earthsong_ski_l": "14_Ski_L.livemove.bin",
+  "earthsong_saut_r": "15_Saut_R.livemove.bin",
+  "earthsong_saut_l": "16_Saut_L.livemove.bin",
+  "earthsong_bras_tendu": "17_Bras_Tendu.livemove.bin",
+  "earthsong_poing_lever_l": "18_Poing_Lever_L.livemove.bin",
+  "earthsong_poing_lever_r": "19_Poing_Lever_R.livemove.bin",
+  "earthsong_ski_r": "20_Ski_R.livemove.bin",
+  "earthsong_poing_l": "21_Poing_L.livemove.bin",
+  "earthsong_poing_r": "22_Poing_R.livemove.bin",
+  "earthsong_poing_f": "23_Poing_F.livemove.bin",
+  "earthsong_main_r": "24_Main_R.livemove.bin",
+  "earthsong_genou_tape": "25_Genou_Tape.livemove.bin",
+  "earthsong_genou_moi": "26_Genou_Moi.livemove.bin",
+  "earthsong_main_l": "27_Main_L.livemove.bin",
+  "earthsong_pose_fin": "28_Pose_Fin.livemove.bin",
+  "earthsong_poing_lever_f": "29_Poing_Lever_F.livemove.bin",
+  "earthsong_shake": "30_Shake.livemove.bin"
+});
+
 let danceActiveSongId = "RainOverMe";
 let danceManualSyncOffsetMs = DANCE_SONGS.RainOverMe.defaultSyncMs;
 let danceTestSongLoaded = false;
@@ -380,6 +416,8 @@ let danceJudgeActiveMoveIndex = -1;
 let danceJudgeAccumulators = new Map();
 const danceLocallyJudgedMoves = new Set();
 let danceLastVideoTimeMs = 0;
+const danceClassifierProfiles = new Map();
+let danceClassifierLoadSummary = { loaded: 0, total: 0, format: "" };
 const DANCE_QUALITY_STORAGE_KEY = "jdVideoQualityModeV1";
 const DANCE_LYRICS_SIZE_STORAGE_KEY = "jdLyricsSizeV1";
 const DANCE_VIDEO_FIT_STORAGE_KEY = "jdVideoFitV1";
@@ -3713,7 +3751,8 @@ function makeDanceJudgeStats() {
     previousDirection: null,
     previousMotionVector: null,
     previousRotationVector: null,
-    previousGravityVector: null
+    previousGravityVector: null,
+    rawSamples: []
   };
 }
 
@@ -3747,6 +3786,241 @@ function danceJudgeIsRealShakeMove(move) {
   return /(?:^|[^a-z0-9])shake(?:[^a-z0-9]|\d|$)/i.test(String(move?.name || ""));
 }
 
+function danceClassifierKey(songId, moveName) {
+  return `${String(songId || "").toLowerCase()}::${String(moveName || "").toLowerCase()}`;
+}
+
+function danceClassifierFileForMove(songConfig, moveName) {
+  const name = String(moveName || "").toLowerCase();
+  if (songConfig?.classifierFormat === "msm") return `${name}.msm`;
+  if (songConfig?.classifierFormat === "livemove") return EARTHSONG_CLASSIFIER_FILES[name] || "";
+  return "";
+}
+
+function danceFindAscii(bytes, text) {
+  const target = Array.from(String(text || ""), char => char.charCodeAt(0) & 0xff);
+  outer: for (let index = 0; index <= bytes.length - target.length; index += 1) {
+    for (let j = 0; j < target.length; j += 1) if (bytes[index + j] !== target[j]) continue outer;
+    return index;
+  }
+  return -1;
+}
+
+function parseDanceMsmClassifier(arrayBuffer, moveName = "") {
+  if (!(arrayBuffer instanceof ArrayBuffer) || arrayBuffer.byteLength < 260) return null;
+  const view = new DataView(arrayBuffer);
+  const count = view.getUint32(232, false);
+  const channels = view.getUint32(236, false);
+  const duration = view.getFloat32(200, false);
+  const start = 244;
+  if (!count || count > 512 || channels !== 2 || start + (count * 2 + 2) * 4 > arrayBuffer.byteLength) return null;
+  const primary = [];
+  const secondary = [];
+  for (let index = 0; index < count; index += 1) primary.push(view.getFloat32(start + index * 4, false));
+  for (let index = 0; index < count; index += 1) secondary.push(view.getFloat32(start + (count + index) * 4, false));
+  const scaleA = view.getFloat32(start + count * 8, false);
+  const scaleB = view.getFloat32(start + count * 8 + 4, false);
+  if (![...primary, ...secondary].every(Number.isFinite)) return null;
+  return { format: "msm", moveName, duration, count, primary, secondary, scaleA, scaleB };
+}
+
+function parseDanceLiveMoveClassifier(arrayBuffer, moveName = "") {
+  if (!(arrayBuffer instanceof ArrayBuffer) || arrayBuffer.byteLength < 512) return null;
+  const bytes = new Uint8Array(arrayBuffer);
+  const motionIndex = danceFindAscii(bytes, "motion");
+  if (motionIndex < 0) return null;
+  let countOffset = motionIndex + 6;
+  while (countOffset < bytes.length && bytes[countOffset] === 0) countOffset += 1;
+  if (countOffset + 4 > bytes.length) return null;
+  const view = new DataView(arrayBuffer);
+  const count = view.getUint32(countOffset, true);
+  const start = countOffset + 4;
+  if (!count || count > 512 || start + count * 3 * 4 > arrayBuffer.byteLength) return null;
+  const axes = [[], [], []];
+  for (let axis = 0; axis < 3; axis += 1) {
+    for (let index = 0; index < count; index += 1) {
+      const value = view.getFloat32(start + (axis * count + index) * 4, true);
+      if (!Number.isFinite(value) || Math.abs(value) > 1000) return null;
+      axes[axis].push(value);
+    }
+  }
+  return { format: "livemove", moveName, count, axes, source: "AiLive LiveMove Pro" };
+}
+
+async function loadDanceClassifierForMove(moveName, songConfig = getDanceSongConfig()) {
+  const key = danceClassifierKey(songConfig?.id, moveName);
+  if (danceClassifierProfiles.has(key)) return danceClassifierProfiles.get(key);
+  const fileName = danceClassifierFileForMove(songConfig, moveName);
+  if (!fileName) {
+    danceClassifierProfiles.set(key, null);
+    return null;
+  }
+  try {
+    const response = await fetch(`${songConfig.base}/${songConfig.classifierFolder}/${fileName}`, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const buffer = await response.arrayBuffer();
+    const profile = songConfig.classifierFormat === "msm"
+      ? parseDanceMsmClassifier(buffer, moveName)
+      : parseDanceLiveMoveClassifier(buffer, moveName);
+    danceClassifierProfiles.set(key, profile || null);
+    return profile || null;
+  } catch (error) {
+    console.warn(`Classifier indisponivel para ${moveName}:`, error);
+    danceClassifierProfiles.set(key, null);
+    return null;
+  }
+}
+
+async function preloadDanceClassifiers(moves, songConfig = getDanceSongConfig()) {
+  const uniqueNames = [...new Set((moves || []).map(move => String(move?.name || "")).filter(Boolean))];
+  const results = await Promise.all(uniqueNames.map(name => loadDanceClassifierForMove(name, songConfig)));
+  const loaded = results.filter(Boolean).length;
+  danceClassifierLoadSummary = { loaded, total: uniqueNames.length, format: songConfig?.classifierFormat || "" };
+  return danceClassifierLoadSummary;
+}
+
+function danceClassifierNormalizeSeries(values) {
+  const safe = (values || []).map(value => Number(value || 0));
+  if (!safe.length) return [];
+  const mean = safe.reduce((sum, value) => sum + value, 0) / safe.length;
+  const variance = safe.reduce((sum, value) => sum + (value - mean) ** 2, 0) / safe.length;
+  const deviation = Math.sqrt(Math.max(variance, 1e-8));
+  return safe.map(value => (value - mean) / deviation);
+}
+
+function danceClassifierResample(values, targetLength) {
+  const source = (values || []).map(value => Number(value || 0));
+  const count = Math.max(1, Math.round(Number(targetLength || 1)));
+  if (!source.length) return Array(count).fill(0);
+  if (source.length === 1) return Array(count).fill(source[0]);
+  if (count === 1) return [source[Math.floor(source.length / 2)]];
+  const out = [];
+  for (let index = 0; index < count; index += 1) {
+    const position = index * (source.length - 1) / (count - 1);
+    const left = Math.floor(position);
+    const right = Math.min(source.length - 1, left + 1);
+    const mix = position - left;
+    out.push(source[left] * (1 - mix) + source[right] * mix);
+  }
+  return out;
+}
+
+function danceClassifierCorrelation(a, b) {
+  const count = Math.min(a?.length || 0, b?.length || 0);
+  if (count < 3) return 0;
+  const aa = danceClassifierNormalizeSeries(a.slice(0, count));
+  const bb = danceClassifierNormalizeSeries(b.slice(0, count));
+  let dot = 0;
+  for (let index = 0; index < count; index += 1) dot += aa[index] * bb[index];
+  return Math.max(-1, Math.min(1, dot / count));
+}
+
+function danceClassifierBestShiftCorrelation(reference, observed, allowSignFlip = true) {
+  const count = Math.min(reference?.length || 0, observed?.length || 0);
+  if (count < 4) return 0;
+  const ref = danceClassifierNormalizeSeries(reference.slice(0, count));
+  const obs = danceClassifierNormalizeSeries(observed.slice(0, count));
+  const maxShift = Math.max(1, Math.floor(count * 0.14));
+  let best = -1;
+  for (let shift = -maxShift; shift <= maxShift; shift += 1) {
+    let dot = 0;
+    let used = 0;
+    for (let index = 0; index < count; index += 1) {
+      const other = index + shift;
+      if (other < 0 || other >= count) continue;
+      dot += ref[index] * obs[other];
+      used += 1;
+    }
+    if (used >= Math.max(3, count * 0.65)) {
+      const corr = dot / used;
+      best = Math.max(best, allowSignFlip ? Math.abs(corr) : corr);
+    }
+  }
+  return Math.max(0, Math.min(1, best));
+}
+
+function danceClassifierVectorMagnitudeSeries(samples, selector) {
+  return samples.map(sample => danceJudgeVectorMagnitude(selector(sample)));
+}
+
+function danceClassifierDirectionChangeSeries(vectors) {
+  const out = [];
+  let previous = null;
+  for (const vector of vectors) {
+    const unit = danceJudgeUnitVector(vector);
+    if (!unit || !previous) {
+      out.push(0);
+      if (unit) previous = unit;
+      continue;
+    }
+    const dot = Math.max(-1, Math.min(1, unit.x * previous.x + unit.y * previous.y + unit.z * previous.z));
+    out.push(1 - dot);
+    previous = unit;
+  }
+  return out;
+}
+
+function danceClassifierAxisSeries(samples, axis) {
+  return samples.map(sample => Number(sample?.motion?.[axis] || 0));
+}
+
+function danceClassifierMatchLiveMove(profile, stats) {
+  const samples = stats?.rawSamples || [];
+  const count = Number(profile?.count || 0);
+  if (!profile || profile.format !== "livemove" || count < 4 || samples.length < 4) return 0;
+  const phoneAxes = ["x", "y", "z"].map(axis => danceClassifierResample(danceClassifierAxisSeries(samples, axis), count));
+  const modelAxes = profile.axes.map(axis => danceClassifierResample(axis, count));
+
+  const permutations = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+  let bestAxis = 0;
+  for (const permutation of permutations) {
+    const axisScore = permutation.reduce((sum, phoneAxis, modelAxis) => {
+      return sum + danceClassifierBestShiftCorrelation(modelAxes[modelAxis], phoneAxes[phoneAxis], true);
+    }, 0) / 3;
+    bestAxis = Math.max(bestAxis, axisScore);
+  }
+
+  const phoneVectors = samples.map(sample => sample.motion || { x: 0, y: 0, z: 0 });
+  const modelVectors = Array.from({ length: count }, (_, index) => ({
+    x: Number(modelAxes[0][index] || 0), y: Number(modelAxes[1][index] || 0), z: Number(modelAxes[2][index] || 0)
+  }));
+  const phoneMagnitude = danceClassifierResample(danceClassifierVectorMagnitudeSeries(phoneVectors.map(motion => ({ motion })), item => item.motion), count);
+  const modelMagnitude = danceClassifierVectorMagnitudeSeries(modelVectors.map(motion => ({ motion })), item => item.motion);
+  const magnitudeScore = danceClassifierBestShiftCorrelation(modelMagnitude, phoneMagnitude, false);
+  const phoneTurns = danceClassifierResample(danceClassifierDirectionChangeSeries(phoneVectors), count);
+  const modelTurns = danceClassifierDirectionChangeSeries(modelVectors);
+  const turnScore = danceClassifierBestShiftCorrelation(modelTurns, phoneTurns, false);
+
+  const raw = bestAxis * 0.58 + magnitudeScore * 0.27 + turnScore * 0.15;
+  return Math.max(0, Math.min(1, (raw - 0.18) / 0.72));
+}
+
+function danceClassifierMatchMsm(profile, stats) {
+  const samples = stats?.rawSamples || [];
+  const count = Number(profile?.count || 0);
+  if (!profile || profile.format !== "msm" || count < 4 || samples.length < 4) return 0;
+  const axes = ["x", "y", "z"].map(axis => danceClassifierResample(danceClassifierAxisSeries(samples, axis), count));
+  const motionMagnitude = danceClassifierResample(samples.map(sample => danceJudgeVectorMagnitude(sample.motion)), count);
+  const rotationMagnitude = danceClassifierResample(samples.map(sample => danceJudgeVectorMagnitude(sample.rotation)), count);
+  const jerkMagnitude = danceClassifierResample(samples.map(sample => Number(sample.jerk || 0)), count);
+  const directionChange = danceClassifierResample(danceClassifierDirectionChangeSeries(samples.map(sample => sample.motion)), count);
+
+  const signedCandidates = [...axes, motionMagnitude, rotationMagnitude];
+  const energyCandidates = [motionMagnitude, jerkMagnitude, directionChange, rotationMagnitude];
+  let primaryScore = 0;
+  for (const candidate of signedCandidates) primaryScore = Math.max(primaryScore, danceClassifierBestShiftCorrelation(profile.primary, candidate, true));
+  let secondaryScore = 0;
+  for (const candidate of energyCandidates) secondaryScore = Math.max(secondaryScore, danceClassifierBestShiftCorrelation(profile.secondary, candidate, false));
+  const raw = primaryScore * 0.68 + secondaryScore * 0.32;
+  return Math.max(0, Math.min(1, (raw - 0.20) / 0.70));
+}
+
+function danceClassifierMatch(profile, stats) {
+  if (profile?.format === "livemove") return danceClassifierMatchLiveMove(profile, stats);
+  if (profile?.format === "msm") return danceClassifierMatchMsm(profile, stats);
+  return 0;
+}
+
 function beginDanceMoveJudging(index) {
   if (index < 0 || danceLocallyJudgedMoves.has(index)) return;
   danceJudgeActiveMoveIndex = index;
@@ -3757,119 +4031,65 @@ function beginDanceMoveJudging(index) {
 }
 
 function provisionalDanceJudgement(stats, move = null) {
-  // Pontuacao V3: mais arcade e tolerante.
-  // Sem um perfil de sensores gravado para cada coreografia, nao tentamos adivinhar
-  // a direcao "correta" do braco. O foco e: houve movimento no tempo certo, com
-  // energia suficiente e sem ser apenas um shake repetitivo em movimentos normais.
-  if (!stats || stats.count < 2) return { judgement: "X", quality: 0 };
+  // Pontuacao V4: o classifier da coreografia e o criterio principal.
+  // Intensidade/forca so servem para confirmar que houve movimento suficiente na janela.
+  if (!stats || stats.count < 3) return { judgement: "X", quality: 0, classifierMatch: 0 };
 
   const clamp01 = value => Math.max(0, Math.min(1, Number(value || 0)));
   const count = Math.max(1, stats.count);
-  const avg = stats.sum / count;
+  const avgIntensity = stats.sum / count;
   const coverage = stats.active / count;
-  const avgRotation = stats.rotationSum / count;
-  const variance = Math.max(0, stats.sumSquares / count - avg * avg);
-  const variation = Math.sqrt(variance);
-  const highMotionRatio = stats.highMotion / count;
-  const veryHighMotionRatio = stats.veryHighMotion / count;
-  const transitions = Math.max(1, stats.directionTransitions);
-  const reversalRate = stats.hardReversals / transitions;
-  const strongReversalRate = stats.strongReversals / transitions;
-
   const avgMotion = stats.motionSum / count;
-  const avgJerk = stats.jerkSum / Math.max(1, count - 1);
-  const avgAngularAccel = stats.angularAccelSum / Math.max(1, count - 1);
-  const elapsedSeconds = Math.max(0.16, (Number(stats.lastSampleTime || 0) - Number(stats.firstSampleTime || 0)) / 1000);
-  const reversalHz = stats.strongReversals / elapsedSeconds;
+  const avgRotation = stats.rotationSum / count;
+  const motionEvidence = Math.max(
+    clamp01((avgIntensity - 0.025) / 0.22),
+    clamp01((avgMotion - 0.10) / 2.8),
+    clamp01((avgRotation - 4) / 210)
+  );
+  const peakEvidence = Math.max(
+    clamp01((stats.peak - 0.05) / 0.52),
+    clamp01((stats.motionPeak - 0.20) / 7.0),
+    clamp01((stats.rotationPeak - 12) / 600)
+  );
+  const coverageQ = clamp01((coverage - 0.07) / 0.52);
+  const clearMotion = coverage >= 0.12 && (avgIntensity >= 0.035 || avgMotion >= 0.22 || avgRotation >= 12);
+  if (!clearMotion) return { judgement: "X", quality: 0.02, classifierMatch: 0 };
 
-  // Sinais basicos. Cada celular entrega escalas um pouco diferentes, por isso usamos
-  // o melhor indicio entre intensidade normalizada, aceleracao real e giro.
-  const intensityQ = clamp01((avg - 0.025) / 0.24);
-  const peakQ = clamp01((stats.peak - 0.055) / 0.56);
-  const motionQ = clamp01((avgMotion - 0.10) / 3.30);
-  const motionPeakQ = clamp01((stats.motionPeak - 0.22) / 7.50);
-  const rotationQ = clamp01((avgRotation - 4) / 230);
-  const rotationPeakQ = clamp01((stats.rotationPeak - 15) / 620);
-  const coverageQ = clamp01((coverage - 0.05) / 0.52);
-  const variationQ = clamp01((variation - 0.004) / 0.22);
-  const movementEvidence = Math.max(intensityQ, motionQ, rotationQ * 0.92);
-  const peakEvidence = Math.max(peakQ, motionPeakQ, rotationPeakQ * 0.88);
+  const songConfig = getDanceSongConfig();
+  const profile = danceClassifierProfiles.get(danceClassifierKey(songConfig.id, move?.name || "")) || null;
+  const classifierMatch = profile ? danceClassifierMatch(profile, stats) : 0;
 
-  let quality = 0;
-
-  if (danceJudgeIsRealShakeMove(move)) {
-    // SHAKE REAL: reversoes e cadencia sao desejadas, mas nao obrigamos um sensor
-    // especifico. Um aparelho sem giroscopio ainda consegue SUPER/PERFECT.
-    const reversalCountQ = clamp01(stats.strongReversals / 4);
-    const reversalRateQ = clamp01((strongReversalRate - 0.04) / 0.56);
-    const cadenceQ = danceJudgeBandScore(reversalHz, 0.18, 0.75, 8.8, 14.5);
-    const jerkQ = clamp01((avgJerk - 0.8) / 75);
-    const angularQ = clamp01((avgAngularAccel - 25) / 6000);
-    const shakeEvidence = Math.max(reversalCountQ, reversalRateQ * 0.90, cadenceQ * 0.86);
-    const sensorBonus = Math.max(jerkQ, angularQ, rotationQ) * 0.08;
-
-    quality =
-      movementEvidence * 0.30 +
-      peakEvidence * 0.12 +
-      coverageQ * 0.25 +
-      shakeEvidence * 0.28 +
-      variationQ * 0.05 +
-      sensorBonus;
-
-    // Pisos de seguranca para shakes curtos (como os de ~868 ms da Earth Song).
-    // Se o jogador realmente alternou o celular, nao deve receber X por diferenca
-    // de escala entre Android/iPhone/navegadores.
-    const anyClearMotion = coverage >= 0.16 && (avg >= 0.045 || avgMotion >= 0.30 || avgRotation >= 18);
-    if (anyClearMotion) quality = Math.max(quality, 0.24); // pelo menos OK
-    if (stats.hardReversals >= 1 && coverage >= 0.18) quality = Math.max(quality, 0.31);
-    if (stats.strongReversals >= 2 && coverage >= 0.22) quality = Math.max(quality, 0.46); // GOOD
-    if (stats.strongReversals >= 3 && coverage >= 0.30 && reversalHz >= 0.9) quality = Math.max(quality, 0.65); // SUPER
-    if (stats.strongReversals >= 4 && coverage >= 0.42 && reversalHz >= 1.2 && movementEvidence >= 0.38) {
-      quality = Math.max(quality, 0.83); // PERFECT possivel quando o shake foi claro
-    }
+  // Quando existe classifier, ele manda na nota. Forca so acrescenta no maximo 18%.
+  // Sem classifier, o fallback e propositalmente limitado a GOOD para evitar falsos PERFECT.
+  let quality;
+  if (profile) {
+    quality = classifierMatch * 0.76 + coverageQ * 0.12 + motionEvidence * 0.08 + peakEvidence * 0.04;
+    if (classifierMatch < 0.15) quality = Math.min(quality, 0.17);
+    else if (classifierMatch < 0.28) quality = Math.min(quality, 0.35);
+    else if (classifierMatch < 0.43) quality = Math.min(quality, 0.57);
   } else {
-    // MOVIMENTO NORMAL: pontuacao arcade. Nao penaliza coreografia por mudar de direcao.
-    quality =
-      movementEvidence * 0.42 +
-      coverageQ * 0.29 +
-      peakEvidence * 0.17 +
-      variationQ * 0.06 +
-      rotationQ * 0.06;
-
-    // Pisos para movimentos visivelmente executados. Isso evita uma sequencia de X
-    // so porque o celular tem sensores menos sensiveis.
-    const clearMotion = coverage >= 0.18 && (avg >= 0.05 || avgMotion >= 0.35 || avgRotation >= 22);
-    const solidMotion = coverage >= 0.34 && (avg >= 0.075 || avgMotion >= 0.60 || avgRotation >= 34);
-    const strongMotion = coverage >= 0.50 && (avg >= 0.10 || avgMotion >= 0.90 || avgRotation >= 48);
-    if (clearMotion) quality = Math.max(quality, 0.25); // OK
-    if (solidMotion) quality = Math.max(quality, 0.43); // GOOD
-    if (strongMotion && peakEvidence >= 0.35) quality = Math.max(quality, 0.58);
-
-    // Anti-shake V3: somente impede PERFECT/SUPER quando ha um padrao claramente
-    // repetitivo e rapido. Ele nao transforma mais um movimento legitimo em X.
-    const repetitiveShake = reversalHz >= 3.4 && stats.strongReversals >= 4 && coverage >= 0.62;
-    const extremeShake = reversalHz >= 5.0 && stats.strongReversals >= 5 && highMotionRatio >= 0.58;
-    if (repetitiveShake) quality = Math.min(quality, 0.57); // no maximo GOOD
-    if (extremeShake && veryHighMotionRatio >= 0.22) quality = Math.min(quality, 0.50);
+    quality = Math.min(0.52, coverageQ * 0.46 + motionEvidence * 0.38 + peakEvidence * 0.16);
   }
 
   quality = clamp01(quality);
   const roundedQuality = Math.round(quality * 1000) / 1000;
+  const roundedClassifier = Math.round(classifierMatch * 1000) / 1000;
 
-  // Gold Move tambem fica mais tolerante: precisa existir movimento claro no tempo,
-  // nao uma correspondencia perfeita com um modelo que o site nao possui.
-  if (move?.goldMove) return { judgement: quality >= 0.36 ? "YEAH" : "X", quality: roundedQuality };
+  if (move?.goldMove) {
+    const yeah = profile ? (classifierMatch >= 0.30 && quality >= 0.34) : quality >= 0.42;
+    return { judgement: yeah ? "YEAH" : "X", quality: roundedQuality, classifierMatch: roundedClassifier };
+  }
 
-  const judgement = quality >= 0.78
+  const judgement = quality >= 0.79
     ? "PERFECT"
-    : quality >= 0.58
+    : quality >= 0.60
       ? "SUPER"
-      : quality >= 0.36
+      : quality >= 0.39
         ? "GOOD"
         : quality >= 0.18
           ? "OK"
           : "X";
-  return { judgement, quality: roundedQuality };
+  return { judgement, quality: roundedQuality, classifierMatch: roundedClassifier };
 }
 
 function renderDanceStars(card, dance = {}) {
@@ -3918,7 +4138,9 @@ function finalizeDanceMoveJudging(index) {
 
   const results = playersNow.map(player => {
     const stats = danceJudgeAccumulators.get(player.id) || makeDanceJudgeStats();
-    return { playerId: player.id, ...provisionalDanceJudgement(stats, move) };
+    const result = { playerId: player.id, ...provisionalDanceJudgement(stats, move) };
+    console.debug(`[JD classifier] ${move.name || index}`, player.id, { judgement: result.judgement, quality: result.quality, classifierMatch: result.classifierMatch });
+    return result;
   });
 
   danceLocallyJudgedMoves.add(index);
@@ -4025,6 +4247,7 @@ function collectDanceJudgementSample(payload) {
     : 0.04;
   stats.previousSampleTime = sampleTime;
 
+  let currentJerk = 0;
   if (stats.previousMotionVector) {
     const jerkVector = {
       x: (motionVector.x - stats.previousMotionVector.x) / dt,
@@ -4032,6 +4255,7 @@ function collectDanceJudgementSample(payload) {
       z: (motionVector.z - stats.previousMotionVector.z) / dt
     };
     const jerk = danceJudgeVectorMagnitude(jerkVector);
+    currentJerk = jerk;
     stats.jerkSum += jerk;
     stats.jerkPeak = Math.max(stats.jerkPeak, jerk);
   }
@@ -4071,6 +4295,21 @@ function collectDanceJudgementSample(payload) {
       stats.previousDirection = direction;
     }
   }
+
+  stats.rawSamples.push({
+    time: sampleTime,
+    motion: { x: Number(motionVector.x || 0), y: Number(motionVector.y || 0), z: Number(motionVector.z || 0) },
+    rotation: { x: rotationRate.x, y: rotationRate.y, z: rotationRate.z },
+    gravity: { x: gravity.x, y: gravity.y, z: gravity.z },
+    orientation: {
+      alpha: Number(sample.orientation?.alpha || 0),
+      beta: Number(sample.orientation?.beta || 0),
+      gamma: Number(sample.orientation?.gamma || 0)
+    },
+    intensity,
+    jerk: currentJerk
+  });
+  if (stats.rawSamples.length > 240) stats.rawSamples.shift();
 
   danceJudgeAccumulators.set(payload.playerId, stats);
 }
@@ -4150,11 +4389,13 @@ async function loadDanceTestSongData(force = false) {
       danceManualSyncOffsetMs = songConfig.defaultSyncMs;
     }
     dancePictoAtlas = atlas && typeof atlas === "object" ? atlas : null;
+    const classifierSummary = await preloadDanceClassifiers(danceTestMoves, songConfig);
     danceTestSongLoaded = true;
     const goldCount = danceTestMoves.filter(move => move.goldMove).length;
     if (danceSongAssetStatus) {
       const betaText = songConfig.beta ? " • BETA" : "";
-      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText} • vídeo 360p/720p/1080p.`;
+      const classifierLabel = classifierSummary.total ? ` • classifiers ${classifierSummary.loaded}/${classifierSummary.total} (${String(classifierSummary.format || "").toUpperCase()})` : "";
+      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel} • vídeo 360p/720p/1080p.`;
     }
     renderDanceSyncCalibration();
     updateDanceSongTimeline();
