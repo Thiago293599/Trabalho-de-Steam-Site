@@ -436,7 +436,7 @@ const DANCE_QUALITY_STORAGE_KEY = "jdVideoQualityModeV1";
 const DANCE_LYRICS_SIZE_STORAGE_KEY = "jdLyricsSizeV1";
 const DANCE_VIDEO_FIT_STORAGE_KEY = "jdVideoFitV1";
 let DANCE_VIDEO_SOURCES = {};
-let DANCE_AUDIO_SOURCE = "";
+let DANCE_AUDIO_SOURCE = ""; // reservado para preview futuro; não usado no gameplay V6.8
 let DANCE_PLAYER_AVATAR_SOURCE = "";
 let DANCE_PICTO_ATLAS_SOURCE = "";
 
@@ -452,7 +452,7 @@ function applyDanceSongSources(songId = danceActiveSongId) {
     medium: `${song.base}/${song.videos.medium}`,
     high: `${song.base}/${song.videos.high}`
   };
-  DANCE_AUDIO_SOURCE = `${song.base}/${song.audioFile}`;
+  DANCE_AUDIO_SOURCE = `${song.base}/${song.audioFile}`; // preview futuro
   DANCE_PLAYER_AVATAR_SOURCE = `${song.base}/${song.avatarFile}`;
   DANCE_PICTO_ATLAS_SOURCE = `${song.base}/${song.atlasImageFile}`;
   return song;
@@ -2520,30 +2520,25 @@ function safeLocalStorageSet(key, value) {
   try { localStorage.setItem(key, String(value)); } catch {}
 }
 
+// V6.8: o MP4 é a fonte única do gameplay (imagem + áudio + relógio).
+// danceSongAudio fica reservado para um futuro preview da música e não participa da dança.
 function getDanceMediaCurrentTime() {
-  if (danceSongAudio && Number.isFinite(danceSongAudio.currentTime)) return Number(danceSongAudio.currentTime || 0);
   return Number(danceTestVideo?.currentTime || 0);
 }
 
 function getDanceMediaDuration() {
-  const audioDuration = Number(danceSongAudio?.duration || 0);
-  if (Number.isFinite(audioDuration) && audioDuration > 0) return audioDuration;
   const videoDuration = Number(danceTestVideo?.duration || 0);
   return Number.isFinite(videoDuration) ? videoDuration : 0;
 }
 
 function isDanceMediaPlaying() {
-  return Boolean(danceSongAudio && !danceSongAudio.paused && !danceSongAudio.ended);
+  return Boolean(danceTestVideo && !danceTestVideo.paused && !danceTestVideo.ended);
 }
 
+// Mantida apenas para compatibilidade com chamadas antigas da HUD.
+// Não existe mais sincronização MP3 -> vídeo: o vídeo já é o relógio mestre.
 function syncDanceVideoToAudio(force = false) {
-  if (!danceSongAudio || !danceTestVideo || danceQualitySwitching) return;
-  const audioTime = Number(danceSongAudio.currentTime || 0);
-  const videoTime = Number(danceTestVideo.currentTime || 0);
-  const drift = audioTime - videoTime;
-  if (force || Math.abs(drift) > 0.11) {
-    try { danceTestVideo.currentTime = Math.max(0, audioTime); } catch {}
-  }
+  return;
 }
 
 function updateDancePlayerControls() {
@@ -2681,7 +2676,10 @@ async function installDanceMediaBlob(key, blob, element) {
   if (!element) return;
   const url = replaceDanceManagedBlobUrl(key, blob);
   element.src = url;
-  if (element === danceTestVideo) element.muted = true;
+  if (element === danceTestVideo) {
+    element.muted = false;
+    element.volume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
+  }
   element.load();
   await waitDanceMediaMetadata(element);
 }
@@ -2793,20 +2791,17 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
 
     try {
       const coreNeeded = !danceCoreMediaPreloaded;
-      const videoEnd = coreNeeded ? 70 : 95;
-      setDancePreloadUi(0, `Carregando vídeo ${label}…`, "Carregando antes de iniciar");
+      // V6.8: o próprio MP4 contém o áudio principal. Não carregamos o MP3 de gameplay.
+      const videoEnd = coreNeeded ? 84 : 95;
+      setDancePreloadUi(0, `Carregando vídeo + áudio ${label}…`, "Carregando antes de iniciar");
       const videoBlob = await fetchDanceBlob(DANCE_VIDEO_SOURCES[quality], ratio => {
         if (generation !== dancePreloadGeneration) return;
-        setDancePreloadUi(videoEnd * ratio, `Carregando vídeo ${label}…`);
+        setDancePreloadUi(videoEnd * ratio, `Carregando vídeo + áudio ${label}…`);
       });
       await installDanceMediaBlob("video", videoBlob, danceTestVideo);
       dancePreloadedVideoQuality = quality;
 
       if (coreNeeded) {
-        setDancePreloadUi(70, "Carregando áudio principal…");
-        const audioBlob = await fetchDanceBlob(DANCE_AUDIO_SOURCE, ratio => setDancePreloadUi(70 + ratio * 14, "Carregando áudio principal…"));
-        await installDanceMediaBlob("audio", audioBlob, danceSongAudio);
-
         setDancePreloadUi(84, "Carregando vídeo do Gold Move…");
         if (danceGoldMoveVideo) {
           const goldVideoBlob = await fetchDanceBlob(DANCE_YEAH_FINAL_SOURCE, ratio => setDancePreloadUi(84 + ratio * 10, "Carregando vídeo do Gold Move…"));
@@ -2824,7 +2819,6 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       setDancePreloadUi(imageStart, "Preparando HUD, pictos e julgamentos…");
       await preloadDanceCriticalImages(ratio => setDancePreloadUi(imageStart + ratio * (100 - imageStart), "Preparando HUD, pictos e julgamentos…"));
 
-      try { if (danceSongAudio) danceSongAudio.currentTime = currentTime; } catch {}
       try { if (danceTestVideo) danceTestVideo.currentTime = currentTime; } catch {}
       danceActiveQuality = quality;
       danceQualitySwitching = false;
@@ -2834,7 +2828,6 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       window.setTimeout(() => {
         if (dancePreloadReady) dancePreloadOverlay?.classList.add("hidden");
       }, 220);
-      syncDanceVideoToAudio(true);
       updateDancePlayerControls();
       return true;
     } catch (error) {
@@ -2858,18 +2851,18 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
 }
 
 async function playDanceMedia() {
-  if (!danceSongAudio || !danceTestVideo) return;
+  if (!danceTestVideo) return;
   if (!dancePreloadReady) {
     const target = danceQualityPreference === "auto" ? chooseAutoDanceQuality() : danceQualityPreference;
     const ready = await prepareDancePlayerAssets(target, { reason: danceQualityPreference === "auto" ? "perfil do aparelho" : "" });
     if (!ready) return;
   }
   unlockDanceHudAudio();
-  syncDanceVideoToAudio(true);
-  danceTestVideo.muted = true;
+  // V6.8: som, imagem e tempo vêm do mesmo MP4.
+  danceTestVideo.muted = false;
+  danceTestVideo.volume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
   try {
-    await danceSongAudio.play();
-    await danceTestVideo.play().catch(() => {});
+    await danceTestVideo.play();
   } catch (error) {
     if (danceLabMessage) danceLabMessage.textContent = "O navegador bloqueou a reprodução. Clique novamente em ▶.";
     return;
@@ -2884,7 +2877,6 @@ async function playDanceMedia() {
 }
 
 function pauseDanceMedia() {
-  danceSongAudio?.pause();
   danceTestVideo?.pause();
   // Ao retomar, o vídeo do Gold Move é reconstruído pela posição atual da música.
   resetDanceGoldMoveFx(true);
@@ -2897,7 +2889,6 @@ function seekDanceMedia(seconds) {
   const duration = getDanceMediaDuration();
   const target = Math.max(0, Math.min(duration || Infinity, Number(seconds || 0)));
   const wasPlaying = isDanceMediaPlaying();
-  try { if (danceSongAudio) danceSongAudio.currentTime = target; } catch {}
   try { if (danceTestVideo) danceTestVideo.currentTime = target; } catch {}
   danceJudgeActiveMoveIndex = -1;
   danceJudgeAccumulators = new Map();
@@ -2992,7 +2983,7 @@ function setDanceWindowMode(enabled) {
   document.body.classList.toggle("dance-window-player", danceWindowMode);
   dancePlayerShell?.classList.toggle("window-mode", danceWindowMode);
   if (danceWindowBtn) danceWindowBtn.textContent = danceWindowMode ? "Sair da janela" : "Preencher janela";
-  if (danceWindowMode) setTimeout(() => { syncDanceVideoToAudio(true); syncDanceStageUiScale(); }, 80);
+  if (danceWindowMode) setTimeout(() => { syncDanceStageUiScale(); }, 80);
 }
 
 async function toggleDanceFullscreen() {
@@ -3375,12 +3366,11 @@ function releaseDanceSongMedia() {
   dancePreloadReady = false;
   dancePreloadedVideoQuality = "";
   danceCoreMediaPreloaded = false;
-  for (const key of ["video", "audio", "gold-video"]) {
+  for (const key of ["video", "gold-video"]) {
     const url = danceManagedBlobUrls.get(key);
     if (url) { try { URL.revokeObjectURL(url); } catch {} danceManagedBlobUrls.delete(key); }
   }
   if (danceTestVideo) { danceTestVideo.removeAttribute("src"); danceTestVideo.load(); }
-  if (danceSongAudio) { danceSongAudio.removeAttribute("src"); danceSongAudio.load(); }
   if (danceGoldMoveVideo) { danceGoldMoveVideo.removeAttribute("src"); danceGoldMoveVideo.load(); }
   resetDanceGoldMoveFx(true);
   resetLocalDanceJudging();
@@ -3426,7 +3416,11 @@ async function initializeDancePlayerSettings() {
   applyDanceLyricsSize(safeLocalStorageGet(DANCE_LYRICS_SIZE_STORAGE_KEY, "small"), false);
   applyDanceVideoFit(safeLocalStorageGet(DANCE_VIDEO_FIT_STORAGE_KEY, "contain"), false);
   if (danceQualityMode) danceQualityMode.value = danceQualityPreference;
-  if (danceSongAudio && danceVolume) danceSongAudio.volume = Number(danceVolume.value || .9);
+  if (danceVolume) {
+    const initialVolume = Number(danceVolume.value || .9);
+    if (danceTestVideo) danceTestVideo.volume = initialVolume;
+    if (danceSongAudio) danceSongAudio.volume = initialVolume; // reservado ao futuro preview
+  }
   preloadDanceFeedbackAssets();
   renderDanceMainHud({ score: 0, stars: 0 });
   updateDancePlayerHudOverlay(1);
@@ -3823,7 +3817,6 @@ function updateDanceVisualHud() {
   renderDanceLyrics(timeMs);
   updateDancePictoBeatPulse(timeMs);
   updateDanceGoldMoveFx(timeMs);
-  syncDanceVideoToAudio(false);
   updateDancePlayerControls();
   if (isDanceMediaPlaying()) danceHudAnimationFrame = requestAnimationFrame(updateDanceVisualHud);
   else danceHudAnimationFrame = 0;
@@ -4830,18 +4823,17 @@ function testDevCard() {
 
 /* ---------- Eventos ---------- */
 
-danceSongAudio?.addEventListener("timeupdate", () => { updateDanceSongTimeline(); updateDancePlayerControls(); broadcastDancePhoneSession("sync", false); });
-danceSongAudio?.addEventListener("loadedmetadata", () => { updateDanceSongTimeline(); updateDancePlayerControls(); });
-danceSongAudio?.addEventListener("play", () => { syncDanceMoveJudging(); startDanceVisualHud(); updateDancePlayerControls(); });
-danceSongAudio?.addEventListener("pause", () => { syncDanceMoveJudging(); stopDanceVisualHud(); updateDancePlayerControls(); });
-danceSongAudio?.addEventListener("ended", () => {
+// V6.8: todos os eventos de gameplay seguem o MP4. O <audio> fica livre para preview futuro.
+danceTestVideo?.addEventListener("timeupdate", () => { updateDanceSongTimeline(); updateDancePlayerControls(); broadcastDancePhoneSession("sync", false); });
+danceTestVideo?.addEventListener("loadedmetadata", () => { updateDanceSongTimeline(); updateDancePlayerControls(); });
+danceTestVideo?.addEventListener("play", () => { syncDanceMoveJudging(); startDanceVisualHud(); updateDancePlayerControls(); });
+danceTestVideo?.addEventListener("pause", () => { syncDanceMoveJudging(); stopDanceVisualHud(); updateDancePlayerControls(); });
+danceTestVideo?.addEventListener("ended", () => {
   broadcastDancePhoneSession("ended", true);
   danceJudgeActiveMoveIndex = -1;
-  danceTestVideo?.pause();
   stopDanceVisualHud();
   updateDancePlayerControls();
 });
-danceTestVideo?.addEventListener("loadedmetadata", () => { syncDanceVideoToAudio(true); updateDanceSongTimeline(); });
 danceTestVideo?.addEventListener("waiting", handleDancePlaybackStall);
 danceTestVideo?.addEventListener("stalled", handleDancePlaybackStall);
 dancePlayPauseBtn?.addEventListener("click", () => { if (isDanceMediaPlaying()) pauseDanceMedia(); else playDanceMedia(); });
@@ -4854,7 +4846,8 @@ danceSeek?.addEventListener("change", () => { dancePlayerSeeking = false; update
 danceSeek?.addEventListener("pointerup", () => { dancePlayerSeeking = false; updateDancePlayerControls(); });
 danceVolume?.addEventListener("input", () => {
   const volume = Math.max(0, Math.min(1, Number(danceVolume.value || 0)));
-  if (danceSongAudio) danceSongAudio.volume = volume;
+  if (danceTestVideo) danceTestVideo.volume = volume;
+  if (danceSongAudio) danceSongAudio.volume = volume; // futuro preview, sem controlar o gameplay
   if (danceGoldMoveVideo) danceGoldMoveVideo.volume = volume;
 });
 danceSongSelect?.addEventListener("change", () => switchDanceSong(danceSongSelect.value, true));
@@ -4998,4 +4991,3 @@ setDiceFace(1);
 createBoard();
 updateNameFields();
 handleInitialRoute();
-
