@@ -43,7 +43,7 @@ themeToggle?.addEventListener("click", () => {
 applyTheme(getCurrentTheme(), false);
 
 const BOARD_SIZE = 40;
-const REQUIRED_SERVER_PROTOCOL = 9;
+const REQUIRED_SERVER_PROTOCOL = 10;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 const colors = ["#ef4444", "#3b82f6", "#22c55e", "#a855f7"];
 
@@ -917,7 +917,8 @@ function isCompatibleMultiplayerServer(status) {
     status?.ok &&
     Number(status?.protocolVersion || 0) >= REQUIRED_SERVER_PROTOCOL &&
     status?.features?.interactiveCards === true &&
-    status?.features?.multiplayerCardSync === true
+    status?.features?.multiplayerCardSync === true &&
+    status?.features?.danceTimelineRelay === true
   );
 }
 
@@ -3615,6 +3616,7 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
   if (!force && now - dancePhoneSyncLastSentAt < 900) return;
   dancePhoneSyncLastSentAt = now;
   measureDanceHostServerLatency(force);
+  const movesRevision = danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves);
   const payload = {
     roomCode: devSensorRoomCode,
     songId: danceActiveSongId,
@@ -3623,7 +3625,16 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
     syncOffsetMs: danceManualSyncOffsetMs,
     playing: isDanceMediaPlaying(),
     totalMoves: danceTestMoves.length,
-    movesRevision: danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves),
+    movesRevision,
+    // V9: em sincronizações forçadas o próprio PC envia a timeline canônica ao
+    // servidor. O servidor guarda e replica isso ao celular, eliminando JSON
+    // antigo/cacheado como fonte para movimentos e Gold Moves/YEAH.
+    timeline: force ? danceTestMoves.map(move => ({
+      name: String(move?.name || "").slice(0, 80),
+      time: Math.round(Number(move?.time || 0)),
+      duration: Math.max(0, Math.round(Number(move?.duration || 0))),
+      goldMove: Boolean(move?.goldMove)
+    })) : undefined,
     hostOneWayMs: Math.max(0, Math.min(1000, danceHostServerRttMs / 2)),
     reason
   };
