@@ -350,7 +350,7 @@ const DANCE_SONGS = Object.freeze({
     base: "minigames/just-dance/songs/RainOverMe", mapFile: "RainOverMe.json", movesFile: "RainOverMe_moves0.json",
     videos: Object.freeze({ low: "RainOverMe_Low.mp4", medium: "RainOverMe_Medium.mp4", high: "RainOverMe_High.mp4" }),
     audioFile: "RainOverMe_Audio.mp3", coverFile: "rainoverme_cover@2x.jpg", posterFile: "RainOverMe.jpg", avatarFile: "rainoverme_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsV4",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsV4",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
   }),
   EarthSong: Object.freeze({
@@ -358,7 +358,7 @@ const DANCE_SONGS = Object.freeze({
     base: "minigames/just-dance/songs/EarthSong", mapFile: "EarthSong.json", movesFile: "EarthSong_moves0.json",
     videos: Object.freeze({ low: "EarthSong_Coach_Low.mp4", medium: "EarthSong_Coach_Medium.mp4", high: "EarthSong_Coach_High.mp4" }),
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
     classifierFormat: "livemove", classifierFolder: "classifiers_WII_source"
   }),
   ItsRainingMen: Object.freeze({
@@ -366,7 +366,7 @@ const DANCE_SONGS = Object.freeze({
     base: "minigames/just-dance/songs/ItsRainingMen", mapFile: "ItsRainingMen.json", movesFile: "ItsRainingMen_moves0.json",
     videos: Object.freeze({ low: "ItsRainingMen_Low.mp4", medium: "ItsRainingMen_Medium.mp4", high: "ItsRainingMen_High.mp4" }),
     audioFile: "ItsRainingMen_Audio.mp3", coverFile: "itsrainingmen_cover@2x.jpg", posterFile: "ItsRainingMen.jpg", avatarFile: "itsrainingmen_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", defaultSyncMs: 0, syncStorageKey: "jdItsRainingMenSyncOffsetMsV1",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 5, rows: 5 }), pictoIndividualFolder: "pictos-individual", defaultSyncMs: 0, syncStorageKey: "jdItsRainingMenSyncOffsetMsV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
   })
 });
@@ -2715,7 +2715,13 @@ async function preloadDanceHudSounds(onProgress = null) {
 async function preloadDanceCriticalImages(onProgress = null) {
   const urls = new Set(DANCE_CRITICAL_IMAGE_SOURCES);
   urls.add(DANCE_PLAYER_AVATAR_SOURCE);
-  urls.add(DANCE_PICTO_ATLAS_SOURCE);
+  const songConfig = getDanceSongConfig();
+  if (songConfig?.pictoIndividualFolder) {
+    const uniquePictos = new Set(danceTestPictos.map(picto => String(picto?.name || "").trim()).filter(Boolean));
+    uniquePictos.forEach(name => urls.add(`${songConfig.base}/${songConfig.pictoIndividualFolder}/${encodeURIComponent(name)}.png`));
+  } else {
+    urls.add(DANCE_PICTO_ATLAS_SOURCE);
+  }
   Object.values(DANCE_FEEDBACK_ASSETS).forEach(asset => {
     if (asset.image) urls.add(`${DANCE_SCORING_BASE}/${asset.image}`);
     if (asset.flare) urls.add(`${DANCE_SCORING_BASE}/${asset.flare}`);
@@ -3533,12 +3539,27 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
 function pictoAtlasPosition(name) {
   const coords = dancePictoAtlas?.images?.[name];
   if (!Array.isArray(coords) || coords.length < 2) return null;
+
   const tile = dancePictoAtlas?.imageSize || { width: 256, height: 256 };
-  const maxX = Math.max(1, Number(tile.width || 256) * 5);
-  const maxY = Math.max(1, Number(tile.height || 256) * 5);
+  // Cada música pode ter um spritesheet de tamanho diferente.
+  // Rain Over Me / Earth Song = 6x6 (1536x1536).
+  // It's Raining Men = 5x5 (1280x1280).
+  // background-position em CSS é relativo ao espaço restante depois de aplicar
+  // background-size, então o divisor correto é (colunas - 1)/(linhas - 1),
+  // e não a largura/altura total do atlas.
+  const configuredGrid = getDanceSongConfig()?.atlasGrid || { columns: 6, rows: 6 };
+  const columns = Math.max(1, Number(configuredGrid.columns || 6));
+  const rows = Math.max(1, Number(configuredGrid.rows || 6));
+  const tileWidth = Math.max(1, Number(tile.width || 256));
+  const tileHeight = Math.max(1, Number(tile.height || 256));
+  const positionSpanX = tileWidth * Math.max(1, columns - 1);
+  const positionSpanY = tileHeight * Math.max(1, rows - 1);
+
   return {
-    x: Math.max(0, Math.min(100, Number(coords[0] || 0) / maxX * 100)),
-    y: Math.max(0, Math.min(100, Number(coords[1] || 0) / maxY * 100))
+    x: columns <= 1 ? 0 : Math.max(0, Math.min(100, Number(coords[0] || 0) / positionSpanX * 100)),
+    y: rows <= 1 ? 0 : Math.max(0, Math.min(100, Number(coords[1] || 0) / positionSpanY * 100)),
+    sizeX: columns * 100,
+    sizeY: rows * 100
   };
 }
 
@@ -3721,8 +3742,20 @@ function renderDancePictos(timeMs) {
     item.style.left = `${left}%`;
     item.style.opacity = String(opacity);
     item.style.transform = `scale(${scale.toFixed(3)})`;
-    item.style.backgroundImage = `url("${DANCE_PICTO_ATLAS_SOURCE}")`;
-    item.style.backgroundPosition = `${position.x}% ${position.y}%`;
+    const songConfig = getDanceSongConfig();
+    if (songConfig?.pictoIndividualFolder) {
+      // V6.2: It's Raining Men usa PNGs individuais. Isso elimina por completo
+      // bleed/interpolação entre tiles adjacentes do spritesheet 5x5.
+      const pictoFile = `${songConfig.base}/${songConfig.pictoIndividualFolder}/${encodeURIComponent(String(picto.name || ""))}.png`;
+      item.style.backgroundImage = `url("${pictoFile}")`;
+      item.style.backgroundSize = "contain";
+      item.style.backgroundPosition = "center center";
+      item.style.backgroundRepeat = "no-repeat";
+    } else {
+      item.style.backgroundImage = `url("${DANCE_PICTO_ATLAS_SOURCE}")`;
+      item.style.backgroundSize = `${position.sizeX}% ${position.sizeY}%`;
+      item.style.backgroundPosition = `${position.x}% ${position.y}%`;
+    }
     item.title = `${picto.name || "picto"} • ${formatDanceTime(Number(picto.time || 0) / 1000)}`;
     dancePictoItems.appendChild(item);
   }
