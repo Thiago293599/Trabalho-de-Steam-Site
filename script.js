@@ -371,6 +371,21 @@ const DANCE_SONGS = Object.freeze({
     audioFile: "ItsRainingMen_Audio.mp3", coverFile: "itsrainingmen_cover@2x.jpg", posterFile: "ItsRainingMen.jpg", avatarFile: "itsrainingmen_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 5, rows: 5 }), pictoIndividualFolder: "pictos-individual", defaultSyncMs: 0, syncStorageKey: "jdItsRainingMenSyncOffsetMsV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU"
+  }),
+  WhereHaveYou: Object.freeze({
+    id: "WhereHaveYou", title: "Where Have You Been", artist: "Rihanna", edition: "Just Dance 2014", coaches: 1, beta: true, lyricsColor: "#F61F87",
+    base: "minigames/just-dance/songs/WhereHaveYou", mapFile: "WhereHaveYou.json", movesFile: "WhereHaveYou_moves0.json",
+    // Low fica no próprio site. Medium e High usam os arquivos originais do Google Drive
+    // como stream de mídia; não é iframe e não mostra a interface do Drive.
+    videos: Object.freeze({
+      low: "WhereHaveYou_Low.mp4",
+      medium: "gdrive:14tdzgR-LSZDGuNDFSsLhRWLI63zqwpj-",
+      high: "gdrive:1GGiGZ0Xdx1hO6DDLlUi7Ljgi47N3Nhpi"
+    }),
+    audioFile: "WhereHaveYou_Audio.mp3", coverFile: "wherehaveyou_cover@2x.jpg", posterFile: "WhereHaveYou.jpg", avatarFile: "wherehaveyou_thumb_kiwi.jpg",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 8 }), defaultSyncMs: 0, syncStorageKey: "jdWhereHaveYouSyncOffsetMsV1",
+    classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
+    videoQualityNote: "Low local 360p • Medium/High via Google Drive, sem interface do Drive"
   })
 });
 const EARTHSONG_CLASSIFIER_FILES = Object.freeze({
@@ -445,13 +460,21 @@ function getDanceSongConfig(songId = danceActiveSongId) {
   return DANCE_SONGS[songId] || DANCE_SONGS.RainOverMe;
 }
 
+function resolveDanceSongVideoSource(song, source) {
+  const value = String(source || "").trim();
+  if (!value) return "";
+  if (value.startsWith("gdrive:")) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${song.base}/${value}`;
+}
+
 function applyDanceSongSources(songId = danceActiveSongId) {
   const song = getDanceSongConfig(songId);
   danceActiveSongId = song.id;
   DANCE_VIDEO_SOURCES = {
-    low: `${song.base}/${song.videos.low}`,
-    medium: `${song.base}/${song.videos.medium}`,
-    high: `${song.base}/${song.videos.high}`
+    low: resolveDanceSongVideoSource(song, song.videos.low),
+    medium: resolveDanceSongVideoSource(song, song.videos.medium),
+    high: resolveDanceSongVideoSource(song, song.videos.high)
   };
   DANCE_AUDIO_SOURCE = `${song.base}/${song.audioFile}`; // preview futuro
   DANCE_PLAYER_AVATAR_SOURCE = `${song.base}/${song.avatarFile}`;
@@ -2686,6 +2709,47 @@ async function installDanceMediaBlob(key, blob, element) {
   await waitDanceMediaMetadata(element);
 }
 
+function danceGoogleDriveStreamCandidates(source) {
+  const value = String(source || "").trim();
+  if (!value.startsWith("gdrive:")) return [value].filter(Boolean);
+  const id = value.slice("gdrive:".length).trim();
+  if (!id) return [];
+  const encoded = encodeURIComponent(id);
+  return [
+    `https://drive.usercontent.google.com/download?id=${encoded}&export=download&confirm=t`,
+    `https://drive.google.com/uc?export=download&id=${encoded}`
+  ];
+}
+
+function isDanceDirectStreamSource(source) {
+  return String(source || "").startsWith("gdrive:");
+}
+
+async function installDanceDirectVideoStream(source, element) {
+  if (!element) throw new Error("Player de vídeo indisponível.");
+  const candidates = danceGoogleDriveStreamCandidates(source);
+  if (!candidates.length) throw new Error("Fonte externa de vídeo inválida.");
+  let lastError = null;
+  for (const url of candidates) {
+    try {
+      // Não usamos iframe nem o player do Drive. O próprio <video> do site
+      // recebe os bytes do MP4, mantendo o visual do site e a qualidade do arquivo.
+      element.removeAttribute("crossorigin");
+      element.src = url;
+      element.preload = "metadata";
+      element.muted = false;
+      element.volume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
+      element.load();
+      await waitDanceMediaMetadata(element, 30000);
+      return url;
+    } catch (error) {
+      lastError = error;
+      try { element.removeAttribute("src"); element.load(); } catch {}
+    }
+  }
+  throw lastError || new Error("O Google Drive não entregou o vídeo como mídia direta.");
+}
+
 function preloadDanceImage(url) {
   return new Promise(resolve => {
     const image = new Image();
@@ -2795,12 +2859,33 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       const coreNeeded = !danceCoreMediaPreloaded;
       // V6.8: o próprio MP4 contém o áudio principal. Não carregamos o MP3 de gameplay.
       const videoEnd = coreNeeded ? 84 : 95;
-      setDancePreloadUi(0, `Carregando vídeo + áudio ${label}…`, "Carregando antes de iniciar");
-      const videoBlob = await fetchDanceBlob(DANCE_VIDEO_SOURCES[quality], ratio => {
-        if (generation !== dancePreloadGeneration) return;
-        setDancePreloadUi(videoEnd * ratio, `Carregando vídeo + áudio ${label}…`);
-      });
-      await installDanceMediaBlob("video", videoBlob, danceTestVideo);
+      const videoSource = DANCE_VIDEO_SOURCES[quality];
+      const directStream = isDanceDirectStreamSource(videoSource);
+      if (directStream) {
+        setDancePreloadUi(12, `Conectando ao vídeo ${label} no Google Drive…`, "Preparando stream externo");
+        try {
+          await installDanceDirectVideoStream(videoSource, danceTestVideo);
+          setDancePreloadUi(videoEnd, `Stream ${label} pronto • player do site, sem interface do Drive.`);
+        } catch (driveError) {
+          // Se o Drive bloquear o stream direto, mantemos a música jogável usando o Low local.
+          const fallbackSource = DANCE_VIDEO_SOURCES.low;
+          if (quality === "low" || !fallbackSource || isDanceDirectStreamSource(fallbackSource)) throw driveError;
+          setDancePreloadUi(18, `Drive indisponível para ${label}; usando Low local…`);
+          const fallbackBlob = await fetchDanceBlob(fallbackSource, ratio => {
+            if (generation !== dancePreloadGeneration) return;
+            setDancePreloadUi(18 + (videoEnd - 18) * ratio, `Drive indisponível • carregando Low local…`);
+          });
+          await installDanceMediaBlob("video", fallbackBlob, danceTestVideo);
+          if (danceLabMessage) danceLabMessage.textContent = `O Google Drive não liberou ${label} como stream direto; Low local foi usado automaticamente.`;
+        }
+      } else {
+        setDancePreloadUi(0, `Carregando vídeo + áudio ${label}…`, "Carregando antes de iniciar");
+        const videoBlob = await fetchDanceBlob(videoSource, ratio => {
+          if (generation !== dancePreloadGeneration) return;
+          setDancePreloadUi(videoEnd * ratio, `Carregando vídeo + áudio ${label}…`);
+        });
+        await installDanceMediaBlob("video", videoBlob, danceTestVideo);
+      }
       dancePreloadedVideoQuality = quality;
 
       if (coreNeeded) {
@@ -4823,7 +4908,8 @@ async function loadDanceTestSongData(force = false) {
       const classifierWarning = classifierSummary.rejectedMsm
         ? ` • ATENÇÃO: ${classifierSummary.rejectedMsm} MSM rejeitados (${classifierSummary.duplicateMsm || 0} duplicados, ${classifierSummary.sourceMismatch || 0} de outra música)`
         : "";
-      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel}${classifierWarning} • vídeo 360p/720p/1080p.`;
+      const videoNote = songConfig.videoQualityNote || "vídeo 360p/720p/1080p";
+      danceSongAssetStatus.textContent = `${danceTestMoves.length} movimentos • ${danceTestPictos.length} pictos • ${danceLyricLines.length} linhas de letra • ${goldCount} Gold Moves/YEAH!${betaText}${classifierLabel}${classifierWarning} • ${videoNote}.`;
     }
     renderDanceSyncCalibration();
     updateDanceSongTimeline();

@@ -146,18 +146,20 @@ let sensorLastGenericAccelAt = 0;
 
 let sensorObserved = { motion: false, orientation: false, gyro: false, accelerometer: false, orientationFallback: false };
 
-/* ---------- Just Dance V12: scoring por layout MSM no celular + servidor relay ---------- */
+/* ---------- Just Dance V13: Where Have You Been + scoring por layout MSM no celular ---------- */
 const PHONE_DANCE_MAX_SCORE = 13333;
 const PHONE_DANCE_WEIGHTS = Object.freeze({ PERFECT: 1, SUPER: 0.8, GOOD: 0.6, OK: 0.35, YEAH: 1, X: 0 });
 const PHONE_DANCE_SONGS = Object.freeze({
   RainOverMe: Object.freeze({ id:"RainOverMe", base:"minigames/just-dance/songs/RainOverMe", movesFile:"RainOverMe_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
   EarthSong: Object.freeze({ id:"EarthSong", base:"minigames/just-dance/songs/EarthSong", movesFile:"EarthSong_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
-  ItsRainingMen: Object.freeze({ id:"ItsRainingMen", base:"minigames/just-dance/songs/ItsRainingMen", movesFile:"ItsRainingMen_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" })
+  ItsRainingMen: Object.freeze({ id:"ItsRainingMen", base:"minigames/just-dance/songs/ItsRainingMen", movesFile:"ItsRainingMen_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" }),
+  WhereHaveYou: Object.freeze({ id:"WhereHaveYou", base:"minigames/just-dance/songs/WhereHaveYou", movesFile:"WhereHaveYou_moves0.json", classifierFormat:"msm", classifierFolder:"classifiers_WIIU" })
 });
 const PHONE_DANCE_SCORE_TUNING = Object.freeze({
   RainOverMe: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 }),
   EarthSong: Object.freeze({ floor:.22, perfectRef:.56, minRef:.46, maxRef:.66, perfectQ:.74, superQ:.57, goodQ:.38, okQ:.19 }),
-  ItsRainingMen: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 })
+  ItsRainingMen: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 }),
+  WhereHaveYou: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 })
 });
 const PHONE_DANCE_MSM_LAYOUT_TUNING = Object.freeze({
   modern: Object.freeze({
@@ -777,7 +779,7 @@ function phoneJudge(stats,move){
     classifierLayout:profile?.layout||profile?.format||"none"
   };
 }
-function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,movesRevision:phoneDanceMovesRevision,...result,scoredAt:Date.now(),source:"phone-v12-layout-aware-msm"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
+function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,movesRevision:phoneDanceMovesRevision,...result,scoredAt:Date.now(),source:"phone-v13-wherehaveyou-msm"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
 function phoneFlushDanceResults(){if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;for(const [index,payload] of [...phoneDancePendingResults]){socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:dance-judgement",payload,(error,response)=>{if(!error&&response?.ok){phoneDancePendingResults.delete(index);if(response.state)applyState(response.state);}});}}
 function phoneFinalizeActiveMove(){const i=phoneDanceActiveMoveIndex;if(i<0||phoneDanceJudgedMoves.has(i))return;const move=phoneDanceMoves[i];if(!move)return;const result=phoneJudge(phoneDanceStats,move);phoneDanceJudgedMoves.add(i);phoneQueueResult(i,move,result);phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;}
 function phoneSyncMoveWindow(){if(!phoneDanceReady||!phoneDanceClock.playing||!sensorStreaming)return;const current=phoneMoveIndexAt(phoneDanceClockNow());if(phoneDanceActiveMoveIndex>=0&&current!==phoneDanceActiveMoveIndex)phoneFinalizeActiveMove();if(current>=0&&!phoneDanceJudgedMoves.has(current)&&phoneDanceActiveMoveIndex!==current){phoneDanceActiveMoveIndex=current;phoneDanceStats=phoneMakeStats();}}

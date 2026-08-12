@@ -1,0 +1,1710 @@
+{
+  "MapName": "WhereHaveYou",
+  "JDVersion": 2019,
+  "OriginalJDVersion": 2014,
+  "Artist": "Rihanna",
+  "Title": "Where Have You Been",
+  "Credits": "Written by Peter Svensson, Max Martin, Savan Kotecha, Ali Payami and Abel Tesfaye. Published by Songs Music Publishing, LLC. o/b/o Songs of SMP (ASCAP) / WB Music Corp. obo Warner/Chappell Music Scandinavia AB. / MXM Music AB Administered by Kobalt Music Publishing America, Inc. Courtesy of The Weeknd XO & Republic Records under license from Universal Music Enterprises. ",
+  "NumCoach": 1,
+  "CountInProgression": 1,
+  "DancerName": "Unknown Dancer",
+  "LocaleID": 4294967295,
+  "MojoValue": 0,
+  "Mode": 6,
+  "Status": 3,
+  "LyricsType": 0,
+  "BackgroundType": 0,
+  "Difficulty": 2,
+  "DefaultColors": {
+    "lyrics": "0xFFF61F87",
+    "songColor_1A": "0xFFCE0B31",
+    "songColor_1B": "0xFF1F006F",
+    "songColor_2A": "0xFFE89824",
+    "songColor_2B": "0xFF842900",
+    "theme": "0xFFFFFFFF"
+  },
+  "lyricsColor": "#F61F87",
+  "videoOffset": 1875,
+  "beats": [
+    0,
+    469,
+    938,
+    1406,
+    1875,
+    2344,
+    2813,
+    3281,
+    3750,
+    4219,
+    4688,
+    5156,
+    5625,
+    6094,
+    6563,
+    7031,
+    7500,
+    7969,
+    8438,
+    8906,
+    9375,
+    9844,
+    10313,
+    10781,
+    11250,
+    11719,
+    12188,
+    12656,
+    13125,
+    13594,
+    14063,
+    14531,
+    15000,
+    15469,
+    15938,
+    16406,
+    16875,
+    17344,
+    17813,
+    18281,
+    18750,
+    19219,
+    19688,
+    20156,
+    20625,
+    21094,
+    21563,
+    22031,
+    22500,
+    22969,
+    23438,
+    23906,
+    24375,
+    24844,
+    25313,
+    25781,
+    26250,
+    26719,
+    27188,
+    27656,
+    28125,
+    28594,
+    29063,
+    29531,
+    30000,
+    30469,
+    30938,
+    31406,
+    31875,
+    32344,
+    32813,
+    33281,
+    33750,
+    34219,
+    34688,
+    35156,
+    35625,
+    36094,
+    36563,
+    37031,
+    37500,
+    37969,
+    38438,
+    38906,
+    39375,
+    39844,
+    40313,
+    40781,
+    41250,
+    41719,
+    42188,
+    42656,
+    43125,
+    43594,
+    44063,
+    44531,
+    45000,
+    45469,
+    45938,
+    46406,
+    46875,
+    47344,
+    47813,
+    48281,
+    48750,
+    49219,
+    49688,
+    50156,
+    50625,
+    51094,
+    51563,
+    52031,
+    52500,
+    52969,
+    53438,
+    53906,
+    54375,
+    54844,
+    55313,
+    55781,
+    56250,
+    56719,
+    57188,
+    57656,
+    58125,
+    58594,
+    59063,
+    59531,
+    60000,
+    60469,
+    60938,
+    61406,
+    61875,
+    62344,
+    62813,
+    63281,
+    63750,
+    64219,
+    64688,
+    65156,
+    65625,
+    66094,
+    66563,
+    67031,
+    67500,
+    67969,
+    68438,
+    68906,
+    69375,
+    69844,
+    70313,
+    70781,
+    71250,
+    71719,
+    72188,
+    72656,
+    73125,
+    73594,
+    74063,
+    74531,
+    75000,
+    75469,
+    75938,
+    76406,
+    76875,
+    77344,
+    77813,
+    78281,
+    78750,
+    79219,
+    79688,
+    80156,
+    80625,
+    81094,
+    81563,
+    82031,
+    82500,
+    82969,
+    83438,
+    83906,
+    84375,
+    84844,
+    85313,
+    85781,
+    86250,
+    86719,
+    87188,
+    87656,
+    88125,
+    88594,
+    89063,
+    89531,
+    90000,
+    90469,
+    90938,
+    91406,
+    91875,
+    92344,
+    92813,
+    93281,
+    93750,
+    94219,
+    94688,
+    95156,
+    95625,
+    96094,
+    96563,
+    97031,
+    97500,
+    97969,
+    98438,
+    98906,
+    99375,
+    99844,
+    100313,
+    100781,
+    101250,
+    101719,
+    102188,
+    102656,
+    103125,
+    103594,
+    104063,
+    104531,
+    105000,
+    105469,
+    105938,
+    106406,
+    106875,
+    107344,
+    107813,
+    108281,
+    108750,
+    109219,
+    109688,
+    110156,
+    110625,
+    111094,
+    111563,
+    112031,
+    112500,
+    112969,
+    113438,
+    113906,
+    114375,
+    114844,
+    115313,
+    115781,
+    116250,
+    116719,
+    117188,
+    117656,
+    118125,
+    118594,
+    119063,
+    119531,
+    120000,
+    120469,
+    120938,
+    121406,
+    121875,
+    122344,
+    122813,
+    123281,
+    123750,
+    124219,
+    124688,
+    125156,
+    125625,
+    126094,
+    126563,
+    127031,
+    127500,
+    127969,
+    128438,
+    128906,
+    129375,
+    129844,
+    130313,
+    130781,
+    131250,
+    131719,
+    132188,
+    132656,
+    133125,
+    133594,
+    134063,
+    134531,
+    135000,
+    135469,
+    135938,
+    136406,
+    136875,
+    137344,
+    137813,
+    138281,
+    138750,
+    139219,
+    139688,
+    140156,
+    140625,
+    141094,
+    141563,
+    142031,
+    142500,
+    142969,
+    143438,
+    143906,
+    144375,
+    144844,
+    145313,
+    145781,
+    146250,
+    146719,
+    147188,
+    147656,
+    148125,
+    148594,
+    149063,
+    149531,
+    150000,
+    150469,
+    150938,
+    151406,
+    151875,
+    152344,
+    152813,
+    153281,
+    153750,
+    154219,
+    154688,
+    155156,
+    155625,
+    156094,
+    156563,
+    157031,
+    157500,
+    157969,
+    158438,
+    158906,
+    159375,
+    159844,
+    160313,
+    160781,
+    161250,
+    161719,
+    162188,
+    162656,
+    163125,
+    163594,
+    164063,
+    164531,
+    165000,
+    165469,
+    165938,
+    166406,
+    166875,
+    167344,
+    167813,
+    168281,
+    168750,
+    169219,
+    169688,
+    170156,
+    170625,
+    171094,
+    171563,
+    172031,
+    172500,
+    172969,
+    173438,
+    173906,
+    174375,
+    174844,
+    175313,
+    175781,
+    176250,
+    176719,
+    177188,
+    177656,
+    178125,
+    178594,
+    179063,
+    179531,
+    180000,
+    180469,
+    180938,
+    181406,
+    181875,
+    182344,
+    182813,
+    183281,
+    183750,
+    184219,
+    184688,
+    185156,
+    185625,
+    186094,
+    186563,
+    187031,
+    187500,
+    187969,
+    188438,
+    188906,
+    189375,
+    189844,
+    190313,
+    190781,
+    191250,
+    191719,
+    192188,
+    192656,
+    193125,
+    193594,
+    194063,
+    194531,
+    195000,
+    195469,
+    195938,
+    196406,
+    196875,
+    197344,
+    197813,
+    198281,
+    198750,
+    199219,
+    199688,
+    200156,
+    200625,
+    201094,
+    201563,
+    202031,
+    202500,
+    202969,
+    203438,
+    203906,
+    204375,
+    204844,
+    205313,
+    205781,
+    206250,
+    206719,
+    207188,
+    207656,
+    208125,
+    208594,
+    209063,
+    209531,
+    210000,
+    210469,
+    210938,
+    211406,
+    211875,
+    212344,
+    212813,
+    213281,
+    213750,
+    214219,
+    214688,
+    215156,
+    215625,
+    216094,
+    216563,
+    217031,
+    217500,
+    217969,
+    218438,
+    218906,
+    219375,
+    219844,
+    220313,
+    220781,
+    221250,
+    221719,
+    222188,
+    222656,
+    223125,
+    223594,
+    224063,
+    224531,
+    225000,
+    225469,
+    225938,
+    226406,
+    226875,
+    227344,
+    227813,
+    228281,
+    228750,
+    229219,
+    229688,
+    230156,
+    230625,
+    231094,
+    231563,
+    232031,
+    232500,
+    232969,
+    233438,
+    233906,
+    234375,
+    234844,
+    235313,
+    235781,
+    236250,
+    236719,
+    237188,
+    237656,
+    238125,
+    238594,
+    239063,
+    239531,
+    240000,
+    240469,
+    240938,
+    241406,
+    241875,
+    242344,
+    242813,
+    243281,
+    243750,
+    244219,
+    244688,
+    245156
+  ],
+  "lyrics": [
+    {
+      "time": 2246,
+      "duration": 1817,
+      "text": "I've been everywhere man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 4180,
+      "duration": 1562,
+      "text": "Looking for someone",
+      "isLineEnding": 1
+    },
+    {
+      "time": 5938,
+      "duration": 1875,
+      "text": "Someone who can please me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 7832,
+      "duration": 1621,
+      "text": "Love me all night long",
+      "isLineEnding": 1
+    },
+    {
+      "time": 9824,
+      "duration": 1700,
+      "text": "I've been everywhere man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 11582,
+      "duration": 1641,
+      "text": "Looking for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 13477,
+      "duration": 1621,
+      "text": "Looking for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 15293,
+      "duration": 1895,
+      "text": "Searching for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 18965,
+      "duration": 2149,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 22578,
+      "duration": 3203,
+      "text": "'Cause I never see you out",
+      "isLineEnding": 1
+    },
+    {
+      "time": 26113,
+      "duration": 2755,
+      "text": "Are you hiding from me yeah?",
+      "isLineEnding": 1
+    },
+    {
+      "time": 30410,
+      "duration": 5704,
+      "text": "Somewhere in the crowd",
+      "isLineEnding": 1
+    },
+    {
+      "time": 37656,
+      "duration": 4942,
+      "text": "Oh oh oh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 47305,
+      "duration": 4882,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 52950,
+      "duration": 3378,
+      "text": "All my li-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 56700,
+      "duration": 5507,
+      "text": "All my li-i-i-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 62285,
+      "duration": 1172,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 63574,
+      "duration": 2501,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 66075,
+      "duration": 1151,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 67285,
+      "duration": 2520,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 69864,
+      "duration": 1093,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 71113,
+      "duration": 2422,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 73575,
+      "duration": 1073,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 74805,
+      "duration": 1016,
+      "text": "All my life",
+      "isLineEnding": 1
+    },
+    {
+      "time": 92285,
+      "duration": 1797,
+      "text": "I've been everywhere man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 94180,
+      "duration": 1445,
+      "text": "Looking for someone",
+      "isLineEnding": 1
+    },
+    {
+      "time": 95899,
+      "duration": 1894,
+      "text": "Someone who can please me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 97852,
+      "duration": 1504,
+      "text": "Love me all night long",
+      "isLineEnding": 1
+    },
+    {
+      "time": 99746,
+      "duration": 1817,
+      "text": "I've been everywhere man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 101641,
+      "duration": 1504,
+      "text": "Looking for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 103457,
+      "duration": 1660,
+      "text": "Looking for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 105352,
+      "duration": 1504,
+      "text": "Searching for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 106895,
+      "duration": 4180,
+      "text": "Eh! Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 112520,
+      "duration": 3261,
+      "text": "'Cause I never see you out",
+      "isLineEnding": 1
+    },
+    {
+      "time": 116231,
+      "duration": 2637,
+      "text": "Are you hiding from me yeah?",
+      "isLineEnding": 1
+    },
+    {
+      "time": 120215,
+      "duration": 6153,
+      "text": "Somewhere in the crowd",
+      "isLineEnding": 1
+    },
+    {
+      "time": 127637,
+      "duration": 4922,
+      "text": "Oh oh oh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 137344,
+      "duration": 4687,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 142969,
+      "duration": 3301,
+      "text": "All my li-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 146661,
+      "duration": 5507,
+      "text": "All my li-i-i-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 152246,
+      "duration": 1191,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 153594,
+      "duration": 2363,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 156055,
+      "duration": 1191,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 157285,
+      "duration": 2481,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 159805,
+      "duration": 1191,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 161074,
+      "duration": 2383,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 163496,
+      "duration": 1231,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 164805,
+      "duration": 2559,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 178477,
+      "duration": 1250,
+      "text": "Where have you been",
+      "isLineEnding": 1
+    },
+    {
+      "time": 179844,
+      "duration": 2461,
+      "text": "All my li-i-i-i-i-ife",
+      "isLineEnding": 1
+    },
+    {
+      "time": 199219,
+      "duration": 4043,
+      "text": "You can have me all you want",
+      "isLineEnding": 1
+    },
+    {
+      "time": 203926,
+      "duration": 5801,
+      "text": "Any way any day",
+      "isLineEnding": 1
+    },
+    {
+      "time": 209883,
+      "duration": 3711,
+      "text": "To show me where you are tonight",
+      "isLineEnding": 1
+    },
+    {
+      "time": 215039,
+      "duration": 2833,
+      "text": "Oh oh oh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 218731,
+      "duration": 3633,
+      "text": "Yeah yeah",
+      "isLineEnding": 1
+    },
+    {
+      "time": 222949,
+      "duration": 3496,
+      "text": "Oh oh oh",
+      "isLineEnding": 1
+    },
+    {
+      "time": 227344,
+      "duration": 1778,
+      "text": "I've been everywhere man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 229200,
+      "duration": 1484,
+      "text": "Looking for someone",
+      "isLineEnding": 1
+    },
+    {
+      "time": 231055,
+      "duration": 1758,
+      "text": "Someone who can please me",
+      "isLineEnding": 1
+    },
+    {
+      "time": 232930,
+      "duration": 1602,
+      "text": "Love me all night long",
+      "isLineEnding": 1
+    },
+    {
+      "time": 234864,
+      "duration": 1699,
+      "text": "I've been everywhere man",
+      "isLineEnding": 1
+    },
+    {
+      "time": 236700,
+      "duration": 1542,
+      "text": "Looking for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 238438,
+      "duration": 1640,
+      "text": "Looking for you babe",
+      "isLineEnding": 1
+    },
+    {
+      "time": 240313,
+      "duration": 1894,
+      "text": "Searching for you babe",
+      "isLineEnding": 1
+    }
+  ],
+  "pictos": [
+    {
+      "time": 2578,
+      "duration": 294,
+      "name": "wavesl_f_swap"
+    },
+    {
+      "time": 5899,
+      "duration": 293,
+      "name": "wavesr_f_swap"
+    },
+    {
+      "time": 9844,
+      "duration": 293,
+      "name": "windlup_p"
+    },
+    {
+      "time": 10313,
+      "duration": 293,
+      "name": "windldown_p"
+    },
+    {
+      "time": 13594,
+      "duration": 293,
+      "name": "windrup_p"
+    },
+    {
+      "time": 14063,
+      "duration": 293,
+      "name": "windrdown_p"
+    },
+    {
+      "time": 17344,
+      "duration": 293,
+      "name": "uglyr1_p_swap"
+    },
+    {
+      "time": 17872,
+      "duration": 292,
+      "name": "uglyl1_p_swap"
+    },
+    {
+      "time": 20625,
+      "duration": 293,
+      "name": "uglyl2_p_swap"
+    },
+    {
+      "time": 21172,
+      "duration": 293,
+      "name": "uglyr2_p_swap"
+    },
+    {
+      "time": 24844,
+      "duration": 293,
+      "name": "butterfly_p"
+    },
+    {
+      "time": 25313,
+      "duration": 293,
+      "name": "butterflyr_p"
+    },
+    {
+      "time": 25781,
+      "duration": 293,
+      "name": "butterfly_p"
+    },
+    {
+      "time": 26250,
+      "duration": 293,
+      "name": "butterflyl_p"
+    },
+    {
+      "time": 32813,
+      "duration": 293,
+      "name": "summonr_p"
+    },
+    {
+      "time": 33750,
+      "duration": 293,
+      "name": "summonl_p"
+    },
+    {
+      "time": 37969,
+      "duration": 293,
+      "name": "taptap_clap_seq"
+    },
+    {
+      "time": 40313,
+      "duration": 293,
+      "name": "summonr_p"
+    },
+    {
+      "time": 41250,
+      "duration": 293,
+      "name": "summonl_p"
+    },
+    {
+      "time": 45469,
+      "duration": 293,
+      "name": "taptap_clap_seq"
+    },
+    {
+      "time": 47344,
+      "duration": 293,
+      "name": "witch1_f"
+    },
+    {
+      "time": 50156,
+      "duration": 293,
+      "name": "witch2_f"
+    },
+    {
+      "time": 52969,
+      "duration": 293,
+      "name": "witchpushr_f"
+    },
+    {
+      "time": 53906,
+      "duration": 293,
+      "name": "witchpushl_f"
+    },
+    {
+      "time": 54785,
+      "duration": 294,
+      "name": "curser_f"
+    },
+    {
+      "time": 55411,
+      "duration": 292,
+      "name": "cursel_f"
+    },
+    {
+      "time": 58594,
+      "duration": 293,
+      "name": "pushr_f_seq"
+    },
+    {
+      "time": 59531,
+      "duration": 293,
+      "name": "pushl_f_seq"
+    },
+    {
+      "time": 62344,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 63281,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 64219,
+      "duration": 293,
+      "name": "shaker_shake_swap"
+    },
+    {
+      "time": 66094,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 67031,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 67969,
+      "duration": 293,
+      "name": "shakel_shake_swap"
+    },
+    {
+      "time": 69844,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 70781,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 71719,
+      "duration": 293,
+      "name": "shaker_shake_swap"
+    },
+    {
+      "time": 73594,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 74531,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 75469,
+      "duration": 293,
+      "name": "stop_p"
+    },
+    {
+      "time": 76406,
+      "duration": 293,
+      "name": "breast_shake"
+    },
+    {
+      "time": 77344,
+      "duration": 293,
+      "name": "voodool_f"
+    },
+    {
+      "time": 78281,
+      "duration": 293,
+      "name": "voodoor_f"
+    },
+    {
+      "time": 84805,
+      "duration": 293,
+      "name": "hitl_p"
+    },
+    {
+      "time": 85352,
+      "duration": 293,
+      "name": "hitr_p"
+    },
+    {
+      "time": 86016,
+      "duration": 293,
+      "name": "hitl_f"
+    },
+    {
+      "time": 86680,
+      "duration": 293,
+      "name": "hitr_p"
+    },
+    {
+      "time": 87266,
+      "duration": 293,
+      "name": "hitl_p"
+    },
+    {
+      "time": 87891,
+      "duration": 293,
+      "name": "hitr_f"
+    },
+    {
+      "time": 88535,
+      "duration": 294,
+      "name": "hitl_p"
+    },
+    {
+      "time": 89102,
+      "duration": 293,
+      "name": "hitr_p"
+    },
+    {
+      "time": 89766,
+      "duration": 293,
+      "name": "hitl_f"
+    },
+    {
+      "time": 90410,
+      "duration": 294,
+      "name": "hitr_p"
+    },
+    {
+      "time": 91016,
+      "duration": 293,
+      "name": "hitl_p"
+    },
+    {
+      "time": 91641,
+      "duration": 293,
+      "name": "hitr_f"
+    },
+    {
+      "time": 92344,
+      "duration": 293,
+      "name": "windlup_p"
+    },
+    {
+      "time": 92813,
+      "duration": 293,
+      "name": "windldown_p"
+    },
+    {
+      "time": 96094,
+      "duration": 293,
+      "name": "windrup_p"
+    },
+    {
+      "time": 96563,
+      "duration": 293,
+      "name": "windrdown_p"
+    },
+    {
+      "time": 99844,
+      "duration": 293,
+      "name": "windlup_p"
+    },
+    {
+      "time": 100313,
+      "duration": 293,
+      "name": "windldown_p"
+    },
+    {
+      "time": 103594,
+      "duration": 293,
+      "name": "windrup_p"
+    },
+    {
+      "time": 104063,
+      "duration": 293,
+      "name": "windrdown_p"
+    },
+    {
+      "time": 107344,
+      "duration": 293,
+      "name": "uglyr1_p_swap"
+    },
+    {
+      "time": 107872,
+      "duration": 292,
+      "name": "uglyl1_p_swap"
+    },
+    {
+      "time": 110625,
+      "duration": 293,
+      "name": "uglyl2_p_swap"
+    },
+    {
+      "time": 111133,
+      "duration": 293,
+      "name": "uglyr2_p_swap"
+    },
+    {
+      "time": 114844,
+      "duration": 293,
+      "name": "butterfly_p"
+    },
+    {
+      "time": 115313,
+      "duration": 293,
+      "name": "butterflyr_p"
+    },
+    {
+      "time": 115781,
+      "duration": 293,
+      "name": "butterfly_p"
+    },
+    {
+      "time": 116250,
+      "duration": 293,
+      "name": "butterflyl_p"
+    },
+    {
+      "time": 122813,
+      "duration": 293,
+      "name": "summonr_p"
+    },
+    {
+      "time": 123750,
+      "duration": 293,
+      "name": "summonl_p"
+    },
+    {
+      "time": 127969,
+      "duration": 293,
+      "name": "taptap_clap_seq"
+    },
+    {
+      "time": 130313,
+      "duration": 293,
+      "name": "summonr_p"
+    },
+    {
+      "time": 131250,
+      "duration": 293,
+      "name": "summonl_p"
+    },
+    {
+      "time": 135469,
+      "duration": 293,
+      "name": "taptap_clap_seq"
+    },
+    {
+      "time": 137344,
+      "duration": 293,
+      "name": "witch1_f"
+    },
+    {
+      "time": 139219,
+      "duration": 293,
+      "name": "witch2_f"
+    },
+    {
+      "time": 142969,
+      "duration": 293,
+      "name": "witchpushr_f"
+    },
+    {
+      "time": 143906,
+      "duration": 293,
+      "name": "witchpushl_f"
+    },
+    {
+      "time": 144786,
+      "duration": 293,
+      "name": "curser_f"
+    },
+    {
+      "time": 145372,
+      "duration": 292,
+      "name": "cursel_f"
+    },
+    {
+      "time": 148594,
+      "duration": 293,
+      "name": "pushr_f_seq"
+    },
+    {
+      "time": 149531,
+      "duration": 293,
+      "name": "pushl_f_seq"
+    },
+    {
+      "time": 152344,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 153281,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 154219,
+      "duration": 293,
+      "name": "shaker_shake_swap"
+    },
+    {
+      "time": 156094,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 157031,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 157969,
+      "duration": 293,
+      "name": "shakel_shake_swap"
+    },
+    {
+      "time": 159844,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 160781,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 161719,
+      "duration": 293,
+      "name": "shaker_shake_swap"
+    },
+    {
+      "time": 163594,
+      "duration": 293,
+      "name": "rihannar_f_seq"
+    },
+    {
+      "time": 164531,
+      "duration": 293,
+      "name": "rihannal_f_seq"
+    },
+    {
+      "time": 165469,
+      "duration": 293,
+      "name": "stop_p"
+    },
+    {
+      "time": 166406,
+      "duration": 293,
+      "name": "breast_shake"
+    },
+    {
+      "time": 167344,
+      "duration": 293,
+      "name": "voodool_f"
+    },
+    {
+      "time": 168281,
+      "duration": 293,
+      "name": "voodoor_f"
+    },
+    {
+      "time": 174805,
+      "duration": 293,
+      "name": "hitl_p"
+    },
+    {
+      "time": 175352,
+      "duration": 293,
+      "name": "hitr_p"
+    },
+    {
+      "time": 176016,
+      "duration": 293,
+      "name": "hitl_f"
+    },
+    {
+      "time": 176661,
+      "duration": 293,
+      "name": "hitr_p"
+    },
+    {
+      "time": 177266,
+      "duration": 293,
+      "name": "hitl_p"
+    },
+    {
+      "time": 177871,
+      "duration": 293,
+      "name": "hitr_f"
+    },
+    {
+      "time": 178555,
+      "duration": 293,
+      "name": "hitl_p"
+    },
+    {
+      "time": 179122,
+      "duration": 292,
+      "name": "hitr_p"
+    },
+    {
+      "time": 179766,
+      "duration": 293,
+      "name": "hitl_f"
+    },
+    {
+      "time": 180430,
+      "duration": 293,
+      "name": "hitr_p"
+    },
+    {
+      "time": 181036,
+      "duration": 292,
+      "name": "hitl_p"
+    },
+    {
+      "time": 181641,
+      "duration": 293,
+      "name": "hitr_f"
+    },
+    {
+      "time": 182344,
+      "duration": 293,
+      "name": "charml_f"
+    },
+    {
+      "time": 183281,
+      "duration": 293,
+      "name": "charmr_f"
+    },
+    {
+      "time": 184219,
+      "duration": 293,
+      "name": "invocation_f"
+    },
+    {
+      "time": 185508,
+      "duration": 293,
+      "name": "invocation_clap"
+    },
+    {
+      "time": 186094,
+      "duration": 293,
+      "name": "charml_f"
+    },
+    {
+      "time": 187031,
+      "duration": 293,
+      "name": "charmr_f"
+    },
+    {
+      "time": 187969,
+      "duration": 293,
+      "name": "invocation_f"
+    },
+    {
+      "time": 189258,
+      "duration": 293,
+      "name": "invocation_clap"
+    },
+    {
+      "time": 189844,
+      "duration": 293,
+      "name": "charml_f"
+    },
+    {
+      "time": 190781,
+      "duration": 293,
+      "name": "charmr_f"
+    },
+    {
+      "time": 191719,
+      "duration": 293,
+      "name": "invocation_f"
+    },
+    {
+      "time": 192988,
+      "duration": 294,
+      "name": "invocation_clap"
+    },
+    {
+      "time": 193594,
+      "duration": 293,
+      "name": "charml_f"
+    },
+    {
+      "time": 194531,
+      "duration": 293,
+      "name": "charmr_f"
+    },
+    {
+      "time": 195469,
+      "duration": 293,
+      "name": "invocation_f"
+    },
+    {
+      "time": 196699,
+      "duration": 293,
+      "name": "invocation_clap"
+    },
+    {
+      "time": 197344,
+      "duration": 293,
+      "name": "slowdown_f"
+    },
+    {
+      "time": 199219,
+      "duration": 293,
+      "name": "groundr_clap"
+    },
+    {
+      "time": 200156,
+      "duration": 293,
+      "name": "groundl_clap"
+    },
+    {
+      "time": 201094,
+      "duration": 293,
+      "name": "groundr_clap"
+    },
+    {
+      "time": 202031,
+      "duration": 293,
+      "name": "groundl_clap"
+    },
+    {
+      "time": 202969,
+      "duration": 293,
+      "name": "groundr_clap"
+    },
+    {
+      "time": 203906,
+      "duration": 293,
+      "name": "demon_f_gold"
+    },
+    {
+      "time": 206250,
+      "duration": 293,
+      "name": "demondown_p"
+    },
+    {
+      "time": 207676,
+      "duration": 293,
+      "name": "demon_f_gold"
+    },
+    {
+      "time": 210469,
+      "duration": 293,
+      "name": "demonup_f"
+    },
+    {
+      "time": 211406,
+      "duration": 293,
+      "name": "breast_shake"
+    },
+    {
+      "time": 212813,
+      "duration": 293,
+      "name": "summonr_p"
+    },
+    {
+      "time": 213750,
+      "duration": 293,
+      "name": "summonl_p"
+    },
+    {
+      "time": 217969,
+      "duration": 293,
+      "name": "taptap_clap_seq"
+    },
+    {
+      "time": 220313,
+      "duration": 293,
+      "name": "summonr_p"
+    },
+    {
+      "time": 221250,
+      "duration": 293,
+      "name": "summonl_p"
+    },
+    {
+      "time": 225469,
+      "duration": 293,
+      "name": "taptap_clap_seq"
+    },
+    {
+      "time": 227344,
+      "duration": 293,
+      "name": "wavesl_f_swap"
+    },
+    {
+      "time": 231094,
+      "duration": 293,
+      "name": "wavesr_f_swap"
+    },
+    {
+      "time": 238809,
+      "duration": 293,
+      "name": "finish_f"
+    },
+    {
+      "time": 240469,
+      "duration": 293,
+      "name": "finishwave_f"
+    }
+  ],
+  "AudioPreview": {
+    "coverflow": {
+      "startbeat": 150
+    },
+    "prelobby": {
+      "startbeat": 150
+    }
+  },
+  "AudioPreviewFadeTime": 0.5,
+  "_conversionInfo": {
+    "source": "Wii U UbiArt IPK",
+    "template": "EarthSong(3) Web package",
+    "videoSource": "Original Wii U VP8 WebM",
+    "audioSource": "Original Wii U RAKI/DSP ADPCM",
+    "timingSource": "MusicTrack markers (48 kHz) + UbiArt tape clock (24 ticks/beat)",
+    "moves": 270,
+    "goldMoves": 2,
+    "pictoEvents": 149,
+    "uniquePictos": 48,
+    "lyrics": 64,
+    "beats": 524,
+    "missingPictos": []
+  }
+}

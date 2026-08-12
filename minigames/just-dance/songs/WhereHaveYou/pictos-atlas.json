@@ -1,0 +1,200 @@
+{
+  "imageSize": {
+    "width": 256,
+    "height": 256
+  },
+  "images": {
+    "wavesl_f_swap": [
+      0,
+      0
+    ],
+    "wavesr_f_swap": [
+      256,
+      0
+    ],
+    "windlup_p": [
+      512,
+      0
+    ],
+    "windldown_p": [
+      768,
+      0
+    ],
+    "windrup_p": [
+      1024,
+      0
+    ],
+    "windrdown_p": [
+      1280,
+      0
+    ],
+    "uglyr1_p_swap": [
+      0,
+      256
+    ],
+    "uglyl1_p_swap": [
+      256,
+      256
+    ],
+    "uglyl2_p_swap": [
+      512,
+      256
+    ],
+    "uglyr2_p_swap": [
+      768,
+      256
+    ],
+    "butterfly_p": [
+      1024,
+      256
+    ],
+    "butterflyr_p": [
+      1280,
+      256
+    ],
+    "butterflyl_p": [
+      0,
+      512
+    ],
+    "summonr_p": [
+      256,
+      512
+    ],
+    "summonl_p": [
+      512,
+      512
+    ],
+    "taptap_clap_seq": [
+      768,
+      512
+    ],
+    "witch1_f": [
+      1024,
+      512
+    ],
+    "witch2_f": [
+      1280,
+      512
+    ],
+    "witchpushr_f": [
+      0,
+      768
+    ],
+    "witchpushl_f": [
+      256,
+      768
+    ],
+    "curser_f": [
+      512,
+      768
+    ],
+    "cursel_f": [
+      768,
+      768
+    ],
+    "pushr_f_seq": [
+      1024,
+      768
+    ],
+    "pushl_f_seq": [
+      1280,
+      768
+    ],
+    "rihannal_f_seq": [
+      0,
+      1024
+    ],
+    "rihannar_f_seq": [
+      256,
+      1024
+    ],
+    "shaker_shake_swap": [
+      512,
+      1024
+    ],
+    "shakel_shake_swap": [
+      768,
+      1024
+    ],
+    "stop_p": [
+      1024,
+      1024
+    ],
+    "breast_shake": [
+      1280,
+      1024
+    ],
+    "voodool_f": [
+      0,
+      1280
+    ],
+    "voodoor_f": [
+      256,
+      1280
+    ],
+    "hitl_p": [
+      512,
+      1280
+    ],
+    "hitr_p": [
+      768,
+      1280
+    ],
+    "hitl_f": [
+      1024,
+      1280
+    ],
+    "hitr_f": [
+      1280,
+      1280
+    ],
+    "charml_f": [
+      0,
+      1536
+    ],
+    "charmr_f": [
+      256,
+      1536
+    ],
+    "invocation_f": [
+      512,
+      1536
+    ],
+    "invocation_clap": [
+      768,
+      1536
+    ],
+    "slowdown_f": [
+      1024,
+      1536
+    ],
+    "groundr_clap": [
+      1280,
+      1536
+    ],
+    "groundl_clap": [
+      0,
+      1792
+    ],
+    "demon_f_gold": [
+      256,
+      1792
+    ],
+    "demondown_p": [
+      512,
+      1792
+    ],
+    "demonup_f": [
+      768,
+      1792
+    ],
+    "finish_f": [
+      1024,
+      1792
+    ],
+    "finishwave_f": [
+      1280,
+      1792
+    ]
+  }
+}

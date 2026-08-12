@@ -1,0 +1,1354 @@
+[
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 2813,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 3750,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 4688,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 5625,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 6563,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 7500,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 8438,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 9610,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 10547,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 11484,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 12422,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 13360,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 14297,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 15234,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 16172,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 17110,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 18047,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 18984,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 19922,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 20860,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 21797,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 22735,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymoveend",
+    "time": 23672,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 24610,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 25547,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 26485,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 27422,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 28360,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 29297,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 30235,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 31172,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 32344,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 33281,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 34219,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 35156,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 36094,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonlfinish",
+    "time": 37031,
+    "duration": 704
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 37735,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 38204,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 38672,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 39141,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 39844,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 40781,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 41719,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 42656,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 43594,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonlfinish",
+    "time": 44531,
+    "duration": 704
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 45235,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 45704,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 46172,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 46641,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 47344,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 48281,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 49219,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 50156,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 51094,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witchpush",
+    "time": 52735,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 54610,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 55547,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 56485,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 57422,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_push",
+    "time": 58594,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_push",
+    "time": 60469,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 62227,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 63281,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_back",
+    "time": 63867,
+    "duration": 352
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 64219,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 64688,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 65156,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 66094,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 66914,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_back",
+    "time": 67500,
+    "duration": 352
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 67969,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 68438,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 68906,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 69727,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 70781,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_back",
+    "time": 71367,
+    "duration": 352
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 71719,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 72188,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 72656,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 73594,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 74531,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 77110,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 78047,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 78985,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 79922,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 80860,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 81797,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 82735,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 83672,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 84610,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 85079,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 85547,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 86485,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 86954,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 87422,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 88360,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 88829,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 89297,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 90235,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 90704,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 91172,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 92110,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 93047,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 93985,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 94922,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 95860,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 96797,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 97735,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 98672,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 99610,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 100547,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 101485,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 102422,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 103360,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 104297,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 105235,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wind",
+    "time": 106172,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 107110,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 108047,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 108985,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 109922,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 110860,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 111797,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_uglymove",
+    "time": 112735,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_uglymoveend",
+    "time": 113672,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 114610,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 115547,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 116485,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 117422,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 118360,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 119297,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 120235,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_butterfly",
+    "time": 121172,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 122344,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 123281,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 124219,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 125156,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 126094,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonlfinish",
+    "time": 127031,
+    "duration": 704
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 127735,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 128204,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 128672,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 129141,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 129844,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 130781,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 131719,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 132656,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 133594,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonlfinish",
+    "time": 134531,
+    "duration": 704
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 135235,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 135704,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 136172,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 136641,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 137344,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 138281,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 139219,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 140156,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 141094,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witchpush",
+    "time": 142735,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 144610,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 145547,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 146485,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_curse",
+    "time": 147422,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_push",
+    "time": 148594,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_push",
+    "time": 150469,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 152227,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 153281,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_back",
+    "time": 153867,
+    "duration": 352
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 154219,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 154688,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 155156,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 156094,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 156914,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_back",
+    "time": 157500,
+    "duration": 352
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 157969,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 158438,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 158906,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 159727,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 160781,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_back",
+    "time": 161367,
+    "duration": 352
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 161719,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 162188,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_shake",
+    "time": 162656,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 163594,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_rihanna",
+    "time": 164531,
+    "duration": 586
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 167110,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 168047,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 168985,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 169922,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 170860,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 171797,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 172735,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_voodoo",
+    "time": 173672,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 174610,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 175079,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 175547,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 176485,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 176954,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 177422,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 178360,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 178829,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 179297,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 180235,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_hit",
+    "time": 180704,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_hitstop",
+    "time": 181172,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_charm",
+    "time": 181875,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_charm",
+    "time": 182813,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 183985,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 184454,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 184922,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_invocationthrow",
+    "time": 185391,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_charmstart",
+    "time": 185860,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_charm",
+    "time": 186563,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 187735,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 188204,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 188672,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_invocationthrow",
+    "time": 189141,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_charmstart",
+    "time": 189610,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_charm",
+    "time": 190313,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 191485,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 191954,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 192422,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_invocationthrow",
+    "time": 192891,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_charmstart",
+    "time": 193360,
+    "duration": 703
+  },
+  {
+    "name": "wherehaveyou_charm",
+    "time": 194063,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 195235,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 195704,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_invocation",
+    "time": 196172,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_slowdown",
+    "time": 197579,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_ground",
+    "time": 198985,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_ground",
+    "time": 200860,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_ground",
+    "time": 202735,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_demon",
+    "time": 204141,
+    "duration": 938,
+    "goldMove": true
+  },
+  {
+    "name": "wherehaveyou_demon",
+    "time": 207891,
+    "duration": 938,
+    "goldMove": true
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 212344,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 213281,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 214219,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 215156,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 216094,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonlfinish",
+    "time": 217031,
+    "duration": 704
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 217735,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 218204,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 218672,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 219141,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 219844,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 220781,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 221719,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonl",
+    "time": 222656,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_summonr",
+    "time": 223594,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_summonlfinish",
+    "time": 224531,
+    "duration": 704
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 225235,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 225704,
+    "duration": 468
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 226172,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_taptap",
+    "time": 226641,
+    "duration": 469
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 227813,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 228750,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 229688,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 230625,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 231563,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 232500,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 233438,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 234610,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_wavesdown",
+    "time": 235547,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_wavesup",
+    "time": 236719,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_finish",
+    "time": 238829,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 240469,
+    "duration": 937
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 241406,
+    "duration": 938
+  },
+  {
+    "name": "wherehaveyou_witch",
+    "time": 242344,
+    "duration": 937
+  }
+]
