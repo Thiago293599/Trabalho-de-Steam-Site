@@ -6,7 +6,7 @@
   const minigameOverlay=$("#finalMinigameOverlay"),minigameIntro=$("#finalMinigameIntro"),droneGame=$("#finalDroneGame"),minigameResult=$("#finalMinigameResult"),minigameTitle=$("#finalMinigameTitle"),minigameDescription=$("#finalMinigameDescription"),droneAnswers=$("#finalDroneAnswers"),droneQuestion=$("#finalDroneQuestion"),droneA=$("#finalDroneA"),droneB=$("#finalDroneB"),droneTimer=$("#finalDroneTimer"),minigameWinner=$("#finalMinigameWinner"),minigameRanking=$("#finalMinigameRanking"),matchResultOverlay=$("#finalMatchResultOverlay"),matchRanking=$("#finalMatchRanking");
   const partyLobby=$("#finalPartyLobbyOverlay"),partyRoomCode=$("#finalPartyRoomCode"),partyQr=$("#finalPartyQr"),partyJoinUrl=$("#finalPartyJoinUrl"),partyConnectedCount=$("#finalPartyConnectedCount"),partyConnectedPlayers=$("#finalPartyConnectedPlayers"),partyStart=$("#finalPartyStartMatch"),partyStatus=$("#finalPartyLobbyStatus");
   const network=window.STEAMPartyNetwork||null,danceBridge=window.STEAMJustDanceBridge||null,spaceTypes=["start","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good"],symbols={start:"INÍCIO",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"},colors=["cyan","green","orange","pink","purple","yellow"],shapes=["round","square","triangle","hex"],triples=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[7,24,25],[9,12,15],[12,16,20]];
-  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null;
+  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0;
   const api=()=>window.STEAMParty||{},toast=m=>api().showToast?.(m),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const avatar=p=>api().avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><rect x="18" y="18" width="84" height="84" rx="34" fill="#65f2c3"/></svg>`;
   const isPhoneMatch=match=>Boolean(match&&(match.mode==="phones"||String(match.controlMethod||"").startsWith("phone-")));
@@ -53,14 +53,27 @@
   function finalizeConnectedGame(){if(!currentProblem||droneGame.dataset.finished==="1")return;droneGame.dataset.finished="1";clearInterval(droneTimerId);state.players.filter(p=>p.human&&!phoneAnswers.has(p.id)).forEach(p=>minigameScores.push({player:p,correct:false,timeMs:12000,performance:0}));addBots();setTimeout(showResults,500)}
   function showResults(){currentProblem=null;droneGame.classList.add("hidden");minigameResult.classList.remove("hidden");minigameScores.sort((a,b)=>b.performance-a.performance||a.timeMs-b.timeMs);const winner=minigameScores.find(e=>e.correct);if(winner?.player){winner.player.score+=MINIGAME_REWARD;minigameWinner.textContent=`${winner.player.name} venceu!`}else minigameWinner.textContent="Ninguém acertou desta vez.";minigameRanking.innerHTML="";const results=[];minigameScores.forEach((e,i)=>{const row=document.createElement("div");row.className="final-ranking-row";row.innerHTML=`<b>${i+1}º</b><span><strong></strong><small></small></span><span>${e.correct?"✓":"×"}</span>`;$("strong",row).textContent=e.player.name;$("small",row).textContent=e.correct?`${(e.timeMs/1000).toFixed(1)} s`:"Errou";minigameRanking.appendChild(row);results.push({playerId:e.player.id,name:e.player.name,correct:e.correct,timeMs:e.timeMs,place:i+1})});renderPlayers();publish("minigame-result",{minigame:{id:"drone-route",title:"Rota do Drone",status:"result",results}})}
 
+  function stopPartyDanceBotFeedback(){
+    clearInterval(partyDanceBotTimer);
+    partyDanceBotTimer=0;
+  }
+  function randomBotDanceJudgement(bot){
+    const roll=Math.random();
+    if(bot.difficulty==="hard")return roll<.48?"PERFECT":roll<.78?"SUPER":roll<.94?"GOOD":roll<.99?"OK":"X";
+    if(bot.difficulty==="easy")return roll<.12?"PERFECT":roll<.30?"SUPER":roll<.55?"GOOD":roll<.76?"OK":"X";
+    return roll<.28?"PERFECT":roll<.56?"SUPER":roll<.80?"GOOD":roll<.93?"OK":"X";
+  }
+  function startPartyDanceBotFeedback(){
+    stopPartyDanceBotFeedback();
+    const bots=state?.players?.filter(player=>player.bot)||[];
+    if(!bots.length||!danceBridge?.showBotJudgement)return;
+    partyDanceBotTimer=setInterval(()=>{
+      bots.forEach(bot=>danceBridge.showBotJudgement(bot.id,randomBotDanceJudgement(bot)));
+    },1900);
+  }
+
   async function startPartyDance(){
     if(!state?.connected||!danceBridge||!network)return;
-    // O clique em "Começar" ainda é um gesto do usuário. Tentamos fullscreen
-    // imediatamente; se o navegador bloquear, o CSS ainda ocupa 100% da viewport.
-    try{
-      const target=document.getElementById("danceDevScreen")||document.documentElement;
-      if(!document.fullscreenElement&&target?.requestFullscreen)target.requestFullscreen({navigationUI:"hide"}).catch(()=>{});
-    }catch{}
     const ids=danceBridge.getSongIds?.()||["RainOverMe"];
     const songId=ids[rand(0,ids.length-1)];
     const info=danceBridge.getSongInfo?.(songId)||{title:"Just Dance",artist:""};
@@ -70,11 +83,12 @@
     publish("just-dance-loading",{minigame:{id:"just-dance",title:info.title,status:"loading"}});
     try{
       await network.setSensorMode(true);
-      const prepared=await danceBridge.openPartyDanceSong(songId,network.getRoomCode());
+      const prepared=await danceBridge.openPartyDanceSong(songId,network.getRoomCode(),state.players);
       if(!prepared?.ok)throw new Error(prepared?.message||"Falha ao carregar música.");
       publish("just-dance",{minigame:{id:"just-dance",title:prepared.title,status:"playing"}});
       const playing=await danceBridge.startPartyDancePlayback();
-      if(!playing)toast("Se o navegador bloquear o vídeo, toque em ▶ no player do PC.");
+      if(!playing)toast("O navegador bloqueou a reprodução automática. Tente iniciar novamente.");
+      startPartyDanceBotFeedback();
     }catch(error){
       try{await network.setSensorMode(false)}catch{}
       danceBridge.closePartyDanceSong?.();
@@ -86,9 +100,13 @@
 
   async function finishPartyDance(){
     if(!state?.currentMinigame||state.currentMinigame.id!=="just-dance")return;
-    try{await network.setSensorMode(false)}catch{}
+    stopPartyDanceBotFeedback();
+
+    // O retorno visual não espera rede: fecha o stage e restaura o tabuleiro imediatamente.
     danceBridge.closePartyDanceSong?.();
-    try{if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});}catch{}
+    api().showView?.("board");
+    view?.classList.remove("hidden");
+    network.setSensorMode(false).catch(()=>{});
 
     const scoreRows=[];
     const connectedPlayers=roomState?.players||[];
@@ -137,14 +155,14 @@
   function renderLobby(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1)),connected=roomState.players?.length||0;partyConnectedCount.textContent=`${connected} / ${expected}`;partyConnectedPlayers.innerHTML="";(roomState.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-party-connected-player";el.innerHTML=`<strong></strong><small>Jogador ${i+1} • pronto</small>`;$("strong",el).textContent=p.name;partyConnectedPlayers.appendChild(el)});partyStart.disabled=connected<expected;partyStatus.textContent=connected<expected?`Aguardando ${expected-connected} celular${expected-connected===1?"":"es"}…`:"Todos os jogadores estão conectados."}
   async function startConnectedLobby(match){if(!network){toast("Ponte de rede indisponível.");return false}pendingStartConfig=match;roomState=null;api().showView?.("board");partyLobby.classList.remove("hidden");modeBadge.textContent="Celulares";try{const room=await network.createRoom();partyRoomCode.textContent=room.roomCode;partyJoinUrl.textContent=room.joinUrl;partyQr.src=room.qrUrl;partyStatus.textContent="Sala pronta. Aguardando celulares…";renderLobby();return true}catch(err){partyStatus.textContent=err.message||"Falha ao criar sala.";toast("Não foi possível criar a sala.");return false}}
   async function beginConnectedMatch(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1));if((roomState.players?.length||0)<expected)return;state={match:pendingStartConfig,players:buildPlayers(pendingStartConfig,roomState.players.slice(0,expected)),round:1,totalRounds:Math.max(1,Number(pendingStartConfig.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,connected:true};renderSpaces();renderTokens();eventBox.textContent="Partida conectada iniciada. O celular do jogador da vez controla o dado.";partyLobby.classList.add("hidden");await network.startParty(expected,partyState("board"));pendingStartConfig=null;updateTurnUi()}
-  function leaveBoard(){clearInterval(droneTimerId);network?.closeRoom();state=null;pendingStartConfig=null;roomState=null;view.classList.add("hidden");partyLobby.classList.add("hidden");minigameOverlay.classList.add("hidden");matchResultOverlay.classList.add("hidden");api().showView?.("main")}
+  function leaveBoard(){clearInterval(droneTimerId);stopPartyDanceBotFeedback();network?.closeRoom();state=null;pendingStartConfig=null;roomState=null;view.classList.add("hidden");partyLobby.classList.add("hidden");minigameOverlay.classList.add("hidden");matchResultOverlay.classList.add("hidden");api().showView?.("main")}
   function start(match=null){const saved=match||JSON.parse(localStorage.getItem(MATCH_KEY)||"{}");if(!saved?.humanPlayers){toast("Configure a partida primeiro.");return false}if(saved.mode==="online"){return false}if(isPhoneMatch(saved)){startConnectedLobby(saved);return true}state={match:saved,players:buildPlayers(saved),round:1,totalRounds:Math.max(1,Number(saved.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,connected:false};renderSpaces();renderTokens();modeBadge.textContent="Local";eventBox.textContent="Partida iniciada. O dado possui 6 faces visuais e resultados de 1 a 10.";matchResultOverlay.classList.add("hidden");minigameOverlay.classList.add("hidden");api().showView?.("board");updateTurnUi();return true}
   rollButton?.addEventListener("click",()=>rollForCurrentPlayer("pc"));$("#finalStartMinigame")?.addEventListener("click",()=>{
     if(state?.currentMinigame?.id==="drone-route")startDroneGame();
     else if(state?.currentMinigame?.id==="just-dance")startPartyDance();
   });$("#finalReturnBoard")?.addEventListener("click",closeMinigame);$("#finalBoardExit")?.addEventListener("click",leaveBoard);$("#finalMatchBackMenu")?.addEventListener("click",leaveBoard);partyStart?.addEventListener("click",beginConnectedMatch);$("#finalPartyCancelLobby")?.addEventListener("click",leaveBoard);$("#finalPartyCopyLink")?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(partyJoinUrl.textContent||"");toast("Link copiado.")}catch{toast("Não foi possível copiar automaticamente.")}});
   window.addEventListener("steam-party-room-state",e=>{const next=e.detail;if(!next||next.purpose!=="party-board-v2")return;roomState=next;renderLobby()});
-  window.addEventListener("steam-party-dance-judgement",e=>{danceBridge?.handleJudgement?.(e.detail)});
+  window.addEventListener("steam-party-dance-judgement",e=>{if(e.detail?.state)roomState=e.detail.state;danceBridge?.handleJudgement?.(e.detail)});
   window.addEventListener("steam-party-dance-ended",()=>finishPartyDance());
   window.addEventListener("steam-party-presence",e=>{
     const p=state?.players?.find(x=>x.id===e.detail?.playerId);

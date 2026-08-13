@@ -1205,14 +1205,14 @@ function renderControllerDanceScore(dance = {}, animateJudgement = false) {
     : score >= 11000
       ? "minigames/just-dance/hud/images/Superstar.png"
       : "minigames/just-dance/hud/images/Star.png";
-  const topPercent = (478 / 2160) * 100;
-  const bottomPercent = (1680 / 2160) * 100;
-  const spanPercent = bottomPercent - topPercent;
+  // O contêiner móvel já representa SOMENTE o trecho vertical da scorebar.
+  // Portanto a estrela usa coordenada local: 2k = 85%, 4k = 70%, ...
+  // A V18 reaplicava porcentagens da tela 16:9 inteira dentro desse recorte, deslocando as estrelas.
   let nextOutline = false;
   sensorDanceStars?.querySelectorAll(".final-mobile-jd-star").forEach(star => {
     const threshold = Number(star.dataset.threshold || 0);
     const ratio = Math.max(0, Math.min(1, threshold / 13333));
-    star.style.top = `${(bottomPercent - spanPercent * ratio).toFixed(4)}%`;
+    star.style.top = `${((1 - ratio) * 100).toFixed(4)}%`;
     const filled = score >= threshold;
     star.classList.toggle("filled", filled);
     const showOutline = !filled && !nextOutline;

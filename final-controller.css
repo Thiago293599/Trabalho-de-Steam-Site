@@ -28,166 +28,73 @@
 
 
 /* ==========================================================
-   V18 — controle Just Dance limpo: capa/nome + scorebar real + julgamento
+   V19 — controle Just Dance limpo + scorebar fiel ao HUD do PC
    ========================================================== */
-.sensor-mode-active .controller-shell{
-  min-height:100dvh!important;
-}
+.sensor-mode-active .controller-shell{min-height:100dvh!important}
 .sensor-mode-active #sensorModePanel.final-dance-controller-clean{
-  position:fixed!important;
-  inset:0!important;
-  z-index:5000!important;
-  display:block!important;
-  width:100vw!important;
-  height:100dvh!important;
-  max-width:none!important;
-  margin:0!important;
-  padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  overflow:hidden!important;
-  background:radial-gradient(circle at 50% -10%,rgba(255,255,255,.09),transparent 42%),linear-gradient(180deg,#111821,#070b10 78%)!important;
-  color:#fff!important;
+  position:fixed!important;inset:0!important;z-index:5000!important;
+  display:block!important;width:100vw!important;height:100dvh!important;max-width:none!important;
+  margin:0!important;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;
+  background:radial-gradient(circle at 50% -10%,rgba(255,255,255,.09),transparent 42%),linear-gradient(180deg,#111821,#070b10 78%)!important;color:#fff!important;
 }
-.final-dance-controller-clean .final-dance-hidden-tech,
-.final-dance-controller-clean .final-dance-hidden-artist{
-  display:none!important;
-}
-.final-dance-controller-clean .final-dance-permission{
-  position:absolute!important;
-  left:50%!important;
-  top:50%!important;
-  translate:-50% -50%!important;
-  z-index:20!important;
-  min-width:190px!important;
-}
-.final-dance-controller-clean.sensors-ready .final-dance-permission{
-  display:none!important;
-}
+.final-dance-controller-clean .final-dance-hidden-tech,.final-dance-controller-clean .final-dance-hidden-artist{display:none!important}
+.final-dance-controller-clean .final-dance-permission{position:absolute!important;left:50%!important;top:50%!important;translate:-50% -50%!important;z-index:20!important;min-width:190px!important}
+.final-dance-controller-clean.sensors-ready .final-dance-permission{display:none!important}
 .final-dance-controller-clean .final-dance-song-card{
-  position:absolute!important;
-  top:max(18px,env(safe-area-inset-top))!important;
-  left:50%!important;
-  transform:translateX(-50%)!important;
-  z-index:5!important;
-  width:min(84vw,340px)!important;
-  margin:0!important;
-  padding:0!important;
-  display:grid!important;
-  grid-template-columns:72px minmax(0,1fr)!important;
-  align-items:center!important;
-  gap:14px!important;
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
+  position:absolute!important;top:max(18px,env(safe-area-inset-top))!important;left:50%!important;transform:translateX(-50%)!important;z-index:5!important;
+  width:min(84vw,340px)!important;margin:0!important;padding:0!important;display:grid!important;grid-template-columns:72px minmax(0,1fr)!important;align-items:center!important;gap:14px!important;
+  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
 }
 .final-dance-controller-clean .final-dance-song-card.hidden{display:none!important}
-.final-dance-controller-clean .final-dance-song-card img{
-  width:72px!important;
-  height:72px!important;
-  border-radius:14px!important;
-  object-fit:cover!important;
-  box-shadow:0 10px 32px rgba(0,0,0,.42)!important;
-}
-.final-dance-controller-clean .final-dance-song-card strong{
-  font-size:clamp(1rem,5vw,1.35rem)!important;
-  line-height:1.08!important;
-  text-align:left!important;
-  color:#fff!important;
-  text-shadow:0 2px 12px rgba(0,0,0,.7)!important;
-}
-.final-mobile-jd-hud{
-  position:absolute!important;
-  inset:0!important;
-  pointer-events:none!important;
-}
+.final-dance-controller-clean .final-dance-song-card img{width:72px!important;height:72px!important;border-radius:14px!important;object-fit:cover!important;box-shadow:0 10px 32px rgba(0,0,0,.42)!important}
+.final-dance-controller-clean .final-dance-song-card strong{font-size:clamp(1rem,5vw,1.35rem)!important;line-height:1.08!important;text-align:left!important;color:#fff!important;text-shadow:0 2px 12px rgba(0,0,0,.7)!important}
+.final-mobile-jd-hud{position:absolute!important;inset:0!important;pointer-events:none!important}
+
+/* Relações copiadas do HUD do PC:
+   scorebar 1P = 28px em 3840px; estrelas ~= 5x a largura da barra.
+   O recorte móvel preserva essa proporção em vez de engrossar o PNG. */
 .final-mobile-jd-score-column{
-  position:absolute!important;
-  left:max(22px,env(safe-area-inset-left))!important;
-  top:23%!important;
-  width:76px!important;
-  height:58%!important;
+  --jd-mobile-bar-width:clamp(7px,2.2vw,10px);
+  position:absolute!important;left:max(12px,env(safe-area-inset-left))!important;top:23%!important;
+  width:70px!important;height:55.6481481%!important;
 }
 .final-mobile-jd-scorebar{
-  position:absolute!important;
-  left:27px!important;
-  top:0!important;
-  width:22px!important;
-  height:100%!important;
-  overflow:hidden!important;
-  border-radius:999px!important;
-  mask-image:linear-gradient(#000,#000)!important;
+  position:absolute!important;left:56%!important;top:0!important;
+  width:var(--jd-mobile-bar-width)!important;height:100%!important;
+  translate:-50% 0!important;overflow:hidden!important;background:transparent!important;border-radius:0!important;
 }
 .final-mobile-jd-scorebar img{
-  position:absolute!important;
-  left:0!important;
-  bottom:0!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:fill!important;
-  transform:translateY(100%);
-  opacity:0;
-  transition:transform .24s linear,opacity .12s linear!important;
+  position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;
+  object-fit:fill!important;transform:translateY(100%);transform-origin:50% 100%!important;opacity:0;
+  transition:transform .48s cubic-bezier(.20,.72,.18,1),opacity .10s linear!important;will-change:transform;
 }
-.final-mobile-jd-stars{
-  position:absolute!important;
-  inset:0!important;
-}
+.final-mobile-jd-stars{position:absolute!important;inset:0!important;display:block!important}
 .final-mobile-jd-star{
-  position:absolute!important;
-  left:0!important;
-  width:36px!important;
-  height:36px!important;
-  transform:translateY(-50%)!important;
-  display:block!important;
+  position:absolute!important;left:30%!important;
+  width:calc(var(--jd-mobile-bar-width) * 5)!important;height:calc(var(--jd-mobile-bar-width) * 5)!important;
+  translate:-50% -50%!important;transform:none!important;display:block!important;opacity:0!important;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.82));
 }
-.final-mobile-jd-star img{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:contain!important;
-}
-.final-mobile-jd-star .fill{opacity:0!important;transform:scale(.72);transition:opacity .18s,transform .22s!important}
-.final-mobile-jd-star .outline{opacity:0!important}
-.final-mobile-jd-star.next-outline .outline{opacity:.92!important}
-.final-mobile-jd-star.filled .fill{opacity:1!important;transform:scale(1)!important}
+.final-mobile-jd-star img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important}
+.final-mobile-jd-star .outline{opacity:0!important;transform:none!important;filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))!important}
+.final-mobile-jd-star .fill{opacity:0!important;transform:scale(.18)!important;transition:opacity .10s linear,transform .22s cubic-bezier(.17,.86,.21,1.15)!important}
+.final-mobile-jd-star.next-outline{opacity:1!important}
+.final-mobile-jd-star.next-outline .outline{opacity:1!important}
+.final-mobile-jd-star.filled{opacity:1!important;animation:finalMobileDanceStarWin .58s cubic-bezier(.17,.86,.21,1.15)!important}
 .final-mobile-jd-star.filled .outline{opacity:0!important}
-.final-mobile-jd-star.final-dance-star-pop{animation:finalStarPop .42s cubic-bezier(.2,.9,.2,1.35)!important}
+.final-mobile-jd-star.filled .fill{opacity:1!important;transform:scale(1)!important}
+@keyframes finalMobileDanceStarWin{
+  0%{opacity:0;scale:.18;rotate:-18deg}56%{opacity:1;scale:1.34;rotate:5deg}78%{scale:.92;rotate:-2deg}100%{opacity:1;scale:1;rotate:0deg}
+}
 .final-mobile-jd-feedback{
-  position:absolute!important;
-  left:50%!important;
-  bottom:max(11vh,calc(env(safe-area-inset-bottom) + 38px))!important;
-  transform:translateX(-50%)!important;
-  display:grid!important;
-  justify-items:center!important;
-  gap:8px!important;
+  position:absolute!important;left:50%!important;bottom:max(11vh,calc(env(safe-area-inset-bottom) + 38px))!important;
+  transform:translateX(-50%)!important;display:grid!important;justify-items:center!important;gap:8px!important;
 }
-.final-mobile-jd-score-number{
-  font-size:clamp(1.1rem,5vw,1.45rem)!important;
-  line-height:1!important;
-  color:rgba(255,255,255,.9)!important;
-  font-variant-numeric:tabular-nums!important;
-  text-shadow:0 2px 12px rgba(0,0,0,.65)!important;
-}
+.final-mobile-jd-score-number{font-size:clamp(1.1rem,5vw,1.45rem)!important;line-height:1!important;color:rgba(255,255,255,.9)!important;font-variant-numeric:tabular-nums!important;text-shadow:0 2px 12px rgba(0,0,0,.65)!important}
 .final-dance-controller-clean .mobile-dance-judgement{
-  min-width:190px!important;
-  min-height:56px!important;
-  display:grid!important;
-  place-items:center!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  background:transparent!important;
-  font-size:clamp(2rem,11vw,3.15rem)!important;
-  line-height:1!important;
-  font-weight:1000!important;
-  letter-spacing:-.05em!important;
-  text-shadow:0 4px 18px rgba(0,0,0,.72)!important;
+  min-width:190px!important;min-height:56px!important;display:grid!important;place-items:center!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+  font-size:clamp(2rem,11vw,3.15rem)!important;line-height:1!important;font-weight:1000!important;letter-spacing:-.05em!important;text-shadow:0 4px 18px rgba(0,0,0,.72)!important;
 }
-/* Mantém as cores/classes de PERFECT/SUPER/GOOD/OK/YEAH/X do CSS original. */
-@media(orientation:landscape){
-  .sensor-mode-active #sensorModePanel.final-dance-controller-clean{display:none!important}
-}
+@media(orientation:landscape){.sensor-mode-active #sensorModePanel.final-dance-controller-clean{display:none!important}}
+@media(prefers-reduced-motion:reduce){.final-mobile-jd-star.filled{animation:none!important}}

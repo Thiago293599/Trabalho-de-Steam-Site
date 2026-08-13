@@ -49,11 +49,11 @@
 
 
 /* ==========================================================
-   V18 — Just Dance de partida = somente o stage/HUD em tela inteira
+   V19 — Just Dance de partida: stage limpo 16:9 centralizado
    ========================================================== */
 body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   overflow:hidden!important;
-  background:#000!important;
+  background:#05070a!important;
 }
 #danceDevScreen.party-dance-session{
   position:fixed!important;
@@ -61,17 +61,19 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   width:100vw!important;
   height:100dvh!important;
   min-height:0!important;
-  padding:0!important;
+  padding:20px!important;
   margin:0!important;
   z-index:20000!important;
   overflow:hidden!important;
-  background:#000!important;
+  display:grid!important;
+  place-items:center!important;
+  box-sizing:border-box!important;
+  background:radial-gradient(circle at 50% 45%,#151b23 0%,#080b10 56%,#030405 100%)!important;
 }
 #danceDevScreen.party-dance-session .dance-lab-card{
-  position:absolute!important;
-  inset:0!important;
-  width:100vw!important;
-  height:100dvh!important;
+  position:relative!important;
+  width:100%!important;
+  height:100%!important;
   max-width:none!important;
   min-height:0!important;
   padding:0!important;
@@ -79,8 +81,10 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   border:0!important;
   border-radius:0!important;
   box-shadow:none!important;
-  background:#000!important;
+  background:transparent!important;
   overflow:hidden!important;
+  display:grid!important;
+  place-items:center!important;
 }
 #danceDevScreen.party-dance-session .menu-heading,
 #danceDevScreen.party-dance-session .dance-song-info,
@@ -98,8 +102,7 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   display:none!important;
 }
 #danceDevScreen.party-dance-session .dance-song-test{
-  position:absolute!important;
-  inset:0!important;
+  position:relative!important;
   width:100%!important;
   height:100%!important;
   min-height:0!important;
@@ -107,38 +110,41 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   margin:0!important;
   border:0!important;
   border-radius:0!important;
-  background:#000!important;
+  background:transparent!important;
   overflow:hidden!important;
+  display:grid!important;
+  place-items:center!important;
 }
 #danceDevScreen.party-dance-session #dancePlayerShell,
 #danceDevScreen.party-dance-session .dance-player-shell{
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  min-height:0!important;
+  position:relative!important;
+  width:min(calc(100vw - 40px),calc((100dvh - 40px) * 16 / 9))!important;
+  height:auto!important;
+  max-width:calc(100vw - 40px)!important;
+  max-height:calc(100dvh - 40px)!important;
+  aspect-ratio:16/9!important;
   margin:0!important;
   padding:0!important;
   border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
+  border-radius:10px!important;
+  box-shadow:0 22px 70px rgba(0,0,0,.58)!important;
   background:#000!important;
   overflow:hidden!important;
+  display:block!important;
 }
 #danceDevScreen.party-dance-session #danceVideoStage,
 #danceDevScreen.party-dance-session .dance-video-stage{
-  position:absolute!important;
-  inset:0!important;
+  position:relative!important;
+  inset:auto!important;
   width:100%!important;
-  height:100%!important;
-  min-height:0!important;
+  height:auto!important;
   max-width:none!important;
-  aspect-ratio:auto!important;
+  min-height:0!important;
+  aspect-ratio:16/9!important;
   margin:0!important;
   padding:0!important;
   border:0!important;
-  border-radius:0!important;
+  border-radius:10px!important;
   box-shadow:none!important;
   overflow:hidden!important;
   background:#000!important;
@@ -153,12 +159,20 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   max-height:none!important;
   margin:0!important;
 }
-/* O stage continua contendo exatamente os elementos reais: vídeo, scorebar,
-   estrelas, julgamentos, letras, pictos, preload e efeitos de Gold Move. */
+/* Mantém cards, scorebar, estrelas, pictos, letras e feedbacks exatamente dentro do canvas 16:9. */
 #danceDevScreen.party-dance-session .dance-game-hud,
 #danceDevScreen.party-dance-session #dancePreloadOverlay,
 #danceDevScreen.party-dance-session #danceGoldCanvas,
 #danceDevScreen.party-dance-session #danceYeahFinalVideo,
 #danceDevScreen.party-dance-session #danceIpkGoldStageFx{
-  z-index:auto;
+  pointer-events:none;
+}
+@media(max-width:700px){
+  #danceDevScreen.party-dance-session{padding:10px!important}
+  #danceDevScreen.party-dance-session #dancePlayerShell,
+  #danceDevScreen.party-dance-session .dance-player-shell{
+    width:min(calc(100vw - 20px),calc((100dvh - 20px) * 16 / 9))!important;
+    max-width:calc(100vw - 20px)!important;
+    max-height:calc(100dvh - 20px)!important;
+  }
 }

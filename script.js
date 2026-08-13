@@ -5320,12 +5320,58 @@ function testDevCard() {
 }
 
 
+/* ---------- Estado visual do Just Dance dentro do party game ---------- */
+let partyDanceEndNotified = false;
+let partyDanceDisplayPlayers = [];
+
+const PARTY_DANCE_COLOR_MAP = Object.freeze({
+  cyan: "#56d9ff",
+  green: "#65f2a8",
+  orange: "#ffae57",
+  pink: "#ff72b8",
+  purple: "#a987ff",
+  yellow: "#f6df65"
+});
+
+function partyDancePlayerColor(player, index = 0) {
+  const raw = String(player?.color || player?.avatarColor || "").trim();
+  if (/^#[0-9a-f]{3,8}$/i.test(raw)) return raw;
+  return PARTY_DANCE_COLOR_MAP[raw] || ["#56d9ff", "#65f2a8", "#ffae57", "#ff72b8"][index % 4];
+}
+
+function setPartyDanceDisplayPlayers(players = []) {
+  partyDanceDisplayPlayers = (Array.isArray(players) ? players : []).slice(0, 4).map((player, index) => ({
+    id: String(player?.id || `party-player-${index + 1}`),
+    name: String(player?.name || (player?.bot ? `Bot ${index + 1}` : `Jogador ${index + 1}`)),
+    color: partyDancePlayerColor(player, index),
+    bot: Boolean(player?.bot),
+    dance: { score: 0, stars: 0, judgedMoves: 0, totalMoves: danceTestMoves.length, lastJudgement: "" }
+  }));
+
+  if (danceVideoJudgements) danceVideoJudgements.innerHTML = "";
+  renderDanceVideoPlayerSlots(partyDanceDisplayPlayers);
+}
+
+function showPartyDanceBotJudgement(playerId, judgement = "GOOD") {
+  if (gameMode !== "party-dance") return;
+  showDanceVideoJudgement(String(playerId || ""), String(judgement || "GOOD"), false);
+}
+
+function notifyPartyDanceEnded(reason = "ended") {
+  if (gameMode !== "party-dance" || partyDanceEndNotified) return;
+  partyDanceEndNotified = true;
+  window.dispatchEvent(new CustomEvent("steam-party-dance-ended", {
+    detail: { songId: danceActiveSongId, reason }
+  }));
+}
+
 /* ---------- Ponte Just Dance -> novo tabuleiro ---------- */
-async function openPartyDanceSong(songId, roomCode) {
+async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
   const song = getDanceSongConfig(songId);
   if (!song || !roomCode) return { ok: false, message: "Música ou sala inválida." };
 
   gameMode = "party-dance";
+  partyDanceEndNotified = false;
   devSensorRoomCode = String(roomCode);
   devSensorState = null;
   devSensorModeEnabled = true;
@@ -5337,6 +5383,7 @@ async function openPartyDanceSong(songId, roomCode) {
   resetDanceLabUi();
   danceDevScreenEl?.classList.add("party-dance-session");
   showOnly(danceDevScreenEl);
+  setPartyDanceDisplayPlayers(partyPlayers);
 
   if (danceLabBackBtn) danceLabBackBtn.disabled = true;
   if (danceLabMessage) danceLabMessage.textContent = "Minigame do tabuleiro • preparando música e celulares…";
@@ -5346,6 +5393,11 @@ async function openPartyDanceSong(songId, roomCode) {
 
   const playerReady = await initializeDancePlayerSettings();
   if (!playerReady) return { ok: false, message: "Não foi possível preparar o player." };
+
+  partyDanceDisplayPlayers.forEach(player => {
+    player.dance.totalMoves = danceTestMoves.length;
+  });
+  renderDanceVideoPlayerSlots(partyDanceDisplayPlayers);
 
   try { danceTestVideo.currentTime = 0; } catch {}
   resetLocalDanceJudging();
@@ -5384,6 +5436,8 @@ function closePartyDanceSong() {
   devSensorRoomCode = "";
   devSensorState = null;
   devSensorModeEnabled = false;
+  partyDanceDisplayPlayers = [];
+  if (danceVideoJudgements) danceVideoJudgements.innerHTML = "";
   gameMode = "same-device";
 }
 
@@ -5391,6 +5445,8 @@ window.STEAMJustDanceBridge = Object.freeze({
   openPartyDanceSong,
   startPartyDancePlayback,
   closePartyDanceSong,
+  setPartyPlayers: setPartyDanceDisplayPlayers,
+  showBotJudgement: showPartyDanceBotJudgement,
   handleJudgement: handleDanceJudgementEvent,
   getSongIds: () => Object.keys(DANCE_SONGS),
   getSongInfo: id => {
@@ -5403,7 +5459,16 @@ window.STEAMJustDanceBridge = Object.freeze({
 /* ---------- Eventos ---------- */
 
 // V6.8: todos os eventos de gameplay seguem o MP4. O <audio> fica livre para preview futuro.
-danceTestVideo?.addEventListener("timeupdate", () => { updateDanceSongTimeline(); updateDancePlayerControls(); broadcastDancePhoneSession("sync", false); });
+danceTestVideo?.addEventListener("timeupdate", () => {
+  updateDanceSongTimeline();
+  updateDancePlayerControls();
+  broadcastDancePhoneSession("sync", false);
+  if (gameMode === "party-dance") {
+    const duration = getDanceMediaDuration();
+    const current = getDanceMediaCurrentTime();
+    if (duration > 0 && current >= Math.max(0, duration - 0.18)) notifyPartyDanceEnded("timeline-end");
+  }
+});
 danceTestVideo?.addEventListener("loadedmetadata", () => { applyDanceAutomaticVideoFraming(); updateDanceSongTimeline(); updateDancePlayerControls(); });
 danceTestVideo?.addEventListener("play", () => { syncDanceMoveJudging(); startDanceVisualHud(); updateDancePlayerControls(); });
 danceTestVideo?.addEventListener("pause", () => { syncDanceMoveJudging(); stopDanceVisualHud(); updateDancePlayerControls(); });
@@ -5412,11 +5477,7 @@ danceTestVideo?.addEventListener("ended", () => {
   danceJudgeActiveMoveIndex = -1;
   stopDanceVisualHud();
   updateDancePlayerControls();
-  if (gameMode === "party-dance") {
-    window.dispatchEvent(new CustomEvent("steam-party-dance-ended", {
-      detail: { songId: danceActiveSongId }
-    }));
-  }
+  notifyPartyDanceEnded("media-ended");
 });
 danceTestVideo?.addEventListener("waiting", handleDancePlaybackStall);
 danceTestVideo?.addEventListener("stalled", handleDancePlaybackStall);
