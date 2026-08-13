@@ -1210,3 +1210,23 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
     animation:none!important;
   }
 }
+
+
+/* ==========================================================
+   V31 — Player Card: julgamento humano corrigido
+   Score numérico removido; o HUD deve mostrar JULGAMENTOS.
+   ========================================================== */
+#danceDevScreen.party-dance-session .dance-video-player-score{
+  display:none!important;
+}
+
+/* Garante que o feedback humano fique na frente do card/estrelas. */
+#danceDevScreen.party-dance-session .dance-video-feedback{
+  z-index:18!important;
+  pointer-events:none!important;
+}
+#danceDevScreen.party-dance-session .dance-video-feedback.active{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}

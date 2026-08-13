@@ -3402,12 +3402,6 @@ function updatePartyDancePlayerScoreBar(playerId, score = 0) {
     fill.style.opacity = progress > 0 ? '1' : '0';
   }
 
-  const card = danceVideoJudgements?.querySelector(
-    `.dance-video-player-judge[data-player-id="${CSS.escape(String(playerId || ''))}"]`
-  );
-  const scoreText = card?.querySelector('.dance-video-player-score');
-  if (scoreText) scoreText.textContent = Math.round(safeScore).toLocaleString("pt-BR");
-
   updatePartyDancePlayerStarRank(playerId, safeScore);
   updatePartyDanceSharedStars();
 }
@@ -3937,7 +3931,6 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
             <span class="dance-player-origin-slot"></span>
             <span class="dance-ipk-player-avatar" aria-hidden="true"></span>
             <span class="dance-video-player-name"></span>
-            <span class="dance-video-player-score" aria-label="Score">0</span>
           </div>
           <span class="dance-ipk-player-line" aria-hidden="true"></span>
         </div>
@@ -3954,8 +3947,6 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
     item.style.setProperty('--player-bar-color', PARTY_DANCE_SCOREBAR_COLORS[playerIndex] || player.color || '#fff');
     item.style.setProperty('--jd-player-slot-x', `${((slotPositions[playerIndex] || 0) / 1920 * 100).toFixed(4)}%`);
     item.querySelector('.dance-video-player-name').textContent = player.name || 'Jogador';
-    const scoreText = item.querySelector('.dance-video-player-score');
-    if (scoreText) scoreText.textContent = Math.round(Number(player.dance?.score || 0)).toLocaleString("pt-BR");
     danceVideoJudgements.appendChild(item);
     ensurePartyDancePlayerStarRank(item);
     updatePartyDancePlayerStarRank(player.id, player.dance?.score || 0);
@@ -3963,7 +3954,10 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
 }
 
 function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
-  const item = danceVideoJudgements?.querySelector(`[data-player-id="${CSS.escape(playerId)}"]`);
+  const safePlayerId = String(playerId || "");
+  const item = danceVideoJudgements?.querySelector(
+    `[data-player-id="${CSS.escape(safePlayerId)}"]`
+  );
   if (!item) return;
   const feedback = item.querySelector(".dance-video-feedback");
   const image = item.querySelector(".dance-video-judge-image");
@@ -5051,8 +5045,18 @@ function renderDanceStars(card, dance = {}) {
 }
 
 function showDanceJudgementOnCard(playerId, judgement, dance, moveName = "", goldMove = false) {
-  const card = danceSensorPlayers?.querySelector(`[data-player-id="${CSS.escape(playerId)}"]`);
+  const safePlayerId = String(playerId || "");
+
+  // O Player Card da tela principal é independente do painel técnico Sensor Lab.
+  // No Party Mode o painel técnico pode nem existir; por isso o julgamento visual
+  // precisa ser disparado ANTES de tentar atualizar esse painel.
+  showDanceVideoJudgement(safePlayerId, judgement, goldMove);
+
+  const card = danceSensorPlayers?.querySelector(
+    `[data-player-id="${CSS.escape(safePlayerId)}"]`
+  );
   if (!card) return;
+
   renderDanceStars(card, dance || {});
   const judgementEl = card.querySelector('[data-dance-judgement]');
   if (judgementEl) {
@@ -5064,7 +5068,6 @@ function showDanceJudgementOnCard(playerId, judgement, dance, moveName = "", gol
   }
   const moveEl = card.querySelector('[data-dance-last-move]');
   if (moveEl && moveName) moveEl.textContent = moveName;
-  showDanceVideoJudgement(playerId, judgement, goldMove);
 }
 
 function finalizeDanceMoveJudging(index) {
@@ -5255,7 +5258,13 @@ function handleDanceJudgementEvent(payload) {
       }
     }
 
-    showDanceJudgementOnCard(result.playerId, result.judgement, result.dance, payload.moveName || "", Boolean(payload.goldMove));
+    showDanceJudgementOnCard(
+      result.playerId,
+      result.judgement,
+      result.dance,
+      payload.moveName || "",
+      Boolean(payload.goldMove)
+    );
   }
   renderDanceMainHud(devSensorState?.players?.[0]?.dance || payload.results?.[0]?.dance || {});
 }
