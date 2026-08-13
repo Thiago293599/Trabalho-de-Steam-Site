@@ -5661,6 +5661,9 @@ function testDevCard() {
 /* ---------- Estado visual do Just Dance dentro do party game ---------- */
 let partyDanceEndNotified = false;
 let partyDanceEndWatchTimer = 0;
+let partyDancePlaybackStartedAt = 0;
+let partyDanceLastProgressAt = 0;
+let partyDanceLastProgressMediaTime = 0;
 let partyDanceDisplayPlayers = [];
 
 const PARTY_DANCE_SCOREBAR_COLORS = Object.freeze([
@@ -5768,9 +5771,26 @@ function partyDanceScoresSnapshot() {
 function notifyPartyDanceEnded(reason = "ended") {
   if (gameMode !== "party-dance" || partyDanceEndNotified) return;
   partyDanceEndNotified = true;
-  window.dispatchEvent(new CustomEvent("steam-party-dance-ended", {
-    detail: { songId: danceActiveSongId, reason }
-  }));
+  stopPartyDanceEndWatch();
+
+  const detail = { songId: danceActiveSongId, reason: String(reason || "ended") };
+
+  // Caminho normal: CustomEvent para desacoplar o minigame do tabuleiro.
+  try {
+    window.dispatchEvent(new CustomEvent("steam-party-dance-ended", { detail }));
+  } catch (error) {
+    console.error("[JustDance] Falha ao disparar evento de fim:", error);
+  }
+
+  // V33: caminho direto de emergência. Se o listener do evento tiver sido
+  // perdido ou tiver lançado erro, o tabuleiro ainda recebe o encerramento.
+  queueMicrotask(() => {
+    try {
+      window.STEAMPartyBoard?.finishPartyDance?.(detail.reason);
+    } catch (error) {
+      console.error("[JustDance] Falha no fallback direto de fim:", error);
+    }
+  });
 }
 
 function stopPartyDanceEndWatch() {
@@ -5781,22 +5801,68 @@ function stopPartyDanceEndWatch() {
 function startPartyDanceEndWatch() {
   stopPartyDanceEndWatch();
 
+  partyDancePlaybackStartedAt = Date.now();
+  partyDanceLastProgressAt = Date.now();
+  partyDanceLastProgressMediaTime = Number(danceTestVideo?.currentTime || 0);
+
+  const lastMoveEndMs = (danceTestMoves || []).reduce((max, move) => {
+    const startMs = Math.max(0, Number(move?.time || 0));
+    const durationMs = Math.max(0, Number(move?.duration || 0));
+    return Math.max(max, startMs + durationMs);
+  }, 0);
+
   partyDanceEndWatchTimer = setInterval(() => {
-    if (gameMode !== "party-dance") {
+    if (gameMode !== "party-dance" || partyDanceEndNotified) {
       stopPartyDanceEndWatch();
       return;
     }
 
-    const duration = Number(getDanceMediaDuration() || 0);
-    const current = Number(getDanceMediaCurrentTime() || 0);
-    const videoEnded = Boolean(danceTestVideo?.ended);
+    // V33 usa diretamente o elemento de vídeo. Isso evita depender de qualquer
+    // helper intermediária no momento mais crítico do minigame.
+    const video = danceTestVideo;
+    const duration = Number(video?.duration || 0);
+    const current = Number(video?.currentTime || 0);
+    const durationValid = Number.isFinite(duration) && duration > 0;
+    const currentValid = Number.isFinite(current) && current >= 0;
+    const now = Date.now();
 
-    // O Drive/proxy nem sempre dispara `ended`.
-    // Se o relógio chegou nos últimos ~450 ms, encerramos de forma confiável.
-    if (videoEnded || (duration > 0 && current >= Math.max(0, duration - 0.45))) {
-      notifyPartyDanceEnded(videoEnded ? "watchdog-ended" : "watchdog-near-end");
+    if (currentValid && current > partyDanceLastProgressMediaTime + 0.025) {
+      partyDanceLastProgressMediaTime = current;
+      partyDanceLastProgressAt = now;
     }
-  }, 180);
+
+    const videoEnded = Boolean(video?.ended);
+    const nearMediaEnd = durationValid && currentValid && current >= Math.max(0, duration - 0.85);
+    const timelineMs = Math.max(0, Number(getDanceTimelineTimeMs?.() || current * 1000));
+    const pastLastMove = lastMoveEndMs > 0 && timelineMs >= lastMoveEndMs + 900;
+
+    // Alguns streams do Drive param no último frame sem `ended` e alguns
+    // décimos antes de duration. Se isso ocorrer perto do fim, 1,8 s sem
+    // progresso é suficiente para encerrar o minigame.
+    const stalledForMs = Math.max(0, now - partyDanceLastProgressAt);
+    const stalledNearEnd = stalledForMs >= 1800 && (
+      (durationValid && currentValid && current >= Math.max(0, duration - 3.0)) ||
+      (lastMoveEndMs > 0 && timelineMs >= Math.max(0, lastMoveEndMs - 300))
+    );
+
+    // Último paraquedas: caso o navegador congele o vídeo exatamente no fim e
+    // nem currentTime nem `ended` mudem. A folga de 15 s evita cortar buffering
+    // normal durante a música.
+    const hardWallFallback = durationValid &&
+      now - partyDancePlaybackStartedAt >= duration * 1000 + 15000;
+
+    if (videoEnded) {
+      notifyPartyDanceEnded("watchdog-ended");
+    } else if (nearMediaEnd) {
+      notifyPartyDanceEnded("watchdog-near-media-end");
+    } else if (pastLastMove) {
+      notifyPartyDanceEnded("watchdog-past-last-move");
+    } else if (stalledNearEnd) {
+      notifyPartyDanceEnded("watchdog-stalled-near-end");
+    } else if (hardWallFallback) {
+      notifyPartyDanceEnded("watchdog-hard-fallback");
+    }
+  }, 120);
 }
 
 /* ---------- Ponte Just Dance -> novo tabuleiro ---------- */
@@ -5806,6 +5872,9 @@ async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
 
   gameMode = "party-dance";
   partyDanceEndNotified = false;
+  partyDancePlaybackStartedAt = 0;
+  partyDanceLastProgressAt = 0;
+  partyDanceLastProgressMediaTime = 0;
   devSensorRoomCode = String(roomCode);
   devSensorState = null;
   devSensorModeEnabled = true;
@@ -5864,6 +5933,9 @@ async function startPartyDancePlayback() {
 
 function closePartyDanceSong() {
   stopPartyDanceEndWatch();
+  partyDancePlaybackStartedAt = 0;
+  partyDanceLastProgressAt = 0;
+  partyDanceLastProgressMediaTime = 0;
   if (gameMode !== "party-dance") return;
   try { pauseDanceMedia(); } catch {}
   resetDanceGoldMoveFx(true);
@@ -5920,7 +5992,7 @@ danceTestVideo?.addEventListener("timeupdate", () => {
   if (gameMode === "party-dance") {
     const duration = getDanceMediaDuration();
     const current = getDanceMediaCurrentTime();
-    if (duration > 0 && current >= Math.max(0, duration - 0.18)) notifyPartyDanceEnded("timeline-end");
+    if (duration > 0 && current >= Math.max(0, duration - 0.85)) notifyPartyDanceEnded("timeline-end");
   }
 });
 danceTestVideo?.addEventListener("loadedmetadata", () => { applyDanceAutomaticVideoFraming(); updateDanceSongTimeline(); updateDancePlayerControls(); });

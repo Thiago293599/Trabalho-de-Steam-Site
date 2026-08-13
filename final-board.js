@@ -1009,71 +1009,111 @@
     }
   }
 
+  function forceRestoreBoardAfterDance(){
+    // Cada operação é isolada: nenhuma falha pode impedir o tabuleiro de voltar.
+    try{danceBridge?.closePartyDanceSong?.()}catch(error){console.error("[PartyBoard] closePartyDanceSong:",error)}
+    try{document.getElementById("danceDevScreen")?.classList.add("hidden")}catch{}
+    try{document.getElementById("finalShell")?.classList.remove("hidden")}catch{}
+    try{document.body.classList.add("final-shell-v1")}catch{}
+    try{api().showView?.("board")}catch(error){console.error("[PartyBoard] showView(board):",error)}
+    try{view?.classList.remove("hidden")}catch{}
+  }
+
   async function finishPartyDance(reason="ended"){
     if(partyDanceFinishing)return;
     if(!state?.currentMinigame||state.currentMinigame.id!=="just-dance")return;
     partyDanceFinishing=true;
     stopPartyDanceBotFeedback();
 
-    // IMPORTANTE: captura score local ANTES de fechar o bridge,
-    // pois closePartyDanceSong limpa partyDanceDisplayPlayers.
-    const localDanceScores=danceBridge?.getPartyScores?.()||[];
-    const connectedPlayers=roomState?.players||[];
+    // Captura os dados ANTES de fechar o bridge. Qualquer leitura pode falhar,
+    // então os fallbacks são arrays vazios e a volta visual não depende deles.
+    let localDanceScores=[];
+    let connectedPlayers=[];
+    try{localDanceScores=danceBridge?.getPartyScores?.()||[]}catch(error){console.error("[PartyBoard] getPartyScores:",error)}
+    try{connectedPlayers=roomState?.players||[]}catch{}
 
-    // O retorno visual é imediato e não depende da rede.
-    danceBridge.closePartyDanceSong?.();
-    api().showView?.("board");
-    view?.classList.remove("hidden");
-    document.getElementById("finalShell")?.classList.remove("hidden");
-    document.body.classList.add("final-shell-v1");
+    // Volta para o tabuleiro imediatamente. Rede, ranking e saves vêm depois.
+    forceRestoreBoardAfterDance();
 
-    try{network?.setSensorMode(false)?.catch?.(()=>{})}catch{}
+    try{
+      const scoreRows=[];
 
-    const scoreRows=[];
-    state.players.filter(p=>p.human).forEach(player=>{
-      const rp=connectedPlayers.find(item=>item.id===player.id);
-      const dance=rp?.dance||{};
-      scoreRows.push({
-        player,
-        score:Math.max(0,Number(dance.score||0)),
-        stars:Math.max(0,Number(dance.stars||0))
+      state.players.filter(p=>p.human).forEach(player=>{
+        const rp=connectedPlayers.find(item=>String(item.id)===String(player.id));
+        const local=localDanceScores.find(item=>String(item.id)===String(player.id));
+        // Se o último room-state ainda não trouxe o score final, usa o snapshot
+        // local do bridge como fallback.
+        const dance=rp?.dance||local?.dance||{};
+        scoreRows.push({
+          player,
+          score:Math.max(0,Number(dance.score||0)),
+          stars:Math.max(0,Number(dance.stars||0))
+        });
       });
-    });
 
-    state.players.filter(p=>p.bot).forEach(bot=>{
-      const local=localDanceScores.find(item=>String(item.id)===String(bot.id));
-      const dance=local?.dance||{};
-      scoreRows.push({
-        player:bot,
-        score:Math.max(0,Number(dance.score||0)),
-        stars:Math.max(0,Number(dance.stars||0))
+      state.players.filter(p=>p.bot).forEach(bot=>{
+        const local=localDanceScores.find(item=>String(item.id)===String(bot.id));
+        const dance=local?.dance||{};
+        scoreRows.push({
+          player:bot,
+          score:Math.max(0,Number(dance.score||0)),
+          stars:Math.max(0,Number(dance.stars||0))
+        });
       });
-    });
 
-    scoreRows.sort((a,b)=>b.score-a.score);
-    const winner=scoreRows[0];
-    if(winner?.player)winner.player.score+=MINIGAME_REWARD;
+      // Mesmo se nenhum score estiver disponível, o resultado ainda fecha e
+      // permite continuar a partida.
+      if(!scoreRows.length){
+        state.players.forEach(player=>scoreRows.push({player,score:0,stars:0}));
+      }
 
-    minigameIntro.classList.add("hidden");
-    droneGame.classList.add("hidden");
-    minigameResult.classList.remove("hidden");
-    minigameWinner.textContent=winner?.player?`${winner.player.name} venceu o Just Dance!`:"Just Dance concluído.";
-    minigameRanking.innerHTML="";
-    const results=[];
-    scoreRows.forEach((entry,index)=>{
-      const row=document.createElement("div");
-      row.className="final-ranking-row";
-      row.innerHTML=`<b>${index+1}º</b><span><strong></strong><small></small></span><span>${Math.round(entry.score).toLocaleString("pt-BR")}</span>`;
-      $("strong",row).textContent=entry.player.name;
-      $("small",row).textContent=entry.player.bot?`Bot • ${difficulty(entry.player.difficulty)}`:`Score Just Dance`;
-      minigameRanking.appendChild(row);
-      results.push({playerId:entry.player.id,name:entry.player.name,correct:true,timeMs:0,place:index+1});
-    });
-    minigameOverlay.classList.remove("hidden");
-    renderPlayers();
-    checkpoint("post-minigame","auto");
-    publish("minigame-result",{minigame:{id:"just-dance",title:state.currentDanceSong?.title||"Just Dance",status:"result",results}});
-    partyDanceFinishing=false;
+      scoreRows.sort((a,b)=>b.score-a.score);
+      const winner=scoreRows[0];
+      if(winner?.player)winner.player.score+=MINIGAME_REWARD;
+
+      minigameIntro.classList.add("hidden");
+      droneGame.classList.add("hidden");
+      minigameResult.classList.remove("hidden");
+      minigameWinner.textContent=winner?.player?`${winner.player.name} venceu o Just Dance!`:"Just Dance concluído.";
+      minigameRanking.innerHTML="";
+      const results=[];
+
+      scoreRows.forEach((entry,index)=>{
+        const row=document.createElement("div");
+        row.className="final-ranking-row";
+        row.innerHTML=`<b>${index+1}º</b><span><strong></strong><small></small></span><span>${Math.round(entry.score).toLocaleString("pt-BR")}</span>`;
+        $("strong",row).textContent=entry.player.name;
+        $("small",row).textContent=entry.player.bot?`Bot • ${difficulty(entry.player.difficulty)}`:`Score Just Dance`;
+        minigameRanking.appendChild(row);
+        results.push({playerId:entry.player.id,name:entry.player.name,correct:true,timeMs:0,place:index+1});
+      });
+
+      minigameOverlay.classList.remove("hidden");
+      renderPlayers();
+      try{checkpoint("post-minigame","auto")}catch(error){console.error("[PartyBoard] checkpoint pós-JD:",error)}
+      try{publish("minigame-result",{minigame:{id:"just-dance",title:state.currentDanceSong?.title||"Just Dance",status:"result",results}})}catch(error){console.error("[PartyBoard] publish resultado JD:",error)}
+    }catch(error){
+      console.error("[PartyBoard] Erro ao montar resultado do Just Dance:",error);
+
+      // Fallback visual mínimo: nunca deixa o usuário preso no último frame.
+      try{
+        minigameIntro.classList.add("hidden");
+        droneGame.classList.add("hidden");
+        minigameResult.classList.remove("hidden");
+        minigameWinner.textContent="Just Dance concluído.";
+        minigameRanking.innerHTML='<div class="final-info-box">A música terminou. O resultado detalhado não pôde ser carregado, mas a partida pode continuar.</div>';
+        minigameOverlay.classList.remove("hidden");
+      }catch{}
+    }finally{
+      // Segundo restore deliberado: se qualquer código acima mexeu nas views,
+      // garante novamente que o tabuleiro está por baixo do resultado.
+      forceRestoreBoardAfterDance();
+      try{minigameOverlay.classList.remove("hidden")}catch{}
+      partyDanceFinishing=false;
+
+      // Rede por último e sem await: ela nunca pode bloquear a UI.
+      try{network?.setSensorMode(false)?.catch?.(()=>{})}catch{}
+    }
   }
 
   function closeMinigame(){clearInterval(droneTimerId);minigameOverlay.classList.add("hidden");advanceRound()}
@@ -1129,6 +1169,7 @@
   });
   window.STEAMPartyBoard=Object.freeze({
     start,
+    finishPartyDance:reason=>finishPartyDance(reason||"direct-fallback"),
     startPresentation:()=>start({
       version:1,mode:"local",humanPlayers:1,controlMethod:"keyboard",
       bots:[{slot:2,difficulty:"normal"},{slot:3,difficulty:"normal"},{slot:4,difficulty:"normal"}],
