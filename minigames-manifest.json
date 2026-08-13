@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "description": "Registro modular inicial de minigames. O seletor futuro filtrará por controles, sensores e quantidade de jogadores.",
+  "examples": [
+    {
+      "id": "just-dance",
+      "title": "Just Dance",
+      "status": "existing-prototype",
+      "players": {
+        "min": 1,
+        "max": 4
+      },
+      "controls": [
+        "phone-motion"
+      ],
+      "sensorRequired": true,
+      "orientation": "portrait",
+      "botsSupported": true,
+      "topicTags": [
+        "movimento"
+      ]
+    },
+    {
+      "id": "drone-route",
+      "title": "Rota do Drone",
+      "status": "planned",
+      "players": {
+        "min": 1,
+        "max": 4
+      },
+      "controls": [
+        "keyboard",
+        "phone-touch"
+      ],
+      "sensorRequired": false,
+      "orientation": "landscape",
+      "botsSupported": true,
+      "topicTags": [
+        "pitagoras",
+        "tecnologia",
+        "monitoramento"
+      ]
+    }
+  ]
+}

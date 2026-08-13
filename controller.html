@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#f4f4f7" />
-  <title>Controles • Corrida de Tabuleiro</title>
+  <title>Controle • Missão: Prevenir Desastres</title>
   <script>
     (() => {
       try {
@@ -16,6 +16,7 @@
   </script>
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="controller.css?v=040-earthsong-server-gate" />
+  <link rel="stylesheet" href="final-controller.css?v=001-base-nova" />
 </head>
 <body class="site-loading">
 
@@ -124,6 +125,14 @@
     <span id="themeToggleText">Escuro</span>
   </button>
 
+  
+  <div id="finalControllerOrientationGate" class="final-controller-orientation-gate hidden" role="dialog" aria-live="polite">
+    <div class="final-orientation-phone" aria-hidden="true">▯</div>
+    <strong id="finalOrientationTitle">Gire o celular</strong>
+    <p id="finalOrientationText">Use o controle na horizontal.</p>
+    <button id="finalEnterFullscreen" type="button">Entrar em tela cheia</button>
+  </div>
+
   <main class="controller-shell">
     <section id="joinScreen" class="controller-card">
       <button id="controllerBackBtn" class="controller-back" type="button" aria-label="Voltar">
@@ -175,6 +184,15 @@
           <span id="sensorModeBadge" class="sensor-mode-badge idle">Inativo</span>
         </div>
         <p id="sensorModeText" class="subtitle">O computador ainda não pediu acesso aos sensores.</p>
+
+        <div id="finalDanceSongCard" class="final-dance-song-card hidden">
+          <img id="finalDanceSongCover" alt="" />
+          <div>
+            <span class="tiny-label">Música atual</span>
+            <strong id="finalDanceSongTitle">Just Dance</strong>
+            <small id="finalDanceSongArtist">—</small>
+          </div>
+        </div>
         <button id="enableSensorsBtn" class="primary sensor-enable-button" type="button">Ativar sensores deste celular</button>
         <div class="sensor-live-grid">
           <div><span>Movimento</span><strong id="sensorMovementValue">0%</strong></div>
@@ -184,6 +202,7 @@
         </div>
         <div class="sensor-motion-meter" aria-hidden="true"><span id="sensorMotionFill"></span></div>
         <div class="mobile-dance-score" aria-live="polite">
+          <div class="final-dance-progress-track" aria-hidden="true"><span id="finalDanceProgressFill"></span></div>
           <div class="mobile-dance-score-head"><div><span>Score</span><strong id="sensorDanceScore">0</strong><small>/ 13.333</small></div><b id="sensorDanceRank">SEM ESTRELAS</b></div>
           <div id="sensorDanceStars" class="mobile-dance-stars" aria-label="Estrelas"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
           <div id="sensorDanceJudgement" class="mobile-dance-judgement">—</div>
@@ -222,7 +241,8 @@
   </div>
 
   <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
-  <script src="controller.js?v=052-wherehaveyou-msm" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
-  <span class="version-badge" data-version>V. 0.2.4 (Teste)</span>
+  <script src="controller.js?v=053-base-nova" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
+  <script src="final-controller-shell.js?v=001-base-nova"></script>
+<span class="version-badge" data-version>V. 0.3.0 • Controle</span>
 </body>
 </html>

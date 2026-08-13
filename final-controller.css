@@ -1,0 +1,17 @@
+
+/* Base nova do controle móvel */
+.final-controller-orientation-gate{position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 30%,#15393e,#071619 70%);color:#f5fffc;display:grid;place-content:center;text-align:center;padding:28px}
+.final-controller-orientation-gate.hidden{display:none!important}
+.final-orientation-phone{font-size:5rem;line-height:1;display:inline-block;margin:auto auto 20px;animation:finalPhoneTurn 1.6s ease-in-out infinite;color:#69f1c4}
+.final-controller-orientation-gate strong{font-size:1.6rem}.final-controller-orientation-gate p{color:#aacac4;max-width:330px;line-height:1.5}
+.final-controller-orientation-gate button{justify-self:center;border:0;border-radius:999px;background:#69f1c4;color:#06231d;font-weight:900;padding:12px 17px}
+@keyframes finalPhoneTurn{50%{transform:rotate(90deg)}}
+.final-dance-song-card{display:flex;align-items:center;gap:12px;margin:14px 0;padding:10px;border-radius:18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}
+.final-dance-song-card.hidden{display:none!important}.final-dance-song-card img{width:64px;height:64px;object-fit:cover;border-radius:14px;background:rgba(255,255,255,.08);box-shadow:0 10px 24px rgba(0,0,0,.15)}
+.final-dance-song-card strong,.final-dance-song-card small{display:block}.final-dance-song-card strong{font-size:1rem}.final-dance-song-card small{margin-top:3px;color:var(--muted,#777)}
+.final-dance-progress-track{height:7px;border-radius:999px;background:rgba(0,0,0,.15);overflow:hidden;margin-bottom:11px}
+.final-dance-progress-track span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#56d9ff,#69f1c4);transition:width .25s ease}
+.final-dance-star-pop{animation:finalStarPop .42s cubic-bezier(.2,.9,.2,1.35)}
+@keyframes finalStarPop{50%{transform:scale(1.5)}}
+@media(orientation:landscape){.sensor-mode-active .mobile-dance-score{max-width:560px}}
+@media(prefers-reduced-motion:reduce){.final-orientation-phone,.final-dance-star-pop{animation:none!important}}

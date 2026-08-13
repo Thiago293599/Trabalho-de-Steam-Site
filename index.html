@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Corrida de Tabuleiro</title>
+  <title>Missão: Prevenir Desastres</title>
   <script>
     (() => {
       try {
@@ -15,6 +15,7 @@
   </script>
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
+  <link rel="stylesheet" href="final-shell.css?v=001-base-nova" />
 </head>
 <body class="site-loading">
 
@@ -163,6 +164,257 @@
     <span id="themeToggleIcon" aria-hidden="true">☾</span>
     <span id="themeToggleText">Escuro</span>
   </button>
+
+
+  <!-- ================================================================
+       BASE NOVA V14
+       Camada nova da versão final. O protótipo antigo continua abaixo
+       para que possamos migrar cada sistema sem quebrar o jogo atual.
+       ================================================================ -->
+  <div id="finalShell" class="final-shell" aria-live="polite">
+    <section id="finalStartScreen" class="final-view final-start-view">
+      <div class="final-bg-grid" aria-hidden="true"></div>
+      <div class="final-radar final-radar-a" aria-hidden="true"></div>
+      <div class="final-radar final-radar-b" aria-hidden="true"></div>
+      <div class="final-start-content">
+        <div class="final-project-mark">STEAM • MISSÃO DE PREVENÇÃO</div>
+        <h1 id="finalGameTitle">Missão: Prevenir Desastres</h1>
+        <p class="final-theme-line">Tecnologia <span>•</span> Matemática <span>•</span> Desastres Ambientais</p>
+        <button id="finalPressStart" class="final-press-start" type="button">
+          Aperte <kbd>Enter</kbd> ou clique na tela para começar
+        </button>
+        <p class="final-working-title">Título provisório • Base nova do projeto</p>
+      </div>
+    </section>
+
+    <section id="finalMainMenu" class="final-view final-menu-view hidden">
+      <div class="final-menu-layout">
+        <header class="final-menu-header">
+          <div>
+            <p class="final-eyebrow">Central de Missões</p>
+            <h2>Menu principal</h2>
+            <p>Escolha o que deseja fazer.</p>
+          </div>
+          <div id="finalActiveProfileChip" class="final-profile-chip">
+            <span class="final-mini-avatar" aria-hidden="true"></span>
+            <span><small>Perfil</small><strong>Convidado</strong></span>
+          </div>
+        </header>
+
+        <div class="final-main-actions">
+          <button class="final-main-button final-main-primary" data-final-nav="play" type="button">
+            <span class="final-button-icon">▶</span>
+            <span><strong>Jogar</strong><small>Configure jogadores, controles e bots.</small></span>
+          </button>
+          <button class="final-main-button" data-final-nav="profiles" type="button">
+            <span class="final-button-icon">◎</span>
+            <span><strong>Perfis</strong><small>Crie, importe ou exporte seu perfil.</small></span>
+          </button>
+          <button class="final-main-button" data-final-nav="how" type="button">
+            <span class="final-button-icon">?</span>
+            <span><strong>Como funciona</strong><small>Veja o fluxo do tabuleiro e dos minigames.</small></span>
+          </button>
+          <button class="final-main-button" data-final-nav="settings" type="button">
+            <span class="final-button-icon">⚙</span>
+            <span><strong>Configurações</strong><small>Preferências da nova versão.</small></span>
+          </button>
+        </div>
+
+        <div class="final-menu-footer">
+          <button id="finalOpenLegacy" class="final-text-button" type="button">Abrir protótipo atual</button>
+          <span>Base V14 • desenvolvimento gradual</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="finalPlayMenu" class="final-view hidden">
+      <div class="final-panel">
+        <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
+        <p class="final-eyebrow">Jogar</p>
+        <h2>Escolha o tipo de partida</h2>
+        <p class="final-subtitle">Esta etapa define como os jogadores vão participar.</p>
+
+        <div class="final-mode-grid">
+          <button class="final-mode-card" data-match-mode="local" type="button">
+            <span class="final-mode-symbol">⌨</span>
+            <strong>Local</strong>
+            <small>Um jogador, vários no mesmo PC ou celulares como controles.</small>
+          </button>
+          <button class="final-mode-card" data-match-mode="phones" type="button">
+            <span class="final-mode-symbol">▯</span>
+            <strong>Celulares</strong>
+            <small>O PC vira a tela principal e cada pessoa usa seu celular.</small>
+          </button>
+          <button class="final-mode-card" data-match-mode="online" type="button">
+            <span class="final-mode-symbol">◎</span>
+            <strong>Online</strong>
+            <small>Sala sincronizada pelo servidor.</small>
+          </button>
+        </div>
+
+        <div id="finalMatchSetup" class="final-match-setup hidden">
+          <div class="final-setup-head">
+            <div>
+              <p class="final-eyebrow">Configuração da partida</p>
+              <h3 id="finalMatchModeTitle">Local</h3>
+            </div>
+            <span id="finalCompatibilityBadge" class="final-status-pill">Compatível</span>
+          </div>
+
+          <div class="final-form-grid">
+            <label>
+              Jogadores humanos
+              <select id="finalHumanPlayers">
+                <option value="1">1 jogador</option>
+                <option value="2">2 jogadores</option>
+                <option value="3">3 jogadores</option>
+                <option value="4">4 jogadores</option>
+              </select>
+            </label>
+            <label>
+              Controle dos humanos
+              <select id="finalControlMethod">
+                <option value="keyboard">Teclado</option>
+                <option value="phone-touch">Celular sem sensores</option>
+                <option value="phone-motion">Celular com sensores</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="final-rule-summary">
+            <div><span>Minigames</span><strong id="finalMinigameStatus">Ativados</strong></div>
+            <div><span>Minigames com movimento</span><strong id="finalMotionStatus">Desativados</strong></div>
+            <div><span>Vagas restantes</span><strong id="finalBotCount">3 bots</strong></div>
+          </div>
+
+          <div class="final-bot-section">
+            <div class="final-section-title">
+              <div>
+                <strong>Bots</strong>
+                <small>As vagas restantes são preenchidas automaticamente.</small>
+              </div>
+            </div>
+            <div id="finalBotsList" class="final-bots-list"></div>
+          </div>
+
+          <div id="finalRuleMessage" class="final-info-box"></div>
+
+          <div class="final-actions-row">
+            <button id="finalSaveMatch" class="final-secondary" type="button">Salvar configuração</button>
+            <button id="finalContinuePrototype" class="final-primary" type="button">Continuar para o protótipo</button>
+          </div>
+          <p class="final-dev-note">Nesta primeira base, as regras e bots já são configurados e salvos. A integração completa deles ao tabuleiro novo será feita nas próximas etapas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="finalProfilesMenu" class="final-view hidden">
+      <div class="final-panel final-profile-panel">
+        <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
+        <p class="final-eyebrow">Perfis</p>
+        <h2>Seu jogador, no seu dispositivo</h2>
+        <p class="final-subtitle">Os perfis ficam salvos localmente e podem ser exportados como arquivo.</p>
+
+        <div class="final-profile-layout">
+          <div>
+            <div id="finalProfileList" class="final-profile-list"></div>
+            <button id="finalNewProfile" class="final-secondary final-full-button" type="button">+ Criar novo perfil</button>
+            <div class="final-import-row">
+              <label class="final-file-button">
+                Importar arquivo de perfil
+                <input id="finalImportProfile" type="file" accept=".json,.steamprofile,application/json" />
+              </label>
+            </div>
+          </div>
+
+          <form id="finalProfileEditor" class="final-profile-editor hidden">
+            <div id="finalAvatarPreview" class="final-avatar-preview" aria-label="Prévia do avatar"></div>
+            <label>
+              Nome
+              <input id="finalProfileName" maxlength="18" autocomplete="nickname" placeholder="Jogador" />
+            </label>
+            <div class="final-form-grid">
+              <label>
+                Formato
+                <select id="finalAvatarShape">
+                  <option value="round">Redondo</option>
+                  <option value="square">Quadrado</option>
+                  <option value="triangle">Triangular</option>
+                  <option value="hex">Hexagonal</option>
+                </select>
+              </label>
+              <label>
+                Cor
+                <select id="finalAvatarColor">
+                  <option value="cyan">Ciano</option>
+                  <option value="green">Verde</option>
+                  <option value="orange">Laranja</option>
+                  <option value="pink">Rosa</option>
+                  <option value="purple">Roxo</option>
+                  <option value="yellow">Amarelo</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Rosto
+              <select id="finalAvatarFace">
+                <option value="smile">Sorriso</option>
+                <option value="calm">Calmo</option>
+                <option value="focus">Focado</option>
+                <option value="happy">Animado</option>
+              </select>
+            </label>
+
+            <div class="final-actions-row">
+              <button id="finalSaveProfile" class="final-primary" type="submit">Salvar perfil</button>
+              <button id="finalExportProfile" class="final-secondary" type="button">Exportar arquivo</button>
+              <button id="finalDeleteProfile" class="final-danger" type="button">Excluir</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="finalHowMenu" class="final-view hidden">
+      <div class="final-panel">
+        <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
+        <p class="final-eyebrow">Estrutura da partida</p>
+        <h2>Tabuleiro primeiro, minigame depois</h2>
+        <div class="final-flow">
+          <span>Tela inicial</span><b>→</b>
+          <span>Menu</span><b>→</b>
+          <span>Tipo de jogo</span><b>→</b>
+          <span>Configuração</span><b>→</b>
+          <span>Tabuleiro</span><b>→</b>
+          <span>Minigame</span><b>↻</b>
+        </div>
+        <div class="final-info-cards">
+          <article><strong>Dado digital</strong><p>Visual de 6 faces, mas resultados de 1 a 10 para manter o ritmo do tabuleiro.</p></article>
+          <article><strong>Controles justos</strong><p>Se celulares forem usados no multiplayer, todos os humanos usam celular. Sensores podem ser ativados ou não.</p></article>
+          <article><strong>Bots</strong><p>Vagas vazias são preenchidas automaticamente, com dificuldade configurável.</p></article>
+          <article><strong>Minigames compatíveis</strong><p>O sistema filtra jogos por teclado, toque, sensores e número de participantes.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="finalSettingsMenu" class="final-view hidden">
+      <div class="final-panel">
+        <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
+        <p class="final-eyebrow">Configurações</p>
+        <h2>Base da versão pronta</h2>
+        <div class="final-settings-grid">
+          <div><span>Texto do Just Dance</span><strong>Normal</strong></div>
+          <div><span>Gold Move DEV</span><strong>1500 ms</strong></div>
+          <div><span>Where Have You Been</span><strong>-1900 ms</strong></div>
+          <div><span>Rain Over Me</span><strong>-1725 ms</strong></div>
+          <div><span>Dado</span><strong>1–10</strong></div>
+          <div><span>Jogadores</span><strong>Até 4</strong></div>
+        </div>
+        <p class="final-dev-note">Esses valores ficam centralizados em <code>final-game-config.js</code> para facilitar ajustes futuros.</p>
+      </div>
+    </section>
+  </div>
+
 
   <section id="mainMenu" class="menu-screen">
     <div class="menu-card">
@@ -524,9 +776,9 @@
           <label>Música
             <select id="danceSongSelect">
               <option value="RainOverMe">Rain Over Me</option>
-              <option value="EarthSong">Earth Song • Beta</option>
-              <option value="ItsRainingMen">It's Raining Men • Beta</option>
-              <option value="WhereHaveYou">Where Have You Been • Beta</option>
+              <option value="EarthSong">Earth Song</option>
+              <option value="ItsRainingMen">It's Raining Men</option>
+              <option value="WhereHaveYou">Where Have You Been</option>
             </select>
           </label>
           <label>Qualidade do vídeo
@@ -849,8 +1101,10 @@
       window.dispatchEvent(new CustomEvent("dice3d-error", { detail: String(error?.message || error) }));
     });
   </script>
-  <script src="script.js?v=0695-all-songs-google-drive" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
-  <span class="version-badge" data-version>V. 0.2.4 (Teste)</span>
+  <script src="final-game-config.js?v=001-base-nova"></script>
+  <script src="script.js?v=0696-base-nova" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <script src="final-shell.js?v=001-base-nova"></script>
+  <span class="version-badge" data-version>V. 0.3.0 • Base nova</span>
 </body>
 </html>
 

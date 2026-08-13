@@ -357,12 +357,12 @@ const DANCE_SONGS = Object.freeze({
       high: "gdrive:1ogG3xCIolWix3w5oUmAmFN6sB-tDM570"
     }),
     audioFile: "RainOverMe_Audio.mp3", coverFile: "rainoverme_cover@2x.jpg", posterFile: "RainOverMe.jpg", avatarFile: "rainoverme_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsV4",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsFinalV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
     videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
   }),
   EarthSong: Object.freeze({
-    id: "EarthSong", title: "Earth Song", artist: "Michael Jackson", edition: "Michael Jackson: The Experience", coaches: 1, beta: true, lyricsColor: "#FFFFFF",
+    id: "EarthSong", title: "Earth Song", artist: "Michael Jackson", edition: "Michael Jackson: The Experience", coaches: 1, beta: false, lyricsColor: "#FFFFFF",
     base: "minigames/just-dance/songs/EarthSong", mapFile: "EarthSong.json", movesFile: "EarthSong_moves0.json",
     videos: Object.freeze({
       low: "EarthSong_Coach_Low.mp4",
@@ -375,7 +375,7 @@ const DANCE_SONGS = Object.freeze({
     videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
   }),
   ItsRainingMen: Object.freeze({
-    id: "ItsRainingMen", title: "It's Raining Men", artist: "The Weather Girls", edition: "Just Dance 2", coaches: 1, beta: true, lyricsColor: "#35C5ED",
+    id: "ItsRainingMen", title: "It's Raining Men", artist: "The Weather Girls", edition: "Just Dance 2", coaches: 1, beta: false, lyricsColor: "#35C5ED",
     base: "minigames/just-dance/songs/ItsRainingMen", mapFile: "ItsRainingMen.json", movesFile: "ItsRainingMen_moves0.json",
     videos: Object.freeze({
       low: "ItsRainingMen_Low.mp4",
@@ -388,7 +388,7 @@ const DANCE_SONGS = Object.freeze({
     videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
   }),
   WhereHaveYou: Object.freeze({
-    id: "WhereHaveYou", title: "Where Have You Been", artist: "Rihanna", edition: "Just Dance 2014", coaches: 1, beta: true, lyricsColor: "#F61F87",
+    id: "WhereHaveYou", title: "Where Have You Been", artist: "Rihanna", edition: "Just Dance 2014", coaches: 1, beta: false, lyricsColor: "#F61F87",
     base: "minigames/just-dance/songs/WhereHaveYou", mapFile: "WhereHaveYou.json", movesFile: "WhereHaveYou_moves0.json",
     // Low fica no próprio site. Medium e High usam os arquivos originais do Google Drive
     // como stream de mídia; não é iframe e não mostra a interface do Drive.
@@ -398,7 +398,7 @@ const DANCE_SONGS = Object.freeze({
       high: "gdrive:1GGiGZ0Xdx1hO6DDLlUi7Ljgi47N3Nhpi"
     }),
     audioFile: "WhereHaveYou_Audio.mp3", coverFile: "wherehaveyou_cover@2x.jpg", posterFile: "WhereHaveYou.jpg", avatarFile: "wherehaveyou_thumb_kiwi.jpg",
-    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 8 }), defaultSyncMs: 0, syncStorageKey: "jdWhereHaveYouSyncOffsetMsV1",
+    atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 8 }), defaultSyncMs: -1900, syncStorageKey: "jdWhereHaveYouSyncOffsetMsFinalV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
     videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor, sem interface do Drive"
   })
@@ -464,7 +464,7 @@ let danceHostLatencyMeasuredAt = 0;
 const danceClassifierProfiles = new Map();
 let danceClassifierLoadSummary = { loaded: 0, total: 0, format: "" };
 const DANCE_QUALITY_STORAGE_KEY = "jdVideoQualityModeV1";
-const DANCE_LYRICS_SIZE_STORAGE_KEY = "jdLyricsSizeV1";
+const DANCE_LYRICS_SIZE_STORAGE_KEY = "jdLyricsSizeFinalV1";
 const DANCE_VIDEO_FIT_STORAGE_KEY = "jdVideoFitV1";
 let DANCE_VIDEO_SOURCES = {};
 let DANCE_AUDIO_SOURCE = ""; // reservado para preview futuro; não usado no gameplay V6.8
@@ -537,8 +537,8 @@ const DANCE_GOLD_SPRITES = Object.freeze({
 });
 const DANCE_YEAH_FINAL_SOURCE = "minigames/just-dance/hud/goldmove-starry-cubes.mp4";
 const DANCE_IPK_GOLD_BASE = "minigames/just-dance/hud/ipk-gold";
-const DANCE_GOLD_DEFAULTS = Object.freeze({ prepareMs: 3250, loopRestartMs: 0, finishOffsetMs: 0, finalDelayMs: 0, finalScalePct: 100 });
-const DANCE_YEAH_DEV_STORAGE_KEY = "jdGoldMoveSingleVideoSettingsV1";
+const DANCE_GOLD_DEFAULTS = Object.freeze({ prepareMs: 1500, loopRestartMs: 0, finishOffsetMs: 0, finalDelayMs: 0, finalScalePct: 100 });
+const DANCE_YEAH_DEV_STORAGE_KEY = "jdGoldMoveSingleVideoSettingsFinalV1";
 const DANCE_GOLD_FINISH_WINDOW_MS = 850;
 let danceGoldPrepareMs = DANCE_GOLD_DEFAULTS.prepareMs;
 let danceGoldLoopRestartMs = DANCE_GOLD_DEFAULTS.loopRestartMs;
@@ -3597,7 +3597,7 @@ async function initializeDancePlayerSettings() {
   updateDanceSongIdentityUi();
   danceQualityPreference = safeLocalStorageGet(DANCE_QUALITY_STORAGE_KEY, "auto");
   if (!["auto","low","medium","high"].includes(danceQualityPreference)) danceQualityPreference = "auto";
-  applyDanceLyricsSize(safeLocalStorageGet(DANCE_LYRICS_SIZE_STORAGE_KEY, "small"), false);
+  applyDanceLyricsSize(safeLocalStorageGet(DANCE_LYRICS_SIZE_STORAGE_KEY, "normal"), false);
   applyDanceVideoFit(safeLocalStorageGet(DANCE_VIDEO_FIT_STORAGE_KEY, "contain"), false);
   if (danceQualityMode) danceQualityMode.value = danceQualityPreference;
   if (danceVolume) {

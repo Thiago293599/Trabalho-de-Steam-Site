@@ -677,6 +677,7 @@ async function phoneApplyDanceSession(payload){
   const timelineMismatch=Boolean(incomingRevision&&phoneDanceMovesRevision&&incomingRevision!==phoneDanceMovesRevision);
   const explicitSongRefresh=String(payload?.reason||"")==="song";
   phoneDanceSession={...payload};
+  window.dispatchEvent(new CustomEvent("phone-dance-session", { detail: { songId: String(payload.songId || ""), reason: String(payload.reason || "") } }));
   phoneDanceSyncClock(payload);
   if(songChanged||songNotLoaded||timelineMismatch||explicitSongRefresh){
     await phoneLoadDanceSong(payload.songId,incomingRevision);
