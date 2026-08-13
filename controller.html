@@ -16,7 +16,7 @@
   </script>
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="controller.css?v=040-earthsong-server-gate" />
-  <link rel="stylesheet" href="final-controller.css?v=001-base-nova" />
+  <link rel="stylesheet" href="final-controller.css?v=002-party-board" />
 </head>
 <body class="site-loading">
 
@@ -175,6 +175,39 @@
         <p id="turnDescription" class="subtitle">Seu botão será liberado automaticamente quando chegar a sua vez.</p>
       </div>
 
+
+      <section id="finalPartyControllerPanel" class="final-party-controller-panel hidden" aria-live="polite">
+        <div class="final-party-controller-head">
+          <div>
+            <p class="eyebrow">Tabuleiro</p>
+            <h2 id="finalPartyPhoneRound">Aguardando início</h2>
+          </div>
+          <span id="finalPartyPhoneScore" class="sensor-mode-badge">0 PTS</span>
+        </div>
+
+        <div id="finalPartyPhoneBoard" class="final-party-phone-board">
+          <p id="finalPartyPhoneKicker" class="eyebrow">Conectado</p>
+          <h1 id="finalPartyPhoneTitle">Espere os outros jogadores</h1>
+          <p id="finalPartyPhoneDescription" class="subtitle">O computador iniciará a partida quando todos estiverem conectados.</p>
+          <div id="finalPartyPhoneDice" class="mobile-dice">?</div>
+          <button id="finalPartyPhoneRoll" class="roll-button" type="button" disabled>Rolar dado</button>
+        </div>
+
+        <div id="finalPartyPhoneMinigame" class="final-party-phone-minigame hidden">
+          <p class="eyebrow">Minigame • Pitágoras</p>
+          <h2>Rota do Drone</h2>
+          <p id="finalPartyPhoneQuestion" class="subtitle">Aguardando pergunta…</p>
+          <div id="finalPartyPhoneAnswers" class="final-party-phone-answers"></div>
+          <strong id="finalPartyPhoneTimer">Tempo: —</strong>
+        </div>
+
+        <div id="finalPartyPhoneResult" class="final-party-phone-result hidden">
+          <p class="eyebrow">Resultado</p>
+          <h2 id="finalPartyPhoneResultTitle">Aguardando…</h2>
+          <div id="finalPartyPhoneRanking" class="final-party-phone-ranking"></div>
+        </div>
+      </section>
+
       <section id="sensorModePanel" class="sensor-mode-panel hidden" aria-live="polite">
         <div class="sensor-mode-head">
           <div>
@@ -241,8 +274,9 @@
   </div>
 
   <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
-  <script src="controller.js?v=053-base-nova" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
-  <script src="final-controller-shell.js?v=001-base-nova"></script>
-<span class="version-badge" data-version>V. 0.3.0 • Controle</span>
+  <script src="controller.js?v=054-party-board" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
+  <script src="final-controller-shell.js?v=002-party-board"></script>
+<script src="final-party-controller.js?v=001-party-board"></script>
+<span class="version-badge" data-version>V. 0.5.0 • Controle</span>
 </body>
 </html>

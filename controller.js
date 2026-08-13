@@ -146,6 +146,14 @@ let sensorLastGenericAccelAt = 0;
 
 let sensorObserved = { motion: false, orientation: false, gyro: false, accelerometer: false, orientationFallback: false };
 
+window.STEAMPartyControllerBridge = Object.freeze({
+  getSocket: () => socket,
+  getPlayerId: () => myPlayerId,
+  getRoomCode: () => joinedRoom,
+  getRoomState: () => state
+});
+
+
 /* ---------- Just Dance V13: Where Have You Been + scoring por layout MSM no celular ---------- */
 const PHONE_DANCE_MAX_SCORE = 13333;
 const PHONE_DANCE_WEIGHTS = Object.freeze({ PERFECT: 1, SUPER: 0.8, GOOD: 0.6, OK: 0.35, YEAH: 1, X: 0 });
@@ -1367,6 +1375,9 @@ joinBtn.addEventListener("click", async () => {
     controlScreen.classList.remove("hidden");
     connectionBadge.textContent = "Conectado";
     applyState(response.state);
+    window.dispatchEvent(new CustomEvent("steam-party-controller-joined", {
+      detail: { roomCode: joinedRoom, playerId: myPlayerId, state: response.state }
+    }));
     reportSensorStatus(false);
   });
 });

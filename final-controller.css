@@ -15,3 +15,13 @@
 @keyframes finalStarPop{50%{transform:scale(1.5)}}
 @media(orientation:landscape){.sensor-mode-active .mobile-dance-score{max-width:560px}}
 @media(prefers-reduced-motion:reduce){.final-orientation-phone,.final-dance-star-pop{animation:none!important}}
+
+
+/* V16 — novo tabuleiro no celular */
+.final-party-controller-panel{display:grid;gap:16px}.final-party-controller-panel.hidden{display:none!important}
+.final-party-controller-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.final-party-controller-head h2{margin:3px 0;font-size:1.35rem}
+.final-party-phone-board{text-align:center;padding:14px 0}.final-party-phone-board .mobile-dice{margin:20px auto}
+.final-party-phone-minigame{text-align:center}.final-party-phone-minigame h2{margin:4px 0 8px;font-size:1.8rem}.final-party-phone-answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:18px 0}
+.final-party-phone-answer{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.06);color:inherit;padding:16px 10px;font:inherit;font-weight:900}.final-party-phone-answer:disabled{opacity:.5}.final-party-phone-answer.is-selected{border-color:#69f1c4;background:rgba(105,241,196,.12)}
+.final-party-phone-result{text-align:center}.final-party-phone-ranking{display:grid;gap:7px;margin-top:12px}.final-party-phone-rank-row{display:flex;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.045)}.final-party-phone-rank-row:first-child{border-color:rgba(255,209,102,.35)}
+@media(orientation:landscape){.final-party-controller-panel{max-width:720px;margin:auto}.final-party-phone-answers{grid-template-columns:repeat(4,minmax(0,1fr))}}

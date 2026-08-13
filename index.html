@@ -16,7 +16,7 @@
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
   <link rel="stylesheet" href="final-shell.css?v=002-board-alpha" />
-  <link rel="stylesheet" href="final-board.css?v=001-board-alpha" />
+  <link rel="stylesheet" href="final-board.css?v=002-phone-board" />
 </head>
 <body class="site-loading">
 
@@ -318,6 +318,37 @@
     </section>
 
     <section id="finalBoardView" class="final-view final-board-view hidden">
+      <div id="finalPartyLobbyOverlay" class="final-party-lobby-overlay hidden">
+        <div class="final-party-lobby-card">
+          <p class="final-eyebrow">Celulares como controles</p>
+          <h2>Conecte os jogadores</h2>
+          <p id="finalPartyLobbyHelp">Cada jogador humano precisa entrar com o próprio celular.</p>
+
+          <div class="final-party-code-row">
+            <div><span>Código da sala</span><strong id="finalPartyRoomCode">------</strong></div>
+            <img id="finalPartyQr" alt="QR Code da sala" />
+          </div>
+
+          <div class="final-party-link-box">
+            <span>Link do controle</span>
+            <code id="finalPartyJoinUrl">Preparando…</code>
+            <button id="finalPartyCopyLink" class="final-secondary" type="button">Copiar link</button>
+          </div>
+
+          <div class="final-party-connected-head">
+            <strong>Celulares conectados</strong>
+            <span id="finalPartyConnectedCount">0 / 1</span>
+          </div>
+          <div id="finalPartyConnectedPlayers" class="final-party-connected-list"></div>
+
+          <div class="final-actions-row">
+            <button id="finalPartyCancelLobby" class="final-secondary" type="button">Cancelar</button>
+            <button id="finalPartyStartMatch" class="final-primary" type="button" disabled>Iniciar partida</button>
+          </div>
+          <p id="finalPartyLobbyStatus" class="final-dev-note">Criando sala…</p>
+        </div>
+      </div>
+
       <div class="final-board-shell">
         <header class="final-board-topbar">
           <div><p class="final-eyebrow">Partida experimental</p><h2 id="finalBoardRound">Rodada 1 / 5</h2></div>
@@ -1141,9 +1172,10 @@
   </script>
   <script src="final-game-config.js?v=001-base-nova"></script>
   <script src="script.js?v=0696-base-nova" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
-  <script src="final-shell.js?v=002-board-alpha"></script>
-  <script src="final-board.js?v=001-board-alpha"></script>
-  <span class="version-badge" data-version>V. 0.4.0 • Tabuleiro Alpha</span>
+  <script src="final-party-network.js?v=001-phone-board"></script>
+  <script src="final-shell.js?v=003-phone-board"></script>
+  <script src="final-board.js?v=002-phone-board"></script>
+  <span class="version-badge" data-version>V. 0.5.0 • Celulares Alpha</span>
 </body>
 </html>
 

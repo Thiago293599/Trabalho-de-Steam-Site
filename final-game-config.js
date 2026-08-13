@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   window.STEAM_PARTY_CONFIG = Object.freeze({
-    version: "0.4.0-board-alpha",
+    version: "0.5.0-phone-board-alpha",
     workingTitle: "Missão: Prevenir Desastres",
     titleIsProvisional: true,
     theme: "Tecnologia, Matemática e Desastres Ambientais",

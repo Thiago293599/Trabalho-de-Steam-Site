@@ -307,6 +307,15 @@
     const effectiveControl = controlSelect.value;
     const samePcMulti = selectedMatchMode === "local" && effectiveControl === "keyboard" && humans >= 2;
     const minigames = !samePcMulti;
+    const continueButton = qs("#finalContinuePrototype");
+    if (continueButton) {
+      const connected = selectedMatchMode === "phones" || String(effectiveControl).startsWith("phone-");
+      continueButton.textContent = selectedMatchMode === "online"
+        ? "Continuar para o protótipo online"
+        : connected
+          ? "Criar sala e iniciar tabuleiro"
+          : "Iniciar tabuleiro experimental";
+    }
     const motion = minigames && effectiveControl === "phone-motion";
 
     qs("#finalMinigameStatus").textContent = minigames ? "Ativados" : "Desativados";
@@ -315,14 +324,6 @@
 
     badge.textContent = samePcMulti ? "Modo simplificado" : "Compatível";
     badge.classList.toggle("is-warning", samePcMulti);
-
-    const continueButton = qs("#finalContinuePrototype");
-    if (continueButton) {
-      const boardAlphaSupported = selectedMatchMode === "local" && effectiveControl === "keyboard";
-      continueButton.textContent = boardAlphaSupported
-        ? "Iniciar tabuleiro experimental"
-        : "Continuar para o protótipo conectado";
-    }
 
     if (samePcMulti) {
       message.textContent = "Com 2–4 humanos no mesmo PC usando teclado, os minigames entre rodadas ficam desativados. O tabuleiro continua normalmente.";
@@ -423,7 +424,10 @@
 
     // V15: o tabuleiro novo já roda localmente. A ponte completa do
     // tabuleiro novo com celulares/online será a próxima etapa.
-    if (config.mode === "local" && window.STEAMPartyBoard?.start(config)) return;
+    if (
+      (config.mode === "local" || config.mode === "phones") &&
+      window.STEAMPartyBoard?.start(config)
+    ) return;
 
     exitShellToLegacy();
 
