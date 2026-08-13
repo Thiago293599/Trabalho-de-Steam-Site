@@ -179,7 +179,11 @@ window.STEAMPartyControllerBridge = Object.freeze({
   getSocket: () => socket,
   getPlayerId: () => myPlayerId,
   getRoomCode: () => joinedRoom,
-  getRoomState: () => state
+  getRoomState: () => state,
+  requestSensors: () => requestAndStartSensors(),
+  sensorsGranted: () => Boolean(sensorPermissionGranted),
+  sensorsStreaming: () => Boolean(sensorStreaming),
+  latestIntensity: () => Number(sensorLatestIntensity || 0)
 });
 
 
@@ -215,6 +219,7 @@ const PHONE_EARTH_CLASSIFIERS = Object.freeze({
   "earthsong_bras_genou":"00_Bras_Genou.livemove.bin","earthsong_poing_terre":"01_Poing_Terre.livemove.bin","earthsong_bras_sol":"02_Bras_Sol.livemove.bin","earthsong_jette":"03_Jette.livemove.bin","earthsong_lever":"04_Lever.livemove.bin","earthsong_poitrine_l":"05_Poitrine_L.livemove.bin","earthsong_spin":"06_Spin.livemove.bin","earthsong_bras_u":"07_Bras_U.livemove.bin","earthsong_bras_down":"08_Bras_Down.livemove.bin","earthsong_allemand":"09_Allemand.livemove.bin","earthsong_pointer_sol":"10_Pointer_Sol.livemove.bin","earthsong_poitrine_r":"11_Poitrine_R.livemove.bin","earthsong_main":"12_Main.livemove.bin","earthsong_bras":"13_Bras.livemove.bin","earthsong_ski_l":"14_Ski_L.livemove.bin","earthsong_saut_r":"15_Saut_R.livemove.bin","earthsong_saut_l":"16_Saut_L.livemove.bin","earthsong_bras_tendu":"17_Bras_Tendu.livemove.bin","earthsong_poing_lever_l":"18_Poing_Lever_L.livemove.bin","earthsong_poing_lever_r":"19_Poing_Lever_R.livemove.bin","earthsong_ski_r":"20_Ski_R.livemove.bin","earthsong_poing_l":"21_Poing_L.livemove.bin","earthsong_poing_r":"22_Poing_R.livemove.bin","earthsong_poing_f":"23_Poing_F.livemove.bin","earthsong_main_r":"24_Main_R.livemove.bin","earthsong_genou_tape":"25_Genou_Tape.livemove.bin","earthsong_genou_moi":"26_Genou_Moi.livemove.bin","earthsong_main_l":"27_Main_L.livemove.bin","earthsong_pose_fin":"28_Pose_Fin.livemove.bin","earthsong_poing_lever_f":"29_Poing_Lever_F.livemove.bin","earthsong_shake":"30_Shake.livemove.bin"
 });
 let phoneDanceSession = null;
+let phoneDanceSessionId = "";
 let phoneDanceMoves = [];
 let phoneDanceMovesRevision = "";
 let phoneDanceLoadedSongId = "";
@@ -731,15 +736,25 @@ async function phoneLoadDanceSong(songId,expectedRevision="") {
 async function phoneApplyDanceSession(payload){
   if(!payload||payload.roomCode!==joinedRoom)return;
   const previousSongId=phoneDanceSession?.songId||"";
+  const previousSessionId=phoneDanceSessionId;
+  const incomingSessionId=String(payload?.sessionId||"");
   const incomingRevision=String(payload?.movesRevision||"");
   const songChanged=previousSongId!==String(payload.songId||"");
+  const sessionChanged=Boolean(incomingSessionId && incomingSessionId!==previousSessionId);
   const songNotLoaded=phoneDanceLoadedSongId!==String(payload.songId||"");
   const timelineMismatch=Boolean(incomingRevision&&phoneDanceMovesRevision&&incomingRevision!==phoneDanceMovesRevision);
   const explicitSongRefresh=String(payload?.reason||"")==="song";
+  if(sessionChanged || explicitSongRefresh){
+    // V36: apaga fila/resultados da sessão anterior ANTES de aceitar a nova.
+    phoneDanceResetLocal(true);
+    phoneDanceActiveMoveIndex=-1;
+    phoneDanceStats=null;
+  }
+  phoneDanceSessionId=incomingSessionId || phoneDanceSessionId;
   phoneDanceSession={...payload};
   window.dispatchEvent(new CustomEvent("phone-dance-session", { detail: { songId: String(payload.songId || ""), reason: String(payload.reason || "") } }));
   phoneDanceSyncClock(payload);
-  if(songChanged||songNotLoaded||timelineMismatch||explicitSongRefresh){
+  if(songChanged||songNotLoaded||timelineMismatch||explicitSongRefresh||sessionChanged){
     await phoneLoadDanceSong(payload.songId,incomingRevision);
     phoneDanceSyncClock(payload);
   }
@@ -936,6 +951,7 @@ function phoneQueueResult(index,move,result){
     goldMove:Boolean(move?.goldMove),
     totalMoves:phoneDanceMoves.length,
     movesRevision:phoneDanceMovesRevision,
+    sessionId: phoneDanceSessionId || String(phoneDanceSession?.sessionId||""),
     ...enriched,
     scoredAt:Date.now(),
     source:"phone-v32-reference-score"
@@ -1381,7 +1397,15 @@ function renderControllerDanceScore(dance = {}, animateJudgement = false) {
 
 function applySensorLabState(nextState, me) {
   updateMobileDancePlayerBarAsset(nextState);
-  const isSensorLab = nextState?.purpose === "sensor-lab" || (nextState?.purpose === "party-board-v2" && Boolean(nextState?.sensorMode));
+  const partyMotionMode = nextState?.purpose === "party-board-v2" && Boolean(nextState?.sensorMode) && nextState?.sensorPurpose === "motion-minigame";
+  const isSensorLab = nextState?.purpose === "sensor-lab" || (nextState?.purpose === "party-board-v2" && Boolean(nextState?.sensorMode) && !partyMotionMode);
+  if(partyMotionMode){
+    sensorModeRequested = true;
+    if(sensorPermissionGranted && !sensorStreaming) startSensorStreaming();
+    controlScreen?.classList.remove("sensor-mode-active");
+    sensorModePanel?.classList.add("hidden");
+    return false;
+  }
   controlScreen?.classList.toggle("sensor-mode-active", isSensorLab);
   sensorModePanel?.classList.toggle("hidden", !isSensorLab);
   if (!isSensorLab) {
@@ -1786,6 +1810,7 @@ if (socket) {
     stopSensorStreaming();
     phoneDanceResetLocal(true);
     phoneDanceSession = null;
+    phoneDanceSessionId = "";
     sensorModeRequested = false;
     sensorLastReportedActive = null;
     joinedRoom = "";

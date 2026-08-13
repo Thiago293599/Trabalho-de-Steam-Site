@@ -3,7 +3,7 @@
   const bridge=window.STEAMPartyControllerBridge;
   if(!bridge)return;
   const $=s=>document.querySelector(s),panel=$("#finalPartyControllerPanel"),legacy=$("#boardControllerArea"),sensor=$("#sensorModePanel"),round=$("#finalPartyPhoneRound"),score=$("#finalPartyPhoneScore"),kicker=$("#finalPartyPhoneKicker"),title=$("#finalPartyPhoneTitle"),description=$("#finalPartyPhoneDescription"),dice=$("#finalPartyPhoneDice"),roll=$("#finalPartyPhoneRoll"),game=$("#finalPartyPhoneBoard"),mini=$("#finalPartyPhoneMinigame"),miniTopic=$("#finalPartyPhoneMiniTopic"),miniTitle=$("#finalPartyPhoneMiniTitle"),question=$("#finalPartyPhoneQuestion"),answers=$("#finalPartyPhoneAnswers"),timer=$("#finalPartyPhoneTimer"),result=$("#finalPartyPhoneResult"),resultTitle=$("#finalPartyPhoneResultTitle"),ranking=$("#finalPartyPhoneRanking"),controlScreen=$("#controlScreen");
-  let partyState=null,activeProblemToken="",answeredToken="",timerId=0,danceMode=false;
+  let partyState=null,activeProblemToken="",answeredToken="",timerId=0,danceMode=false,motionMode=false;
   const socket=bridge.getSocket();
   const myId=()=>bridge.getPlayerId(),room=()=>bridge.getRoomCode();
   function stopTimer(){clearInterval(timerId);timerId=0}
@@ -31,6 +31,16 @@
     result.classList.add("hidden");
 
     const p=partyState.minigame?.problem;
+    if(p?.kind==="motion-escape"){
+      motionMode=true;
+      round.textContent=`Rodada ${partyState.round} / ${partyState.totalRounds}`;score.textContent=`${Math.round(me()?.score||0)} PTS`;
+      if(miniTopic)miniTopic.textContent="Sensor de movimento • Enchente";if(miniTitle)miniTitle.textContent="Fuga da Enchente";
+      question.textContent="CHACOALHE O CELULAR para correr até o abrigo!";answers.innerHTML="";
+      const mine=(p.progress||[]).find(x=>x.playerId===myId());const prog=Math.max(0,Math.min(100,Number(mine?.progress||0)));
+      const meter=document.createElement("div");meter.className="final-party-phone-motion-meter";meter.innerHTML=`<div class="final-party-phone-motion-track"><div class="final-party-phone-motion-fill" style="width:${prog}%"></div><span>🏃</span></div><strong>${Math.round(prog)}%</strong><button class="final-primary" type="button">Ativar sensores</button>`;
+      const btn=meter.querySelector("button");btn.hidden=bridge.sensorsGranted?.();btn.onclick=async()=>{btn.disabled=true;try{await bridge.requestSensors?.();btn.hidden=true}catch{btn.disabled=false}};answers.appendChild(meter);renderTimer(p.deadlineServerMs);return;
+    }
+    motionMode=false;
     if(!p){
       question.textContent="O computador está preparando a pergunta…";
       answers.innerHTML="";
@@ -68,7 +78,7 @@
   function render(){if(!partyState)return;if(danceMode){setPartyUi(false);return}if(partyState.phase==="board")renderBoard();else if(partyState.phase==="minigame")renderMinigame();else if(partyState.phase==="minigame-intro")renderIntro();else if(partyState.phase==="minigame-result")renderResult();else if(partyState.phase==="match-result"){renderResult();resultTitle.textContent="Partida encerrada"}else if(String(partyState.phase).startsWith("just-dance")){panel?.classList.add("hidden")}}
   window.addEventListener("steam-party-controller-joined",e=>{if(e.detail?.state?.purpose==="party-board-v2"){setPartyUi(true);kicker.textContent="Sala conectada";title.textContent=e.detail?.resumed?"Partida retomada":"Espere o computador iniciar";description.textContent=e.detail?.resumed?"Você voltou ao mesmo jogador.":"Você já está conectado ao novo tabuleiro."}});
   window.addEventListener("phone-dance-session",()=>{danceMode=true;setPartyUi(false)});
-  socket?.on("dev:sensor-mode",payload=>{if(payload?.roomCode!==room())return;danceMode=Boolean(payload.enabled);setPartyUi(!danceMode);if(!danceMode)render()});
+  socket?.on("dev:sensor-mode",payload=>{if(payload?.roomCode!==room())return;const motion=payload.enabled&&payload.purpose==="motion-minigame";danceMode=Boolean(payload.enabled&&!motion);motionMode=Boolean(motion);setPartyUi(!danceMode);if(!danceMode)render()});
   socket?.on("party:started",payload=>{if(payload?.roomCode===room()&&payload.state){partyState=payload.state;render()}});
   socket?.on("party:state",next=>{if(!next||next.roomCode!==room())return;partyState=next;render()});
   socket?.on("room:closed",payload=>{if(payload?.roomCode!==room())return;stopTimer();danceMode=false;setPartyUi(false)});

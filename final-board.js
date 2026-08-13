@@ -3,7 +3,7 @@
   const MATCH_KEY="steamPartyMatchConfigV1",SAVE_KEY="steamPartyBoardAutosaveV1",SAVE_FORMAT="steam-party-save",SAVE_VERSION=1,CONFIG=window.STEAM_PARTY_CONFIG||{},BOARD_CONFIG=CONFIG.board||{},SPACE_COUNT=Number(BOARD_CONFIG.spaces||28),MIN_ROLL=Number(BOARD_CONFIG.diceMin||1),MAX_ROLL=Number(BOARD_CONFIG.diceMax||10),MINIGAME_REWARD=Number(BOARD_CONFIG.minigameReward||10);
   const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
   const view=$("#finalBoardView"),spacesLayer=$("#finalBoardSpaces"),tokensLayer=$("#finalBoardTokens"),playersList=$("#finalBoardPlayers"),roundText=$("#finalBoardRound"),turnName=$("#finalBoardTurnName"),turnAvatar=$("#finalBoardTurnAvatar"),instruction=$("#finalBoardInstruction"),eventBox=$("#finalBoardEvent"),rollButton=$("#finalRollDice"),diceCube=$("#finalDiceCube"),diceResult=$("#finalDiceResult"),modeBadge=$("#finalBoardModeBadge");
-  const minigameOverlay=$("#finalMinigameOverlay"),minigameIntro=$("#finalMinigameIntro"),droneGame=$("#finalDroneGame"),minigameResult=$("#finalMinigameResult"),minigameTitle=$("#finalMinigameTitle"),minigameDescription=$("#finalMinigameDescription"),droneAnswers=$("#finalDroneAnswers"),droneQuestion=$("#finalDroneQuestion"),droneA=$("#finalDroneA"),droneB=$("#finalDroneB"),droneTimer=$("#finalDroneTimer"),eduVisual=$("#finalEduVisual"),eduTopic=$("#finalEduTopic"),minigameWinner=$("#finalMinigameWinner"),minigameRanking=$("#finalMinigameRanking"),matchResultOverlay=$("#finalMatchResultOverlay"),matchRanking=$("#finalMatchRanking");
+  const minigameOverlay=$("#finalMinigameOverlay"),minigameIntro=$("#finalMinigameIntro"),droneGame=$("#finalDroneGame"),motionGame=$("#finalMotionEscapeGame"),motionLanes=$("#finalMotionEscapeLanes"),motionTimer=$("#finalMotionEscapeTimer"),motionWave=$("#finalMotionEscapeWave"),minigameResult=$("#finalMinigameResult"),minigameTitle=$("#finalMinigameTitle"),minigameDescription=$("#finalMinigameDescription"),droneAnswers=$("#finalDroneAnswers"),droneQuestion=$("#finalDroneQuestion"),droneA=$("#finalDroneA"),droneB=$("#finalDroneB"),droneTimer=$("#finalDroneTimer"),eduVisual=$("#finalEduVisual"),eduTopic=$("#finalEduTopic"),minigameWinner=$("#finalMinigameWinner"),minigameRanking=$("#finalMinigameRanking"),matchResultOverlay=$("#finalMatchResultOverlay"),matchRanking=$("#finalMatchRanking");
   const boardStage=$("#finalBoardStage"),manualSaveButton=$("#finalBoardManualSave"),saveStatus=$("#finalBoardSaveStatus"),
   tutorialOverlay=$("#finalBoardTutorial"),tutorialProgress=$("#finalTutorialProgress"),tutorialIcon=$("#finalTutorialIcon"),tutorialEyebrow=$("#finalTutorialEyebrow"),tutorialTitle=$("#finalTutorialTitle"),tutorialText=$("#finalTutorialText"),tutorialDots=$("#finalTutorialDots"),tutorialNext=$("#finalTutorialNext"),tutorialSkip=$("#finalTutorialSkip"),
   inventoryPanel=$("#finalInventoryPanel"),inventorySlots=$("#finalInventorySlots"),inventoryHint=$("#finalInventoryHint"),
@@ -13,7 +13,7 @@
   partyLobby=$("#finalPartyLobbyOverlay"),partyRoomCode=$("#finalPartyRoomCode"),partyQr=$("#finalPartyQr"),partyJoinUrl=$("#finalPartyJoinUrl"),partyConnectedCount=$("#finalPartyConnectedCount"),partyConnectedPlayers=$("#finalPartyConnectedPlayers"),partyStart=$("#finalPartyStartMatch"),partyStatus=$("#finalPartyLobbyStatus");
   const network=window.STEAMPartyNetwork||null,danceBridge=window.STEAMJustDanceBridge||null,spaceTypes=["start","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good"],symbols={start:"INÍCIO",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"},colors=["cyan","green","orange","pink","purple","yellow"],shapes=["round","square","triangle","hex"],triples=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[7,24,25],[9,12,15],[12,16,20]];
   const TUTORIAL_KEY="steamPartyBoardTutorialSeenV1";
-  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false;
+  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0;
   const api=()=>window.STEAMParty||{},toast=m=>api().showToast?.(m),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const avatar=p=>api().avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><rect x="18" y="18" width="84" height="84" rx="34" fill="#65f2c3"/></svg>`;
   const isPhoneMatch=match=>Boolean(match&&(match.mode==="phones"||String(match.controlMethod||"").startsWith("phone-")));
@@ -389,6 +389,10 @@
       addUnique(state.education.technologies,"Satélites e mapas");
     }else if(id==="just-dance"){
       addUnique(state.education.concepts,"Movimento e coordenação");
+    }else if(id==="flood-escape"){
+      addUnique(state.education.concepts,"Movimento e tempo de reação");
+      addUnique(state.education.technologies,"Sensores do celular");
+      addUnique(state.education.disasters,"Enchente");
     }
   }
 
@@ -498,8 +502,11 @@
   function renderTokens(){tokensLayer.innerHTML="";state.players.forEach(p=>{const pt=path[p.position]||path[0],t=document.createElement("div");t.className="final-board-token";t.dataset.playerId=p.id;t.dataset.slot=p.slot;t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`;t.innerHTML=avatar(p);tokensLayer.appendChild(t)})}
   function updateToken(p){const t=$(`[data-player-id="${CSS.escape(p.id)}"]`,tokensLayer),pt=path[p.position]||path[0];if(t&&pt){t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`}}
   function partyState(phase="board",extra={}){if(!state)return{};return{phase,round:state.round,totalRounds:state.totalRounds,currentPlayerId:state.players[state.turnIndex]?.id||"",eventText:eventBox.textContent||"",players:state.players.map(p=>({id:p.id,name:p.name,human:p.human,bot:p.bot,difficulty:p.difficulty,position:p.position,score:p.score,laps:p.laps})),...extra}}
-  function publish(phase="board",extra={}){if(state?.connected)network?.publishState(partyState(phase,extra))}
-  function updateTurnUi(){const p=state.players[state.turnIndex];checkpoint("board","auto");renderInventory();roundText.textContent=`Rodada ${state.round} / ${state.totalRounds}`;turnName.textContent=p.name;turnAvatar.innerHTML=avatar(p);renderPlayers();const phoneHuman=state.connected&&p.human;rollButton.disabled=rolling||p.bot||phoneHuman;rollButton.textContent=p.bot?"Bot jogando…":phoneHuman?"Use o celular":"Rolar dado";instruction.textContent=p.bot?`${p.name} está preparando a jogada.`:phoneHuman?`Aguardando ${p.name} rolar o dado no celular.`:"Role o dado para continuar.";instruction.classList.toggle("final-party-phone-wait",phoneHuman);diceResult.textContent="";publish("board");if(p.bot&&!rolling)setTimeout(async()=>{
+  function publish(phase="board",extra={}){
+    if(state?.connected)network?.publishState(partyState(phase,extra));
+    if(state?.onlineHost)window.STEAMOnlineV2?.publishState?.(partyState(phase,extra));
+  }
+  function updateTurnUi(){const p=state.players[state.turnIndex];checkpoint("board","auto");renderInventory();roundText.textContent=`Rodada ${state.round} / ${state.totalRounds}`;turnName.textContent=p.name;turnAvatar.innerHTML=avatar(p);renderPlayers();const phoneHuman=state.connected&&p.human;const remoteOnline=Boolean(state.onlineHost&&p.human&&p.id!==state.onlineHostPlayerId);rollButton.disabled=rolling||p.bot||phoneHuman||remoteOnline;rollButton.textContent=p.bot?"Bot jogando…":phoneHuman?"Use o celular":remoteOnline?"Aguardando online":"Rolar dado";instruction.textContent=p.bot?`${p.name} está preparando a jogada.`:phoneHuman?`Aguardando ${p.name} rolar o dado no celular.`:remoteOnline?`Aguardando ${p.name} jogar pelo dispositivo online.`:"Role o dado para continuar.";instruction.classList.toggle("final-party-phone-wait",phoneHuman||remoteOnline);diceResult.textContent="";publish("board");if(p.bot&&!rolling)setTimeout(async()=>{
       const item=botShouldUseEquipment(p);
       if(item)await useEquipment(p,item,"bot");
       setTimeout(()=>rollForCurrentPlayer("bot"),item==="map"?300:80);
@@ -545,7 +552,7 @@
     eventBox.textContent=(events[type]||events.good)();
     renderInventory();renderPlayers();checkpoint("board","auto");publish("board");
   }
-  async function rollForCurrentPlayer(source="pc"){if(!state||rolling)return;const p=state.players[state.turnIndex];if(state.connected&&p.human&&source!=="phone")return;rolling=true;rollButton.disabled=true;let result=rand(MIN_ROLL,MAX_ROLL);
+  async function rollForCurrentPlayer(source="pc",sourcePlayerId=""){if(!state||rolling)return;const p=state.players[state.turnIndex];if(state.connected&&p.human&&source!=="phone")return;if(state.onlineHost&&p.human){if(source==="pc"&&p.id!==state.onlineHostPlayerId)return;if(source==="online"&&String(sourcePlayerId)!==String(p.id))return;}rolling=true;rollButton.disabled=true;let result=rand(MIN_ROLL,MAX_ROLL);
     ensurePlayerEquipment(p);
     if(p.activeEffects.gps){
       result=Math.max(6,result);
@@ -586,6 +593,13 @@
         topic:"Tales / Escala"
       },
       {
+        id:"flood-escape",
+        title:"Fuga da Enchente",
+        description:"Chacoalhe o celular para correr pela rota de evacuação antes que a água alcance você.",
+        sensorRequired:true,
+        topic:"Sensores • Evacuação"
+      },
+      {
         id:"just-dance",
         title:"Just Dance",
         description:"Use o celular em pé e acompanhe a coreografia. O próprio celular calcula seus julgamentos.",
@@ -596,10 +610,11 @@
     return games.filter(g=>{
       if(g.sensorRequired&&!state.match.motionMinigamesEnabled)return false;
       if(g.id==="just-dance"&&(!state.connected||!danceBridge))return false;
+      if(g.id==="flood-escape"&&!state.connected)return false;
       return true;
     });
   }
-  function openMinigame(forcedId=null){const games=compatibleMinigames();if(!games.length){advanceRound();return}const g=games.find(game=>game.id===forcedId)||games[rand(0,games.length-1)];state.currentMinigame=g;registerEducationForMinigame(g.id);minigameTitle.textContent=g.title;minigameDescription.textContent=g.description;minigameIntro.classList.remove("hidden");droneGame.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");checkpoint("minigame-intro","auto");publish("minigame-intro",{minigame:{id:g.id,title:g.title,status:"intro"}})}
+  function openMinigame(forcedId=null){const games=compatibleMinigames();if(!games.length){advanceRound();return}const g=games.find(game=>game.id===forcedId)||games[rand(0,games.length-1)];state.currentMinigame=g;registerEducationForMinigame(g.id);minigameTitle.textContent=g.title;minigameDescription.textContent=g.description;minigameIntro.classList.remove("hidden");droneGame.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");checkpoint("minigame-intro","auto");publish("minigame-intro",{minigame:{id:g.id,title:g.title,status:"intro"}})}
   function shuffled(values){
     return [...values].sort(()=>Math.random()-.5);
   }
@@ -751,9 +766,15 @@
         button.className="final-drone-answer";
         button.dataset.answer=String(value);
         button.textContent=answerLabel(value,currentProblem.unit);
-        button.onclick=()=>submitLocalAnswer(value,button);
+        button.onclick=()=>state.onlineHost?submitOnlineHostAnswer(value,button):submitLocalAnswer(value,button);
         droneAnswers.appendChild(button);
       });
+      if(state.onlineHost){
+        const wait=document.createElement("div");
+        wait.className="final-info-box";
+        wait.textContent="Você responde aqui como host. Os outros jogadores respondem em seus próprios dispositivos.";
+        droneAnswers.appendChild(wait);
+      }
     }else{
       const wait=document.createElement("div");
       wait.className="final-info-box";
@@ -797,7 +818,7 @@
     droneTimer.textContent=`Tempo: ${(left/1000).toFixed(1)} s`;
     if(left<=0){
       clearInterval(droneTimerId);
-      state.connected?finalizeConnectedGame():submitLocalAnswer(null,null);
+      (state.connected||state.onlineHost)?finalizeConnectedGame():submitLocalAnswer(null,null);
     }
   }
 
@@ -848,6 +869,27 @@
 
     const needed=state.players.filter(x=>x.human).length;
     if(phoneAnswers.size>=needed)finalizeConnectedGame();
+  }
+
+  function submitOnlineHostAnswer(value,button){
+    if(!state?.onlineHost||!currentProblem||droneGame.dataset.finished==="1")return;
+    const p=state.players.find(x=>x.id===state.onlineHostPlayerId&&x.human);if(!p||phoneAnswers.has(p.id))return;
+    const correct=Number(value)===Number(currentProblem.answer);
+    const timeMs=Math.max(200,Math.min(12000,12000-Math.max(0,droneDeadline-performance.now())));
+    phoneAnswers.set(p.id,true);minigameScores.push({player:p,correct,timeMs,performance:correct?10000-timeMs:0});
+    $$(".final-drone-answer",droneAnswers).forEach(x=>x.disabled=true);
+    if(button)button.classList.add(correct?"correct":"wrong");
+    $$(".final-drone-answer",droneAnswers).find(x=>Number(x.dataset.answer)===Number(currentProblem.answer))?.classList.add("correct");
+    const needed=state.players.filter(x=>x.human).length;if(phoneAnswers.size>=needed)finalizeConnectedGame();
+  }
+
+  function handleOnlineMinigameAnswer(action){
+    if(!state?.onlineHost||!currentProblem||action.problemToken!==currentProblem.token||phoneAnswers.has(action.playerId))return;
+    const p=state.players.find(x=>x.id===action.playerId&&x.human);if(!p)return;
+    const correct=Number(action.answer)===Number(currentProblem.answer);
+    const timeMs=Math.max(200,Math.min(12000,12000-Math.max(0,droneDeadline-performance.now())));
+    phoneAnswers.set(p.id,true);minigameScores.push({player:p,correct,timeMs,performance:correct?10000-timeMs:0});
+    const needed=state.players.filter(x=>x.human).length;if(phoneAnswers.size>=needed)finalizeConnectedGame();
   }
 
   function finalizeConnectedGame(){
@@ -904,6 +946,110 @@
         results
       }
     });
+  }
+
+
+  function motionEscapePublicProgress(){
+    if(!motionEscapeState)return[];
+    return state.players.map(p=>({playerId:p.id,name:p.name,progress:Math.round(Number(motionEscapeState.progress.get(p.id)||0)*10)/10,bot:Boolean(p.bot)}));
+  }
+
+  function renderMotionEscape(){
+    if(!motionGame||!motionEscapeState)return;
+    motionLanes.innerHTML="";
+    const list=motionEscapePublicProgress();
+    list.forEach((entry,index)=>{
+      const row=document.createElement("div");
+      row.className="final-motion-lane";
+      const pct=Math.max(0,Math.min(100,entry.progress));
+      row.innerHTML=`<div class="final-motion-lane-label"><strong></strong><span>${Math.round(pct)}%</span></div><div class="final-motion-track"><div class="final-motion-water"></div><div class="final-motion-safe">ABRIGO</div><div class="final-motion-runner">${entry.bot?"◆":"●"}</div><div class="final-motion-progress"></div></div>`;
+      $("strong",row).textContent=entry.name;
+      $(".final-motion-runner",row).style.left=`calc(${pct}% - 12px)`;
+      $(".final-motion-progress",row).style.width=`${pct}%`;
+      motionLanes.appendChild(row);
+    });
+    const elapsed=Math.max(0,12000-Math.max(0,motionEscapeState.deadline-performance.now()));
+    const danger=Math.max(0,Math.min(100,elapsed/12000*100));
+    if(motionWave)motionWave.style.width=`${Math.min(86,danger*.72)}%`;
+  }
+
+  function publishMotionEscape(force=false){
+    if(!motionEscapeState)return;
+    const now=performance.now();
+    if(!force&&now-motionEscapeLastPublish<180)return;
+    motionEscapeLastPublish=now;
+    publish("minigame",{minigame:{id:"flood-escape",title:"Fuga da Enchente",status:"playing",problem:{token:motionEscapeState.token,kind:"motion-escape",topic:"Enchente • Evacuação",scenario:"Uma enchente repentina bloqueou a área. Corra para o abrigo usando o celular como sensor de movimento.",question:"CHACOALHE O CELULAR para correr!",unit:"%",a:0,b:0,c:0,answers:[],deadlineServerMs:Date.now()+Math.max(0,motionEscapeState.deadline-performance.now()),progress:motionEscapePublicProgress()}}});
+  }
+
+  function finishMotionEscape(){
+    if(!motionEscapeState||motionEscapeState.finished)return;
+    motionEscapeState.finished=true;
+    clearInterval(motionEscapeTimer);motionEscapeTimer=0;
+    clearInterval(motionEscapeBotTimer);motionEscapeBotTimer=0;
+    try{network?.setSensorMode(false,"motion-minigame")?.catch?.(()=>{})}catch{}
+    renderMotionEscape();
+    const rows=motionEscapePublicProgress().map(entry=>({player:state.players.find(p=>p.id===entry.playerId),progress:entry.progress})).filter(x=>x.player);
+    rows.sort((a,b)=>b.progress-a.progress);
+    const winner=rows[0];
+    if(winner?.player)winner.player.score+=MINIGAME_REWARD;
+    motionGame?.classList.add("hidden");
+    minigameResult.classList.remove("hidden");
+    minigameWinner.textContent=winner?.player?`${winner.player.name} chegou mais longe na evacuação!`:"Evacuação concluída.";
+    minigameRanking.innerHTML="";
+    const results=[];
+    rows.forEach((entry,index)=>{
+      const row=document.createElement("div");row.className="final-ranking-row";
+      row.innerHTML=`<b>${index+1}º</b><span><strong></strong><small></small></span><span>${Math.round(entry.progress)}%</span>`;
+      $("strong",row).textContent=entry.player.name;
+      $("small",row).textContent=entry.progress>=100?"Chegou ao abrigo":"Rota percorrida";
+      minigameRanking.appendChild(row);
+      results.push({playerId:entry.player.id,name:entry.player.name,correct:entry.progress>=100,timeMs:Math.round((1-entry.progress/100)*12000),place:index+1});
+    });
+    renderPlayers();checkpoint("post-minigame","auto");
+    publish("minigame-result",{minigame:{id:"flood-escape",title:"Fuga da Enchente",status:"result",results}});
+    motionEscapeState=null;
+  }
+
+  async function startMotionEscape(){
+    if(!state?.connected||!network)return;
+    minigameIntro.classList.add("hidden");droneGame.classList.add("hidden");minigameResult.classList.add("hidden");motionGame?.classList.remove("hidden");
+    motionEscapeState={token:`escape-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,deadline:performance.now()+12000,progress:new Map(),lastSample:new Map(),finished:false};
+    state.players.forEach(p=>motionEscapeState.progress.set(p.id,0));
+    await network.setSensorMode(true,"motion-minigame").catch(()=>null);
+    renderMotionEscape();publishMotionEscape(true);
+    clearInterval(motionEscapeBotTimer);
+    motionEscapeBotTimer=setInterval(()=>{
+      if(!motionEscapeState||motionEscapeState.finished)return;
+      state.players.filter(p=>p.bot).forEach(bot=>{
+        const speed=bot.difficulty==="hard"?1.45:bot.difficulty==="easy"?.75:1.08;
+        const noise=(Math.random()-.5)*.65;
+        const next=Math.min(100,Number(motionEscapeState.progress.get(bot.id)||0)+Math.max(.12,speed+noise));
+        motionEscapeState.progress.set(bot.id,next);
+      });
+      renderMotionEscape();publishMotionEscape();
+    },130);
+    clearInterval(motionEscapeTimer);
+    motionEscapeTimer=setInterval(()=>{
+      if(!motionEscapeState)return;
+      const left=Math.max(0,motionEscapeState.deadline-performance.now());
+      if(motionTimer)motionTimer.textContent=`Tempo: ${(left/1000).toFixed(1)} s`;
+      renderMotionEscape();publishMotionEscape();
+      const anyone=[...motionEscapeState.progress.values()].some(v=>v>=100);
+      if(left<=0||anyone)setTimeout(finishMotionEscape,anyone?500:0);
+    },80);
+  }
+
+  function handleMotionSensor(payload){
+    if(!motionEscapeState||motionEscapeState.finished||state?.currentMinigame?.id!=="flood-escape")return;
+    const player=state.players.find(p=>p.id===payload?.playerId&&p.human);if(!player)return;
+    const now=performance.now();const last=Number(motionEscapeState.lastSample.get(player.id)||now-40);const dt=Math.max(.025,Math.min(.12,(now-last)/1000));motionEscapeState.lastSample.set(player.id,now);
+    const intensity=Math.max(0,Math.min(1,Number(payload?.intensity||payload?.sample?.intensity||0)));
+    const effective=Math.max(0,intensity-.10);
+    const delta=Math.pow(effective,1.18)*44*dt;
+    if(delta<=0)return;
+    const next=Math.min(100,Number(motionEscapeState.progress.get(player.id)||0)+delta);
+    motionEscapeState.progress.set(player.id,next);
+    renderMotionEscape();publishMotionEscape();
   }
 
   function stopPartyDanceBotFeedback(){
@@ -988,7 +1134,10 @@
     eventBox.textContent=`Preparando Just Dance: ${info.title}.`;
     publish("just-dance-loading",{minigame:{id:"just-dance",title:info.title,status:"loading"}});
     try{
-      await network.setSensorMode(true);
+      // V36: reset explícito e aguardado antes da nova música.
+      // Evita score/judgedMoveKeys da primeira aparição do JD vazarem para a segunda.
+      await network.resetDanceScore().catch(()=>null);
+      await network.setSensorMode(true,"dance");
       const dancePlayers=state.players.map((player,index)=>({
         ...player,
         partyPlayerNumber:index+1,
@@ -1010,37 +1159,13 @@
   }
 
   function forceRestoreBoardAfterDance(){
-    // V34: restauração direta do DOM PRIMEIRO. Nem bridge, nem rede, nem API
-    // podem impedir que o PC saia do último frame do Just Dance.
-    try{
-      const dance=document.getElementById("danceDevScreen");
-      if(dance){
-        dance.classList.remove("party-dance-session");
-        dance.classList.add("hidden");
-        dance.setAttribute("aria-hidden","true");
-        dance.style.setProperty("display","none","important");
-        dance.style.setProperty("visibility","hidden","important");
-        dance.style.setProperty("pointer-events","none","important");
-      }
-    }catch{}
-
-    try{
-      const shell=document.getElementById("finalShell");
-      if(shell){
-        shell.classList.remove("hidden");
-        shell.style.removeProperty("display");
-        shell.style.removeProperty("visibility");
-      }
-      document.querySelectorAll("#finalShell .final-view").forEach(el=>{
-        el.classList.toggle("hidden",el!==view);
-      });
-      view?.classList.remove("hidden");
-      document.body.classList.add("final-shell-v1");
-      document.body.style.removeProperty("overflow");
-    }catch{}
-
-    try{api().showView?.("board")}catch(error){console.error("[PartyBoard] showView(board):",error)}
+    // Cada operação é isolada: nenhuma falha pode impedir o tabuleiro de voltar.
     try{danceBridge?.closePartyDanceSong?.()}catch(error){console.error("[PartyBoard] closePartyDanceSong:",error)}
+    try{document.getElementById("danceDevScreen")?.classList.add("hidden")}catch{}
+    try{document.getElementById("finalShell")?.classList.remove("hidden")}catch{}
+    try{document.body.classList.add("final-shell-v1")}catch{}
+    try{api().showView?.("board")}catch(error){console.error("[PartyBoard] showView(board):",error)}
+    try{view?.classList.remove("hidden")}catch{}
   }
 
   async function finishPartyDance(reason="ended"){
@@ -1140,12 +1265,22 @@
     }
   }
 
-  function closeMinigame(){clearInterval(droneTimerId);minigameOverlay.classList.add("hidden");advanceRound()}
+  function closeMinigame(){clearInterval(droneTimerId);clearInterval(motionEscapeTimer);clearInterval(motionEscapeBotTimer);motionEscapeState=null;try{network?.setSensorMode(false,"motion-minigame")?.catch?.(()=>{})}catch{}minigameOverlay.classList.add("hidden");advanceRound()}
   function finishMatch(){clearCheckpoint();renderEducationSummary();matchResultOverlay.classList.remove("hidden");const sorted=[...state.players].sort((a,b)=>b.score-a.score||b.laps-a.laps);matchRanking.innerHTML="";sorted.forEach((p,i)=>{const row=document.createElement("div");row.className="final-ranking-row";row.innerHTML=`<b>${i+1}º</b><span><strong></strong><small></small></span><span><strong>${p.score} pts</strong></span>`;const info=$("span",row);$("strong",info).textContent=p.name;$("small",row).textContent=p.bot?`Bot • ${difficulty(p.difficulty)}`:"Humano";matchRanking.appendChild(row)});publish("match-result",{minigame:null})}
   function renderLobby(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1)),connected=roomState.players?.length||0;partyConnectedCount.textContent=`${connected} / ${expected}`;partyConnectedPlayers.innerHTML="";(roomState.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-party-connected-player";el.innerHTML=`<strong></strong><small>Jogador ${i+1} • pronto</small>`;$("strong",el).textContent=p.name;partyConnectedPlayers.appendChild(el)});partyStart.disabled=connected<expected;partyStatus.textContent=connected<expected?`Aguardando ${expected-connected} celular${expected-connected===1?"":"es"}…`:"Todos os jogadores estão conectados."}
   async function startConnectedLobby(match){if(!network){toast("Ponte de rede indisponível.");return false}pendingStartConfig=match;roomState=null;api().showView?.("board");partyLobby.classList.remove("hidden");modeBadge.textContent="Celulares";try{const room=await network.createRoom();partyRoomCode.textContent=room.roomCode;partyJoinUrl.textContent=room.joinUrl;partyQr.src=room.qrUrl;partyStatus.textContent="Sala pronta. Aguardando celulares…";renderLobby();return true}catch(err){partyStatus.textContent=err.message||"Falha ao criar sala.";toast("Não foi possível criar a sala.");return false}}
   async function beginConnectedMatch(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1));if((roomState.players?.length||0)<expected)return;state={match:pendingStartConfig,players:buildPlayers(pendingStartConfig,roomState.players.slice(0,expected)),round:1,totalRounds:Math.max(1,Number(pendingStartConfig.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:true};renderSpaces();renderTokens();applyRoundEnvironmentEvent();partyLobby.classList.add("hidden");await network.startParty(expected,partyState("board"));pendingStartConfig=null;updateTurnUi()}
   function leaveBoard(){if(state&&!state.connected)checkpoint("board","exit");clearInterval(droneTimerId);stopPartyDanceBotFeedback();network?.closeRoom();state=null;pendingStartConfig=null;roomState=null;view.classList.add("hidden");partyLobby.classList.add("hidden");itemOverlay?.classList.add("hidden");minigameOverlay.classList.add("hidden");matchResultOverlay.classList.add("hidden");api().showView?.("main")}
+
+  function startOnlineHost(match,onlinePlayers=[],hostPlayerId=""){
+    if(!match||!Array.isArray(onlinePlayers)||onlinePlayers.length<2)return false;
+    if(manualSaveButton)manualSaveButton.disabled=true;
+    const config={...match,mode:"online",humanPlayers:Math.min(4,onlinePlayers.length),controlMethod:"online",minigamesEnabled:true,motionMinigamesEnabled:false};
+    const players=buildPlayers(config,onlinePlayers.slice(0,4));
+    state={match:config,players,round:1,totalRounds:Math.max(1,Number(config.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:false,onlineHost:true,onlineHostPlayerId:String(hostPlayerId||onlinePlayers[0]?.id||"")};
+    renderSpaces();renderTokens();modeBadge.textContent="Online Alpha";matchResultOverlay.classList.add("hidden");minigameOverlay.classList.add("hidden");api().showView?.("board");applyRoundEnvironmentEvent();updateTurnUi();return true;
+  }
+
   function start(match=null){const saved=match||JSON.parse(localStorage.getItem(MATCH_KEY)||"{}");if(!saved?.humanPlayers){toast("Configure a partida primeiro.");return false}if(saved.mode==="online"){return false}if(isPhoneMatch(saved)){if(manualSaveButton)manualSaveButton.disabled=true;startConnectedLobby(saved);return true}if(manualSaveButton)manualSaveButton.disabled=false;state={match:saved,players:buildPlayers(saved),round:1,totalRounds:Math.max(1,Number(saved.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:false};renderSpaces();renderTokens();modeBadge.textContent=saved.presentationMode?"Apresentação STEAM":"Local";matchResultOverlay.classList.add("hidden");minigameOverlay.classList.add("hidden");api().showView?.("board");applyRoundEnvironmentEvent();updateTurnUi();setTimeout(()=>showTutorial(false),350);return true}
   itemClose?.addEventListener("click",closeItemOverlay);
   tutorialNext?.addEventListener("click",nextTutorial);
@@ -1159,6 +1294,7 @@
   rollButton?.addEventListener("click",()=>rollForCurrentPlayer("pc"));$("#finalStartMinigame")?.addEventListener("click",()=>{
     const id=state?.currentMinigame?.id;
     if(["drone-route","slope-sensor","satellite-scale"].includes(id))startEduGame(id);
+    else if(id==="flood-escape")startMotionEscape();
     else if(id==="just-dance")startPartyDance();
   });$("#finalReturnBoard")?.addEventListener("click",closeMinigame);$("#finalBoardExit")?.addEventListener("click",leaveBoard);$("#finalMatchBackMenu")?.addEventListener("click",leaveBoard);partyStart?.addEventListener("click",beginConnectedMatch);$("#finalPartyCancelLobby")?.addEventListener("click",leaveBoard);$("#finalPartyCopyLink")?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(partyJoinUrl.textContent||"");toast("Link copiado.")}catch{toast("Não foi possível copiar automaticamente.")}});
   window.addEventListener("steam-party-room-state",e=>{const next=e.detail;if(!next||next.purpose!=="party-board-v2")return;roomState=next;renderLobby()});
@@ -1166,6 +1302,8 @@
   window.addEventListener("steam-party-dance-ended",e=>{
     void finishPartyDance(e.detail?.reason||"ended");
   });
+  window.addEventListener("steam-party-sensor-data",e=>handleMotionSensor(e.detail));
+  window.addEventListener("steam-online-v2-action",e=>{const a=e.detail;if(!state?.onlineHost||!a)return;if(a.type==="roll")rollForCurrentPlayer("online",a.playerId);if(a.type==="minigame-answer")handleOnlineMinigameAnswer(a)});
   window.addEventListener("steam-party-presence",e=>{
     const p=state?.players?.find(x=>x.id===e.detail?.playerId);
     if(!p||!state?.connected)return;
@@ -1193,6 +1331,7 @@
   });
   window.STEAMPartyBoard=Object.freeze({
     start,
+    startOnlineHost,
     finishPartyDance:reason=>finishPartyDance(reason||"direct-fallback"),
     startPresentation:()=>start({
       version:1,mode:"local",humanPlayers:1,controlMethod:"keyboard",

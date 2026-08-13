@@ -57,6 +57,10 @@
           if (!payload || payload.roomCode !== roomCode) return;
           dispatch("steam-party-dance-judgement", payload);
         });
+        socket.on("dev:sensor-data", payload => {
+          if (!payload || payload.roomCode !== roomCode) return;
+          dispatch("steam-party-sensor-data", payload);
+        });
         socket.on("dev:dance-reset", payload => {
           if (!payload || payload.roomCode !== roomCode) return;
           dispatch("steam-party-dance-reset", payload);
@@ -118,9 +122,9 @@
   }
 
 
-  function setSensorMode(enabled) {
+  function setSensorMode(enabled, purpose="dance") {
     if (!roomCode) return Promise.reject(new Error("Sala não criada."));
-    return emitAck("host:sensor-mode", { roomCode, enabled: Boolean(enabled) });
+    return emitAck("host:sensor-mode", { roomCode, enabled: Boolean(enabled), purpose:String(purpose||"dance") });
   }
 
   function publishDanceSession(payload) {

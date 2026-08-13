@@ -4063,6 +4063,9 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
     playing: isDanceMediaPlaying(),
     totalMoves: danceTestMoves.length,
     movesRevision,
+    sessionId: partyDanceSessionId,
+    // V36: sessionId muda a cada entrada no Just Dance. Resultados atrasados
+    // da música anterior não podem contaminar a próxima sessão.
     // V11: o PC NÃO envia os movimentos para o servidor. Ele envia apenas a
     // revisão para o celular conferir se carregou o mesmo JSON diretamente.
     hostOneWayMs: Math.max(0, Math.min(1000, danceHostServerRttMs / 2)),
@@ -5431,6 +5434,7 @@ function closeDevSensorRoom() {
   }
   devSensorRoomCode = "";
   devSensorState = null;
+  partyDanceSessionId = "";
   devSensorJoinUrl = "";
   devSensorModeEnabled = false;
   devSensorLive.clear();
@@ -5660,6 +5664,7 @@ function testDevCard() {
 
 /* ---------- Estado visual do Just Dance dentro do party game ---------- */
 let partyDanceEndNotified = false;
+let partyDanceSessionId = "";
 let partyDanceEndWatchTimer = 0;
 let partyDancePlaybackStartedAt = 0;
 let partyDanceLastProgressAt = 0;
@@ -5905,6 +5910,9 @@ async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
 
   gameMode = "party-dance";
   partyDanceEndNotified = false;
+  partyDanceSessionId = `jd-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
+  dancePhoneSyncLastSentAt = 0;
+  dancePhoneSessionRevision = 0;
   partyDancePlaybackStartedAt = 0;
   partyDanceLastProgressAt = 0;
   partyDanceLastProgressMediaTime = 0;
