@@ -4045,14 +4045,23 @@ function danceMovesRevisionOf(moves) {
 }
 
 function broadcastDancePhoneSession(reason = "sync", force = false) {
-  const partyTransport = gameMode === "party-dance" ? window.STEAMPartyDanceTransport : null;
-  const legacyReady = Boolean(remoteSocket?.connected && devSensorRoomCode);
+  const onlineTransport = window.STEAMOnlineDanceTransport?.handlesRoom?.(devSensorRoomCode)
+    ? window.STEAMOnlineDanceTransport
+    : null;
+  const partyTransport = !onlineTransport && gameMode === "party-dance"
+    ? window.STEAMPartyDanceTransport
+    : null;
+  const legacyReady = Boolean(!onlineTransport && remoteSocket?.connected && devSensorRoomCode);
   const partyReady = Boolean(partyTransport?.publishSession && devSensorRoomCode);
-  if ((!legacyReady && !partyReady) || !devSensorRoomCode || !danceTestMoves.length) return;
+  const onlineReady = Boolean(onlineTransport?.publishSession && devSensorRoomCode);
+  if ((!legacyReady && !partyReady && !onlineReady) || !devSensorRoomCode || !danceTestMoves.length) return;
+
   const now = performance.now();
   if (!force && now - dancePhoneSyncLastSentAt < 900) return;
   dancePhoneSyncLastSentAt = now;
-  if (!partyTransport) measureDanceHostServerLatency(force);
+
+  if (!partyTransport && !onlineTransport) measureDanceHostServerLatency(force);
+
   const movesRevision = danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves);
   const payload = {
     roomCode: devSensorRoomCode,
@@ -4064,19 +4073,28 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
     totalMoves: danceTestMoves.length,
     movesRevision,
     sessionId: partyDanceSessionId,
-    // V36: sessionId muda a cada entrada no Just Dance. Resultados atrasados
-    // da música anterior não podem contaminar a próxima sessão.
-    // V11: o PC NÃO envia os movimentos para o servidor. Ele envia apenas a
-    // revisão para o celular conferir se carregou o mesmo JSON diretamente.
     hostOneWayMs: Math.max(0, Math.min(1000, danceHostServerRttMs / 2)),
     reason
   };
-  if (partyTransport) {
-    partyTransport.publishSession(payload).then(response => {
-      if (response?.ok) dancePhoneSessionRevision = Number(response.revision || dancePhoneSessionRevision);
-    }).catch(() => {});
+
+  if (onlineTransport) {
+    Promise.resolve(onlineTransport.publishSession(payload))
+      .then(response => {
+        if (response?.ok) dancePhoneSessionRevision = Number(response.revision || dancePhoneSessionRevision);
+      })
+      .catch(() => {});
     return;
   }
+
+  if (partyTransport) {
+    Promise.resolve(partyTransport.publishSession(payload))
+      .then(response => {
+        if (response?.ok) dancePhoneSessionRevision = Number(response.revision || dancePhoneSessionRevision);
+      })
+      .catch(() => {});
+    return;
+  }
+
   remoteSocket.emit("host:dance-session", payload, response => {
     if (response?.ok) dancePhoneSessionRevision = Number(response.revision || dancePhoneSessionRevision);
   });
@@ -5904,13 +5922,13 @@ function startPartyDanceEndWatch() {
 }
 
 /* ---------- Ponte Just Dance -> novo tabuleiro ---------- */
-async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
+async function openPartyDanceSong(songId, roomCode, partyPlayers = [], options = {}) {
   const song = getDanceSongConfig(songId);
   if (!song || !roomCode) return { ok: false, message: "Música ou sala inválida." };
 
   gameMode = "party-dance";
   partyDanceEndNotified = false;
-  partyDanceSessionId = `jd-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
+  partyDanceSessionId = String(options?.sessionId || "") || `jd-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
   dancePhoneSyncLastSentAt = 0;
   dancePhoneSessionRevision = 0;
   partyDancePlaybackStartedAt = 0;
@@ -5967,7 +5985,8 @@ async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
     title: song.title,
     artist: song.artist,
     totalMoves: danceTestMoves.length,
-    movesRevision: danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves)
+    movesRevision: danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves),
+    sessionId: partyDanceSessionId
   };
 }
 

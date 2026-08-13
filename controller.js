@@ -184,6 +184,8 @@ window.STEAMPartyControllerBridge = Object.freeze({
   sensorsGranted: () => Boolean(sensorPermissionGranted),
   sensorsStreaming: () => Boolean(sensorStreaming),
   latestIntensity: () => Number(sensorLatestIntensity || 0),
+  applyDanceSession: payload => phoneApplyDanceSession(payload),
+  getDanceLocalState: () => phoneDanceLocal ? { ...phoneDanceLocal, judgementCounts:{ ...(phoneDanceLocal.judgementCounts||{}) } } : null,
   getTransportMode: () => onlineFullControllerMode ? "online" : "party"
 });
 
@@ -741,6 +743,12 @@ async function phoneLoadDanceSong(songId,expectedRevision="") {
 }
 async function phoneApplyDanceSession(payload){
   if(!payload||payload.roomCode!==joinedRoom)return;
+
+  if(String(payload?.reason||"")==="ended"){
+    try{phoneFinalizeActiveMove()}catch{}
+    try{phoneFlushDanceResults()}catch{}
+  }
+
   const previousSongId=phoneDanceSession?.songId||"";
   const previousSessionId=phoneDanceSessionId;
   const incomingSessionId=String(payload?.sessionId||"");
@@ -758,6 +766,21 @@ async function phoneApplyDanceSession(payload){
   }
   phoneDanceSessionId=incomingSessionId || phoneDanceSessionId;
   phoneDanceSession={...payload};
+
+  if(onlineFullControllerMode){
+    const ended=String(payload.reason||"")==="ended";
+    controlScreen?.classList.toggle("sensor-mode-active",!ended);
+    sensorModePanel?.classList.toggle("hidden",ended);
+    sensorModeRequested=!ended;
+    if(!ended){
+      turnKicker.textContent="Just Dance • Online";
+      mobileDeckArea?.classList.add("hidden");
+      if(mobileRollBtn)mobileRollBtn.disabled=true;
+      renderControllerDanceScore(phoneDanceLocal||{score:0,stars:0,judgedMoves:0});
+      if(sensorPermissionGranted&&!sensorStreaming)startSensorStreaming();
+    }
+  }
+
   window.dispatchEvent(new CustomEvent("phone-dance-session", { detail: { songId: String(payload.songId || ""), reason: String(payload.reason || "") } }));
   phoneDanceSyncClock(payload);
   if(songChanged||songNotLoaded||timelineMismatch||explicitSongRefresh||sessionChanged){
@@ -966,7 +989,20 @@ function phoneQueueResult(index,move,result){
   phoneDanceApplyLocalResult(move,enriched);
   phoneFlushDanceResults();
 }
-function phoneFlushDanceResults(){if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;for(const [index,payload] of [...phoneDancePendingResults]){socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:dance-judgement",payload,(error,response)=>{if(!error&&response?.ok){phoneDancePendingResults.delete(index);if(response.state)applyState(response.state);}});}}
+function phoneFlushDanceResults(){
+  if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;
+  for(const [index,payload] of [...phoneDancePendingResults]){
+    const event=onlineFullControllerMode
+      ?"online:controller-dance-judgement"
+      :"controller:dance-judgement";
+    socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit(event,payload,(error,response)=>{
+      if(!error&&response?.ok){
+        phoneDancePendingResults.delete(index);
+        if(response.state&&!onlineFullControllerMode)applyState(response.state);
+      }
+    });
+  }
+}
 function phoneFinalizeActiveMove(){const i=phoneDanceActiveMoveIndex;if(i<0||phoneDanceJudgedMoves.has(i))return;const move=phoneDanceMoves[i];if(!move)return;const result=phoneJudge(phoneDanceStats,move);phoneDanceJudgedMoves.add(i);phoneQueueResult(i,move,result);phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;}
 function phoneSyncMoveWindow(){if(!phoneDanceReady||!phoneDanceClock.playing||!sensorStreaming)return;const current=phoneMoveIndexAt(phoneDanceClockNow());if(phoneDanceActiveMoveIndex>=0&&current!==phoneDanceActiveMoveIndex)phoneFinalizeActiveMove();if(current>=0&&!phoneDanceJudgedMoves.has(current)&&phoneDanceActiveMoveIndex!==current){phoneDanceActiveMoveIndex=current;phoneDanceStats=phoneMakeStats();}}
 function phoneCollectDanceSample(sample){if(!phoneDanceReady||!phoneDanceSession||!phoneDanceClock.playing||!sensorStreaming)return;phoneSyncMoveWindow();if(phoneDanceActiveMoveIndex<0||!phoneDanceStats)return;const st=phoneDanceStats,now=performance.now(),linear={x:Number(sample.acceleration?.x||0),y:Number(sample.acceleration?.y||0),z:Number(sample.acceleration?.z||0)},gravity={x:Number(sample.accelerationIncludingGravity?.x||0),y:Number(sample.accelerationIncludingGravity?.y||0),z:Number(sample.accelerationIncludingGravity?.z||0)},rotation={x:Number(sample.rotationRate?.x||0),y:Number(sample.rotationRate?.y||0),z:Number(sample.rotationRate?.z||0)};let motion=linear;if(phoneMagnitude(linear)<.04&&st.prevGravity){motion={x:gravity.x-st.prevGravity.x,y:gravity.y-st.prevGravity.y,z:gravity.z-st.prevGravity.z};}st.prevGravity={...gravity};const gmag=phoneMagnitude(gravity);if(gmag>6&&gmag<13&&phoneMagnitude(motion)<.35){phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.985+gmag*.015;phoneDanceCalibration.quietSamples++;}const gu=phoneUnit(gravity)||{x:0,y:0,z:1},vertical=phoneDot(motion,gu),motionMag=phoneMagnitude(motion),horizontal=Math.sqrt(Math.max(0,motionMag*motionMag-vertical*vertical)),rotationMag=phoneMagnitude(rotation),dt=st.prevTime?Math.max(.018,Math.min(.12,(now-st.prevTime)/1000)):.035;st.prevTime=now;let jerk=0;if(st.prevMotion)jerk=phoneMagnitude({x:(motion.x-st.prevMotion.x)/dt,y:(motion.y-st.prevMotion.y)/dt,z:(motion.z-st.prevMotion.z)/dt});st.prevMotion={...motion};const unit=motionMag>.10?phoneUnit(motion):null;if(unit&&st.prevUnit){const dot=Math.max(-1,Math.min(1,phoneDot(unit,st.prevUnit)));if(dot<-.18)st.reversals++;if(dot<-.52)st.strongReversals++;}if(unit)st.prevUnit=unit;st.count++;if(motionMag>=.20||rotationMag>=18)st.active++;st.motionSum+=motionMag;st.motionPeak=Math.max(st.motionPeak,motionMag);st.rotationSum+=rotationMag;st.rotationPeak=Math.max(st.rotationPeak,rotationMag);st.jerkSum+=jerk;st.jerkPeak=Math.max(st.jerkPeak,jerk);st.samples.push({time:now,timelineMs:phoneDanceClockNow(),motion,gravity,rotation,motionMag,rotationMag,vertical,horizontal,jerk});if(st.samples.length>220)st.samples.shift();}

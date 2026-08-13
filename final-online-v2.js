@@ -13,7 +13,7 @@
   const symbols={start:"INÍCIO",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"};
   const path=(()=>{const p=[];for(let x=10;x<=90;x+=80/7)p.push({x,y:10});for(let y=21.5;y<=78.5;y+=57/5)p.push({x:90,y});for(let x=90;x>=10;x-=80/7)p.push({x,y:90});for(let y=78.5;y>=21.5;y-=57/5)p.push({x:10,y});return p.slice(0,SPACE_COUNT)})();
 
-  let socket=null,roomCode="",playerId="",resumeToken="",state=null,isHost=false,v2State=null,wired=false,resuming=false,timer=0;
+  let socket=null,roomCode="",playerId="",resumeToken="",state=null,isHost=false,v2State=null,wired=false,resuming=false,timer=0,onlineDance=null,danceStartTimer=0;
   const normalize=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
   const selectedOnline=()=>document.querySelector('[data-match-mode="online"]')?.classList.contains("is-selected");
   const avatar=p=>window.STEAMParty?.avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="42" fill="#65f2c3"/><circle cx="45" cy="52" r="5"/><circle cx="75" cy="52" r="5"/></svg>`;
@@ -22,6 +22,129 @@
   function readSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||"null")}catch{return null}}
   function inviteUrl(){const u=new URL(location.href);u.searchParams.set("onlineRoom",roomCode);u.hash="";return u.toString()}
   function setStatus(t){if(statusEl)statusEl.textContent=t}
+
+  function ensureDanceWaitOverlay(){
+    let overlay=document.querySelector("#finalOnlineDanceWait");
+    if(overlay)return overlay;
+    overlay=document.createElement("div");
+    overlay.id="finalOnlineDanceWait";
+    overlay.className="final-online-dance-wait hidden";
+    overlay.innerHTML=`
+      <div class="final-online-dance-wait-card">
+        <span class="final-online-dance-spinner" aria-hidden="true"></span>
+        <p class="eyebrow">Just Dance Online</p>
+        <h2>Esperando o restante terminar</h2>
+        <p data-online-dance-wait-text>Seu resultado já foi enviado.</p>
+        <div class="final-online-dance-finish-list" data-online-dance-finish-list></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function showDanceWait(packet={}){
+    const overlay=ensureDanceWaitOverlay();
+    const finished=Array.isArray(packet.finishedPlayerIds)?packet.finishedPlayerIds:[];
+    const total=Math.max(1,Number(packet.totalPlayers||state?.players?.length||1));
+    const text=overlay.querySelector("[data-online-dance-wait-text]");
+    if(text)text.textContent=`${finished.length} de ${total} jogador${total===1?"":"es"} terminaram. Seu resultado foi enviado.`;
+    const list=overlay.querySelector("[data-online-dance-finish-list]");
+    if(list){
+      list.innerHTML="";
+      (state?.players||[]).forEach(p=>{
+        const row=document.createElement("div");
+        row.className="final-online-dance-finish-row";
+        const done=finished.some(id=>String(id)===String(p.id));
+        row.innerHTML=`<span>${done?"✓":"…"}</span><strong></strong><small>${done?"Terminou":"Jogando"}</small>`;
+        row.querySelector("strong").textContent=p.name||"Jogador";
+        list.appendChild(row);
+      });
+    }
+    overlay.classList.remove("hidden");
+  }
+
+  function hideDanceWait(){
+    document.querySelector("#finalOnlineDanceWait")?.classList.add("hidden");
+  }
+
+  function onlineDancePlayers(){
+    const source=v2State?.players||state?.players||[];
+    return source.map((p,i)=>({
+      ...p,
+      id:String(p.id),
+      slot:Number(p.slot||i+1),
+      partyPlayerNumber:i+1,
+      partyConnectionMode:"online",
+      human:true,
+      bot:false
+    }));
+  }
+
+  async function startOnlineDanceClient(packet){
+    if(!packet||packet.roomCode!==roomCode)return;
+    const bridge=window.STEAMJustDanceBridge;
+    if(!bridge)return;
+
+    clearTimeout(danceStartTimer);
+    hideDanceWait();
+    onlineDance={...packet,localFinished:false};
+
+    try{
+      const alreadyPrepared=Boolean(isHost&&bridge.isPartyDance?.());
+      if(!alreadyPrepared){
+        const prepared=await bridge.openPartyDanceSong(
+          packet.songId,
+          roomCode,
+          onlineDancePlayers(),
+          {sessionId:packet.sessionId}
+        );
+        if(!prepared?.ok)throw new Error(prepared?.message||"Falha ao preparar Just Dance.");
+      }
+
+      // Não tentamos alinhar frame a frame entre casas diferentes.
+      // Todos recebem o mesmo countdown do servidor e começam localmente.
+      const delay=Math.max(250,Number(packet.startDelayMs||4000));
+      danceStartTimer=setTimeout(async()=>{
+        try{
+          await bridge.startPartyDancePlayback?.();
+        }catch(error){
+          console.error("[OnlineDance] playback",error);
+        }
+      },delay);
+    }catch(error){
+      console.error("[OnlineDance] start",error);
+      window.STEAMParty?.showToast?.("Não foi possível iniciar o Just Dance neste dispositivo.");
+    }
+  }
+
+  async function finishOnlineDanceLocal(reason="ended"){
+    if(!onlineDance||onlineDance.localFinished)return;
+    onlineDance.localFinished=true;
+    clearTimeout(danceStartTimer);
+
+    try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}
+    try{window.STEAMParty?.showView?.("board")}catch{}
+    boardView?.classList.remove("hidden");
+    showDanceWait({finishedPlayerIds:[playerId],totalPlayers:state?.players?.length||1});
+
+    try{
+      await ack("online:v2-dance-finished",{
+        roomCode,
+        sessionId:onlineDance.sessionId,
+        reason:String(reason||"ended")
+      });
+    }catch(error){
+      const overlay=ensureDanceWaitOverlay();
+      const text=overlay.querySelector("[data-online-dance-wait-text]");
+      if(text)text.textContent="Seu vídeo terminou. Tentando enviar o resultado…";
+    }
+  }
+
+  function publishOnlineDanceSession(payload){
+    if(!onlineDance||String(payload?.sessionId||"")!==String(onlineDance.sessionId||"")){
+      return Promise.resolve({ok:false,ignored:true});
+    }
+    return ack("online:v2-dance-session",{roomCode,...payload}).catch(()=>({ok:false}));
+  }
 
   function connect(){
     if(socket?.connected)return Promise.resolve(socket);
@@ -43,6 +166,33 @@
     socket.on("online:v2-state",p=>{if(p?.roomCode!==roomCode)return;v2State=p.state;if(!isHost)renderReplica()});
     socket.on("online:v2-action",action=>{if(!action||action.roomCode!==roomCode||!isHost)return;window.dispatchEvent(new CustomEvent("steam-online-v2-action",{detail:action}))});
     socket.on("online:v2-sensor",payload=>{if(!payload||payload.roomCode!==roomCode||!isHost)return;window.dispatchEvent(new CustomEvent("steam-online-v2-sensor",{detail:payload}))});
+
+    socket.on("online:v2-dance-start",packet=>{
+      if(packet?.roomCode!==roomCode)return;
+      void startOnlineDanceClient(packet);
+    });
+
+    socket.on("online:v2-dance-judgement",payload=>{
+      if(payload?.roomCode!==roomCode)return;
+      window.STEAMJustDanceBridge?.handleJudgement?.(payload);
+    });
+
+    socket.on("online:v2-dance-status",packet=>{
+      if(packet?.roomCode!==roomCode||!onlineDance)return;
+      if(onlineDance.localFinished)showDanceWait(packet);
+    });
+
+    socket.on("online:v2-dance-complete",packet=>{
+      if(packet?.roomCode!==roomCode)return;
+      hideDanceWait();
+      clearTimeout(danceStartTimer);
+      try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}
+      try{window.STEAMParty?.showView?.("board")}catch{}
+      boardView?.classList.remove("hidden");
+      window.dispatchEvent(new CustomEvent("steam-online-v2-dance-complete",{detail:packet}));
+      onlineDance=null;
+    });
+
     socket.on("online:room-closed",()=>reset("Sala encerrada."));
     socket.on("online:kicked",p=>reset(p?.message||"Você foi removido."));
   }
@@ -143,7 +293,7 @@
     }
     if(phase==="minigame-result"){
       minigameIntro?.classList.add("hidden");droneGame?.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult?.classList.remove("hidden");returnBoard?.classList.add("hidden");
-      const results=mg?.results||[];if(minigameWinner)minigameWinner.textContent=results[0]?.name?`${results[0].name} venceu!`:"Resultado";if(minigameRanking){minigameRanking.innerHTML="";results.forEach((e,i)=>{const r=document.createElement("div");r.className="final-ranking-row";r.innerHTML=`<b>${e.place||i+1}º</b><span><strong></strong><small></small></span><span>${e.correct?"✓":"×"}</span>`;r.querySelector("strong").textContent=e.name||"Jogador";r.querySelector("small").textContent=e.correct?(e.timeMs?`${(Number(e.timeMs)/1000).toFixed(1)} s`:"Concluído"):"Errou";minigameRanking.appendChild(r)})}return;
+      const results=mg?.results||[];if(minigameWinner)minigameWinner.textContent=results[0]?.name?`${results[0].name} venceu!`:"Resultado";if(minigameRanking){minigameRanking.innerHTML="";results.forEach((e,i)=>{const r=document.createElement("div");r.className="final-ranking-row";const isDance=mg?.id==="just-dance";const tail=isDance?`${Math.round(Number(e.score||0)).toLocaleString("pt-BR")}`:(e.correct?"✓":"×");r.innerHTML=`<b>${e.place||i+1}º</b><span><strong></strong><small></small></span><span>${tail}</span>`;r.querySelector("strong").textContent=e.name||"Jogador";r.querySelector("small").textContent=isDance?"Score Just Dance":e.correct?(e.timeMs?`${(Number(e.timeMs)/1000).toFixed(1)} s`:"Concluído"):"Errou";minigameRanking.appendChild(r)})}return;
     }
   }
   function renderReplica(){
@@ -157,7 +307,7 @@
 
   function sendAction(type,data={}){return new Promise((resolve,reject)=>{if(!socket||!roomCode){reject(new Error("Sala desconectada."));return}socket.timeout(6500).emit("online:v2-action",{roomCode,type,...data,clientTime:Date.now()},(err,res)=>{if(err)reject(new Error("Servidor não respondeu."));else if(!res?.ok)reject(new Error(res?.message||"Ação recusada."));else resolve(res)})})}
   async function resumeCurrentSession(showErrors=true){if(resuming||!roomCode||!playerId||!resumeToken)return false;resuming=true;try{const r=await ack("online:resume",{roomCode,playerId,resumeToken});state=r.state;isHost=playerId===state.hostPlayerId;v2State=r.onlineV2State||v2State;saveSession();if(state.started&&v2State&&!isHost)renderReplica();else renderLobby();return true}catch(e){if(showErrors)setStatus(e.message);if(e.invalidSession)clearSession();return false}finally{resuming=false}}
-  function reset(message=""){clearReplicaTimer();roomCode="";playerId="";resumeToken="";state=null;v2State=null;isHost=false;clearSession();boardView?.removeAttribute("data-online-replica");lobby.classList.add("hidden");remote?.classList.add("hidden");actions.classList.remove("hidden");if(message)window.STEAMParty?.showToast?.(message)}
+  function reset(message=""){clearReplicaTimer();clearTimeout(danceStartTimer);hideDanceWait();try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}onlineDance=null;roomCode="";playerId="";resumeToken="";state=null;v2State=null;isHost=false;clearSession();boardView?.removeAttribute("data-online-replica");lobby.classList.add("hidden");remote?.classList.add("hidden");actions.classList.remove("hidden");if(message)window.STEAMParty?.showToast?.(message)}
 
   createBtn?.addEventListener("click",async()=>{try{const r=await ack("online:create-room",{name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=true;saveSession();renderLobby()}catch(e){setStatus(e.message)}});
   showJoin?.addEventListener("click",()=>joinRow.classList.toggle("hidden")); codeInput?.addEventListener("input",()=>codeInput.value=normalize(codeInput.value));
@@ -183,6 +333,16 @@
     showPanel();
   },true);
 
+  window.addEventListener("steam-party-dance-ended",e=>{
+    if(!onlineDance)return;
+    void finishOnlineDanceLocal(e.detail?.reason||"ended");
+  });
+
+  window.STEAMOnlineDanceTransport=Object.freeze({
+    handlesRoom: code => Boolean(roomCode&&state?.started&&String(code||"")===String(roomCode)),
+    publishSession: publishOnlineDanceSession
+  });
+
   window.STEAMOnlineV2=Object.freeze({
     open:showPanel,
     close:hidePanel,
@@ -195,7 +355,13 @@
     getRoomCode:()=>roomCode,
     getPlayerId:()=>playerId,
     isHost:()=>isHost,
-    getControlMethod:()=>state?.controlMethod||"keyboard"
+    getControlMethod:()=>state?.controlMethod||"keyboard",
+    startDance(meta={}){
+      if(!isHost)return Promise.reject(new Error("Somente o host pode iniciar o Just Dance."));
+      return ack("online:v2-dance-create",{roomCode,...meta});
+    },
+    finishDanceLocal:finishOnlineDanceLocal,
+    isDanceActive:()=>Boolean(onlineDance)
   });
 
   // Link de convite: cada pessoa abre o MESMO site, mesmo estando em outra rede.

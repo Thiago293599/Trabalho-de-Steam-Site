@@ -122,3 +122,53 @@ body.online-sensor-controller #sensorModePanel .sensor-live-grid{display:grid!im
 body.online-full-controller #themeToggle{display:none}
 body.online-full-controller .controller-shell{min-height:100dvh;display:grid;place-items:center}
 body.online-full-controller #controlScreen{width:min(760px,calc(100vw - 20px));margin:0}
+
+
+/* ==========================================================
+   V41 — Controle sempre em retrato
+   Paisagem fica reservada a futuros minigames que realmente precisem.
+   ========================================================== */
+body.controller-portrait-only{
+  min-height:100dvh;
+}
+body.controller-portrait-only .controller-shell{
+  width:min(100%,460px)!important;
+  margin-inline:auto!important;
+}
+body.controller-portrait-only .final-party-controller-panel{
+  width:100%!important;
+  max-width:430px!important;
+  margin-inline:auto!important;
+}
+body.controller-portrait-only .final-party-phone-answers{
+  grid-template-columns:1fr 1fr!important;
+}
+body.controller-portrait-only .final-party-phone-board .mobile-dice{
+  margin:18px auto!important;
+}
+body.controller-portrait-only .final-controller-orientation-gate{
+  z-index:999999!important;
+}
+body.controller-portrait-only .final-orientation-phone{
+  animation:finalPhonePortrait 1.45s ease-in-out infinite!important;
+}
+@keyframes finalPhonePortrait{
+  0%,100%{transform:rotate(0deg) scale(1)}
+  50%{transform:rotate(0deg) scale(1.08)}
+}
+@media(orientation:landscape){
+  body.controller-portrait-only .final-controller-orientation-gate:not(.hidden){
+    display:grid!important;
+  }
+  body.controller-portrait-only #sensorModePanel.final-dance-controller-clean{
+    display:none!important;
+  }
+}
+@media(orientation:portrait){
+  body.controller-portrait-only .final-controller-orientation-gate{
+    display:none!important;
+  }
+  body.controller-portrait-only .sensor-mode-active #sensorModePanel.final-dance-controller-clean:not(.hidden){
+    display:block!important;
+  }
+}

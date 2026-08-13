@@ -1465,3 +1465,66 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
 /* V40 Online full-controller */
 .final-online-v2-player.has-controller .final-online-sensor-dot{opacity:1;transform:scale(1.12)}
 .final-online-v2-player.has-controller .final-online-sensor-dot::after{content:"✓";font-size:10px;font-weight:1000}
+
+
+/* ==========================================================
+   V41 — Just Dance Online: espera assíncrona
+   ========================================================== */
+.final-online-dance-wait{
+  position:fixed;
+  inset:0;
+  z-index:999980;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(5,10,18,.72);
+  backdrop-filter:blur(10px);
+}
+.final-online-dance-wait.hidden{display:none!important}
+.final-online-dance-wait-card{
+  width:min(92vw,520px);
+  padding:28px;
+  border-radius:28px;
+  background:linear-gradient(180deg,rgba(22,31,48,.96),rgba(9,15,26,.96));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 28px 90px rgba(0,0,0,.45);
+  text-align:center;
+}
+.final-online-dance-wait-card h2{
+  margin:8px 0 8px;
+}
+.final-online-dance-wait-card>p{
+  color:rgba(235,244,255,.72);
+}
+.final-online-dance-spinner{
+  display:block;
+  width:48px;
+  height:48px;
+  margin:0 auto 14px;
+  border-radius:50%;
+  border:5px solid rgba(255,255,255,.14);
+  border-top-color:#69f1c4;
+  animation:finalOnlineDanceSpin .8s linear infinite;
+}
+.final-online-dance-finish-list{
+  display:grid;
+  gap:8px;
+  margin-top:18px;
+}
+.final-online-dance-finish-row{
+  display:grid;
+  grid-template-columns:28px 1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,.055);
+  text-align:left;
+}
+.final-online-dance-finish-row small{
+  color:rgba(235,244,255,.58);
+}
+@keyframes finalOnlineDanceSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){
+  .final-online-dance-spinner{animation:none}
+}

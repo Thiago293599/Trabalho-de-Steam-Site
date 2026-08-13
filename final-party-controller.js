@@ -2,11 +2,34 @@
   "use strict";
   const bridge=window.STEAMPartyControllerBridge;if(!bridge)return;
   const $=s=>document.querySelector(s);
-  const panel=$("#finalPartyControllerPanel"),legacy=$("#boardControllerArea"),sensor=$("#sensorModePanel"),round=$("#finalPartyPhoneRound"),score=$("#finalPartyPhoneScore"),kicker=$("#finalPartyPhoneKicker"),title=$("#finalPartyPhoneTitle"),description=$("#finalPartyPhoneDescription"),dice=$("#finalPartyPhoneDice"),roll=$("#finalPartyPhoneRoll"),items=$("#finalPartyPhoneItems"),sensorButton=$("#finalPartyPhoneEnableSensors"),game=$("#finalPartyPhoneBoard"),mini=$("#finalPartyPhoneMinigame"),miniTopic=$("#finalPartyPhoneMiniTopic"),miniTitle=$("#finalPartyPhoneMiniTitle"),question=$("#finalPartyPhoneQuestion"),answers=$("#finalPartyPhoneAnswers"),timer=$("#finalPartyPhoneTimer"),result=$("#finalPartyPhoneResult"),resultTitle=$("#finalPartyPhoneResultTitle"),ranking=$("#finalPartyPhoneRanking"),controlScreen=$("#controlScreen"),connection=$("#connectionBadge");
+  const panel=$("#finalPartyControllerPanel"),legacy=$("#boardControllerArea"),sensor=$("#sensorModePanel"),round=$("#finalPartyPhoneRound"),score=$("#finalPartyPhoneScore"),kicker=$("#finalPartyPhoneKicker"),title=$("#finalPartyPhoneTitle"),description=$("#finalPartyPhoneDescription"),dice=$("#finalPartyPhoneDice"),roll=$("#finalPartyPhoneRoll"),items=$("#finalPartyPhoneItems"),sensorButton=$("#finalPartyPhoneEnableSensors"),game=$("#finalPartyPhoneBoard"),mini=$("#finalPartyPhoneMinigame"),miniTopic=$("#finalPartyPhoneMiniTopic"),miniTitle=$("#finalPartyPhoneMiniTitle"),question=$("#finalPartyPhoneQuestion"),answers=$("#finalPartyPhoneAnswers"),timer=$("#finalPartyPhoneTimer"),result=$("#finalPartyPhoneResult"),resultTitle=$("#finalPartyPhoneResultTitle"),ranking=$("#finalPartyPhoneRanking"),controlScreen=$("#controlScreen"),connection=$("#connectionBadge"),orientationGate=$("#finalControllerOrientationGate"),orientationTitle=$("#finalOrientationTitle"),orientationText=$("#finalOrientationText"),fullscreenBtn=$("#finalEnterFullscreen");
   const socket=bridge.getSocket();
   let transport=bridge.getTransportMode?.()||"party",gameState=null,lobbyState=null,activeProblemToken="",answeredToken="",timerId=0,danceMode=false;
   const myId=()=>bridge.getPlayerId(),room=()=>bridge.getRoomCode();
   const me=()=>gameState?.players?.find(p=>String(p.id)===String(myId()))||null;
+
+  function portraitOnly(){
+    document.body.classList.add("controller-portrait-only");
+    const landscape=window.matchMedia?.("(orientation: landscape)")?.matches||window.innerWidth>window.innerHeight;
+    orientationGate?.classList.toggle("hidden",!landscape);
+    if(orientationTitle)orientationTitle.textContent="Coloque o celular em pé";
+    if(orientationText)orientationText.textContent="Este controle usa o modo retrato. O modo deitado será usado somente em minigames que realmente precisarem.";
+    if(!landscape){
+      try{screen.orientation?.lock?.("portrait").catch?.(()=>{})}catch{}
+    }
+  }
+  function requestPortrait(){
+    portraitOnly();
+    try{screen.orientation?.lock?.("portrait").catch?.(()=>{})}catch{}
+  }
+  window.addEventListener("resize",portraitOnly);
+  window.addEventListener("orientationchange",portraitOnly);
+  fullscreenBtn?.addEventListener("click",async()=>{
+    try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen?.()}catch{}
+    requestPortrait();
+  });
+  document.addEventListener("pointerdown",()=>{requestPortrait()},{once:true});
+  portraitOnly();
   function stopTimer(){clearInterval(timerId);timerId=0}
   function ui(active=true){panel?.classList.toggle("hidden",!active);legacy?.classList.add("hidden");if(active){sensor?.classList.add("hidden");controlScreen?.classList.remove("sensor-mode-active")}}
   function send(type,data={}){if(!socket||!room())return Promise.reject(new Error("Controle desconectado."));const event=transport==="online"?"online:controller-action":"controller:party-action";return new Promise((resolve,reject)=>socket.timeout(6500).emit(event,{roomCode:room(),type,...data,clientTime:Date.now()},(err,res)=>{if(err||!res?.ok){const e=new Error(res?.message||"O servidor não respondeu.");reject(e)}else resolve(res)}))}
@@ -22,7 +45,30 @@
   sensorButton?.addEventListener("click",async()=>{sensorButton.disabled=true;try{await bridge.requestSensors?.();sensorButton.textContent="Sensores ativos";sensorButton.classList.add("hidden")}catch{sensorButton.disabled=false}});
   window.addEventListener("steam-party-controller-joined",e=>{if(e.detail?.state?.purpose==="party-board-v2"){transport="party";ui(true);kicker.textContent="Party";title.textContent="Controle conectado";description.textContent="Dado, itens, respostas e sensores serão controlados por este celular."}});
   window.addEventListener("steam-online-controller-joined",e=>{transport="online";lobbyState=e.detail?.state||null;gameState=e.detail?.onlineV2State||null;ui(true);if(connection)connection.textContent="Controle Online";kicker.textContent="Online";title.textContent=gameState?"Controle retomado":"Controle completo conectado";description.textContent="Mantenha este celular aberto durante a partida.";renderSensorButton();if(gameState)render()});
-  window.addEventListener("phone-dance-session",()=>{if(transport!=="party")return;danceMode=true;panel?.classList.add("hidden")});
+  window.addEventListener("phone-dance-session",e=>{
+    const reason=String(e.detail?.reason||"");
+    if(!["party","online"].includes(transport))return;
+    danceMode=reason!=="ended";
+    if(danceMode){
+      panel?.classList.add("hidden");
+      return;
+    }
+    if(transport==="online"){
+      ui(true);
+      game?.classList.add("hidden");
+      mini?.classList.add("hidden");
+      result?.classList.remove("hidden");
+      if(resultTitle)resultTitle.textContent="Esperando o restante terminar";
+      if(ranking)ranking.innerHTML='<div class="final-party-phone-rank-row"><strong>Seu resultado foi enviado</strong><span>…</span></div>';
+      stopTimer();
+      return;
+    }
+    render();
+  });
+  socket?.on("online:controller-dance-session",payload=>{
+    if(transport!=="online"||payload?.roomCode!==room())return;
+    bridge.applyDanceSession?.(payload);
+  });
   socket?.on("dev:sensor-mode",p=>{if(transport!=="party"||p?.roomCode!==room())return;const motion=p.enabled&&p.purpose==="motion-minigame";danceMode=Boolean(p.enabled&&!motion);if(!danceMode)render()});
   socket?.on("party:started",p=>{if(transport==="party"&&p?.roomCode===room()&&p.state){gameState=p.state;render()}});
   socket?.on("party:state",p=>{if(transport==="party"&&p?.roomCode===room()){gameState=p;render()}});
