@@ -1259,3 +1259,106 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   /* Mantém apenas o desenho do telefone e o número. */
   background-color:transparent!important;
 }
+
+
+/* ==========================================================
+   V35 — Polimento de animações + posição do indicador
+   ========================================================== */
+
+/* Celular/Wi-Fi: mantém sem fundo, mas um pouco mais para a esquerda. */
+#danceDevScreen.party-dance-session .dance-player-origin-slot{
+  left:calc(-2px * var(--jd-ui-scale))!important;
+  top:calc(3px * var(--jd-ui-scale))!important;
+}
+
+/* Entrada suave das views principais. Como .hidden usa display:none,
+   a animação reinicia naturalmente quando a tela volta a aparecer. */
+#finalShell .final-view:not(.hidden){
+  animation:finalV35ViewEnter .38s cubic-bezier(.20,.76,.20,1) both;
+}
+@keyframes finalV35ViewEnter{
+  from{opacity:0;transform:translateY(9px) scale(.995)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Painéis/cards que antes apareciam estáticos. */
+#finalShell .final-view:not(.hidden) .final-panel,
+#finalShell .final-view:not(.hidden) .final-mode-card,
+#finalShell .final-view:not(.hidden) .final-profile-panel,
+#finalShell .final-view:not(.hidden) .final-save-panel,
+#finalShell .final-view:not(.hidden) .final-continue-card,
+#finalShell .final-view:not(.hidden) .final-info-box{
+  animation:finalV35CardEnter .46s cubic-bezier(.20,.80,.20,1) both;
+}
+@keyframes finalV35CardEnter{
+  from{opacity:0;transform:translateY(14px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Pequeno stagger sem JavaScript. */
+#finalShell .final-mode-grid > :nth-child(2),
+#finalShell .final-info-cards > :nth-child(2){animation-delay:.045s!important}
+#finalShell .final-mode-grid > :nth-child(3),
+#finalShell .final-info-cards > :nth-child(3){animation-delay:.09s!important}
+#finalShell .final-mode-grid > :nth-child(4),
+#finalShell .final-info-cards > :nth-child(4){animation-delay:.135s!important}
+
+/* Botões ganham resposta física leve. */
+#finalShell button,
+#finalShell .final-file-button,
+#finalShell .final-mode-card{
+  transition:transform .16s ease,filter .16s ease,border-color .16s ease,background-color .16s ease!important;
+}
+#finalShell button:hover:not(:disabled),
+#finalShell .final-file-button:hover,
+#finalShell .final-mode-card:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.06);
+}
+#finalShell button:active:not(:disabled),
+#finalShell .final-file-button:active,
+#finalShell .final-mode-card:active{
+  transform:translateY(0) scale(.985);
+}
+
+/* Start e elementos vivos do tabuleiro. */
+#finalShell .final-press-start{
+  animation:finalV35PressStart 1.65s ease-in-out infinite;
+}
+@keyframes finalV35PressStart{
+  0%,100%{opacity:.72;transform:translateY(0)}
+  50%{opacity:1;transform:translateY(-3px)}
+}
+#finalShell .final-board-player.is-turn{
+  animation:finalV35CurrentPlayer 2.2s ease-in-out infinite;
+}
+@keyframes finalV35CurrentPlayer{
+  0%,100%{box-shadow:0 0 0 1px rgba(101,242,195,.10)}
+  50%{box-shadow:0 0 0 1px rgba(101,242,195,.28),0 0 20px rgba(101,242,195,.10)}
+}
+#finalShell .final-minigame-overlay:not(.hidden) .final-minigame-card,
+#finalShell .final-party-lobby-overlay:not(.hidden) .final-party-lobby-card,
+#finalShell .final-item-overlay:not(.hidden) .final-item-card{
+  animation:finalV35OverlayCard .34s cubic-bezier(.18,.84,.18,1) both;
+}
+@keyframes finalV35OverlayCard{
+  from{opacity:0;transform:translateY(18px) scale(.96)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  #finalShell .final-view:not(.hidden),
+  #finalShell .final-view:not(.hidden) .final-panel,
+  #finalShell .final-view:not(.hidden) .final-mode-card,
+  #finalShell .final-view:not(.hidden) .final-profile-panel,
+  #finalShell .final-view:not(.hidden) .final-save-panel,
+  #finalShell .final-view:not(.hidden) .final-continue-card,
+  #finalShell .final-view:not(.hidden) .final-info-box,
+  #finalShell .final-press-start,
+  #finalShell .final-board-player.is-turn,
+  #finalShell .final-minigame-overlay:not(.hidden) .final-minigame-card,
+  #finalShell .final-party-lobby-overlay:not(.hidden) .final-party-lobby-card,
+  #finalShell .final-item-overlay:not(.hidden) .final-item-card{
+    animation:none!important;
+  }
+}
