@@ -142,6 +142,8 @@ const sensorDanceRank = document.getElementById("sensorDanceRank");
 const sensorDanceStars = document.getElementById("sensorDanceStars");
 const sensorDanceJudgement = document.getElementById("sensorDanceJudgement");
 const sensorDanceProgress = document.getElementById("sensorDanceProgress");
+const mobileDanceScoreBarFill = document.getElementById("mobileDanceScoreBarFill");
+const mobileDanceScoreBar = document.getElementById("mobileDanceScoreBar");
 const boardControllerArea = document.getElementById("boardControllerArea");
 
 let myPlayerId = "";
@@ -1067,6 +1069,7 @@ function stopSensorStreaming({ keepPermission = true } = {}) {
   if (sensorWatchdogTimer) clearTimeout(sensorWatchdogTimer);
   sensorWatchdogTimer = null;
   sensorStreaming = false;
+  sensorModePanel?.classList.remove("sensors-ready");
   sensorOrientationPrevious = null;
   if (!keepPermission) sensorPermissionGranted = false;
   reportSensorStatus(false, true);
@@ -1104,6 +1107,7 @@ function startSensorStreaming() {
   sensorPacketCount = 0;
   sensorLastSentAt = 0;
   sensorStreaming = true;
+  sensorModePanel?.classList.add("sensors-ready");
 
   if (caps.orientation) window.addEventListener("deviceorientation", handleDeviceOrientation, { passive: true });
   if (caps.motion) window.addEventListener("devicemotion", handleDeviceMotion, { passive: true });
@@ -1187,12 +1191,43 @@ function renderControllerDanceScore(dance = {}, animateJudgement = false) {
   const score = Math.max(0, Math.min(13333, Number(dance.score || 0)));
   const stars = Math.max(0, Math.min(5, Number(dance.stars || Math.floor(score / 2000))));
   if (sensorDanceScore) sensorDanceScore.textContent = score.toLocaleString("pt-BR");
+
+  // Mesmo comportamento visual do HUD da tela principal: o asset 1P_bar
+  // sobe dentro da máscara conforme o score progride.
+  const progress = score / 13333;
+  if (mobileDanceScoreBarFill) {
+    mobileDanceScoreBarFill.style.transform = `translateY(${((1 - progress) * 100).toFixed(4)}%)`;
+    mobileDanceScoreBarFill.style.opacity = progress > 0 ? "1" : "0";
+  }
+
+  const visual = score >= 12000
+    ? "minigames/just-dance/hud/images/Megastar.png"
+    : score >= 11000
+      ? "minigames/just-dance/hud/images/Superstar.png"
+      : "minigames/just-dance/hud/images/Star.png";
+  const topPercent = (478 / 2160) * 100;
+  const bottomPercent = (1680 / 2160) * 100;
+  const spanPercent = bottomPercent - topPercent;
+  let nextOutline = false;
+  sensorDanceStars?.querySelectorAll(".final-mobile-jd-star").forEach(star => {
+    const threshold = Number(star.dataset.threshold || 0);
+    const ratio = Math.max(0, Math.min(1, threshold / 13333));
+    star.style.top = `${(bottomPercent - spanPercent * ratio).toFixed(4)}%`;
+    const filled = score >= threshold;
+    star.classList.toggle("filled", filled);
+    const showOutline = !filled && !nextOutline;
+    star.classList.toggle("next-outline", showOutline);
+    if (showOutline) nextOutline = true;
+    const fill = star.querySelector(".fill");
+    if (fill && fill.getAttribute("src") !== visual) fill.setAttribute("src", visual);
+  });
+
+  // Mantém esses elementos apenas para compatibilidade interna; V18 os oculta.
   if (sensorDanceRank) {
     sensorDanceRank.textContent = dance.rank || (score >= 12000 ? "MEGASTAR" : score >= 11000 ? "SUPERSTAR" : stars ? `${stars} ESTRELA${stars === 1 ? "" : "S"}` : "SEM ESTRELAS");
-    sensorDanceRank.className = score >= 12000 ? "megastar" : score >= 11000 ? "superstar" : "";
   }
-  sensorDanceStars?.querySelectorAll("span").forEach((star, index) => star.classList.toggle("filled", index < stars));
   if (sensorDanceProgress) sensorDanceProgress.textContent = `${Number(dance.judgedMoves || 0)} / ${Number(dance.totalMoves || 0)} movimentos julgados`;
+
   if (sensorDanceJudgement && dance.lastJudgement) {
     sensorDanceJudgement.textContent = String(dance.lastJudgement).toUpperCase() === "YEAH" ? "YEAH!" : dance.lastJudgement;
     sensorDanceJudgement.className = `mobile-dance-judgement ${String(dance.lastJudgement).toUpperCase() === "YEAH" ? "yeah" : String(dance.lastJudgement).toLowerCase()}`;

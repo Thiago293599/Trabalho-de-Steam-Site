@@ -16,7 +16,7 @@
   </script>
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="controller.css?v=040-earthsong-server-gate" />
-  <link rel="stylesheet" href="final-controller.css?v=002-party-board" />
+  <link rel="stylesheet" href="final-controller.css?v=003-jd-clean" />
 </head>
 <body class="site-loading">
 
@@ -208,40 +208,54 @@
         </div>
       </section>
 
-      <section id="sensorModePanel" class="sensor-mode-panel hidden" aria-live="polite">
-        <div class="sensor-mode-head">
-          <div>
-            <p class="eyebrow">Just Dance • Sensor</p>
-            <h2 id="sensorModeTitle">Sensores aguardando</h2>
+      <section id="sensorModePanel" class="sensor-mode-panel hidden final-dance-controller-clean" aria-live="polite">
+        <!-- Elementos técnicos abaixo continuam no DOM para a lógica dos sensores,
+             mas ficam invisíveis durante a música. -->
+        <div class="final-dance-hidden-tech" aria-hidden="true">
+          <div class="sensor-mode-head">
+            <div><h2 id="sensorModeTitle">Sensores aguardando</h2></div>
+            <span id="sensorModeBadge" class="sensor-mode-badge idle">Inativo</span>
           </div>
-          <span id="sensorModeBadge" class="sensor-mode-badge idle">Inativo</span>
+          <p id="sensorModeText">O computador ainda não pediu acesso aos sensores.</p>
+          <div class="sensor-live-grid">
+            <div><strong id="sensorMovementValue">0%</strong></div>
+            <div><strong id="sensorGyroValue">0°/s</strong></div>
+            <div><strong id="sensorPacketValue">0</strong></div>
+            <div><strong id="sensorSourceValue">—</strong></div>
+          </div>
+          <div class="sensor-motion-meter"><span id="sensorMotionFill"></span></div>
+          <p id="sensorNotice">Sensor ativo.</p>
+          <p id="sensorDanceProgress">0 movimentos julgados</p>
+          <b id="sensorDanceRank">SEM ESTRELAS</b>
         </div>
-        <p id="sensorModeText" class="subtitle">O computador ainda não pediu acesso aos sensores.</p>
+
+        <button id="enableSensorsBtn" class="primary sensor-enable-button final-dance-permission" type="button">Ativar sensores</button>
 
         <div id="finalDanceSongCard" class="final-dance-song-card hidden">
           <img id="finalDanceSongCover" alt="" />
-          <div>
-            <span class="tiny-label">Música atual</span>
-            <strong id="finalDanceSongTitle">Just Dance</strong>
-            <small id="finalDanceSongArtist">—</small>
+          <strong id="finalDanceSongTitle">Just Dance</strong>
+          <small id="finalDanceSongArtist" class="final-dance-hidden-artist">—</small>
+        </div>
+
+        <div class="final-mobile-jd-hud" aria-live="polite">
+          <div class="final-mobile-jd-score-column" aria-label="Barra de score e estrelas">
+            <div id="mobileDanceScoreBar" class="final-mobile-jd-scorebar" aria-hidden="true">
+              <img id="mobileDanceScoreBarFill" src="minigames/just-dance/hud/images/scorebars/1P_bar.png" alt="" />
+            </div>
+            <div id="sensorDanceStars" class="final-mobile-jd-stars" aria-label="Progresso das cinco estrelas">
+              <span class="final-mobile-jd-star" data-threshold="2000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="4000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="6000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="8000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="10000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+            </div>
+          </div>
+
+          <div class="final-mobile-jd-feedback">
+            <strong id="sensorDanceScore" class="final-mobile-jd-score-number">0</strong>
+            <div id="sensorDanceJudgement" class="mobile-dance-judgement">—</div>
           </div>
         </div>
-        <button id="enableSensorsBtn" class="primary sensor-enable-button" type="button">Ativar sensores deste celular</button>
-        <div class="sensor-live-grid">
-          <div><span>Movimento</span><strong id="sensorMovementValue">0%</strong></div>
-          <div><span>Giro</span><strong id="sensorGyroValue">0°/s</strong></div>
-          <div><span>Pacotes</span><strong id="sensorPacketValue">0</strong></div>
-          <div><span>Fonte</span><strong id="sensorSourceValue">—</strong></div>
-        </div>
-        <div class="sensor-motion-meter" aria-hidden="true"><span id="sensorMotionFill"></span></div>
-        <div class="mobile-dance-score" aria-live="polite">
-          <div class="final-dance-progress-track" aria-hidden="true"><span id="finalDanceProgressFill"></span></div>
-          <div class="mobile-dance-score-head"><div><span>Score</span><strong id="sensorDanceScore">0</strong><small>/ 13.333</small></div><b id="sensorDanceRank">SEM ESTRELAS</b></div>
-          <div id="sensorDanceStars" class="mobile-dance-stars" aria-label="Estrelas"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-          <div id="sensorDanceJudgement" class="mobile-dance-judgement">—</div>
-          <p id="sensorDanceProgress">0 movimentos julgados</p>
-        </div>
-        <p id="sensorNotice" class="sensor-notice">O sensor só é enviado enquanto esta tela estiver ativa.</p>
       </section>
 
       <div id="boardControllerArea">
@@ -274,9 +288,9 @@
   </div>
 
   <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
-  <script src="controller.js?v=055-reconnect-dance" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
-  <script src="final-controller-shell.js?v=002-party-board"></script>
+  <script src="controller.js?v=056-jd-scorebar" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
+  <script src="final-controller-shell.js?v=003-jd-clean"></script>
 <script src="final-party-controller.js?v=002-reconnect-dance"></script>
-<span class="version-badge" data-version>V. 0.6.0 • Controle</span>
+<span class="version-badge" data-version>V. 0.6.1 • Controle Just Dance</span>
 </body>
 </html>

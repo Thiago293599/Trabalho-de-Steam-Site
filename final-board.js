@@ -55,6 +55,12 @@
 
   async function startPartyDance(){
     if(!state?.connected||!danceBridge||!network)return;
+    // O clique em "Começar" ainda é um gesto do usuário. Tentamos fullscreen
+    // imediatamente; se o navegador bloquear, o CSS ainda ocupa 100% da viewport.
+    try{
+      const target=document.getElementById("danceDevScreen")||document.documentElement;
+      if(!document.fullscreenElement&&target?.requestFullscreen)target.requestFullscreen({navigationUI:"hide"}).catch(()=>{});
+    }catch{}
     const ids=danceBridge.getSongIds?.()||["RainOverMe"];
     const songId=ids[rand(0,ids.length-1)];
     const info=danceBridge.getSongInfo?.(songId)||{title:"Just Dance",artist:""};
@@ -82,6 +88,7 @@
     if(!state?.currentMinigame||state.currentMinigame.id!=="just-dance")return;
     try{await network.setSensorMode(false)}catch{}
     danceBridge.closePartyDanceSong?.();
+    try{if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});}catch{}
 
     const scoreRows=[];
     const connectedPlayers=roomState?.players||[];
