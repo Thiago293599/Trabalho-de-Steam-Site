@@ -1384,3 +1384,62 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
 @keyframes onlineBoardReplicaIn{from{opacity:.35;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
 #finalBoardView[data-online-replica="1"] .final-board-token{transition:left .28s cubic-bezier(.2,.75,.2,1),top .28s cubic-bezier(.2,.75,.2,1)}
 #finalBoardView[data-online-replica="1"] .final-board-mode-badge::after{content:" • sincronizado";opacity:.62}
+
+
+/* ==========================================================
+   V38 — Online usa exclusivamente a nova interface
+   ========================================================== */
+#finalMatchSetup.is-online-v2{
+  display:block;
+}
+#finalMatchSetup.is-online-v2 > .final-form-grid,
+#finalMatchSetup.is-online-v2 > .final-rule-summary,
+#finalMatchSetup.is-online-v2 > .final-bot-section,
+#finalMatchSetup.is-online-v2 > #finalRuleMessage,
+#finalMatchSetup.is-online-v2 > .final-actions-row,
+#finalMatchSetup.is-online-v2 > .final-dev-note{
+  display:none!important;
+}
+#finalMatchSetup.is-online-v2 #finalCompatibilityBadge{
+  display:none!important;
+}
+#finalMatchSetup.is-online-v2 .final-setup-head{
+  margin-bottom:0;
+}
+#finalMatchSetup.is-online-v2 #finalMatchModeTitle::after{
+  content:" • Internet";
+  opacity:.58;
+  font-weight:600;
+}
+#finalOnlineV2Panel{
+  width:100%;
+  box-sizing:border-box;
+}
+#finalMatchSetup.is-online-v2 #finalOnlineV2Panel{
+  display:block;
+  margin-top:18px;
+  animation:finalOnlineV38In .32s cubic-bezier(.2,.8,.2,1);
+}
+#finalMatchSetup.is-online-v2 #finalOnlineV2Panel.hidden{
+  display:none!important;
+}
+@keyframes finalOnlineV38In{
+  from{opacity:0;transform:translateY(12px) scale(.985)}
+  to{opacity:1;transform:none}
+}
+.final-online-v2-panel .final-online-v2-head strong{
+  font-size:1.06rem;
+}
+.final-online-v2-panel .final-online-v2-head p{
+  max-width:760px;
+}
+.final-online-v2-actions{
+  max-width:680px;
+}
+.final-online-v2-actions label{
+  font-weight:800;
+}
+.final-online-v2-actions input,
+.final-online-v2-join input{
+  min-height:46px;
+}

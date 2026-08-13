@@ -316,7 +316,7 @@
     if (continueButton) {
       const connected = selectedMatchMode === "phones" || String(effectiveControl).startsWith("phone-");
       continueButton.textContent = selectedMatchMode === "online"
-        ? "Continuar para o protótipo online"
+        ? "Abrir sala Online"
         : connected
           ? "Criar sala e iniciar tabuleiro"
           : "Iniciar tabuleiro experimental";
@@ -397,10 +397,18 @@
     if (continueButton) {
       continueButton.textContent = mode === "local"
         ? "Iniciar tabuleiro experimental"
-        : "Continuar para o protótipo conectado";
+        : mode === "online"
+          ? "Abrir sala Online"
+          : "Criar sala e iniciar tabuleiro";
     }
     renderMatchRules();
     qs("#finalMatchSetup")?.scrollIntoView({ behavior:"smooth", block:"nearest" });
+
+    if (mode === "online") {
+      setTimeout(() => window.STEAMOnlineV2?.open?.(), 0);
+    } else {
+      window.STEAMOnlineV2?.close?.();
+    }
   }
 
   function fillLegacyNames() {
@@ -434,13 +442,21 @@
       window.STEAMPartyBoard?.start(config)
     ) return;
 
-    exitShellToLegacy();
-
+    // V38: Online pertence à NOVA interface. Nunca esconder o finalShell
+    // e nunca acionar #onlineModeBtn da build antiga.
     if (config.mode === "online") {
-      document.getElementById("onlineModeBtn")?.click();
+      showView("play");
+      qs("#finalMatchSetup")?.classList.remove("hidden");
+      if (window.STEAMOnlineV2?.open) {
+        window.STEAMOnlineV2.open();
+      } else {
+        qs("#finalOnlineV2Panel")?.classList.remove("hidden");
+        showToast("Carregando interface Online…");
+      }
       return;
     }
 
+    exitShellToLegacy();
     document.getElementById("localModeBtn")?.click();
     setTimeout(() => {
       if (config.mode === "phones" || String(config.controlMethod).startsWith("phone-")) {

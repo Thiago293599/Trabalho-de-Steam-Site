@@ -47,7 +47,39 @@
 
   function ack(event,payload){return connect().then(sock=>new Promise((resolve,reject)=>sock.timeout(7000).emit(event,payload,(err,res)=>err?reject(new Error("Servidor não respondeu.")):res?.ok?resolve(res):reject(new Error(res?.message||"Ação recusada.")))))}
   function buildConfig(){let raw={};try{raw=JSON.parse(localStorage.getItem("steamPartyMatchConfigV1")||"{}")||{}}catch{}return{...raw,mode:"online",humanPlayers:Math.max(2,state?.players?.length||2),controlMethod:"online",motionMinigamesEnabled:false,minigamesEnabled:true}}
-  function showPanel(){window.STEAMParty?.showView?.("match");panel.classList.remove("hidden");document.querySelector("#finalMatchSetup")?.scrollIntoView({behavior:"smooth",block:"nearest"})}
+  function placeOnlinePanel(){
+    const setup=document.querySelector("#finalMatchSetup");
+    if(!setup)return null;
+    if(panel.parentElement!==setup)setup.appendChild(panel);
+    return setup;
+  }
+
+  function showPanel(){
+    // V38: "match" nunca foi uma view válida da nova interface.
+    // Isso escondia TODAS as views e deixava somente fundo/tema/versão na tela.
+    window.STEAMParty?.showView?.("play");
+
+    const setup=placeOnlinePanel();
+    setup?.classList.remove("hidden");
+    setup?.classList.add("is-online-v2");
+    panel.classList.remove("hidden");
+
+    const profile=window.STEAMParty?.getActiveProfile?.();
+    if(profile?.name&&nameInput&&!nameInput.value)nameInput.value=profile.name;
+
+    if(!configured){
+      setStatus("Servidor Online público não configurado. Configure SERVER_URL para criar ou entrar em salas pela Internet.");
+    }else if(!state){
+      setStatus("Crie uma sala ou entre usando um código. Cada jogador abre este mesmo site no próprio dispositivo.");
+    }
+
+    setup?.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  function hidePanel(){
+    panel.classList.add("hidden");
+    document.querySelector("#finalMatchSetup")?.classList.remove("is-online-v2");
+  }
 
   function renderLobby(){
     if(!state)return;
@@ -119,10 +151,33 @@
   leaveBtn?.addEventListener("click",()=>{if(socket&&roomCode)socket.emit("online:leave-room",{roomCode},()=>{});reset()});
   rollButton?.addEventListener("click",()=>{if(boardView?.dataset.onlineReplica!=="1")return;if(v2State?.phase!=="board"||v2State.currentPlayerId!==playerId)return;rollButton.disabled=true;sendAction("roll")});
   copyInvite?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(inviteUrl());window.STEAMParty?.showToast?.("Link Online copiado.")}catch{}});
-  document.querySelector('[data-match-mode="online"]')?.addEventListener("click",()=>{showPanel();const profile=window.STEAMParty?.getActiveProfile?.();if(profile?.name&&!nameInput.value)nameInput.value=profile.name});
-  document.querySelector("#finalContinuePrototype")?.addEventListener("click",e=>{if(!selectedOnline())return;e.preventDefault();e.stopImmediatePropagation();showPanel()},true);
+  document.querySelector('[data-match-mode="online"]')?.addEventListener("click",()=>showPanel());
+  document.querySelectorAll('[data-match-mode="local"],[data-match-mode="phones"]').forEach(btn=>{
+    btn.addEventListener("click",()=>hidePanel());
+  });
 
-  window.STEAMOnlineV2=Object.freeze({publishState(next){if(!isHost||!socket||!roomCode)return;v2State=next;socket.emit("online:v2-state",{roomCode,state:next},()=>{})},sendAction,getRoomCode:()=>roomCode,getPlayerId:()=>playerId,isHost:()=>isHost});
+  // Captura antes do listener antigo do shell e impede qualquer queda no protótipo legado.
+  document.querySelector("#finalContinuePrototype")?.addEventListener("click",e=>{
+    if(!selectedOnline())return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    showPanel();
+  },true);
+
+  window.STEAMOnlineV2=Object.freeze({
+    open:showPanel,
+    close:hidePanel,
+    publishState(next){
+      if(!isHost||!socket||!roomCode)return;
+      v2State=next;
+      socket.emit("online:v2-state",{roomCode,state:next},()=>{});
+    },
+    sendAction,
+    getRoomCode:()=>roomCode,
+    getPlayerId:()=>playerId,
+    isHost:()=>isHost
+  });
 
   // Link de convite: cada pessoa abre o MESMO site, mesmo estando em outra rede.
   const queryCode=normalize(new URLSearchParams(location.search).get("onlineRoom"));
