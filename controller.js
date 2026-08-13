@@ -199,12 +199,14 @@ const PHONE_DANCE_SCORE_TUNING = Object.freeze({
   WhereHaveYou: Object.freeze({ floor:.24, perfectRef:.58, minRef:.48, maxRef:.68, perfectQ:.76, superQ:.58, goodQ:.39, okQ:.20 })
 });
 const PHONE_DANCE_MSM_LAYOUT_TUNING = Object.freeze({
+  // V32: a forma do movimento/reference classifier é a fonte principal da nota.
+  // Coverage/intensidade servem como evidência auxiliar, não como "atalho" para score.
   modern: Object.freeze({
-    classifierWeight:.62, coverageWeight:.20, motionWeight:.11, peakWeight:.07,
+    classifierWeight:.80, timingWeight:.09, coverageWeight:.05, motionWeight:.04, peakWeight:.02,
     adaptiveCeiling:true, competitive:false
   }),
   "legacy-wiiu": Object.freeze({
-    classifierWeight:.86, coverageWeight:.07, motionWeight:.05, peakWeight:.02,
+    classifierWeight:.90, timingWeight:.04, coverageWeight:.025, motionWeight:.02, peakWeight:.015,
     adaptiveCeiling:false, competitive:false
   })
 });
@@ -565,7 +567,28 @@ function phoneIsShake(move){ return /(?:^|[^a-z0-9])shake(?:[^a-z0-9]|\d|$)/i.te
 function phoneMakeStats(){return{count:0,active:0,motionSum:0,motionPeak:0,rotationSum:0,rotationPeak:0,jerkSum:0,jerkPeak:0,reversals:0,strongReversals:0,prevMotion:null,prevUnit:null,prevTime:0,samples:[]};}
 function phoneDanceResetLocal(clearQueue=true){phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;phoneDanceJudgedMoves.clear();if(clearQueue)phoneDancePendingResults.clear();phoneDanceLocal={totalMoves:phoneDanceMoves.length,judgedMoves:0,rawScore:0,score:0,stars:0,rank:"SEM ESTRELAS",lastJudgement:"",judgementCounts:{PERFECT:0,SUPER:0,GOOD:0,OK:0,YEAH:0,X:0}};renderControllerDanceScore(phoneDanceLocal);}
 function phoneDanceRank(d){const score=Math.max(0,Math.min(PHONE_DANCE_MAX_SCORE,Number(d.score||0))),stars=[2000,4000,6000,8000,10000].filter(x=>score>=x).length;d.stars=stars;d.rank=score>=12000?"MEGASTAR":score>=11000?"SUPERSTAR":stars?`${stars} ESTRELA${stars===1?"":"S"}`:"SEM ESTRELAS";}
-function phoneDanceApplyLocalResult(move,result){if(!phoneDanceLocal)phoneDanceResetLocal(false);const per=PHONE_DANCE_MAX_SCORE/Math.max(1,phoneDanceMoves.length);phoneDanceLocal.rawScore=Math.min(PHONE_DANCE_MAX_SCORE,Number(phoneDanceLocal.rawScore||0)+per*PHONE_DANCE_WEIGHTS[result.judgement]);phoneDanceLocal.score=Math.round(phoneDanceLocal.rawScore);phoneDanceLocal.judgedMoves++;phoneDanceLocal.totalMoves=phoneDanceMoves.length;phoneDanceLocal.lastJudgement=result.judgement;phoneDanceLocal.lastMoveName=move?.name||"";phoneDanceLocal.lastQuality=result.quality;phoneDanceLocal.judgementCounts[result.judgement]=(phoneDanceLocal.judgementCounts[result.judgement]||0)+1;phoneDanceRank(phoneDanceLocal);renderControllerDanceScore(phoneDanceLocal,true);}
+function phoneDanceApplyLocalResult(move,result){
+  if(!phoneDanceLocal)phoneDanceResetLocal(false);
+  const per=PHONE_DANCE_MAX_SCORE/Math.max(1,phoneDanceMoves.length);
+  const factor=Number.isFinite(Number(result?.scoreFactor))
+    ? phoneClamp01(result.scoreFactor)
+    : phoneDanceScoreFactor(result);
+
+  phoneDanceLocal.rawScore=Math.min(
+    PHONE_DANCE_MAX_SCORE,
+    Number(phoneDanceLocal.rawScore||0)+per*factor
+  );
+  phoneDanceLocal.score=Math.round(phoneDanceLocal.rawScore);
+  phoneDanceLocal.judgedMoves++;
+  phoneDanceLocal.totalMoves=phoneDanceMoves.length;
+  phoneDanceLocal.lastJudgement=result.judgement;
+  phoneDanceLocal.lastMoveName=move?.name||"";
+  phoneDanceLocal.lastQuality=result.quality;
+  phoneDanceLocal.lastScoreFactor=factor;
+  phoneDanceLocal.judgementCounts[result.judgement]=(phoneDanceLocal.judgementCounts[result.judgement]||0)+1;
+  phoneDanceRank(phoneDanceLocal);
+  renderControllerDanceScore(phoneDanceLocal,true);
+}
 function phoneMeasureServerClock(force=false){if(!socket?.connected||!joinedRoom)return;const now=performance.now();if(!force&&now-phoneDanceLatencyMeasuredAt<5000)return;phoneDanceLatencyMeasuredAt=now;const wallStart=Date.now(),perfStart=performance.now();socket.emit("controller:dance-clock-ping",{roomCode:joinedRoom},response=>{if(!response?.ok)return;const rtt=Math.max(0,Math.min(4000,performance.now()-perfStart));const midpoint=wallStart+rtt/2;const offset=Number(response.serverTime||Date.now())-midpoint;phoneDanceServerRttMs=phoneDanceServerRttMs*.72+rtt*.28;phoneDanceServerOffsetMs=phoneDanceServerOffsetMs*.72+offset*.28;});}
 function phoneUpdateCalibration(sample){const motion=phoneMagnitude(sample?.acceleration),rot=phoneMagnitude(sample?.rotationRate),g=phoneMagnitude(sample?.accelerationIncludingGravity);if(g>6&&g<13)phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.992+g*.008;if(motion<.30&&rot<18){phoneDanceCalibration.noiseMotion=phoneDanceCalibration.noiseMotion*.992+motion*.008;phoneDanceCalibration.noiseRotation=phoneDanceCalibration.noiseRotation*.992+rot*.008;phoneDanceCalibration.quietSamples++;}else{const targetM=Math.max(1.8,Math.min(7.5,motion*1.10));const targetR=Math.max(90,Math.min(520,rot*1.08));phoneDanceCalibration.motionScale=phoneDanceCalibration.motionScale*.997+targetM*.003;phoneDanceCalibration.rotationScale=phoneDanceCalibration.rotationScale*.997+targetR*.003;}}
 
@@ -723,6 +746,70 @@ async function phoneApplyDanceSession(payload){
   if(sensorModeRequested&&sensorPermissionGranted&&!sensorStreaming)startSensorStreaming();
 }
 function phoneMoveIndexAt(ms){for(let i=0;i<phoneDanceMoves.length;i++){const m=phoneDanceMoves[i],start=Number(m.time||0)-130,end=Number(m.time||0)+Number(m.duration||0)+170;if(ms>=start&&ms<=end)return i;if(start>ms)break;}return-1;}
+
+function phoneDanceTimingEvidence(stats, move, profile) {
+  const samples = stats?.samples || [];
+  if (samples.length < 4) return 0;
+
+  const first = Number(samples[0]?.timelineMs);
+  const last = Number(samples.at(-1)?.timelineMs);
+  if (!Number.isFinite(first) || !Number.isFinite(last) || last <= first) return .45;
+
+  const moveStart = Number(move?.time || first);
+  const moveDuration = Math.max(180, Number(move?.duration || 0));
+  const referenceDuration = Math.max(
+    180,
+    Number(profile?.duration || 0) > 0 ? Number(profile.duration) * 1000 : moveDuration
+  );
+
+  const actualSpan = Math.max(1, last - first);
+  const expectedCenter = moveStart + moveDuration / 2;
+  const actualCenter = (first + last) / 2;
+
+  // Penaliza executar muito comprimido/esticado, mas tolera variação humana.
+  const durationRatio = Math.max(.08, actualSpan / referenceDuration);
+  const durationScore = phoneClamp01(
+    Math.exp(-Math.abs(Math.log(durationRatio)) * 1.18)
+  );
+
+  // O movimento deve ocorrer perto do momento correspondente da coreografia.
+  const centerError = Math.abs(actualCenter - expectedCenter);
+  const centerScore = phoneClamp01(
+    1 - centerError / Math.max(260, referenceDuration * .72)
+  );
+
+  return phoneClamp01(durationScore * .58 + centerScore * .42);
+}
+
+function phoneDanceScoreFactor(result, songId = phoneDanceSession?.songId) {
+  const judgement = String(result?.judgement || "X").toUpperCase();
+  if (judgement === "X") return 0;
+  if (judgement === "YEAH") return 1;
+
+  const q = phoneClamp01(result?.quality);
+  const cfg = phoneDanceGetScoreTuning(songId);
+
+  // Score contínuo: dois PERFECTs podem valer diferente conforme a proximidade
+  // com o movimento de referência. O rótulo continua sendo o feedback visual.
+  if (judgement === "PERFECT") {
+    const t = phoneClamp01((q - cfg.perfectQ) / Math.max(.001, 1 - cfg.perfectQ));
+    return .88 + t * .12;
+  }
+  if (judgement === "SUPER") {
+    const t = phoneClamp01((q - cfg.superQ) / Math.max(.001, cfg.perfectQ - cfg.superQ));
+    return .66 + t * .22;
+  }
+  if (judgement === "GOOD") {
+    const t = phoneClamp01((q - cfg.goodQ) / Math.max(.001, cfg.superQ - cfg.goodQ));
+    return .40 + t * .26;
+  }
+  if (judgement === "OK") {
+    const t = phoneClamp01((q - cfg.okQ) / Math.max(.001, cfg.goodQ - cfg.okQ));
+    return .15 + t * .25;
+  }
+  return 0;
+}
+
 function phoneJudge(stats,move){
   if(!stats||stats.count<4)return{judgement:"X",quality:0,classifierMatch:0,classifierRaw:0};
   const n=Math.max(1,stats.count);
@@ -730,10 +817,19 @@ function phoneJudge(stats,move){
   const avgMotion=stats.motionSum/n;
   const avgRot=stats.rotationSum/n;
   const coverageQ=phoneClamp01((coverage-.06)/.58);
-  const motionEvidence=Math.max(phoneClamp01(avgMotion/(phoneDanceCalibration.motionScale*1.10)),phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*1.18)));
-  const peakEvidence=Math.max(phoneClamp01(stats.motionPeak/(phoneDanceCalibration.motionScale*1.95)),phoneClamp01(stats.rotationPeak/(phoneDanceCalibration.rotationScale*2.55)));
+  const motionEvidence=Math.max(
+    phoneClamp01(avgMotion/(phoneDanceCalibration.motionScale*1.10)),
+    phoneClamp01(avgRot/(phoneDanceCalibration.rotationScale*1.18))
+  );
+  const peakEvidence=Math.max(
+    phoneClamp01(stats.motionPeak/(phoneDanceCalibration.motionScale*1.95)),
+    phoneClamp01(stats.rotationPeak/(phoneDanceCalibration.rotationScale*2.55))
+  );
   const profile=phoneDanceProfiles.get(String(move?.name||"").toLowerCase())||null;
-  const layoutCfg=profile?.format==="msm"?phoneDanceGetMsmLayoutTuning(profile):PHONE_DANCE_MSM_LAYOUT_TUNING.modern;
+  const layoutCfg=profile?.format==="msm"
+    ? phoneDanceGetMsmLayoutTuning(profile)
+    : PHONE_DANCE_MSM_LAYOUT_TUNING.modern;
+  const timingEvidence=phoneDanceTimingEvidence(stats,move,profile);
 
   let rawClassifier=profile?phoneClassifierMatch(profile,stats,move):0;
   let classifierRunnerUp=0,classifierMargin=rawClassifier;
@@ -769,12 +865,23 @@ function phoneJudge(stats,move){
   let q=0;
   if(profile){
     q=mobileClassifier*layoutCfg.classifierWeight
+      +timingEvidence*Number(layoutCfg.timingWeight||0)
       +coverageQ*layoutCfg.coverageWeight
       +motionEvidence*layoutCfg.motionWeight
       +peakEvidence*layoutCfg.peakWeight;
   }else{
-    q=Math.min(.54,coverageQ*.55+motionEvidence*.30+peakEvidence*.15);
+    // Sem classifier não existe caminho para PERFECT: movimento bruto é apenas fallback.
+    q=Math.min(.48,
+      timingEvidence*.28+
+      coverageQ*.32+
+      motionEvidence*.25+
+      peakEvidence*.15
+    );
   }
+
+  // Um movimento forte mas com baixa semelhança ao reference não pode virar SUPER/PERFECT.
+  if(profile&&mobileClassifier<.22)q=Math.min(q,cfg.goodQ+.015);
+  if(profile&&mobileClassifier<.10)q=Math.min(q,cfg.okQ+.015);
 
   if(profile&&!phoneIsShake(move)){
     const chaos=phoneDanceChaosScore(stats);
@@ -801,6 +908,7 @@ function phoneJudge(stats,move){
       classifierRunnerUp:Math.round(classifierRunnerUp*1000)/1000,
       classifierMargin:Math.round(classifierMargin*1000)/1000,
       calibrationRef:ref,
+      timingMatch:Math.round(timingEvidence*1000)/1000,
       classifierLayout:profile?.layout||profile?.format||"none"
     };
   }
@@ -814,10 +922,28 @@ function phoneJudge(stats,move){
     classifierRunnerUp:Math.round(classifierRunnerUp*1000)/1000,
     classifierMargin:Math.round(classifierMargin*1000)/1000,
     calibrationRef:ref,
+    timingMatch:Math.round(timingEvidence*1000)/1000,
     classifierLayout:profile?.layout||profile?.format||"none"
   };
 }
-function phoneQueueResult(index,move,result){const payload={roomCode:joinedRoom,moveIndex:index,moveName:move?.name||`move-${index+1}`,goldMove:Boolean(move?.goldMove),totalMoves:phoneDanceMoves.length,movesRevision:phoneDanceMovesRevision,...result,scoredAt:Date.now(),source:"phone-v13-wherehaveyou-msm"};phoneDancePendingResults.set(index,payload);phoneDanceApplyLocalResult(move,result);phoneFlushDanceResults();}
+function phoneQueueResult(index,move,result){
+  const scoreFactor=phoneDanceScoreFactor(result);
+  const enriched={...result,scoreFactor};
+  const payload={
+    roomCode:joinedRoom,
+    moveIndex:index,
+    moveName:move?.name||`move-${index+1}`,
+    goldMove:Boolean(move?.goldMove),
+    totalMoves:phoneDanceMoves.length,
+    movesRevision:phoneDanceMovesRevision,
+    ...enriched,
+    scoredAt:Date.now(),
+    source:"phone-v32-reference-score"
+  };
+  phoneDancePendingResults.set(index,payload);
+  phoneDanceApplyLocalResult(move,enriched);
+  phoneFlushDanceResults();
+}
 function phoneFlushDanceResults(){if(!socket?.connected||!joinedRoom||!phoneDancePendingResults.size)return;for(const [index,payload] of [...phoneDancePendingResults]){socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:dance-judgement",payload,(error,response)=>{if(!error&&response?.ok){phoneDancePendingResults.delete(index);if(response.state)applyState(response.state);}});}}
 function phoneFinalizeActiveMove(){const i=phoneDanceActiveMoveIndex;if(i<0||phoneDanceJudgedMoves.has(i))return;const move=phoneDanceMoves[i];if(!move)return;const result=phoneJudge(phoneDanceStats,move);phoneDanceJudgedMoves.add(i);phoneQueueResult(i,move,result);phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;}
 function phoneSyncMoveWindow(){if(!phoneDanceReady||!phoneDanceClock.playing||!sensorStreaming)return;const current=phoneMoveIndexAt(phoneDanceClockNow());if(phoneDanceActiveMoveIndex>=0&&current!==phoneDanceActiveMoveIndex)phoneFinalizeActiveMove();if(current>=0&&!phoneDanceJudgedMoves.has(current)&&phoneDanceActiveMoveIndex!==current){phoneDanceActiveMoveIndex=current;phoneDanceStats=phoneMakeStats();}}
