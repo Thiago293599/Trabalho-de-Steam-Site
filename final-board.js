@@ -13,7 +13,7 @@
   partyLobby=$("#finalPartyLobbyOverlay"),partyRoomCode=$("#finalPartyRoomCode"),partyQr=$("#finalPartyQr"),partyJoinUrl=$("#finalPartyJoinUrl"),partyConnectedCount=$("#finalPartyConnectedCount"),partyConnectedPlayers=$("#finalPartyConnectedPlayers"),partyStart=$("#finalPartyStartMatch"),partyStatus=$("#finalPartyLobbyStatus");
   const network=window.STEAMPartyNetwork||null,danceBridge=window.STEAMJustDanceBridge||null,spaceTypes=["start","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good"],symbols={start:"INÍCIO",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"},colors=["cyan","green","orange","pink","purple","yellow"],shapes=["round","square","triangle","hex"],triples=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[7,24,25],[9,12,15],[12,16,20]];
   const TUTORIAL_KEY="steamPartyBoardTutorialSeenV1";
-  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0;
+  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,partyDanceBotScoreCache=new Map(),tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0;
   const api=()=>window.STEAMParty||{},toast=m=>api().showToast?.(m),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const avatar=p=>api().avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><rect x="18" y="18" width="84" height="84" rx="34" fill="#65f2c3"/></svg>`;
   const isPhoneMatch=match=>Boolean(match&&(match.mode==="phones"||String(match.controlMethod||"").startsWith("phone-")));
@@ -501,7 +501,7 @@
       playersList.appendChild(row)})}
   function renderTokens(){tokensLayer.innerHTML="";state.players.forEach(p=>{const pt=path[p.position]||path[0],t=document.createElement("div");t.className="final-board-token";t.dataset.playerId=p.id;t.dataset.slot=p.slot;t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`;t.innerHTML=avatar(p);tokensLayer.appendChild(t)})}
   function updateToken(p){const t=$(`[data-player-id="${CSS.escape(p.id)}"]`,tokensLayer),pt=path[p.position]||path[0];if(t&&pt){t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`}}
-  function partyState(phase="board",extra={}){if(!state)return{};return{phase,round:state.round,totalRounds:state.totalRounds,currentPlayerId:state.players[state.turnIndex]?.id||"",eventText:eventBox.textContent||"",players:state.players.map(p=>({id:p.id,name:p.name,human:p.human,bot:p.bot,difficulty:p.difficulty,position:p.position,score:p.score,laps:p.laps})),...extra}}
+  function partyState(phase="board",extra={}){if(!state)return{};return{phase,round:state.round,totalRounds:state.totalRounds,currentPlayerId:state.players[state.turnIndex]?.id||"",eventText:eventBox.textContent||"",players:state.players.map(p=>({id:p.id,slot:p.slot,name:p.name,human:p.human,bot:p.bot,difficulty:p.difficulty,position:p.position,score:p.score,laps:p.laps,avatarShape:p.avatarShape,avatarColor:p.avatarColor,avatarFace:p.avatarFace})),...extra}}
   function publish(phase="board",extra={}){
     if(state?.connected)network?.publishState(partyState(phase,extra));
     if(state?.onlineHost)window.STEAMOnlineV2?.publishState?.(partyState(phase,extra));
@@ -1084,6 +1084,7 @@
 
   function startPartyDanceBotFeedback(){
     stopPartyDanceBotFeedback();
+    partyDanceBotScoreCache=new Map();
     const bots=state?.players?.filter(player=>player.bot)||[];
     const timeline=danceBridge?.getMoveTimeline?.()||[];
     if(!bots.length||!timeline.length||!danceBridge?.applyBotMoveJudgement||!danceBridge?.getCurrentTimelineMs)return;
@@ -1113,12 +1114,15 @@
         partyDanceBotEvents[partyDanceBotEventCursor].atMs<=now+18
       ){
         const event=partyDanceBotEvents[partyDanceBotEventCursor++];
-        danceBridge.applyBotMoveJudgement(
+        const botDance=danceBridge.applyBotMoveJudgement(
           event.bot.id,
           event.judgement,
           event.move.index,
           Boolean(event.move.goldMove)
         );
+        if(botDance){
+          partyDanceBotScoreCache.set(String(event.bot.id),{...botDance});
+        }
       }
     },45);
   }
@@ -1126,6 +1130,7 @@
   async function startPartyDance(){
     if(!state?.connected||!danceBridge||!network)return;
     partyDanceFinishing=false;
+    partyDanceBotScoreCache=new Map();
     const ids=danceBridge.getSongIds?.()||["RainOverMe"];
     const songId=ids[rand(0,ids.length-1)];
     const info=danceBridge.getSongInfo?.(songId)||{title:"Just Dance",artist:""};
@@ -1202,12 +1207,13 @@
 
       state.players.filter(p=>p.bot).forEach(bot=>{
         const local=localDanceScores.find(item=>String(item.id)===String(bot.id));
-        const dance=local?.dance||{};
-        scoreRows.push({
-          player:bot,
-          score:Math.max(0,Number(dance.score||0)),
-          stars:Math.max(0,Number(dance.stars||0))
-        });
+        const cached=partyDanceBotScoreCache.get(String(bot.id))||{};
+        const localDance=local?.dance||{};
+        // O HUD/bridge pode ser limpo durante a saída da música. O cache do
+        // tabuleiro sobrevive até o ranking, então o bot nunca volta para 0.
+        const score=Math.max(0,Number(localDance.score||0),Number(cached.score||0));
+        const stars=Math.max(0,Number(localDance.stars||0),Number(cached.stars||0));
+        scoreRows.push({player:bot,score,stars});
       });
 
       // Mesmo se nenhum score estiver disponível, o resultado ainda fecha e
@@ -1241,6 +1247,7 @@
       renderPlayers();
       try{checkpoint("post-minigame","auto")}catch(error){console.error("[PartyBoard] checkpoint pós-JD:",error)}
       try{publish("minigame-result",{minigame:{id:"just-dance",title:state.currentDanceSong?.title||"Just Dance",status:"result",results}})}catch(error){console.error("[PartyBoard] publish resultado JD:",error)}
+      partyDanceBotScoreCache=new Map();
     }catch(error){
       console.error("[PartyBoard] Erro ao montar resultado do Just Dance:",error);
 

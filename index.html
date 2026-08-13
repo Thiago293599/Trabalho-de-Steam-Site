@@ -16,7 +16,7 @@
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
   <link rel="stylesheet" href="final-shell.css?v=002-board-alpha" />
-  <link rel="stylesheet" href="final-board.css?v=015-v36" />
+  <link rel="stylesheet" href="final-board.css?v=017-v37-online" />
 </head>
 <body class="site-loading">
 
@@ -376,7 +376,7 @@
             <button id="finalSaveMatch" class="final-secondary" type="button">Salvar configuração</button>
             <button id="finalContinuePrototype" class="final-primary" type="button">Iniciar tabuleiro experimental</button>
           <div id="finalOnlineV2Panel" class="final-online-v2-panel hidden">
-            <div class="final-online-v2-head"><span class="final-online-live-dot"></span><div><strong>Online • Nova interface (Alpha)</strong><p>Crie ou entre em uma sala. O host usa o tabuleiro novo e os outros jogadores controlam seus turnos pela própria tela.</p></div></div>
+            <div class="final-online-v2-head"><span class="final-online-live-dot"></span><div><strong>Online • Tabuleiro Completo (Beta)</strong><p>Crie ou entre em uma sala pela Internet. Cada jogador vê o tabuleiro completo e sincronizado no próprio navegador.</p></div></div>
             <div id="finalOnlineV2Actions" class="final-online-v2-actions">
               <label>Seu nome<input id="finalOnlineV2Name" maxlength="18" placeholder="Jogador"></label>
               <div class="final-online-v2-buttons"><button id="finalOnlineV2Create" class="final-primary" type="button">Criar sala</button><button id="finalOnlineV2ShowJoin" class="final-secondary" type="button">Entrar em sala</button></div>
@@ -386,10 +386,12 @@
               <div><span>Código da sala</span><strong id="finalOnlineV2RoomCode">------</strong></div>
               <div id="finalOnlineV2Players" class="final-online-v2-players"></div>
               <p id="finalOnlineV2Status">Aguardando jogadores…</p>
+              <div id="finalOnlineV2Invite" class="final-online-v2-invite hidden"></div>
+              <button id="finalOnlineV2CopyInvite" class="final-secondary hidden" type="button">Copiar link de convite</button>
               <div class="final-online-v2-buttons"><button id="finalOnlineV2Start" class="final-primary hidden" type="button">Iniciar tabuleiro online</button><button id="finalOnlineV2Leave" class="final-secondary" type="button">Sair da sala</button></div>
             </div>
             <div id="finalOnlineV2Remote" class="final-online-v2-remote hidden">
-              <p class="final-eyebrow">Controle Online</p><h3 id="finalOnlineV2RemoteTitle">Aguardando o host</h3><p id="finalOnlineV2RemoteText">O tabuleiro aparece no computador do host.</p>
+              <p class="final-eyebrow">Online</p><h3 id="finalOnlineV2RemoteTitle">Aguardando o host</h3><p id="finalOnlineV2RemoteText">O tabuleiro completo aparece neste dispositivo.</p>
               <div id="finalOnlineV2RemoteScore" class="final-online-v2-score">0 PTS</div>
               <button id="finalOnlineV2Roll" class="final-primary" type="button" disabled>Rolar dado</button>
               <div id="finalOnlineV2Answers" class="final-online-v2-answer-grid"></div>
@@ -1324,8 +1326,8 @@
   <script src="script.js?v=0710-v36" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <script src="final-party-network.js?v=003-motion-sensor"></script>
   <script src="final-shell.js?v=004-saves"></script>
-  <script src="final-board.js?v=013-v36"></script>
-  <script src="final-online-v2.js?v=001-alpha"></script>
+  <script src="final-board.js?v=014-v37"></script>
+  <script src="final-online-v2.js?v=002-full-board"></script>
   <script src="final-presentation.js?v=001-demo"></script>
   <script src="final-save-manager.js?v=001-checkpoints"></script>
   <span class="version-badge" data-version>V. 1.1.3 • JD Finish Polish</span>
