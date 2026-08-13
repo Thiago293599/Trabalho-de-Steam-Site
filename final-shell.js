@@ -19,7 +19,8 @@
     play: qs("#finalPlayMenu"),
     profiles: qs("#finalProfilesMenu"),
     how: qs("#finalHowMenu"),
-    settings: qs("#finalSettingsMenu")
+    settings: qs("#finalSettingsMenu"),
+    board: qs("#finalBoardView")
   };
 
   let selectedMatchMode = "local";
@@ -315,6 +316,14 @@
     badge.textContent = samePcMulti ? "Modo simplificado" : "Compatível";
     badge.classList.toggle("is-warning", samePcMulti);
 
+    const continueButton = qs("#finalContinuePrototype");
+    if (continueButton) {
+      const boardAlphaSupported = selectedMatchMode === "local" && effectiveControl === "keyboard";
+      continueButton.textContent = boardAlphaSupported
+        ? "Iniciar tabuleiro experimental"
+        : "Continuar para o protótipo conectado";
+    }
+
     if (samePcMulti) {
       message.textContent = "Com 2–4 humanos no mesmo PC usando teclado, os minigames entre rodadas ficam desativados. O tabuleiro continua normalmente.";
     } else if (effectiveControl === "phone-motion") {
@@ -358,6 +367,7 @@
       bots,
       minigamesEnabled: rules.minigames,
       motionMinigamesEnabled: rules.motion,
+      rounds: Math.max(1, Number(qs("#finalRoundCount")?.value || CONFIG.board?.defaultRounds || 5)),
       activeProfileId: activeProfileId(),
       savedAt: new Date().toISOString()
     };
@@ -377,6 +387,12 @@
     if (mode === "phones") qs("#finalControlMethod").value = "phone-motion";
     if (mode === "online") qs("#finalControlMethod").value = "phone-touch";
     if (mode === "local") qs("#finalControlMethod").value = "keyboard";
+    const continueButton = qs("#finalContinuePrototype");
+    if (continueButton) {
+      continueButton.textContent = mode === "local"
+        ? "Iniciar tabuleiro experimental"
+        : "Continuar para o protótipo conectado";
+    }
     renderMatchRules();
     qs("#finalMatchSetup")?.scrollIntoView({ behavior:"smooth", block:"nearest" });
   }
@@ -404,6 +420,11 @@
 
   function openLegacyFromConfig() {
     const config = saveMatchConfig();
+
+    // V15: o tabuleiro novo já roda localmente. A ponte completa do
+    // tabuleiro novo com celulares/online será a próxima etapa.
+    if (config.mode === "local" && window.STEAMPartyBoard?.start(config)) return;
+
     exitShellToLegacy();
 
     if (config.mode === "online") {
@@ -466,6 +487,16 @@
     qs("#finalGameTitle").textContent = CONFIG.workingTitle;
     document.title = CONFIG.workingTitle;
   }
+
+  window.STEAMParty = Object.freeze({
+    getProfiles,
+    getActiveProfile,
+    avatarSvg,
+    saveMatchConfig,
+    showView,
+    showToast,
+    returnToShellMain
+  });
 
   renderProfileChip();
   fillLegacyNames();

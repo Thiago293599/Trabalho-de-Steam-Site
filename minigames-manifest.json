@@ -1,15 +1,51 @@
 {
-  "schemaVersion": 1,
-  "description": "Registro modular inicial de minigames. O seletor futuro filtrará por controles, sensores e quantidade de jogadores.",
-  "examples": [
+  "schemaVersion": 2,
+  "selectionRules": {
+    "sensorRequiredFalseWorksWith": [
+      "keyboard",
+      "phone-touch",
+      "phone-motion"
+    ],
+    "sensorRequiredTrueWorksWith": [
+      "phone-motion"
+    ],
+    "samePcMultiHumanKeyboard": "no-minigames"
+  },
+  "minigames": [
     {
-      "id": "just-dance",
-      "title": "Just Dance",
-      "status": "existing-prototype",
+      "id": "drone-route",
+      "title": "Rota do Drone",
+      "status": "implemented-alpha",
       "players": {
         "min": 1,
         "max": 4
       },
+      "teamType": "free-for-all",
+      "controls": [
+        "keyboard",
+        "phone-touch",
+        "phone-motion"
+      ],
+      "sensorRequired": false,
+      "orientation": "landscape",
+      "botsSupported": true,
+      "topicTags": [
+        "pitagoras",
+        "tecnologia",
+        "monitoramento",
+        "rota"
+      ],
+      "educationalGoal": "Calcular a distância direta em um triângulo retângulo."
+    },
+    {
+      "id": "just-dance",
+      "title": "Just Dance",
+      "status": "existing-prototype-awaiting-board-bridge",
+      "players": {
+        "min": 1,
+        "max": 4
+      },
+      "teamType": "free-for-all",
       "controls": [
         "phone-motion"
       ],
@@ -21,13 +57,14 @@
       ]
     },
     {
-      "id": "drone-route",
-      "title": "Rota do Drone",
+      "id": "slope-sensor",
+      "title": "Sensor de Encosta",
       "status": "planned",
       "players": {
         "min": 1,
         "max": 4
       },
+      "teamType": "free-for-all",
       "controls": [
         "keyboard",
         "phone-touch"
@@ -36,9 +73,32 @@
       "orientation": "landscape",
       "botsSupported": true,
       "topicTags": [
-        "pitagoras",
-        "tecnologia",
-        "monitoramento"
+        "trigonometria",
+        "deslizamento",
+        "sensores"
+      ]
+    },
+    {
+      "id": "satellite-scale",
+      "title": "Mapa de Satélite",
+      "status": "planned",
+      "players": {
+        "min": 1,
+        "max": 4
+      },
+      "teamType": "free-for-all",
+      "controls": [
+        "keyboard",
+        "phone-touch"
+      ],
+      "sensorRequired": false,
+      "orientation": "landscape",
+      "botsSupported": true,
+      "topicTags": [
+        "tales",
+        "escala",
+        "satélite",
+        "mapas"
       ]
     }
   ]

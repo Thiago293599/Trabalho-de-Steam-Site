@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   window.STEAM_PARTY_CONFIG = Object.freeze({
-    version: "0.3.0-base",
+    version: "0.4.0-board-alpha",
     workingTitle: "Missão: Prevenir Desastres",
     titleIsProvisional: true,
     theme: "Tecnologia, Matemática e Desastres Ambientais",
@@ -11,7 +11,11 @@
       diceMin: 1,
       diceMax: 10,
       visualDiceFaces: 6,
-      minigameAfterRound: true
+      minigameAfterRound: true,
+      defaultRounds: 5,
+      supportedRounds: Object.freeze([5, 10, 15]),
+      spaces: 28,
+      minigameReward: 10
     }),
 
     controls: Object.freeze({

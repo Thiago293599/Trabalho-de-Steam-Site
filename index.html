@@ -15,7 +15,8 @@
   </script>
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
-  <link rel="stylesheet" href="final-shell.css?v=001-base-nova" />
+  <link rel="stylesheet" href="final-shell.css?v=002-board-alpha" />
+  <link rel="stylesheet" href="final-board.css?v=001-board-alpha" />
 </head>
 <body class="site-loading">
 
@@ -279,6 +280,14 @@
                 <option value="phone-motion">Celular com sensores</option>
               </select>
             </label>
+            <label>
+              Rodadas
+              <select id="finalRoundCount">
+                <option value="5">5 rodadas • rápida</option>
+                <option value="10">10 rodadas • normal</option>
+                <option value="15">15 rodadas • longa</option>
+              </select>
+            </label>
           </div>
 
           <div class="final-rule-summary">
@@ -301,11 +310,40 @@
 
           <div class="final-actions-row">
             <button id="finalSaveMatch" class="final-secondary" type="button">Salvar configuração</button>
-            <button id="finalContinuePrototype" class="final-primary" type="button">Continuar para o protótipo</button>
+            <button id="finalContinuePrototype" class="final-primary" type="button">Iniciar tabuleiro experimental</button>
           </div>
           <p class="final-dev-note">Nesta primeira base, as regras e bots já são configurados e salvos. A integração completa deles ao tabuleiro novo será feita nas próximas etapas.</p>
         </div>
       </div>
+    </section>
+
+    <section id="finalBoardView" class="final-view final-board-view hidden">
+      <div class="final-board-shell">
+        <header class="final-board-topbar">
+          <div><p class="final-eyebrow">Partida experimental</p><h2 id="finalBoardRound">Rodada 1 / 5</h2></div>
+          <div class="final-board-top-actions"><span id="finalBoardModeBadge" class="final-status-pill">Local</span><button id="finalBoardExit" class="final-secondary" type="button">Sair da partida</button></div>
+        </header>
+        <div class="final-board-layout">
+          <aside class="final-player-sidebar"><div class="final-section-title"><div><strong>Jogadores</strong><small>Ordem dos turnos</small></div></div><div id="finalBoardPlayers" class="final-board-player-list"></div></aside>
+          <main class="final-board-stage-wrap">
+            <div id="finalBoardStage" class="final-board-stage" aria-label="Tabuleiro">
+              <div class="final-board-center">
+                <div class="final-board-mission-mark">CENTRAL DE MONITORAMENTO</div>
+                <div id="finalBoardTurnAvatar" class="final-board-turn-avatar"></div><p>Vez de</p><h3 id="finalBoardTurnName">Jogador</h3><p id="finalBoardInstruction">Role o dado para continuar.</p>
+                <div class="final-dice-zone"><div id="finalDiceCube" class="final-dice-cube" aria-hidden="true"><span class="face front">1</span><span class="face back">2</span><span class="face right">3</span><span class="face left">4</span><span class="face top">5</span><span class="face bottom">6</span></div><button id="finalRollDice" class="final-primary final-roll-button" type="button">Rolar dado</button><strong id="finalDiceResult" class="final-dice-result" aria-live="polite"></strong></div>
+                <div id="finalBoardEvent" class="final-board-event">O dado digital possui 6 faces visuais e pode sortear de 1 a 10.</div>
+              </div>
+              <div id="finalBoardSpaces" class="final-board-spaces"></div><div id="finalBoardTokens" class="final-board-tokens"></div>
+            </div>
+          </main>
+        </div>
+      </div>
+      <div id="finalMinigameOverlay" class="final-minigame-overlay hidden" aria-live="polite"><div class="final-minigame-card">
+        <div id="finalMinigameIntro"><p class="final-eyebrow">Fim da rodada</p><h2>Minigame!</h2><div id="finalMinigameIcon" class="final-minigame-icon">△</div><h3 id="finalMinigameTitle">Rota do Drone</h3><p id="finalMinigameDescription">Use a matemática para cumprir a missão.</p><button id="finalStartMinigame" class="final-primary" type="button">Começar</button></div>
+        <div id="finalDroneGame" class="final-drone-game hidden"><div class="final-drone-visual" aria-hidden="true"><div class="final-route-leg final-route-a"><span id="finalDroneA">6 km</span></div><div class="final-route-leg final-route-b"><span id="finalDroneB">8 km</span></div><div class="final-drone-direct">✈</div></div><p class="final-eyebrow">Teorema de Pitágoras</p><h3 id="finalDroneQuestion">Qual é a distância direta?</h3><div id="finalDroneAnswers" class="final-drone-answers"></div><p id="finalDroneTimer" class="final-drone-timer">Tempo: 12 s</p></div>
+        <div id="finalMinigameResult" class="final-minigame-result hidden"><p class="final-eyebrow">Resultado</p><h3 id="finalMinigameWinner">Vencedor</h3><div id="finalMinigameRanking" class="final-minigame-ranking"></div><p>O vencedor recebe <strong>+10 Pontos de Missão</strong>.</p><button id="finalReturnBoard" class="final-primary" type="button">Voltar ao tabuleiro</button></div>
+      </div></div>
+      <div id="finalMatchResultOverlay" class="final-minigame-overlay hidden"><div class="final-minigame-card final-match-result-card"><p class="final-eyebrow">Missão concluída</p><h2>Resultado final</h2><div id="finalMatchRanking" class="final-minigame-ranking"></div><button id="finalMatchBackMenu" class="final-primary" type="button">Voltar ao menu</button></div></div>
     </section>
 
     <section id="finalProfilesMenu" class="final-view hidden">
@@ -1103,8 +1141,9 @@
   </script>
   <script src="final-game-config.js?v=001-base-nova"></script>
   <script src="script.js?v=0696-base-nova" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
-  <script src="final-shell.js?v=001-base-nova"></script>
-  <span class="version-badge" data-version>V. 0.3.0 • Base nova</span>
+  <script src="final-shell.js?v=002-board-alpha"></script>
+  <script src="final-board.js?v=001-board-alpha"></script>
+  <span class="version-badge" data-version>V. 0.4.0 • Tabuleiro Alpha</span>
 </body>
 </html>
 
