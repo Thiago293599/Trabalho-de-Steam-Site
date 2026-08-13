@@ -49,7 +49,7 @@
 
   function ack(event,payload){return connect().then(sock=>new Promise((resolve,reject)=>sock.timeout(7000).emit(event,payload,(err,res)=>err?reject(new Error("Servidor não respondeu.")):res?.ok?resolve(res):reject(new Error(res?.message||"Ação recusada.")))))}
   function buildConfig(){let raw={};try{raw=JSON.parse(localStorage.getItem("steamPartyMatchConfigV1")||"{}")||{}}catch{}const mode=state?.controlMethod==="phone-motion"?"phone-motion":"keyboard";return{...raw,mode:"online",humanPlayers:Math.max(2,state?.players?.length||2),controlMethod:mode==="phone-motion"?"online-phone-motion":"online-keyboard",motionMinigamesEnabled:mode==="phone-motion",minigamesEnabled:true}}
-  function privateSensorUrl(){if(!roomCode||!playerId||!resumeToken)return"";const u=new URL("controller.html",location.href);u.searchParams.set("onlineSensor","1");u.searchParams.set("onlineRoom",roomCode);u.searchParams.set("onlinePlayer",playerId);u.searchParams.set("onlineToken",resumeToken);return u.toString()}
+  function privateSensorUrl(){if(!roomCode||!playerId||!resumeToken)return"";const u=new URL("controller.html",location.href);u.searchParams.set("onlineControl","1");u.searchParams.set("onlineRoom",roomCode);u.searchParams.set("onlinePlayer",playerId);u.searchParams.set("onlineToken",resumeToken);return u.toString()}
   function placeOnlinePanel(){
     const setup=document.querySelector("#finalMatchSetup");
     if(!setup)return null;
@@ -89,18 +89,18 @@
     if(state.started&&v2State&&!isHost){renderReplica();return}
     actions.classList.add("hidden"); remote?.classList.add("hidden"); lobby.classList.remove("hidden");
     roomCodeEl.textContent=state.roomCode||roomCode; playersEl.innerHTML="";
-    (state.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-online-v2-player"+(p.connected===false?" is-offline":" ")+(p.sensorActive?" has-sensor":" ");el.innerHTML=`<span class="final-online-v2-avatar" style="--online-color:${p.color||'#45d9ff'}">${i+1}</span><span><strong></strong><small></small></span><span class="final-online-sensor-dot" title="Sensor"></span>`;el.querySelector("strong").textContent=p.name;const sensorText=state.controlMethod==="phone-motion"?(p.sensorActive?"Celular sensor pronto":"Aguardando celular sensor"):"Teclado e mouse";el.querySelector("small").textContent=p.id===state.hostPlayerId?`Host • ${sensorText}`:p.connected===false?"Reconectando…":`Online • ${sensorText}`;playersEl.appendChild(el)});
+    (state.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-online-v2-player"+(p.connected===false?" is-offline":" ")+(p.controllerActive?" has-sensor has-controller":" ");el.innerHTML=`<span class="final-online-v2-avatar" style="--online-color:${p.color||'#45d9ff'}">${i+1}</span><span><strong></strong><small></small></span><span class="final-online-sensor-dot" title="Sensor"></span>`;el.querySelector("strong").textContent=p.name;const sensorText=state.controlMethod==="phone-motion"?(p.controllerActive?"Celular-controle pronto":p.controllerConnected?"Celular pareado • ative sensores":"Aguardando celular-controle"):"Controle na própria tela";el.querySelector("small").textContent=p.id===state.hostPlayerId?`Host • ${sensorText}`:p.connected===false?"Reconectando…":`Online • ${sensorText}`;playersEl.appendChild(el)});
     isHost=playerId===state.hostPlayerId;
     controlSetup?.classList.toggle("hidden",!isHost);
     if(isHost&&controlSetup){controlSetup.querySelectorAll('input[name="finalOnlineControlMode"]').forEach(r=>r.checked=r.value===(state.controlMethod||"keyboard"))}
     const phoneMode=state.controlMethod==="phone-motion";
     sensorPair?.classList.toggle("hidden",!phoneMode);
-    if(phoneMode){const me=(state.players||[]).find(p=>p.id===playerId),url=privateSensorUrl();if(sensorStatus)sensorStatus.textContent=me?.sensorActive?"Sensor ativo e pronto para os minigames.":me?.sensorControllerConnected?"Celular conectado. Ative a permissão de movimento nele.":"Conecte seu próprio celular antes da partida.";if(sensorLinkEl)sensorLinkEl.textContent=url;if(sensorQr&&url)sensorQr.src=`${configured}/api/qr?text=${encodeURIComponent(url)}`;if(sensorOpen)sensorOpen.dataset.url=url}
-    const sensorReady=!phoneMode||(state.players||[]).every(p=>p.sensorActive);
+    if(phoneMode){const me=(state.players||[]).find(p=>p.id===playerId),url=privateSensorUrl();if(sensorStatus)sensorStatus.textContent=me?.controllerActive?"Controle completo pronto.":me?.controllerConnected?"Celular pareado. Ative os sensores nele para liberar minigames de movimento.":"Pareie seu celular. Ele controlará dado, itens, respostas e movimento.";if(sensorLinkEl)sensorLinkEl.textContent=url;if(sensorQr&&url)sensorQr.src=`${configured}/api/qr?text=${encodeURIComponent(url)}`;if(sensorOpen)sensorOpen.dataset.url=url}
+    const sensorReady=!phoneMode||(state.players||[]).every(p=>p.controllerConnected&&p.controllerActive);
     startBtn.classList.toggle("hidden",!isHost); startBtn.disabled=!isHost||(state.players?.length||0)<2||!sensorReady;
     if(inviteBox){inviteBox.textContent=isHost?inviteUrl():`Sala ${roomCode}`;inviteBox.classList.toggle("hidden",!isHost)}
     copyInvite?.classList.toggle("hidden",!isHost);
-    setStatus(isHost?((state.players?.length||0)<2?"Compartilhe o link da sala. Cada jogador entra pela Internet.":phoneMode&&!sensorReady?"Modo sensores: todos os jogadores precisam conectar e ativar o próprio celular.":"Pronto. Todos jogarão no próprio navegador."):phoneMode&&!sensorReady?"Conecte seu celular de movimento abaixo e ative os sensores.":"Aguarde o host iniciar a partida.");
+    setStatus(isHost?((state.players?.length||0)<2?"Compartilhe o link da sala. Cada jogador entra pela Internet.":phoneMode&&!sensorReady?"Modo celular: todos os jogadores precisam parear e ativar o próprio controle.":"Pronto. Todos jogarão no próprio navegador."):phoneMode&&!sensorReady?"Pareie seu celular-controle abaixo e ative os sensores.":"Aguarde o host iniciar a partida.");
   }
 
   function ensureSpaces(){
@@ -138,7 +138,7 @@
     }
     if(phase==="minigame"&&mg?.problem){
       minigameIntro?.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult?.classList.add("hidden");droneGame?.classList.remove("hidden");
-      if(eduTopic)eduTopic.textContent=mg.problem.topic||mg.title||"Desafio STEAM";if(droneQuestion)droneQuestion.textContent=mg.problem.question||"Responda";if(droneAnswers){droneAnswers.innerHTML="";(mg.problem.answers||[]).forEach(v=>{const b=document.createElement("button");b.className="final-drone-answer";b.textContent=formatAnswer(v,mg.problem.unit);b.onclick=()=>{droneAnswers.querySelectorAll("button").forEach(x=>x.disabled=true);sendAction("minigame-answer",{answer:Number(v),problemToken:mg.problem.token})};droneAnswers.appendChild(b)})}
+      if(eduTopic)eduTopic.textContent=mg.problem.topic||mg.title||"Desafio STEAM";if(droneQuestion)droneQuestion.textContent=mg.problem.question||"Responda";if(droneAnswers){droneAnswers.innerHTML="";(mg.problem.answers||[]).forEach(v=>{const b=document.createElement("button");b.className="final-drone-answer";b.textContent=formatAnswer(v,mg.problem.unit);b.disabled=state?.controlMethod==="phone-motion";b.onclick=()=>{if(state?.controlMethod==="phone-motion")return;droneAnswers.querySelectorAll("button").forEach(x=>x.disabled=true);sendAction("minigame-answer",{answer:Number(v),problemToken:mg.problem.token})};droneAnswers.appendChild(b)})}
       const tick=()=>{if(!droneTimer)return;const left=Math.max(0,Number(mg.problem.deadlineServerMs||0)-Date.now());droneTimer.textContent=`Tempo: ${(left/1000).toFixed(1)} s`};tick();timer=setInterval(tick,100);return;
     }
     if(phase==="minigame-result"){
@@ -148,10 +148,10 @@
   }
   function renderReplica(){
     if(!v2State||isHost)return; showBoardReplica(); ensureSpaces(); renderReplicaPlayers(); renderReplicaTokens();
-    const me=(v2State.players||[]).find(p=>p.id===playerId),current=(v2State.players||[]).find(p=>p.id===v2State.currentPlayerId),myTurn=v2State.currentPlayerId===playerId&&v2State.phase==="board";
+    const me=(v2State.players||[]).find(p=>p.id===playerId),current=(v2State.players||[]).find(p=>p.id===v2State.currentPlayerId),phoneControl=state?.controlMethod==="phone-motion",myTurn=v2State.currentPlayerId===playerId&&v2State.phase==="board";
     if(roundText)roundText.textContent=`Rodada ${v2State.round} / ${v2State.totalRounds}`;if(modeBadge)modeBadge.textContent=`Online • ${roomCode}`;if(turnName)turnName.textContent=current?.name||"Aguardando";if(turnAvatar)turnAvatar.innerHTML=current?avatar(current):"";if(eventBox)eventBox.textContent=v2State.eventText||"Partida Online sincronizada.";
-    if(instruction)instruction.textContent=myTurn?"Sua vez — role o dado neste dispositivo.":current?`Vez de ${current.name}. O tabuleiro continuará sincronizado aqui.`:"Sincronizando partida…";
-    if(rollButton){rollButton.disabled=!myTurn;rollButton.textContent=myTurn?"Rolar dado":"Aguardando…"}if(diceResult)diceResult.textContent="";
+    if(instruction)instruction.textContent=myTurn?(phoneControl?"Sua vez — use o celular-controle pareado.":"Sua vez — role o dado neste dispositivo."):current?`Vez de ${current.name}. O tabuleiro continuará sincronizado aqui.`:"Sincronizando partida…";
+    if(rollButton){rollButton.disabled=!myTurn||phoneControl;rollButton.textContent=myTurn?(phoneControl?"Use o celular":"Rolar dado"):"Aguardando…"}if(diceResult)diceResult.textContent="";
     renderReplicaMinigame();
   }
 

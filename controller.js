@@ -183,7 +183,8 @@ window.STEAMPartyControllerBridge = Object.freeze({
   requestSensors: () => requestAndStartSensors(),
   sensorsGranted: () => Boolean(sensorPermissionGranted),
   sensorsStreaming: () => Boolean(sensorStreaming),
-  latestIntensity: () => Number(sensorLatestIntensity || 0)
+  latestIntensity: () => Number(sensorLatestIntensity || 0),
+  getTransportMode: () => onlineFullControllerMode ? "online" : "party"
 });
 
 
@@ -264,11 +265,12 @@ function phoneDanceFreshUrl(url){
 
 
 const params = new URLSearchParams(location.search);
-const onlineSensorMode = params.get("onlineSensor") === "1";
+const onlineFullControllerMode = params.get("onlineControl") === "1" || params.get("onlineSensor") === "1";
+const onlineSensorMode = onlineFullControllerMode;
 const onlineSensorRoom = (params.get("onlineRoom") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
 const onlineSensorPlayerId = String(params.get("onlinePlayer") || "");
 const onlineSensorToken = String(params.get("onlineToken") || "");
-const initialRoom = (onlineSensorMode ? onlineSensorRoom : (params.get("room") || "")).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+const initialRoom = (onlineFullControllerMode ? onlineSensorRoom : (params.get("room") || "")).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
 roomCode.value = initialRoom;
 
 function showMessage(element, text) {
@@ -977,8 +979,8 @@ function reportSensorStatus(active = sensorStreaming, force = false) {
   if (!force && signature === sensorLastStatusSignature) return;
   sensorLastReportedActive = normalized;
   sensorLastStatusSignature = signature;
-  const eventName = onlineSensorMode ? "online:sensor-status" : "controller:sensor-status";
-  const payload = onlineSensorMode ? { active: normalized, capabilities } : { roomCode: joinedRoom, active: normalized, capabilities };
+  const eventName = onlineFullControllerMode ? "online:controller-status" : "controller:sensor-status";
+  const payload = onlineFullControllerMode ? { active: normalized, capabilities } : { roomCode: joinedRoom, active: normalized, capabilities };
   socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit(eventName, payload, () => {});
 }
 
@@ -1077,7 +1079,7 @@ function sendLatestSensorSample(source = "mixed", interval = 0) {
   if (socket?.connected && joinedRoom && now - phoneDanceLastTelemetryAt >= 240) {
     phoneDanceLastTelemetryAt = now;
     const emitter = socket.volatile || socket;
-    if (onlineSensorMode) emitter.emit("online:sensor-data", { sample });
+    if (onlineFullControllerMode) emitter.emit("online:controller-sensor-data", { sample });
     else emitter.emit("controller:sensor-data", { roomCode: joinedRoom, sample });
   }
 }
@@ -1720,22 +1722,38 @@ function applyControllerResume(response, code, playerId) {
   phoneFlushDanceResults();
 }
 
-function attachOnlineSensorController() {
-  if(!onlineSensorMode||!socket||!onlineSensorRoom||!onlineSensorPlayerId||!onlineSensorToken)return;
-  document.body.classList.add("online-sensor-controller");
+function attachOnlineFullController() {
+  if(!onlineFullControllerMode||!socket||!onlineSensorRoom||!onlineSensorPlayerId||!onlineSensorToken)return;
+  document.body.classList.add("online-full-controller");
   joinScreen?.classList.add("hidden");
   controlScreen?.classList.remove("hidden");
   boardControllerArea?.classList.add("hidden");
-  sensorModePanel?.classList.remove("hidden");
-  connectionBadge.textContent="Conectando sensor…";
+  sensorModePanel?.classList.add("hidden");
+  connectionBadge.textContent="Conectando controle…";
   sensorModeRequested=true;
-  socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("online:sensor-controller-join",{roomCode:onlineSensorRoom,playerId:onlineSensorPlayerId,resumeToken:onlineSensorToken},(error,response)=>{
-    if(error||!response?.ok){connectionBadge.textContent="Falha no pareamento";setSensorPanelError(response?.message||"Não foi possível parear este celular.");return;}
-    myPlayerId=response.playerId;joinedRoom=response.roomCode;playerLabel.textContent=response.name||"Jogador Online";playerColor.style.background=response.color||"#45d9ff";connectionBadge.textContent="Pareado";
-    sensorModeRequested=true;sensorModePanel?.classList.remove("hidden");setSensorBadge("waiting","Permissão");sensorModeTitle.textContent="Celular de movimento Online";sensorModeText.textContent="Ative os sensores. Este celular enviará movimento somente para o seu jogador Online.";enableSensorsBtn.disabled=false;enableSensorsBtn.textContent="Ativar sensores deste celular";sensorNotice.textContent=window.isSecureContext?"Conexão segura detectada. Mantenha esta tela aberta durante os minigames de movimento.":"Abra por HTTPS para usar sensores de movimento.";reportSensorStatus(false,true);
-  });
-}
 
+  socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit(
+    "online:controller-join",
+    {roomCode:onlineSensorRoom,playerId:onlineSensorPlayerId,resumeToken:onlineSensorToken},
+    (error,response)=>{
+      if(error||!response?.ok){
+        connectionBadge.textContent="Falha no pareamento";
+        turnKicker.textContent="Controle Online";
+        turnTitle.textContent="Não foi possível parear";
+        turnDescription.textContent=response?.message||"Abra novamente o QR Code mostrado na sua tela Online.";
+        return;
+      }
+      myPlayerId=response.playerId;
+      joinedRoom=response.roomCode;
+      playerLabel.textContent=response.name||"Jogador Online";
+      playerColor.style.background=response.color||"#45d9ff";
+      connectionBadge.textContent="Controle pareado";
+      sensorModeRequested=true;
+      window.dispatchEvent(new CustomEvent("steam-online-controller-joined",{detail:{roomCode:joinedRoom,playerId:myPlayerId,state:response.state||null,onlineV2State:response.onlineV2State||null,controlMethod:response.controlMethod||"phone-motion"}}));
+      reportSensorStatus(sensorStreaming,true);
+    }
+  );
+}
 function tryResumeStoredPartySession() {
   if (!socket?.connected || myPlayerId || joinedRoom) return;
   const saved = readPartyControllerSession();
@@ -1851,7 +1869,7 @@ if (socket) {
   });
 
   socket.on("connect", () => {
-    if (onlineSensorMode) { attachOnlineSensorController(); return; }
+    if (onlineFullControllerMode) { attachOnlineFullController(); return; }
     if (myPlayerId && joinedRoom) {
       connectionBadge.textContent = "Reconectando sala…";
       socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:resume", { roomCode: joinedRoom, playerId: myPlayerId }, (error, response) => {
@@ -1868,7 +1886,7 @@ if (socket) {
 }
 
 enableSensorsBtn?.addEventListener("click", requestAndStartSensors);
-if(onlineSensorMode&&socket?.connected)setTimeout(attachOnlineSensorController,0);
+if(onlineFullControllerMode&&socket?.connected)setTimeout(attachOnlineFullController,0);
 
 controllerBackBtn.addEventListener("click", () => {
   stopSensorStreaming({ keepPermission: false });

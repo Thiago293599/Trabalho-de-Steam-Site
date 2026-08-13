@@ -1461,3 +1461,7 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
 .final-online-sensor-dot{width:10px;height:10px;border-radius:50%;background:#6d7784;box-shadow:0 0 0 3px rgba(109,119,132,.13);}
 .final-online-v2-player.has-sensor .final-online-sensor-dot{background:#55ed9d;box-shadow:0 0 9px rgba(85,237,157,.65);}
 @media(max-width:650px){.final-online-sensor-pair{grid-template-columns:1fr}.final-online-sensor-qr{justify-self:center}.final-online-sensor-link,.final-online-sensor-pair .final-online-v2-buttons{grid-column:1}}
+
+/* V40 Online full-controller */
+.final-online-v2-player.has-controller .final-online-sensor-dot{opacity:1;transform:scale(1.12)}
+.final-online-v2-player.has-controller .final-online-sensor-dot::after{content:"✓";font-size:10px;font-weight:1000}

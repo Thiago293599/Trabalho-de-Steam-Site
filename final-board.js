@@ -501,12 +501,12 @@
       playersList.appendChild(row)})}
   function renderTokens(){tokensLayer.innerHTML="";state.players.forEach(p=>{const pt=path[p.position]||path[0],t=document.createElement("div");t.className="final-board-token";t.dataset.playerId=p.id;t.dataset.slot=p.slot;t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`;t.innerHTML=avatar(p);tokensLayer.appendChild(t)})}
   function updateToken(p){const t=$(`[data-player-id="${CSS.escape(p.id)}"]`,tokensLayer),pt=path[p.position]||path[0];if(t&&pt){t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`}}
-  function partyState(phase="board",extra={}){if(!state)return{};return{phase,round:state.round,totalRounds:state.totalRounds,currentPlayerId:state.players[state.turnIndex]?.id||"",eventText:eventBox.textContent||"",players:state.players.map(p=>({id:p.id,slot:p.slot,name:p.name,human:p.human,bot:p.bot,difficulty:p.difficulty,position:p.position,score:p.score,laps:p.laps,avatarShape:p.avatarShape,avatarColor:p.avatarColor,avatarFace:p.avatarFace})),...extra}}
+  function partyState(phase="board",extra={}){if(!state)return{};return{phase,round:state.round,totalRounds:state.totalRounds,currentPlayerId:state.players[state.turnIndex]?.id||"",eventText:eventBox.textContent||"",players:state.players.map(p=>({id:p.id,slot:p.slot,name:p.name,human:p.human,bot:p.bot,difficulty:p.difficulty,position:p.position,score:p.score,laps:p.laps,avatarShape:p.avatarShape,avatarColor:p.avatarColor,avatarFace:p.avatarFace,inventory:[...(p.inventory||[])],activeEffects:{...(p.activeEffects||{})}})),...extra}}
   function publish(phase="board",extra={}){
     if(state?.connected)network?.publishState(partyState(phase,extra));
     if(state?.onlineHost)window.STEAMOnlineV2?.publishState?.(partyState(phase,extra));
   }
-  function updateTurnUi(){const p=state.players[state.turnIndex];checkpoint("board","auto");renderInventory();roundText.textContent=`Rodada ${state.round} / ${state.totalRounds}`;turnName.textContent=p.name;turnAvatar.innerHTML=avatar(p);renderPlayers();const phoneHuman=state.connected&&p.human;const remoteOnline=Boolean(state.onlineHost&&p.human&&p.id!==state.onlineHostPlayerId);rollButton.disabled=rolling||p.bot||phoneHuman||remoteOnline;rollButton.textContent=p.bot?"Bot jogando…":phoneHuman?"Use o celular":remoteOnline?"Aguardando online":"Rolar dado";instruction.textContent=p.bot?`${p.name} está preparando a jogada.`:phoneHuman?`Aguardando ${p.name} rolar o dado no celular.`:remoteOnline?`Aguardando ${p.name} jogar pelo dispositivo online.`:"Role o dado para continuar.";instruction.classList.toggle("final-party-phone-wait",phoneHuman||remoteOnline);diceResult.textContent="";publish("board");if(p.bot&&!rolling)setTimeout(async()=>{
+  function updateTurnUi(){const p=state.players[state.turnIndex];checkpoint("board","auto");renderInventory();roundText.textContent=`Rodada ${state.round} / ${state.totalRounds}`;turnName.textContent=p.name;turnAvatar.innerHTML=avatar(p);renderPlayers();const onlinePhone=Boolean(state.onlineHost&&state.match?.controlMethod==="online-phone-motion"&&p.human);const phoneHuman=Boolean((state.connected&&p.human)||onlinePhone);const remoteOnline=Boolean(state.onlineHost&&p.human&&p.id!==state.onlineHostPlayerId&&!onlinePhone);rollButton.disabled=rolling||p.bot||phoneHuman||remoteOnline;rollButton.textContent=p.bot?"Bot jogando…":phoneHuman?"Use o celular":remoteOnline?"Aguardando online":"Rolar dado";instruction.textContent=p.bot?`${p.name} está preparando a jogada.`:phoneHuman?`Aguardando ${p.name} usar o celular-controle.`:remoteOnline?`Aguardando ${p.name} jogar pelo dispositivo online.`:"Role o dado para continuar.";instruction.classList.toggle("final-party-phone-wait",phoneHuman||remoteOnline);diceResult.textContent="";publish("board");if(p.bot&&!rolling)setTimeout(async()=>{
       const item=botShouldUseEquipment(p);
       if(item)await useEquipment(p,item,"bot");
       setTimeout(()=>rollForCurrentPlayer("bot"),item==="map"?300:80);
@@ -552,7 +552,7 @@
     eventBox.textContent=(events[type]||events.good)();
     renderInventory();renderPlayers();checkpoint("board","auto");publish("board");
   }
-  async function rollForCurrentPlayer(source="pc",sourcePlayerId=""){if(!state||rolling)return;const p=state.players[state.turnIndex];if(state.connected&&p.human&&source!=="phone")return;if(state.onlineHost&&p.human){if(source==="pc"&&p.id!==state.onlineHostPlayerId)return;if(source==="online"&&String(sourcePlayerId)!==String(p.id))return;}rolling=true;rollButton.disabled=true;let result=rand(MIN_ROLL,MAX_ROLL);
+  async function rollForCurrentPlayer(source="pc",sourcePlayerId=""){if(!state||rolling)return;const p=state.players[state.turnIndex];if(state.connected&&p.human&&source!=="phone")return;if(state.onlineHost&&p.human){if(source==="pc"&&(p.id!==state.onlineHostPlayerId||state.match?.controlMethod==="online-phone-motion"))return;if(["online","online-controller"].includes(source)&&String(sourcePlayerId)!==String(p.id))return;}rolling=true;rollButton.disabled=true;let result=rand(MIN_ROLL,MAX_ROLL);
     ensurePlayerEquipment(p);
     if(p.activeEffects.gps){
       result=Math.max(6,result);
@@ -1312,7 +1312,7 @@
     void finishPartyDance(e.detail?.reason||"ended");
   });
   window.addEventListener("steam-party-sensor-data",e=>handleMotionSensor(e.detail));
-  window.addEventListener("steam-online-v2-action",e=>{const a=e.detail;if(!state?.onlineHost||!a)return;if(a.type==="roll")rollForCurrentPlayer("online",a.playerId);if(a.type==="minigame-answer")handleOnlineMinigameAnswer(a)});
+  window.addEventListener("steam-online-v2-action",e=>{const a=e.detail;if(!state?.onlineHost||!a)return;if(a.type==="roll")rollForCurrentPlayer(a.fromController?"online-controller":"online",a.playerId);if(a.type==="minigame-answer")handleOnlineMinigameAnswer(a);if(a.type==="use-item"){const p=state.players.find(x=>String(x.id)===String(a.playerId));if(p)void useEquipment(p,a.itemId,a.fromController?"phone":"online")}});
   window.addEventListener("steam-online-v2-sensor",e=>{if(!state?.onlineHost||!state.match?.motionMinigamesEnabled)return;handleMotionSensor(e.detail)});
   window.addEventListener("steam-party-presence",e=>{
     const p=state?.players?.find(x=>x.id===e.detail?.playerId);
@@ -1334,7 +1334,7 @@
     publish("board");
     if(state.players[state.turnIndex]?.id===p.id&&!rolling)updateTurnUi();
   });
-  window.addEventListener("steam-party-action",e=>{const a=e.detail;if(!state?.connected||!a)return;if(a.type==="roll"&&state.players[state.turnIndex]?.id===a.playerId)rollForCurrentPlayer("phone");if(a.type==="minigame-answer")handlePhoneAnswer(a)});
+  window.addEventListener("steam-party-action",e=>{const a=e.detail;if(!state?.connected||!a)return;if(a.type==="roll"&&state.players[state.turnIndex]?.id===a.playerId)rollForCurrentPlayer("phone");if(a.type==="minigame-answer")handlePhoneAnswer(a);if(a.type==="use-item"){const p=state.players.find(x=>String(x.id)===String(a.playerId));if(p)void useEquipment(p,a.itemId,"phone")}});
   window.addEventListener("steam-party-room-closed",()=>{if(state?.connected||pendingStartConfig){toast("A sala conectada foi encerrada.");leaveBoard()}});
   window.STEAMPartyDanceTransport=Object.freeze({
     publishSession: payload => network?.publishDanceSession(payload)

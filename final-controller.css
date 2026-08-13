@@ -112,3 +112,13 @@ body.online-sensor-controller #sensorModePanel #sensorModeText,
 body.online-sensor-controller #sensorModePanel .sensor-motion-meter,
 body.online-sensor-controller #sensorModePanel #sensorNotice{display:block!important;}
 body.online-sensor-controller #sensorModePanel .sensor-live-grid{display:grid!important;}
+
+
+/* V40 — celular como controle completo */
+.final-party-phone-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.final-party-phone-item{min-height:58px;border:1px solid rgba(120,140,170,.28);border-radius:14px;background:rgba(255,255,255,.08);color:inherit;text-align:left;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.final-party-phone-item b{font-size:.92rem}.final-party-phone-item small{opacity:.72}.final-party-phone-item:disabled{opacity:.42}
+.final-party-phone-sensor-button{margin-top:10px;width:100%}
+body.online-full-controller #themeToggle{display:none}
+body.online-full-controller .controller-shell{min-height:100dvh;display:grid;place-items:center}
+body.online-full-controller #controlScreen{width:min(760px,calc(100vw - 20px));margin:0}
