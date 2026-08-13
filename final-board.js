@@ -610,7 +610,7 @@
     return games.filter(g=>{
       if(g.sensorRequired&&!state.match.motionMinigamesEnabled)return false;
       if(g.id==="just-dance"&&(!state.connected||!danceBridge))return false;
-      if(g.id==="flood-escape"&&!state.connected)return false;
+      if(g.id==="flood-escape"&&!(state.connected||(state.onlineHost&&state.match.motionMinigamesEnabled)))return false;
       return true;
     });
   }
@@ -1011,11 +1011,13 @@
   }
 
   async function startMotionEscape(){
-    if(!state?.connected||!network)return;
+    const onlineMotion=Boolean(state?.onlineHost&&state?.match?.motionMinigamesEnabled);
+    if(!state||(!state.connected&&!onlineMotion))return;
+    if(state.connected&&!network)return;
     minigameIntro.classList.add("hidden");droneGame.classList.add("hidden");minigameResult.classList.add("hidden");motionGame?.classList.remove("hidden");
     motionEscapeState={token:`escape-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,deadline:performance.now()+12000,progress:new Map(),lastSample:new Map(),finished:false};
     state.players.forEach(p=>motionEscapeState.progress.set(p.id,0));
-    await network.setSensorMode(true,"motion-minigame").catch(()=>null);
+    if(state.connected)await network.setSensorMode(true,"motion-minigame").catch(()=>null);
     renderMotionEscape();publishMotionEscape(true);
     clearInterval(motionEscapeBotTimer);
     motionEscapeBotTimer=setInterval(()=>{
@@ -1282,7 +1284,7 @@
   function startOnlineHost(match,onlinePlayers=[],hostPlayerId=""){
     if(!match||!Array.isArray(onlinePlayers)||onlinePlayers.length<2)return false;
     if(manualSaveButton)manualSaveButton.disabled=true;
-    const config={...match,mode:"online",humanPlayers:Math.min(4,onlinePlayers.length),controlMethod:"online",minigamesEnabled:true,motionMinigamesEnabled:false};
+    const config={...match,mode:"online",humanPlayers:Math.min(4,onlinePlayers.length),controlMethod:String(match.controlMethod||"online-keyboard"),minigamesEnabled:true,motionMinigamesEnabled:Boolean(match.motionMinigamesEnabled)};
     const players=buildPlayers(config,onlinePlayers.slice(0,4));
     state={match:config,players,round:1,totalRounds:Math.max(1,Number(config.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:false,onlineHost:true,onlineHostPlayerId:String(hostPlayerId||onlinePlayers[0]?.id||"")};
     renderSpaces();renderTokens();modeBadge.textContent="Online Alpha";matchResultOverlay.classList.add("hidden");minigameOverlay.classList.add("hidden");api().showView?.("board");applyRoundEnvironmentEvent();updateTurnUi();return true;
@@ -1311,6 +1313,7 @@
   });
   window.addEventListener("steam-party-sensor-data",e=>handleMotionSensor(e.detail));
   window.addEventListener("steam-online-v2-action",e=>{const a=e.detail;if(!state?.onlineHost||!a)return;if(a.type==="roll")rollForCurrentPlayer("online",a.playerId);if(a.type==="minigame-answer")handleOnlineMinigameAnswer(a)});
+  window.addEventListener("steam-online-v2-sensor",e=>{if(!state?.onlineHost||!state.match?.motionMinigamesEnabled)return;handleMotionSensor(e.detail)});
   window.addEventListener("steam-party-presence",e=>{
     const p=state?.players?.find(x=>x.id===e.detail?.playerId);
     if(!p||!state?.connected)return;

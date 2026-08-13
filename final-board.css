@@ -1443,3 +1443,21 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
 .final-online-v2-join input{
   min-height:46px;
 }
+
+/* ==========================================================
+   V39 — Online: escolha de controle + pareamento de sensores
+   ========================================================== */
+.final-online-control-setup,.final-online-sensor-pair{margin:14px 0;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.045);}
+.final-online-control-setup>strong{display:block;margin-bottom:10px;}
+.final-online-control-option{display:flex!important;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;}
+.final-online-control-option:hover{background:rgba(255,255,255,.055);}
+.final-online-control-option input{width:18px;height:18px;}
+.final-online-control-option span{display:flex;flex-direction:column;gap:2px;}
+.final-online-control-option small{opacity:.68;}
+.final-online-sensor-pair{display:grid;grid-template-columns:minmax(0,1fr) 116px;gap:12px;align-items:center;}
+.final-online-sensor-qr{width:116px;height:116px;border-radius:10px;background:#fff;object-fit:contain;}
+.final-online-sensor-link{grid-column:1/-1;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:8px 10px;border-radius:9px;background:rgba(0,0,0,.22);font-size:.76rem;}
+.final-online-sensor-pair .final-online-v2-buttons{grid-column:1/-1;}
+.final-online-sensor-dot{width:10px;height:10px;border-radius:50%;background:#6d7784;box-shadow:0 0 0 3px rgba(109,119,132,.13);}
+.final-online-v2-player.has-sensor .final-online-sensor-dot{background:#55ed9d;box-shadow:0 0 9px rgba(85,237,157,.65);}
+@media(max-width:650px){.final-online-sensor-pair{grid-template-columns:1fr}.final-online-sensor-qr{justify-self:center}.final-online-sensor-link,.final-online-sensor-pair .final-online-v2-buttons{grid-column:1}}

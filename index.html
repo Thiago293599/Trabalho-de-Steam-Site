@@ -16,7 +16,7 @@
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
   <link rel="stylesheet" href="final-shell.css?v=002-board-alpha" />
-  <link rel="stylesheet" href="final-board.css?v=018-v38-online-ui" />
+  <link rel="stylesheet" href="final-board.css?v=019-online-sensor-pair" />
 </head>
 <body class="site-loading">
 
@@ -385,6 +385,17 @@
             <div id="finalOnlineV2Lobby" class="final-online-v2-lobby hidden">
               <div><span>Código da sala</span><strong id="finalOnlineV2RoomCode">------</strong></div>
               <div id="finalOnlineV2Players" class="final-online-v2-players"></div>
+              <div id="finalOnlineV2ControlSetup" class="final-online-control-setup hidden">
+                <strong>Controles dos minigames</strong>
+                <label class="final-online-control-option"><input type="radio" name="finalOnlineControlMode" value="keyboard" checked><span><b>Teclado e mouse</b><small>Minigames com sensores ficam fora desta partida.</small></span></label>
+                <label class="final-online-control-option"><input type="radio" name="finalOnlineControlMode" value="phone-motion"><span><b>Celular com sensores</b><small>Cada jogador conecta o próprio celular. Libera minigames de movimento.</small></span></label>
+              </div>
+              <div id="finalOnlineV2SensorPair" class="final-online-sensor-pair hidden">
+                <div><strong>Seu celular de movimento</strong><p id="finalOnlineV2SensorStatus">Aguardando pareamento…</p></div>
+                <img id="finalOnlineV2SensorQr" class="final-online-sensor-qr" alt="QR Code para conectar o celular de movimento">
+                <code id="finalOnlineV2SensorLink" class="final-online-sensor-link"></code>
+                <div class="final-online-v2-buttons"><button id="finalOnlineV2SensorOpen" class="final-primary" type="button">Abrir no celular</button><button id="finalOnlineV2SensorCopy" class="final-secondary" type="button">Copiar link</button></div>
+              </div>
               <p id="finalOnlineV2Status">Aguardando jogadores…</p>
               <div id="finalOnlineV2Invite" class="final-online-v2-invite hidden"></div>
               <button id="finalOnlineV2CopyInvite" class="final-secondary hidden" type="button">Copiar link de convite</button>
@@ -1326,8 +1337,8 @@
   <script src="script.js?v=0710-v36" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <script src="final-party-network.js?v=003-motion-sensor"></script>
   <script src="final-shell.js?v=005-online-route-fix"></script>
-  <script src="final-board.js?v=014-v37"></script>
-  <script src="final-online-v2.js?v=003-new-ui-route"></script>
+  <script src="final-board.js?v=013-online-motion"></script>
+  <script src="final-online-v2.js?v=004-roll-sensor-pair"></script>
   <script src="final-presentation.js?v=001-demo"></script>
   <script src="final-save-manager.js?v=001-checkpoints"></script>
   <span class="version-badge" data-version>V. 1.1.3 • JD Finish Polish</span>

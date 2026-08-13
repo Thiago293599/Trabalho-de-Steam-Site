@@ -100,3 +100,15 @@
 @media(prefers-reduced-motion:reduce){.final-mobile-jd-star.filled{animation:none!important}}
 
 .final-party-phone-motion-meter{display:grid;gap:12px;text-align:center;padding:16px;border-radius:22px;background:rgba(5,18,31,.78);border:1px solid rgba(91,226,255,.22)}.final-party-phone-motion-track{position:relative;height:62px;border-radius:22px;background:rgba(0,0,0,.32);overflow:hidden}.final-party-phone-motion-fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#25c8ff,#68f4b5);transition:width .12s linear}.final-party-phone-motion-track span{position:absolute;left:50%;top:50%;translate:-50% -50%;font-size:35px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));animation:phoneRunnerBounce .42s ease-in-out infinite alternate}@keyframes phoneRunnerBounce{to{translate:-50% -58%;scale:1.08}}.final-party-phone-motion-meter>strong{font-size:28px}
+
+/* V39 — celular pareado ao jogador Online */
+body.online-sensor-controller #boardControllerArea,
+body.online-sensor-controller #finalDanceSongCard,
+body.online-sensor-controller .final-mobile-jd-hud{display:none!important;}
+body.online-sensor-controller #sensorModePanel{display:block!important;min-height:360px;}
+body.online-sensor-controller #sensorModePanel .final-dance-hidden-tech{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;width:auto!important;height:auto!important;overflow:visible!important;clip:auto!important;}
+body.online-sensor-controller #sensorModePanel .sensor-mode-head,
+body.online-sensor-controller #sensorModePanel #sensorModeText,
+body.online-sensor-controller #sensorModePanel .sensor-motion-meter,
+body.online-sensor-controller #sensorModePanel #sensorNotice{display:block!important;}
+body.online-sensor-controller #sensorModePanel .sensor-live-grid{display:grid!important;}
