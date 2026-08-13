@@ -1099,3 +1099,114 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
     animation:none!important;
   }
 }
+
+
+/* ==========================================================
+   V30 — HUD JD: cards no topo, line colorida, judgement alto
+   ========================================================== */
+
+/* Card literalmente encostado no topo da área 16:9. */
+#danceDevScreen.party-dance-session .dance-video-judgements{
+  top:0!important;
+  height:calc(145px * var(--jd-ui-scale))!important;
+}
+#danceDevScreen.party-dance-session .dance-video-player-judge{
+  top:0!important;
+}
+#danceDevScreen.party-dance-session .dance-ipk-player-head{
+  margin-top:0!important;
+}
+
+/* Flash branco mais forte, ainda restrito ao fundo colorido. */
+#danceDevScreen.party-dance-session .dance-ipk-player-card.jd-card-soft-flash .dance-ipk-player-color::after{
+  animation:jdV30CardFlash .62s ease-out!important;
+}
+@keyframes jdV30CardFlash{
+  0%{opacity:0}
+  16%{opacity:.34}
+  42%{opacity:.19}
+  72%{opacity:.07}
+  100%{opacity:0}
+}
+
+/* Avatar: pulso disparado pelo JS a cada 4 beats. */
+#danceDevScreen.party-dance-session .dance-ipk-player-avatar.jd-avatar-three-beat{
+  animation:none!important;
+}
+#danceDevScreen.party-dance-session .dance-ipk-player-avatar.jd-avatar-four-beat{
+  animation:jdV30AvatarFourBeat .62s cubic-bezier(.20,.78,.20,1)!important;
+}
+@keyframes jdV30AvatarFourBeat{
+  0%{scale:1}
+  34%{scale:1.115}
+  68%{scale:1.035}
+  100%{scale:1}
+}
+
+/* hud_players_line: usa o alpha original como máscara e pinta a parte branca
+   com EXATAMENTE a cor do player/scorebar. */
+#danceDevScreen.party-dance-session .dance-ipk-player-line{
+  background:var(--player-bar-color)!important;
+  -webkit-mask:
+    url("minigames/just-dance/hud/ipk-base/textures/hud_players_line.png")
+    center/100% 100% no-repeat!important;
+  mask:
+    url("minigames/just-dance/hud/ipk-base/textures/hud_players_line.png")
+    center/100% 100% no-repeat!important;
+  opacity:1!important;
+}
+
+/* Score numérico: aparece para humano E bot; a correção principal é o humano
+   conectado também receber atualização no mesmo instante da barra. */
+#danceDevScreen.party-dance-session .dance-video-player-score{
+  position:absolute!important;
+  right:calc(3px * var(--jd-ui-scale))!important;
+  top:calc(3px * var(--jd-ui-scale))!important;
+  z-index:8!important;
+  color:#fff!important;
+  font-size:calc(7.2px * var(--jd-ui-scale))!important;
+  line-height:1!important;
+  font-weight:950!important;
+  font-variant-numeric:tabular-nums!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.75)!important;
+}
+
+/* Julgamento mais alto e na frente das estrelas. */
+#danceDevScreen.party-dance-session .dance-video-feedback{
+  top:calc(52px * var(--jd-ui-scale))!important;
+  z-index:14!important;
+}
+#danceDevScreen.party-dance-session .dance-player-star-rank{
+  z-index:9!important;
+}
+
+/* Animações da estrela da barra:
+   1) quando ganha estrela
+   2) quando surge a próxima Outline */
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-new-star .fill{
+  animation:jdV30BarStarEarned .76s cubic-bezier(.17,.86,.21,1.15)!important;
+}
+@keyframes jdV30BarStarEarned{
+  0%{opacity:0;scale:.25;rotate:-28deg;filter:brightness(1)}
+  50%{opacity:1;scale:1.32;rotate:6deg;filter:brightness(2.25)}
+  76%{scale:.91;rotate:-2deg;filter:brightness(1.18)}
+  100%{opacity:1;scale:1;rotate:0;filter:brightness(1)}
+}
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-new-outline .outline{
+  animation:jdV30OutlineAppear .58s cubic-bezier(.20,.78,.20,1)!important;
+}
+@keyframes jdV30OutlineAppear{
+  0%{opacity:0;scale:.38;rotate:-15deg}
+  62%{opacity:1;scale:1.16;rotate:4deg}
+  82%{scale:.94;rotate:-1deg}
+  100%{opacity:.82;scale:1;rotate:0}
+}
+
+@media(prefers-reduced-motion:reduce){
+  #danceDevScreen.party-dance-session .dance-ipk-player-card.jd-card-soft-flash .dance-ipk-player-color::after,
+  #danceDevScreen.party-dance-session .dance-ipk-player-avatar.jd-avatar-four-beat,
+  #danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-new-star .fill,
+  #danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-new-outline .outline{
+    animation:none!important;
+  }
+}

@@ -13,7 +13,7 @@
   partyLobby=$("#finalPartyLobbyOverlay"),partyRoomCode=$("#finalPartyRoomCode"),partyQr=$("#finalPartyQr"),partyJoinUrl=$("#finalPartyJoinUrl"),partyConnectedCount=$("#finalPartyConnectedCount"),partyConnectedPlayers=$("#finalPartyConnectedPlayers"),partyStart=$("#finalPartyStartMatch"),partyStatus=$("#finalPartyLobbyStatus");
   const network=window.STEAMPartyNetwork||null,danceBridge=window.STEAMJustDanceBridge||null,spaceTypes=["start","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good"],symbols={start:"INÍCIO",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"},colors=["cyan","green","orange","pink","purple","yellow"],shapes=["round","square","triangle","hex"],triples=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[7,24,25],[9,12,15],[12,16,20]];
   const TUTORIAL_KEY="steamPartyBoardTutorialSeenV1";
-  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,tutorialStep=0,environmentBannerTimer=0;
+  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false;
   const api=()=>window.STEAMParty||{},toast=m=>api().showToast?.(m),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const avatar=p=>api().avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><rect x="18" y="18" width="84" height="84" rx="34" fill="#65f2c3"/></svg>`;
   const isPhoneMatch=match=>Boolean(match&&(match.mode==="phones"||String(match.controlMethod||"").startsWith("phone-")));
@@ -979,6 +979,7 @@
 
   async function startPartyDance(){
     if(!state?.connected||!danceBridge||!network)return;
+    partyDanceFinishing=false;
     const ids=danceBridge.getSongIds?.()||["RainOverMe"];
     const songId=ids[rand(0,ids.length-1)];
     const info=danceBridge.getSongInfo?.(songId)||{title:"Just Dance",artist:""};
@@ -1008,18 +1009,27 @@
     }
   }
 
-  async function finishPartyDance(){
+  async function finishPartyDance(reason="ended"){
+    if(partyDanceFinishing)return;
     if(!state?.currentMinigame||state.currentMinigame.id!=="just-dance")return;
+    partyDanceFinishing=true;
     stopPartyDanceBotFeedback();
 
-    // O retorno visual não espera rede: fecha o stage e restaura o tabuleiro imediatamente.
+    // IMPORTANTE: captura score local ANTES de fechar o bridge,
+    // pois closePartyDanceSong limpa partyDanceDisplayPlayers.
+    const localDanceScores=danceBridge?.getPartyScores?.()||[];
+    const connectedPlayers=roomState?.players||[];
+
+    // O retorno visual é imediato e não depende da rede.
     danceBridge.closePartyDanceSong?.();
     api().showView?.("board");
     view?.classList.remove("hidden");
-    network.setSensorMode(false).catch(()=>{});
+    document.getElementById("finalShell")?.classList.remove("hidden");
+    document.body.classList.add("final-shell-v1");
+
+    try{network?.setSensorMode(false)?.catch?.(()=>{})}catch{}
 
     const scoreRows=[];
-    const connectedPlayers=roomState?.players||[];
     state.players.filter(p=>p.human).forEach(player=>{
       const rp=connectedPlayers.find(item=>item.id===player.id);
       const dance=rp?.dance||{};
@@ -1030,7 +1040,6 @@
       });
     });
 
-    const localDanceScores=danceBridge?.getPartyScores?.()||[];
     state.players.filter(p=>p.bot).forEach(bot=>{
       const local=localDanceScores.find(item=>String(item.id)===String(bot.id));
       const dance=local?.dance||{};
@@ -1064,6 +1073,7 @@
     renderPlayers();
     checkpoint("post-minigame","auto");
     publish("minigame-result",{minigame:{id:"just-dance",title:state.currentDanceSong?.title||"Just Dance",status:"result",results}});
+    partyDanceFinishing=false;
   }
 
   function closeMinigame(){clearInterval(droneTimerId);minigameOverlay.classList.add("hidden");advanceRound()}
@@ -1089,7 +1099,9 @@
   });$("#finalReturnBoard")?.addEventListener("click",closeMinigame);$("#finalBoardExit")?.addEventListener("click",leaveBoard);$("#finalMatchBackMenu")?.addEventListener("click",leaveBoard);partyStart?.addEventListener("click",beginConnectedMatch);$("#finalPartyCancelLobby")?.addEventListener("click",leaveBoard);$("#finalPartyCopyLink")?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(partyJoinUrl.textContent||"");toast("Link copiado.")}catch{toast("Não foi possível copiar automaticamente.")}});
   window.addEventListener("steam-party-room-state",e=>{const next=e.detail;if(!next||next.purpose!=="party-board-v2")return;roomState=next;renderLobby()});
   window.addEventListener("steam-party-dance-judgement",e=>{if(e.detail?.state)roomState=e.detail.state;danceBridge?.handleJudgement?.(e.detail)});
-  window.addEventListener("steam-party-dance-ended",()=>finishPartyDance());
+  window.addEventListener("steam-party-dance-ended",e=>{
+    void finishPartyDance(e.detail?.reason||"ended");
+  });
   window.addEventListener("steam-party-presence",e=>{
     const p=state?.players?.find(x=>x.id===e.detail?.playerId);
     if(!p||!state?.connected)return;

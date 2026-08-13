@@ -16,7 +16,7 @@
   </script>
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="controller.css?v=040-earthsong-server-gate" />
-  <link rel="stylesheet" href="final-controller.css?v=004-star-rank" />
+  <link rel="stylesheet" href="final-controller.css?v=006-v30-vertical-stars" />
 </head>
 <body class="site-loading">
 
@@ -242,9 +242,13 @@
             <div id="mobileDanceScoreBar" class="final-mobile-jd-scorebar" aria-hidden="true">
               <img id="mobileDanceScoreBarFill" src="minigames/just-dance/hud/images/scorebars/1P_bar.png" alt="" />
             </div>
-            <span id="mobileDanceStarBadge" class="final-mobile-jd-star-badge" aria-hidden="true">0</span>
-          </div>
-          <img id="sensorDanceStarRank" class="final-mobile-jd-star-rank" alt="" aria-hidden="true" hidden>
+            <div id="sensorDanceStars" class="final-mobile-jd-stars" aria-label="Progresso das cinco estrelas">
+              <span class="final-mobile-jd-star" data-threshold="2000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="4000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="6000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="8000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+              <span class="final-mobile-jd-star" data-threshold="10000"><img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt=""><img class="fill" src="minigames/just-dance/hud/images/Star.png" alt=""></span>
+            </div>
           </div>
 
           <div class="final-mobile-jd-feedback">
@@ -284,9 +288,9 @@
   </div>
 
   <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
-  <script src="controller.js?v=058-star-rank" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
+  <script src="controller.js?v=059-v30-vertical-stars" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
   <script src="final-controller-shell.js?v=003-jd-clean"></script>
 <script src="final-party-controller.js?v=003-edu-minigames"></script>
-<span class="version-badge" data-version>V. 1.0.1 • JD Stars</span>
+<span class="version-badge" data-version>V. 1.0.6 • JD HUD Mobile</span>
 </body>
 </html>

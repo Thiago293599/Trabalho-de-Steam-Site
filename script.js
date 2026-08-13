@@ -3287,12 +3287,14 @@ function updatePartyDanceSharedStars() {
   const earned = DANCE_SCORE_STAR_THRESHOLDS.filter(threshold => safeScore >= threshold).length;
   const barSpan = DANCE_SCORE_BAR_BOTTOM_PERCENT - DANCE_SCORE_BAR_TOP_PERCENT;
   const slots = Array.from(danceHudStars.querySelectorAll('.dance-hud-star'));
+  const previousEarned = Math.max(0, Number(dancePartySharedEarnedStars || 0));
   const changed = earned !== dancePartySharedEarnedStars;
+  const gained = dancePartySharedEarnedStars >= 0 && earned > dancePartySharedEarnedStars;
 
   // Progressão compartilhada:
   // estrelas já obtidas ficam preenchidas;
   // somente a PRÓXIMA estrela fica em Outline;
-  // as estrelas posteriores ainda não aparecem.
+  // as posteriores ainda não aparecem.
   slots.forEach((slot, index) => {
     const threshold = Number(slot.dataset.threshold || 0);
     const ratio = Math.max(0, Math.min(1, threshold / DANCE_MAX_SCORE));
@@ -3300,11 +3302,20 @@ function updatePartyDanceSharedStars() {
     const filled = index < earned;
     const nextOutline = index === earned && earned < slots.length;
     const visible = filled || nextOutline;
+    const isNewFilled = gained && index >= previousEarned && index < earned;
 
     slot.style.top = `${top.toFixed(4)}%`;
     slot.classList.toggle('filled', filled);
     slot.classList.toggle('next-outline', nextOutline);
     slot.classList.toggle('party-shared-visible', visible);
+
+    if (isNewFilled) {
+      slot.classList.remove('party-new-star');
+      void slot.offsetWidth;
+      slot.classList.add('party-new-star');
+    } else if (!filled) {
+      slot.classList.remove('party-new-star');
+    }
 
     if (changed && nextOutline) {
       slot.classList.remove('party-new-outline');
@@ -3390,6 +3401,12 @@ function updatePartyDancePlayerScoreBar(playerId, score = 0) {
     fill.style.transform = `translateY(${((1 - progress) * 100).toFixed(4)}%)`;
     fill.style.opacity = progress > 0 ? '1' : '0';
   }
+
+  const card = danceVideoJudgements?.querySelector(
+    `.dance-video-player-judge[data-player-id="${CSS.escape(String(playerId || ''))}"]`
+  );
+  const scoreText = card?.querySelector('.dance-video-player-score');
+  if (scoreText) scoreText.textContent = Math.round(safeScore).toLocaleString("pt-BR");
 
   updatePartyDancePlayerStarRank(playerId, safeScore);
   updatePartyDanceSharedStars();
@@ -3920,6 +3937,7 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
             <span class="dance-player-origin-slot"></span>
             <span class="dance-ipk-player-avatar" aria-hidden="true"></span>
             <span class="dance-video-player-name"></span>
+            <span class="dance-video-player-score" aria-label="Score">0</span>
           </div>
           <span class="dance-ipk-player-line" aria-hidden="true"></span>
         </div>
@@ -3936,6 +3954,8 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
     item.style.setProperty('--player-bar-color', PARTY_DANCE_SCOREBAR_COLORS[playerIndex] || player.color || '#fff');
     item.style.setProperty('--jd-player-slot-x', `${((slotPositions[playerIndex] || 0) / 1920 * 100).toFixed(4)}%`);
     item.querySelector('.dance-video-player-name').textContent = player.name || 'Jogador';
+    const scoreText = item.querySelector('.dance-video-player-score');
+    if (scoreText) scoreText.textContent = Math.round(Number(player.dance?.score || 0)).toLocaleString("pt-BR");
     danceVideoJudgements.appendChild(item);
     ensurePartyDancePlayerStarRank(item);
     updatePartyDancePlayerStarRank(player.id, player.dance?.score || 0);
@@ -4227,7 +4247,7 @@ function updateDancePlayerBeatFx(timeMs) {
   if (beat < 0) return;
 
   const flashCycle = Math.floor((beat + 0.0001) / 2.5);
-  const avatarCycle = Math.floor((beat + 0.0001) / 3);
+  const avatarCycle = Math.floor((beat + 0.0001) / 4);
 
   if (flashCycle < danceLastPlayerCardFlashCycle) {
     danceLastPlayerCardFlashCycle = flashCycle;
@@ -4245,7 +4265,7 @@ function updateDancePlayerBeatFx(timeMs) {
     danceLastPlayerAvatarPulseCycle = avatarCycle;
     restartDanceClass(
       Array.from(danceVideoJudgements.querySelectorAll('.dance-ipk-player-avatar')),
-      'jd-avatar-three-beat'
+      'jd-avatar-four-beat'
     );
   }
 }
@@ -5631,6 +5651,7 @@ function testDevCard() {
 
 /* ---------- Estado visual do Just Dance dentro do party game ---------- */
 let partyDanceEndNotified = false;
+let partyDanceEndWatchTimer = 0;
 let partyDanceDisplayPlayers = [];
 
 const PARTY_DANCE_SCOREBAR_COLORS = Object.freeze([
@@ -5743,6 +5764,32 @@ function notifyPartyDanceEnded(reason = "ended") {
   }));
 }
 
+function stopPartyDanceEndWatch() {
+  clearInterval(partyDanceEndWatchTimer);
+  partyDanceEndWatchTimer = 0;
+}
+
+function startPartyDanceEndWatch() {
+  stopPartyDanceEndWatch();
+
+  partyDanceEndWatchTimer = setInterval(() => {
+    if (gameMode !== "party-dance") {
+      stopPartyDanceEndWatch();
+      return;
+    }
+
+    const duration = Number(getDanceMediaDuration() || 0);
+    const current = Number(getDanceMediaCurrentTime() || 0);
+    const videoEnded = Boolean(danceTestVideo?.ended);
+
+    // O Drive/proxy nem sempre dispara `ended`.
+    // Se o relógio chegou nos últimos ~450 ms, encerramos de forma confiável.
+    if (videoEnded || (duration > 0 && current >= Math.max(0, duration - 0.45))) {
+      notifyPartyDanceEnded(videoEnded ? "watchdog-ended" : "watchdog-near-end");
+    }
+  }, 180);
+}
+
 /* ---------- Ponte Just Dance -> novo tabuleiro ---------- */
 async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
   const song = getDanceSongConfig(songId);
@@ -5802,10 +5849,12 @@ async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
 async function startPartyDancePlayback() {
   if (gameMode !== "party-dance") return false;
   await playDanceMedia();
+  startPartyDanceEndWatch();
   return isDanceMediaPlaying();
 }
 
 function closePartyDanceSong() {
+  stopPartyDanceEndWatch();
   if (gameMode !== "party-dance") return;
   try { pauseDanceMedia(); } catch {}
   resetDanceGoldMoveFx(true);
