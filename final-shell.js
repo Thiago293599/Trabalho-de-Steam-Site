@@ -20,6 +20,7 @@
     profiles: qs("#finalProfilesMenu"),
     how: qs("#finalHowMenu"),
     settings: qs("#finalSettingsMenu"),
+    saves: qs("#finalSavesMenu"),
     board: qs("#finalBoardView")
   };
 
@@ -74,7 +75,11 @@
   function showView(name) {
     Object.entries(views).forEach(([key, el]) => el?.classList.toggle("hidden", key !== name));
     if (name === "profiles") renderProfiles();
-    if (name === "main") renderProfileChip();
+    if (name === "saves") window.STEAMPartySaves?.render?.();
+    if (name === "main") {
+      renderProfileChip();
+      window.STEAMPartySaves?.renderMenuCard?.();
+    }
   }
 
   function startGameShell() {
@@ -499,7 +504,8 @@
     saveMatchConfig,
     showView,
     showToast,
-    returnToShellMain
+    returnToShellMain,
+    shellElement: shell
   });
 
   renderProfileChip();

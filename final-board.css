@@ -176,3 +176,465 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
     max-height:calc(100dvh - 20px)!important;
   }
 }
+
+
+/* ==========================================================
+   V20 — scorebars independentes por jogador
+   Os PNGs 2P/3P/4P originais são conjuntos de barras de 28px
+   separadas por 3px. Agora cada faixa possui máscara própria.
+   ========================================================== */
+#danceScoreBar.party-multi{
+  overflow:visible!important;
+}
+#danceScoreBar.party-multi > #danceScoreBarFill{
+  display:none!important;
+}
+.dance-party-score-column{
+  position:absolute;
+  top:0;
+  height:100%;
+  overflow:visible;
+  pointer-events:none;
+}
+.dance-party-score-fill-mask{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+.dance-party-score-fill{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:fill;
+  opacity:0;
+  transform:translateY(100%);
+  transform-origin:50% 100%;
+  transition:transform .42s cubic-bezier(.20,.72,.18,1),opacity .10s linear;
+  will-change:transform;
+}
+.dance-party-score-stars{
+  position:absolute;
+  inset:0;
+  overflow:visible;
+}
+.dance-party-score-star{
+  position:absolute;
+  left:50%;
+  width:calc(30px * var(--jd-ui-scale));
+  height:calc(30px * var(--jd-ui-scale));
+  translate:-50% -50%;
+  opacity:0;
+  filter:drop-shadow(0 calc(1px * var(--jd-ui-scale)) calc(2px * var(--jd-ui-scale)) rgba(0,0,0,.85));
+  z-index:2;
+}
+.dance-party-score-star img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.dance-party-score-star .outline{
+  opacity:0;
+}
+.dance-party-score-star .fill{
+  opacity:0;
+  scale:.18;
+  transition:opacity .10s linear,scale .20s cubic-bezier(.17,.86,.21,1.15);
+}
+.dance-party-score-star.next-outline{
+  opacity:1;
+}
+.dance-party-score-star.next-outline .outline{
+  opacity:.92;
+}
+.dance-party-score-star.filled{
+  opacity:1;
+  animation:jdPartyIndependentStar .58s cubic-bezier(.17,.86,.21,1.15);
+}
+.dance-party-score-star.filled .fill{
+  opacity:1;
+  scale:1;
+}
+@keyframes jdPartyIndependentStar{
+  0%{scale:.18;rotate:-18deg}
+  56%{scale:1.34;rotate:5deg}
+  78%{scale:.92;rotate:-2deg}
+  100%{scale:1;rotate:0deg}
+}
+
+/* V21 — saves locais */
+.final-continue-card:not(.has-save){opacity:.68}
+.final-continue-card.has-save{border-color:rgba(101,242,195,.36);background:linear-gradient(135deg,rgba(101,242,195,.11),rgba(93,201,255,.06))}
+.final-board-save-status{font-size:.68rem;color:var(--final-muted);white-space:nowrap;transition:.2s ease}
+.final-board-save-status.is-saved{color:var(--final-accent)}
+.final-save-panel{max-width:1040px}
+.final-save-empty{display:grid;place-items:center;text-align:center;min-height:270px;margin-top:28px;padding:30px;border:1px dashed rgba(101,242,195,.18);border-radius:26px;background:rgba(255,255,255,.025)}
+.final-save-empty.hidden{display:none!important}
+.final-save-empty-icon{width:72px;height:72px;display:grid;place-items:center;margin-bottom:12px;border-radius:22px;background:rgba(101,242,195,.08);color:var(--final-accent);font-size:2rem}
+.final-save-empty h3{margin:5px 0;font-size:1.3rem}
+.final-save-empty p{max-width:520px;margin:4px 0;color:var(--final-muted);line-height:1.5}
+.final-save-game-card{margin-top:28px;padding:24px;border:1px solid var(--final-line);border-radius:26px;background:linear-gradient(145deg,rgba(16,45,50,.72),rgba(5,22,25,.58))}
+.final-save-game-card.hidden{display:none!important}
+.final-save-game-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.final-save-game-head h3{margin:5px 0 2px;font-size:1.7rem}
+.final-save-game-head>div>p:last-child{margin:0;color:var(--final-muted);font-size:.8rem}
+.final-save-player-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:20px 0}
+.final-save-player{display:grid;grid-template-columns:46px minmax(0,1fr) auto;align-items:center;gap:11px;padding:11px;border:1px solid var(--final-line);border-radius:16px;background:rgba(255,255,255,.035)}
+.final-save-avatar{width:46px;height:46px}.final-save-avatar svg{width:100%;height:100%}
+.final-save-player strong,.final-save-player small{display:block}.final-save-player small{margin-top:3px;color:var(--final-muted);font-size:.7rem}.final-save-player>b{color:var(--final-accent);font-size:.86rem}
+.final-save-meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.final-save-meta-grid>div{padding:13px 14px;border:1px solid var(--final-line);border-radius:15px;background:rgba(255,255,255,.025)}
+.final-save-meta-grid span,.final-save-meta-grid strong{display:block}.final-save-meta-grid span{color:var(--final-muted);font-size:.68rem;margin-bottom:4px}
+.final-save-import{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px 0;padding:18px;border:1px solid var(--final-line);border-radius:20px;background:rgba(255,255,255,.03)}
+.final-save-import strong{display:block}.final-save-import p{margin:5px 0 0;color:var(--final-muted);font-size:.76rem}.final-save-import code{color:var(--final-accent)}
+.final-save-import-button{flex:none;margin:0!important}
+@media(max-width:700px){
+  .final-save-player-grid,.final-save-meta-grid{grid-template-columns:1fr}
+  .final-save-game-head,.final-save-import{align-items:stretch;flex-direction:column}
+  .final-board-save-status{display:none}
+}
+
+
+/* ==========================================================
+   V22 — Minigames educativos reutilizando o mesmo motor
+   ========================================================== */
+.final-edu-visual[data-kind="trigonometria"]{
+  background:
+    linear-gradient(to top,rgba(101,242,195,.05),transparent 55%),
+    linear-gradient(145deg,rgba(255,209,102,.06),rgba(93,201,255,.05));
+}
+.final-slope-ground{
+  position:absolute;
+  left:13%;
+  right:12%;
+  bottom:20%;
+  height:4px;
+  border-radius:999px;
+  background:rgba(255,255,255,.24);
+}
+.final-slope-line{
+  position:absolute;
+  left:19%;
+  bottom:21%;
+  width:62%;
+  height:5px;
+  transform-origin:left center;
+  transform:rotate(-31deg);
+  border-radius:999px;
+  background:linear-gradient(90deg,#ffd166,#ff9d65);
+  box-shadow:0 0 18px rgba(255,209,102,.22);
+}
+.final-slope-rise{
+  position:absolute;
+  left:71%;
+  bottom:21%;
+  height:49%;
+  width:3px;
+  background:rgba(101,242,195,.82);
+}
+.final-slope-run{
+  position:absolute;
+  left:19%;
+  bottom:21%;
+  width:52%;
+  height:3px;
+  background:rgba(93,201,255,.82);
+}
+.final-slope-rise span,
+.final-slope-run span{
+  position:absolute;
+  color:#fff;
+  font-size:.76rem;
+  font-weight:900;
+  white-space:nowrap;
+  text-shadow:0 2px 5px #000;
+}
+.final-slope-rise span{left:9px;top:35%}
+.final-slope-run span{left:42%;bottom:8px}
+.final-slope-sensor-icon{
+  position:absolute;
+  left:69%;
+  top:25%;
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:rgba(101,242,195,.14);
+  color:var(--final-accent);
+  border:1px solid rgba(101,242,195,.35);
+  box-shadow:0 0 24px rgba(101,242,195,.2);
+}
+.final-slope-angle{
+  position:absolute;
+  left:23%;
+  bottom:25%;
+  color:var(--final-warn);
+  font-size:1.2rem;
+  font-weight:950;
+}
+
+.final-edu-visual[data-kind="escala"]{
+  background:linear-gradient(145deg,#0d2d35,#092127);
+}
+.final-map-grid{
+  position:absolute;
+  inset:0;
+  opacity:.35;
+  background-image:
+    linear-gradient(rgba(93,201,255,.15) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(93,201,255,.15) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+.final-map-zone{
+  position:absolute;
+  left:18%;
+  top:24%;
+  width:55%;
+  height:43%;
+  border:2px solid rgba(101,242,195,.72);
+  border-radius:38% 55% 44% 31%;
+  rotate:-7deg;
+  background:rgba(101,242,195,.08);
+  box-shadow:0 0 25px rgba(101,242,195,.09);
+}
+.final-map-ruler{
+  position:absolute;
+  left:20%;
+  bottom:17%;
+  width:55%;
+  height:5px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#ffd166,#ff9567);
+}
+.final-map-ruler::before,
+.final-map-ruler::after{
+  content:"";
+  position:absolute;
+  top:-6px;
+  width:2px;
+  height:17px;
+  background:#ffd166;
+}
+.final-map-ruler::before{left:0}
+.final-map-ruler::after{right:0}
+.final-map-ruler span{
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  translate:-50% 0;
+  color:#fff;
+  font-weight:900;
+  font-size:.78rem;
+}
+.final-map-scale{
+  position:absolute;
+  right:10%;
+  top:10%;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(0,0,0,.26);
+  border:1px solid rgba(255,255,255,.1);
+  color:#dffaf3;
+  font-size:.75rem;
+  font-weight:850;
+}
+.final-satellite-icon{
+  position:absolute;
+  left:8%;
+  top:12%;
+  color:#5dc9ff;
+  font-size:2rem;
+  filter:drop-shadow(0 0 10px rgba(93,201,255,.35));
+}
+
+/* V23 — apresentação/tutorial/eventos */
+.final-presentation-button{border-color:rgba(255,209,102,.22)!important;background:linear-gradient(135deg,rgba(255,209,102,.08),rgba(101,242,195,.05))!important}
+.final-presentation-button .final-button-icon{color:var(--final-warn);background:rgba(255,209,102,.10)}
+.final-how-actions{margin:24px 0 0}
+.final-board-tutorial{position:absolute;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(3,12,14,.78);backdrop-filter:blur(18px)}
+.final-board-tutorial.hidden{display:none!important}
+.final-tutorial-card{width:min(570px,100%);padding:clamp(24px,5vw,42px);border:1px solid rgba(101,242,195,.2);border-radius:30px;text-align:center;background:linear-gradient(145deg,#102d32,#081a1e);box-shadow:0 30px 90px rgba(0,0,0,.4)}
+.final-tutorial-progress{color:var(--final-muted);font-size:.72rem;text-align:right}
+.final-tutorial-icon{width:88px;height:88px;display:grid;place-items:center;margin:10px auto 18px;border-radius:27px;background:rgba(101,242,195,.08);border:1px solid rgba(101,242,195,.16);font-size:2.3rem}
+.final-tutorial-card h2{margin:7px 0 10px;font-size:clamp(1.8rem,5vw,3rem);letter-spacing:-.04em}
+.final-tutorial-card>p:not(.final-eyebrow){color:var(--final-muted);line-height:1.6}
+.final-tutorial-dots{display:flex;justify-content:center;gap:7px;margin:22px 0 4px}
+.final-tutorial-dots span{width:7px;height:7px;border-radius:999px;background:rgba(255,255,255,.17);transition:.2s ease}
+.final-tutorial-dots span.active{width:25px;background:var(--final-accent)}
+.final-tutorial-actions{justify-content:center}
+.final-environment-banner{position:absolute;z-index:25;top:14px;left:50%;translate:-50% 0;width:min(680px,calc(100% - 30px));display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;align-items:center;padding:11px 14px;border-radius:18px;border:1px solid rgba(255,255,255,.13);background:rgba(5,23,27,.90);backdrop-filter:blur(14px);box-shadow:0 14px 35px rgba(0,0,0,.28);animation:finalEnvironmentEnter .38s cubic-bezier(.2,.8,.2,1)}
+.final-environment-banner.hidden{display:none!important}
+.final-environment-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:var(--final-accent);background:rgba(101,242,195,.08);font-size:1.35rem;font-weight:950}
+.final-environment-banner small,.final-environment-banner strong,.final-environment-banner span{display:block}
+.final-environment-banner small{color:var(--final-muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em}
+.final-environment-banner strong{margin:2px 0;font-size:.95rem}
+.final-environment-banner span{color:#c5dbd7;font-size:.7rem;line-height:1.35}
+@keyframes finalEnvironmentEnter{from{opacity:0;translate:-50% -14px}to{opacity:1;translate:-50% 0}}
+.final-board-stage[data-environment="flood"]{box-shadow:inset 0 0 100px rgba(58,170,255,.12)}
+.final-board-stage[data-environment="landslide"]{box-shadow:inset 0 0 100px rgba(255,185,92,.10)}
+.final-board-stage[data-environment="wildfire"]{box-shadow:inset 0 0 100px rgba(255,111,73,.10)}
+.final-board-stage[data-environment="dam"]{box-shadow:inset 0 0 100px rgba(97,205,255,.10)}
+.final-board-stage[data-environment="drought"]{box-shadow:inset 0 0 100px rgba(255,209,102,.10)}
+.final-education-summary{margin:24px 0;padding:18px;border:1px solid var(--final-line);border-radius:20px;text-align:left;background:rgba(255,255,255,.025)}
+.final-education-chip-group{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}
+.final-education-chip-group>strong{min-width:118px;color:var(--final-muted);font-size:.72rem}
+.final-education-chip{display:inline-flex;align-items:center;min-height:30px;padding:6px 10px;border-radius:999px;border:1px solid var(--final-line);font-size:.7rem;font-weight:800}
+.final-education-chip.concept{color:#c8fff0;background:rgba(101,242,195,.08)}
+.final-education-chip.disaster{color:#ffd4b4;background:rgba(255,144,92,.07)}
+.final-education-chip.technology{color:#cdeeff;background:rgba(93,201,255,.07)}
+@media(max-width:700px){.final-environment-banner{top:8px}.final-environment-banner span{display:none}.final-education-chip-group>strong{width:100%;min-width:0}}
+
+
+/* ==========================================================
+   V24 — Equipamentos / inventário
+   ========================================================== */
+.final-inventory-panel{
+  margin:14px auto 2px;
+  width:min(330px,100%);
+}
+.final-inventory-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:7px;
+}
+.final-inventory-head>span{
+  color:#edfdf9;
+  font-size:.72rem;
+  font-weight:900;
+}
+.final-inventory-head>small{
+  color:var(--final-muted);
+  font-size:.58rem;
+  text-align:right;
+}
+.final-inventory-slots{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.final-inventory-slot{
+  min-width:0;
+  min-height:50px;
+  display:grid;
+  grid-template-columns:35px minmax(0,1fr);
+  align-items:center;
+  gap:7px;
+  padding:6px 8px;
+  border:1px dashed rgba(255,255,255,.10);
+  border-radius:13px;
+  text-align:left;
+  color:var(--final-muted);
+  background:rgba(255,255,255,.025);
+  font:inherit;
+}
+.final-inventory-slot.has-item{
+  cursor:pointer;
+  border-style:solid;
+  border-color:rgba(101,242,195,.18);
+  color:#effdfa;
+  background:rgba(101,242,195,.045);
+}
+.final-inventory-slot.has-item:not(:disabled):hover{
+  border-color:rgba(101,242,195,.46);
+  background:rgba(101,242,195,.09);
+}
+.final-inventory-slot:disabled{
+  cursor:default;
+}
+.final-inventory-icon,
+.final-inventory-empty{
+  width:35px;
+  height:35px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+}
+.final-inventory-icon{
+  color:var(--final-accent);
+  background:rgba(101,242,195,.09);
+  font-size:1.15rem;
+  font-weight:950;
+}
+.final-inventory-empty{
+  color:rgba(255,255,255,.22);
+  border:1px dashed rgba(255,255,255,.10);
+}
+.final-inventory-slot strong,
+.final-inventory-slot small{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.final-inventory-slot strong{
+  font-size:.66rem;
+}
+.final-inventory-slot small{
+  margin-top:2px;
+  color:var(--final-muted);
+  font-size:.53rem;
+}
+.final-item-overlay{
+  position:absolute;
+  inset:0;
+  z-index:85;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:rgba(3,12,14,.76);
+  backdrop-filter:blur(15px);
+}
+.final-item-overlay.hidden{display:none!important}
+.final-item-card{
+  width:min(480px,100%);
+  padding:clamp(24px,5vw,38px);
+  border:1px solid rgba(101,242,195,.20);
+  border-radius:28px;
+  text-align:center;
+  background:linear-gradient(145deg,#102d32,#081a1e);
+  box-shadow:0 30px 90px rgba(0,0,0,.42);
+}
+.final-item-big-icon{
+  width:84px;
+  height:84px;
+  display:grid;
+  place-items:center;
+  margin:0 auto 16px;
+  border-radius:25px;
+  background:rgba(101,242,195,.08);
+  border:1px solid rgba(101,242,195,.18);
+  color:var(--final-accent);
+  font-size:2.3rem;
+  font-weight:950;
+}
+.final-item-card h2{
+  margin:7px 0 8px;
+  font-size:clamp(1.7rem,5vw,2.7rem);
+  letter-spacing:-.04em;
+}
+.final-item-card>p:not(.final-eyebrow){
+  color:var(--final-muted);
+  line-height:1.55;
+}
+.final-item-effect{
+  margin-top:16px;
+  padding:12px 14px;
+  border:1px solid var(--final-line);
+  border-radius:15px;
+  color:#dbf8f1;
+  background:rgba(255,255,255,.035);
+  font-size:.76rem;
+  font-weight:800;
+}
+.final-item-actions{
+  justify-content:center;
+}
+@media(max-width:700px){
+  .final-inventory-panel{width:100%}
+  .final-inventory-head>small{display:none}
+}

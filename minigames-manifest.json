@@ -1,16 +1,5 @@
 {
-  "schemaVersion": 3,
-  "selectionRules": {
-    "sensorRequiredFalseWorksWith": [
-      "keyboard",
-      "phone-touch",
-      "phone-motion"
-    ],
-    "sensorRequiredTrueWorksWith": [
-      "phone-motion"
-    ],
-    "samePcMultiHumanKeyboard": "no-minigames"
-  },
+  "schemaVersion": 4,
   "minigames": [
     {
       "id": "drone-route",
@@ -35,34 +24,13 @@
         "monitoramento",
         "rota"
       ],
-      "educationalGoal": "Calcular a distância direta em um triângulo retângulo."
-    },
-    {
-      "id": "just-dance",
-      "title": "Just Dance",
-      "status": "implemented-party-board-alpha",
-      "players": {
-        "min": 1,
-        "max": 4
-      },
-      "teamType": "free-for-all",
-      "controls": [
-        "phone-motion"
-      ],
-      "sensorRequired": true,
-      "orientation": "portrait",
-      "botsSupported": true,
-      "topicTags": [
-        "movimento"
-      ],
-      "boardBridge": true,
-      "requiresConnectedPhones": true,
-      "notes": "Disponível somente quando todos os humanos usam celular com sensores."
+      "educationalGoal": "Calcular a hipotenusa para obter uma distância direta.",
+      "connectedPhones": true
     },
     {
       "id": "slope-sensor",
       "title": "Sensor de Encosta",
-      "status": "planned",
+      "status": "implemented-alpha",
       "players": {
         "min": 1,
         "max": 4
@@ -70,21 +38,25 @@
       "teamType": "free-for-all",
       "controls": [
         "keyboard",
-        "phone-touch"
+        "phone-touch",
+        "phone-motion"
       ],
       "sensorRequired": false,
       "orientation": "landscape",
       "botsSupported": true,
       "topicTags": [
         "trigonometria",
+        "tangente",
         "deslizamento",
         "sensores"
-      ]
+      ],
+      "educationalGoal": "Estimar o ângulo de inclinação de uma encosta usando razão entre altura e distância horizontal.",
+      "connectedPhones": true
     },
     {
       "id": "satellite-scale",
       "title": "Mapa de Satélite",
-      "status": "planned",
+      "status": "implemented-alpha",
       "players": {
         "min": 1,
         "max": 4
@@ -92,7 +64,8 @@
       "teamType": "free-for-all",
       "controls": [
         "keyboard",
-        "phone-touch"
+        "phone-touch",
+        "phone-motion"
       ],
       "sensorRequired": false,
       "orientation": "landscape",
@@ -100,9 +73,12 @@
       "topicTags": [
         "tales",
         "escala",
+        "proporcao",
         "satélite",
         "mapas"
-      ]
+      ],
+      "educationalGoal": "Converter medidas de uma imagem/mapa em distâncias reais por proporcionalidade.",
+      "connectedPhones": true
     }
   ]
 }

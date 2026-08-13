@@ -207,6 +207,10 @@
             <span class="final-button-icon">▶</span>
             <span><strong>Jogar</strong><small>Configure jogadores, controles e bots.</small></span>
           </button>
+          <button id="finalContinueSaveCard" class="final-main-button final-continue-card" data-final-nav="saves" type="button">
+            <span class="final-button-icon">↻</span>
+            <span><strong>Continuar partida</strong><small id="finalContinueSaveSummary">Nenhuma partida local salva.</small></span>
+          </button>
           <button class="final-main-button" data-final-nav="profiles" type="button">
             <span class="final-button-icon">◎</span>
             <span><strong>Perfis</strong><small>Crie, importe ou exporte seu perfil.</small></span>
@@ -214,6 +218,10 @@
           <button class="final-main-button" data-final-nav="how" type="button">
             <span class="final-button-icon">?</span>
             <span><strong>Como funciona</strong><small>Veja o fluxo do tabuleiro e dos minigames.</small></span>
+          </button>
+          <button id="finalPresentationMode" class="final-main-button final-presentation-button" type="button">
+            <span class="final-button-icon">◆</span>
+            <span><strong>Apresentação STEAM</strong><small>Demo curta com Pitágoras, Trigonometria e Tales garantidos.</small></span>
           </button>
           <button class="final-main-button" data-final-nav="settings" type="button">
             <span class="final-button-icon">⚙</span>
@@ -224,6 +232,62 @@
         <div class="final-menu-footer">
           <button id="finalOpenLegacy" class="final-text-button" type="button">Abrir protótipo atual</button>
           <span>Base V14 • desenvolvimento gradual</span>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="finalSavesMenu" class="final-view hidden">
+      <div class="final-panel final-save-panel">
+        <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
+        <p class="final-eyebrow">Partidas salvas</p>
+        <h2>Continue de onde parou</h2>
+        <p class="final-subtitle">A versão atual cria checkpoints automáticos das partidas locais no próprio dispositivo.</p>
+
+        <div id="finalSaveEmpty" class="final-save-empty">
+          <div class="final-save-empty-icon">↻</div>
+          <h3>Nenhuma partida local salva</h3>
+          <p>Comece uma partida local para criar um checkpoint ou importe um arquivo de save.</p>
+        </div>
+
+        <div id="finalSaveCard" class="final-save-game-card hidden">
+          <div class="final-save-game-head">
+            <div>
+              <p class="final-eyebrow">Checkpoint mais recente</p>
+              <h3 id="finalSaveTitle">Rodada 1 / 5</h3>
+              <p id="finalSaveTimestamp">Salvo agora</p>
+            </div>
+            <span id="finalSavePhase" class="final-status-pill">Tabuleiro</span>
+          </div>
+
+          <div id="finalSavePlayers" class="final-save-player-grid"></div>
+
+          <div class="final-save-meta-grid">
+            <div><span>Modo</span><strong id="finalSaveMode">Local</strong></div>
+            <div><span>Jogadores</span><strong id="finalSavePlayerCount">4</strong></div>
+            <div><span>Próxima vez</span><strong id="finalSaveNextPlayer">Jogador 1</strong></div>
+          </div>
+
+          <div class="final-actions-row">
+            <button id="finalResumeSave" class="final-primary" type="button">Continuar partida</button>
+            <button id="finalExportSave" class="final-secondary" type="button">Exportar arquivo</button>
+            <button id="finalDeleteSave" class="final-danger" type="button">Excluir save</button>
+          </div>
+        </div>
+
+        <div class="final-save-import">
+          <div>
+            <strong>Levar a partida para outro dispositivo</strong>
+            <p>Exporte um arquivo <code>.steamsave.json</code> e importe no outro computador.</p>
+          </div>
+          <label class="final-file-button final-save-import-button">
+            Importar save
+            <input id="finalImportSave" type="file" accept=".json,.steamsave,application/json" />
+          </label>
+        </div>
+
+        <div class="final-info-box">
+          Nesta etapa o save completo é para <strong>partidas locais</strong>. Partidas com celulares dependem de uma sala ativa no servidor e continuarão usando a reconexão de jogadores.
         </div>
       </div>
     </section>
@@ -352,15 +416,37 @@
       <div class="final-board-shell">
         <header class="final-board-topbar">
           <div><p class="final-eyebrow">Partida experimental</p><h2 id="finalBoardRound">Rodada 1 / 5</h2></div>
-          <div class="final-board-top-actions"><span id="finalBoardModeBadge" class="final-status-pill">Local</span><button id="finalBoardExit" class="final-secondary" type="button">Sair da partida</button></div>
+          <div class="final-board-top-actions">
+            <span id="finalBoardModeBadge" class="final-status-pill">Local</span>
+            <span id="finalBoardSaveStatus" class="final-board-save-status">Checkpoint automático</span>
+            <button id="finalBoardManualSave" class="final-secondary" type="button">Salvar</button>
+            <button id="finalBoardExit" class="final-secondary" type="button">Sair da partida</button>
+          </div>
         </header>
         <div class="final-board-layout">
           <aside class="final-player-sidebar"><div class="final-section-title"><div><strong>Jogadores</strong><small>Ordem dos turnos</small></div></div><div id="finalBoardPlayers" class="final-board-player-list"></div></aside>
           <main class="final-board-stage-wrap">
             <div id="finalBoardStage" class="final-board-stage" aria-label="Tabuleiro">
+              <div id="finalEnvironmentBanner" class="final-environment-banner hidden">
+                <div id="finalEnvironmentIcon" class="final-environment-icon">!</div>
+                <div>
+                  <small>Evento ambiental da rodada</small>
+                  <strong id="finalEnvironmentTitle">Alerta</strong>
+                  <span id="finalEnvironmentDescription"></span>
+                </div>
+              </div>
               <div class="final-board-center">
                 <div class="final-board-mission-mark">CENTRAL DE MONITORAMENTO</div>
                 <div id="finalBoardTurnAvatar" class="final-board-turn-avatar"></div><p>Vez de</p><h3 id="finalBoardTurnName">Jogador</h3><p id="finalBoardInstruction">Role o dado para continuar.</p>
+
+                <div id="finalInventoryPanel" class="final-inventory-panel">
+                  <div class="final-inventory-head">
+                    <span>Equipamentos</span>
+                    <small id="finalInventoryHint">Ganhe equipamentos em casas de tecnologia.</small>
+                  </div>
+                  <div id="finalInventorySlots" class="final-inventory-slots"></div>
+                </div>
+
                 <div class="final-dice-zone"><div id="finalDiceCube" class="final-dice-cube" aria-hidden="true"><span class="face front">1</span><span class="face back">2</span><span class="face right">3</span><span class="face left">4</span><span class="face top">5</span><span class="face bottom">6</span></div><button id="finalRollDice" class="final-primary final-roll-button" type="button">Rolar dado</button><strong id="finalDiceResult" class="final-dice-result" aria-live="polite"></strong></div>
                 <div id="finalBoardEvent" class="final-board-event">O dado digital possui 6 faces visuais e pode sortear de 1 a 10.</div>
               </div>
@@ -369,12 +455,47 @@
           </main>
         </div>
       </div>
-      <div id="finalMinigameOverlay" class="final-minigame-overlay hidden" aria-live="polite"><div class="final-minigame-card">
+      <div id="finalBoardTutorial" class="final-board-tutorial hidden" aria-live="polite">
+        <div class="final-tutorial-card">
+          <div class="final-tutorial-progress" id="finalTutorialProgress">1 / 4</div>
+          <div id="finalTutorialIcon" class="final-tutorial-icon">🎲</div>
+          <p id="finalTutorialEyebrow" class="final-eyebrow">Como jogar</p>
+          <h2 id="finalTutorialTitle">Role o dado</h2>
+          <p id="finalTutorialText">O dado parece um cubo de seis faces, mas pode sortear números de 1 a 10.</p>
+          <div class="final-tutorial-dots" id="finalTutorialDots" aria-hidden="true"></div>
+          <div class="final-actions-row final-tutorial-actions">
+            <button id="finalTutorialSkip" class="final-secondary" type="button">Pular</button>
+            <button id="finalTutorialNext" class="final-primary" type="button">Próximo</button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="finalItemOverlay" class="final-item-overlay hidden" aria-live="polite">
+        <div class="final-item-card">
+          <div id="finalItemIcon" class="final-item-big-icon">⌁</div>
+          <p id="finalItemEyebrow" class="final-eyebrow">Equipamento encontrado</p>
+          <h2 id="finalItemTitle">GPS de Emergência</h2>
+          <p id="finalItemDescription">Ajuda a encontrar uma rota melhor.</p>
+          <div id="finalItemEffect" class="final-item-effect"></div>
+          <div class="final-actions-row final-item-actions">
+            <button id="finalItemClose" class="final-primary" type="button">Continuar</button>
+          </div>
+        </div>
+      </div>
+
+<div id="finalMinigameOverlay" class="final-minigame-overlay hidden" aria-live="polite"><div class="final-minigame-card">
         <div id="finalMinigameIntro"><p class="final-eyebrow">Fim da rodada</p><h2>Minigame!</h2><div id="finalMinigameIcon" class="final-minigame-icon">△</div><h3 id="finalMinigameTitle">Rota do Drone</h3><p id="finalMinigameDescription">Use a matemática para cumprir a missão.</p><button id="finalStartMinigame" class="final-primary" type="button">Começar</button></div>
-        <div id="finalDroneGame" class="final-drone-game hidden"><div class="final-drone-visual" aria-hidden="true"><div class="final-route-leg final-route-a"><span id="finalDroneA">6 km</span></div><div class="final-route-leg final-route-b"><span id="finalDroneB">8 km</span></div><div class="final-drone-direct">✈</div></div><p class="final-eyebrow">Teorema de Pitágoras</p><h3 id="finalDroneQuestion">Qual é a distância direta?</h3><div id="finalDroneAnswers" class="final-drone-answers"></div><p id="finalDroneTimer" class="final-drone-timer">Tempo: 12 s</p></div>
+        <div id="finalDroneGame" class="final-drone-game hidden"><div id="finalEduVisual" class="final-drone-visual final-edu-visual" aria-hidden="true"><div class="final-route-leg final-route-a"><span id="finalDroneA">6 km</span></div><div class="final-route-leg final-route-b"><span id="finalDroneB">8 km</span></div><div class="final-drone-direct">✈</div></div><p id="finalEduTopic" class="final-eyebrow">Teorema de Pitágoras</p><h3 id="finalDroneQuestion">Qual é a distância direta?</h3><div id="finalDroneAnswers" class="final-drone-answers"></div><p id="finalDroneTimer" class="final-drone-timer">Tempo: 12 s</p></div>
         <div id="finalMinigameResult" class="final-minigame-result hidden"><p class="final-eyebrow">Resultado</p><h3 id="finalMinigameWinner">Vencedor</h3><div id="finalMinigameRanking" class="final-minigame-ranking"></div><p>O vencedor recebe <strong>+10 Pontos de Missão</strong>.</p><button id="finalReturnBoard" class="final-primary" type="button">Voltar ao tabuleiro</button></div>
       </div></div>
-      <div id="finalMatchResultOverlay" class="final-minigame-overlay hidden"><div class="final-minigame-card final-match-result-card"><p class="final-eyebrow">Missão concluída</p><h2>Resultado final</h2><div id="finalMatchRanking" class="final-minigame-ranking"></div><button id="finalMatchBackMenu" class="final-primary" type="button">Voltar ao menu</button></div></div>
+      <div id="finalMatchResultOverlay" class="final-minigame-overlay hidden"><div class="final-minigame-card final-match-result-card"><p class="final-eyebrow">Missão concluída</p><h2>Resultado final</h2><div id="finalMatchRanking" class="final-minigame-ranking"></div>
+          <div id="finalEducationSummary" class="final-education-summary">
+            <p class="final-eyebrow">O que apareceu nesta partida</p>
+            <div id="finalEducationConcepts" class="final-education-chip-group"></div>
+            <div id="finalEducationDisasters" class="final-education-chip-group"></div>
+            <div id="finalEducationTechnologies" class="final-education-chip-group"></div>
+          </div>
+          <button id="finalMatchBackMenu" class="final-primary" type="button">Voltar ao menu</button></div></div>
     </section>
 
     <section id="finalProfilesMenu" class="final-view hidden">
@@ -456,6 +577,9 @@
           <span>Configuração</span><b>→</b>
           <span>Tabuleiro</span><b>→</b>
           <span>Minigame</span><b>↻</b>
+        </div>
+        <div class="final-actions-row final-how-actions">
+          <button id="finalReplayTutorial" class="final-secondary" type="button">Ver tutorial do tabuleiro</button>
         </div>
         <div class="final-info-cards">
           <article><strong>Dado digital</strong><p>Visual de 6 faces, mas resultados de 1 a 10 para manter o ritmo do tabuleiro.</p></article>
@@ -1171,11 +1295,13 @@
     });
   </script>
   <script src="final-game-config.js?v=001-base-nova"></script>
-  <script src="script.js?v=0698-party-dance-fix" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <script src="script.js?v=0699-independent-scorebars" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <script src="final-party-network.js?v=002-dance-reconnect"></script>
-  <script src="final-shell.js?v=003-phone-board"></script>
-  <script src="final-board.js?v=005-jd-169-cards"></script>
-  <span class="version-badge" data-version>V. 0.6.2 • Just Dance 16:9</span>
+  <script src="final-shell.js?v=004-saves"></script>
+  <script src="final-board.js?v=009-equipment"></script>
+  <script src="final-presentation.js?v=001-demo"></script>
+  <script src="final-save-manager.js?v=001-checkpoints"></script>
+  <span class="version-badge" data-version>V. 1.0.0 • Equipamentos</span>
 </body>
 </html>
 

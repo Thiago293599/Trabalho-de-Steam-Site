@@ -1187,6 +1187,20 @@ async function requestAndStartSensors() {
   }
 }
 
+function updateMobileDancePlayerBarAsset(nextState) {
+  if (!mobileDanceScoreBarFill) return;
+  if (nextState?.purpose !== "party-board-v2") {
+    mobileDanceScoreBarFill.src = "minigames/just-dance/hud/images/scorebars/split/1P_P1.png";
+    return;
+  }
+
+  const humanPlayers = Array.isArray(nextState.players) ? nextState.players : [];
+  const slotIndex = Math.max(0, humanPlayers.findIndex(player => String(player.id) === String(myPlayerId)));
+  // O tabuleiro novo completa as quatro vagas com bots; por isso o recorte vem da 4P_bar.
+  const playerSlot = Math.max(1, Math.min(4, slotIndex + 1));
+  mobileDanceScoreBarFill.src = `minigames/just-dance/hud/images/scorebars/split/4P_P${playerSlot}.png`;
+}
+
 function renderControllerDanceScore(dance = {}, animateJudgement = false) {
   const score = Math.max(0, Math.min(13333, Number(dance.score || 0)));
   const stars = Math.max(0, Math.min(5, Number(dance.stars || Math.floor(score / 2000))));
@@ -1240,6 +1254,7 @@ function renderControllerDanceScore(dance = {}, animateJudgement = false) {
 }
 
 function applySensorLabState(nextState, me) {
+  updateMobileDancePlayerBarAsset(nextState);
   const isSensorLab = nextState?.purpose === "sensor-lab" || (nextState?.purpose === "party-board-v2" && Boolean(nextState?.sensorMode));
   controlScreen?.classList.toggle("sensor-mode-active", isSensorLab);
   sensorModePanel?.classList.toggle("hidden", !isSensorLab);
