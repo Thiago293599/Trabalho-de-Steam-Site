@@ -1230,3 +1230,32 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   visibility:visible!important;
   opacity:1!important;
 }
+
+
+/* ==========================================================
+   V34 — saída do JD + indicador local/online
+   ========================================================== */
+/* A classe hidden ganha do display:grid!important do stage JD. */
+#danceDevScreen.hidden,
+#danceDevScreen.party-dance-session.hidden{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Celular/Wi-Fi: um pouco mais para baixo e direita, dentro do card. */
+#danceDevScreen.party-dance-session .dance-player-origin-slot{
+  left:calc(3px * var(--jd-ui-scale))!important;
+  top:calc(3px * var(--jd-ui-scale))!important;
+}
+#danceDevScreen.party-dance-session .dance-player-origin,
+#danceDevScreen.party-dance-session .dance-player-origin.is-local,
+#danceDevScreen.party-dance-session .dance-player-origin.is-online,
+#danceDevScreen.party-dance-session .dance-player-phone-icon{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#danceDevScreen.party-dance-session .dance-player-phone-icon{
+  /* Mantém apenas o desenho do telefone e o número. */
+  background-color:transparent!important;
+}

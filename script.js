@@ -5768,10 +5768,53 @@ function partyDanceScoresSnapshot() {
   }));
 }
 
+function forceHidePartyDanceVisuals() {
+  // V34: saída VISUAL independente do tabuleiro, rede e gameMode.
+  // O objetivo é nunca deixar o PC preso no último frame do vídeo.
+  try { pauseDanceMedia(); } catch {}
+  try { stopDanceVisualHud(); } catch {}
+
+  const screen = danceDevScreenEl || document.getElementById("danceDevScreen");
+  if (screen) {
+    screen.classList.remove("party-dance-session");
+    screen.classList.add("hidden");
+    screen.setAttribute("aria-hidden", "true");
+    // Inline + important derrota qualquer regra antiga display:grid!important.
+    screen.style.setProperty("display", "none", "important");
+    screen.style.setProperty("visibility", "hidden", "important");
+    screen.style.setProperty("pointer-events", "none", "important");
+  }
+
+  const shell = document.getElementById("finalShell");
+  if (shell) {
+    shell.classList.remove("hidden");
+    shell.removeAttribute("aria-hidden");
+    shell.style.removeProperty("display");
+    shell.style.removeProperty("visibility");
+    shell.style.removeProperty("pointer-events");
+  }
+
+  // Não depende de STEAMParty.showView existir: mostra o board diretamente.
+  const board = document.getElementById("finalBoardView");
+  if (board) {
+    document.querySelectorAll("#finalShell .final-view").forEach(view => {
+      view.classList.toggle("hidden", view !== board);
+    });
+    board.classList.remove("hidden");
+  }
+
+  document.body.classList.add("final-shell-v1");
+  document.body.style.removeProperty("overflow");
+}
+
 function notifyPartyDanceEnded(reason = "ended") {
   if (gameMode !== "party-dance" || partyDanceEndNotified) return;
   partyDanceEndNotified = true;
   stopPartyDanceEndWatch();
+
+  // Primeiro o PC sai visualmente do Just Dance. Mesmo que todo o resto falhe,
+  // o usuário já volta a enxergar o tabuleiro.
+  forceHidePartyDanceVisuals();
 
   const detail = { songId: danceActiveSongId, reason: String(reason || "ended") };
 
@@ -5884,7 +5927,13 @@ async function openPartyDanceSong(songId, roomCode, partyPlayers = []) {
   document.body.classList.remove("final-shell-v1");
 
   resetDanceLabUi();
-  danceDevScreenEl?.classList.add("party-dance-session");
+  if (danceDevScreenEl) {
+    danceDevScreenEl.style.removeProperty("display");
+    danceDevScreenEl.style.removeProperty("visibility");
+    danceDevScreenEl.style.removeProperty("pointer-events");
+    danceDevScreenEl.removeAttribute("aria-hidden");
+    danceDevScreenEl.classList.add("party-dance-session");
+  }
   showOnly(danceDevScreenEl);
   setPartyDanceDisplayPlayers(partyPlayers);
 
@@ -5936,24 +5985,21 @@ function closePartyDanceSong() {
   partyDancePlaybackStartedAt = 0;
   partyDanceLastProgressAt = 0;
   partyDanceLastProgressMediaTime = 0;
-  if (gameMode !== "party-dance") return;
-  try { pauseDanceMedia(); } catch {}
-  resetDanceGoldMoveFx(true);
-  stopDanceYeahFx();
-  setDanceWindowMode(false);
-  danceDevScreenEl?.classList.remove("party-dance-session");
-  if (danceLabBackBtn) danceLabBackBtn.disabled = false;
-  danceDevScreenEl?.classList.add("hidden");
 
-  const finalShell = document.getElementById("finalShell");
-  finalShell?.classList.remove("hidden");
-  document.body.classList.add("final-shell-v1");
+  // Não existe mais early-return por gameMode. Essa função também é o
+  // escape-hatch de UI e precisa funcionar mesmo se outro fluxo já mudou o modo.
+  forceHidePartyDanceVisuals();
+
+  try { resetDanceGoldMoveFx(true); } catch {}
+  try { stopDanceYeahFx(); } catch {}
+  try { setDanceWindowMode(false); } catch {}
+  try { if (danceLabBackBtn) danceLabBackBtn.disabled = false; } catch {}
 
   devSensorRoomCode = "";
   devSensorState = null;
   devSensorModeEnabled = false;
   partyDanceDisplayPlayers = [];
-  clearPartyDanceScoreBars();
+  try { clearPartyDanceScoreBars(); } catch {}
   if (danceVideoJudgements) danceVideoJudgements.innerHTML = "";
   gameMode = "same-device";
 }
@@ -5990,9 +6036,11 @@ danceTestVideo?.addEventListener("timeupdate", () => {
   updateDancePlayerControls();
   broadcastDancePhoneSession("sync", false);
   if (gameMode === "party-dance") {
-    const duration = getDanceMediaDuration();
-    const current = getDanceMediaCurrentTime();
-    if (duration > 0 && current >= Math.max(0, duration - 0.85)) notifyPartyDanceEnded("timeline-end");
+    const duration = Number(danceTestVideo?.duration || 0);
+    const current = Number(danceTestVideo?.currentTime || 0);
+    if (Number.isFinite(duration) && duration > 0 && Number.isFinite(current) && current >= Math.max(0, duration - 0.85)) {
+      notifyPartyDanceEnded("timeline-end");
+    }
   }
 });
 danceTestVideo?.addEventListener("loadedmetadata", () => { applyDanceAutomaticVideoFraming(); updateDanceSongTimeline(); updateDancePlayerControls(); });

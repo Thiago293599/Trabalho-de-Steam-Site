@@ -1010,13 +1010,37 @@
   }
 
   function forceRestoreBoardAfterDance(){
-    // Cada operação é isolada: nenhuma falha pode impedir o tabuleiro de voltar.
-    try{danceBridge?.closePartyDanceSong?.()}catch(error){console.error("[PartyBoard] closePartyDanceSong:",error)}
-    try{document.getElementById("danceDevScreen")?.classList.add("hidden")}catch{}
-    try{document.getElementById("finalShell")?.classList.remove("hidden")}catch{}
-    try{document.body.classList.add("final-shell-v1")}catch{}
+    // V34: restauração direta do DOM PRIMEIRO. Nem bridge, nem rede, nem API
+    // podem impedir que o PC saia do último frame do Just Dance.
+    try{
+      const dance=document.getElementById("danceDevScreen");
+      if(dance){
+        dance.classList.remove("party-dance-session");
+        dance.classList.add("hidden");
+        dance.setAttribute("aria-hidden","true");
+        dance.style.setProperty("display","none","important");
+        dance.style.setProperty("visibility","hidden","important");
+        dance.style.setProperty("pointer-events","none","important");
+      }
+    }catch{}
+
+    try{
+      const shell=document.getElementById("finalShell");
+      if(shell){
+        shell.classList.remove("hidden");
+        shell.style.removeProperty("display");
+        shell.style.removeProperty("visibility");
+      }
+      document.querySelectorAll("#finalShell .final-view").forEach(el=>{
+        el.classList.toggle("hidden",el!==view);
+      });
+      view?.classList.remove("hidden");
+      document.body.classList.add("final-shell-v1");
+      document.body.style.removeProperty("overflow");
+    }catch{}
+
     try{api().showView?.("board")}catch(error){console.error("[PartyBoard] showView(board):",error)}
-    try{view?.classList.remove("hidden")}catch{}
+    try{danceBridge?.closePartyDanceSong?.()}catch(error){console.error("[PartyBoard] closePartyDanceSong:",error)}
   }
 
   async function finishPartyDance(reason="ended"){
