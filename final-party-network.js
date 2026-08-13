@@ -45,6 +45,22 @@
           if (!action || action.roomCode !== roomCode) return;
           dispatch("steam-party-action", action);
         });
+        socket.on("party:presence", payload => {
+          if (!payload || payload.roomCode !== roomCode) return;
+          dispatch("steam-party-presence", payload);
+        });
+        socket.on("party:player-timeout", payload => {
+          if (!payload || payload.roomCode !== roomCode) return;
+          dispatch("steam-party-player-timeout", payload);
+        });
+        socket.on("dev:dance-judgement", payload => {
+          if (!payload || payload.roomCode !== roomCode) return;
+          dispatch("steam-party-dance-judgement", payload);
+        });
+        socket.on("dev:dance-reset", payload => {
+          if (!payload || payload.roomCode !== roomCode) return;
+          dispatch("steam-party-dance-reset", payload);
+        });
         socket.on("room:closed", payload => {
           if (!payload || payload.roomCode !== roomCode) return;
           dispatch("steam-party-room-closed", payload);
@@ -101,6 +117,22 @@
     return emitAck("host:party-state", { roomCode, state }, 4500).catch(() => null);
   }
 
+
+  function setSensorMode(enabled) {
+    if (!roomCode) return Promise.reject(new Error("Sala não criada."));
+    return emitAck("host:sensor-mode", { roomCode, enabled: Boolean(enabled) });
+  }
+
+  function publishDanceSession(payload) {
+    if (!roomCode) return Promise.reject(new Error("Sala não criada."));
+    return emitAck("host:dance-session", { ...payload, roomCode }, 4500);
+  }
+
+  function resetDanceScore() {
+    if (!roomCode) return Promise.reject(new Error("Sala não criada."));
+    return emitAck("host:sensor-reset", { roomCode }, 4500);
+  }
+
   function closeRoom() {
     if (roomCode && socket) socket.emit("host:close-room", { roomCode });
     roomCode = "";
@@ -111,6 +143,9 @@
     createRoom,
     startParty,
     publishState,
+    setSensorMode,
+    publishDanceSession,
+    resetDanceScore,
     closeRoom,
     getRoomCode: () => roomCode,
     getRoomState: () => roomState,

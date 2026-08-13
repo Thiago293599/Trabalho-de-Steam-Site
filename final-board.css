@@ -18,3 +18,31 @@
 .final-party-connected-list{display:grid;gap:8px;margin-top:10px}.final-party-connected-player{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--final-line);border-radius:15px;padding:11px 13px;background:rgba(255,255,255,.035)}.final-party-connected-player small{color:var(--final-muted)}
 .final-party-phone-wait{color:var(--final-accent)!important;font-weight:800}
 @media(max-width:600px){.final-party-code-row{grid-template-columns:1fr}.final-party-code-row img{justify-self:center}.final-party-link-box{grid-template-columns:1fr}.final-party-link-box button{width:100%}}
+
+
+/* V17 — Just Dance executado como minigame do novo tabuleiro */
+#danceDevScreen.party-dance-session .dance-lab-layout,
+#danceDevScreen.party-dance-session .dance-lab-footer-note,
+#danceDevScreen.party-dance-session .dance-sync-calibrator,
+#danceDevScreen.party-dance-session .dance-yeah-calibrator,
+#danceDevScreen.party-dance-session .dance-song-note,
+#danceDevScreen.party-dance-session #danceLabBackBtn,
+#danceDevScreen.party-dance-session #danceLabServerWarning{
+  display:none!important;
+}
+#danceDevScreen.party-dance-session .menu-heading .eyebrow::after{
+  content:" • Partida";
+}
+#danceDevScreen.party-dance-session .menu-heading h1{
+  font-size:0;
+}
+#danceDevScreen.party-dance-session .menu-heading h1::after{
+  content:"Just Dance";
+  font-size:clamp(2.2rem,5vw,4.6rem);
+}
+#danceDevScreen.party-dance-session .menu-heading .subtitle{
+  max-width:850px;
+}
+#danceDevScreen.party-dance-session .dance-player-settings{
+  opacity:.72;
+}

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "selectionRules": {
     "sensorRequiredFalseWorksWith": [
       "keyboard",
@@ -40,7 +40,7 @@
     {
       "id": "just-dance",
       "title": "Just Dance",
-      "status": "existing-prototype-awaiting-board-bridge",
+      "status": "implemented-party-board-alpha",
       "players": {
         "min": 1,
         "max": 4
@@ -54,7 +54,10 @@
       "botsSupported": true,
       "topicTags": [
         "movimento"
-      ]
+      ],
+      "boardBridge": true,
+      "requiresConnectedPhones": true,
+      "notes": "Disponível somente quando todos os humanos usam celular com sensores."
     },
     {
       "id": "slope-sensor",

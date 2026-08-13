@@ -44,6 +44,33 @@ applyTheme(getCurrentTheme(), false);
 
 const REQUIRED_SERVER_PROTOCOL = 11;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
+
+const PARTY_CONTROLLER_SESSION_KEY = "steamPartyControllerSessionV1";
+
+function savePartyControllerSession(roomCodeValue, playerIdValue) {
+  try {
+    localStorage.setItem(PARTY_CONTROLLER_SESSION_KEY, JSON.stringify({
+      roomCode: String(roomCodeValue || ""),
+      playerId: String(playerIdValue || ""),
+      savedAt: Date.now()
+    }));
+  } catch {}
+}
+
+function readPartyControllerSession() {
+  try {
+    const value = JSON.parse(localStorage.getItem(PARTY_CONTROLLER_SESSION_KEY) || "null");
+    if (!value?.roomCode || !value?.playerId) return null;
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+function clearPartyControllerSession() {
+  try { localStorage.removeItem(PARTY_CONTROLLER_SESSION_KEY); } catch {}
+}
+
 const configuredServerUrl = String(window.GAME_CONFIG?.SERVER_URL || "").trim();
 
 function getServerUrl() {
@@ -1178,7 +1205,7 @@ function renderControllerDanceScore(dance = {}, animateJudgement = false) {
 }
 
 function applySensorLabState(nextState, me) {
-  const isSensorLab = nextState?.purpose === "sensor-lab";
+  const isSensorLab = nextState?.purpose === "sensor-lab" || (nextState?.purpose === "party-board-v2" && Boolean(nextState?.sensorMode));
   controlScreen?.classList.toggle("sensor-mode-active", isSensorLab);
   sensorModePanel?.classList.toggle("hidden", !isSensorLab);
   if (!isSensorLab) {
@@ -1369,6 +1396,7 @@ joinBtn.addEventListener("click", async () => {
 
     myPlayerId = response.playerId;
     joinedRoom = code;
+    savePartyControllerSession(joinedRoom, myPlayerId);
     sensorLastReportedActive = null;
     playerColor.style.background = response.color;
     joinScreen.classList.add("hidden");
@@ -1470,6 +1498,49 @@ mobileCardContinue.addEventListener("click", () => {
   });
 });
 
+
+function applyControllerResume(response, code, playerId) {
+  myPlayerId = playerId;
+  joinedRoom = code;
+  savePartyControllerSession(code, playerId);
+  sensorLastReportedActive = null;
+  joinScreen.classList.add("hidden");
+  controlScreen.classList.remove("hidden");
+  connectionBadge.textContent = "Conectado";
+  if (response?.state) applyState(response.state);
+  window.dispatchEvent(new CustomEvent("steam-party-controller-joined", {
+    detail: { roomCode: joinedRoom, playerId: myPlayerId, state: response?.state || null, resumed: true }
+  }));
+  if (response?.danceSession) phoneApplyDanceSession(response.danceSession);
+  reportSensorStatus(sensorStreaming, true);
+  phoneMeasureServerClock(true);
+  phoneFlushDanceResults();
+}
+
+function tryResumeStoredPartySession() {
+  if (!socket?.connected || myPlayerId || joinedRoom) return;
+  const saved = readPartyControllerSession();
+  if (!saved) return;
+
+  const requestedRoom = normalizeCode(roomCode.value || new URLSearchParams(location.search).get("room") || "");
+  if (requestedRoom && requestedRoom !== normalizeCode(saved.roomCode)) return;
+
+  const code = normalizeCode(saved.roomCode);
+  connectionBadge.textContent = "Retomando…";
+  socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit(
+    "controller:resume",
+    { roomCode: code, playerId: saved.playerId },
+    (error, response) => {
+      if (!error && response?.ok) {
+        applyControllerResume(response, code, saved.playerId);
+      } else {
+        clearPartyControllerSession();
+        connectionBadge.textContent = "Desconectado";
+      }
+    }
+  );
+}
+
 if (socket) {
   socket.on("dev:dance-session", payload => {
     if (!joinedRoom || payload?.roomCode !== joinedRoom) return;
@@ -1542,6 +1613,8 @@ if (socket) {
     sensorModeRequested = false;
     sensorLastReportedActive = null;
     joinedRoom = "";
+    myPlayerId = "";
+    clearPartyControllerSession();
     mobileRollBtn.disabled = true;
     mobileRollBtn.classList.remove("your-turn");
     connectionBadge.textContent = "Sala encerrada";
@@ -1562,17 +1635,14 @@ if (socket) {
       connectionBadge.textContent = "Reconectando sala…";
       socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:resume", { roomCode: joinedRoom, playerId: myPlayerId }, (error, response) => {
         if (!error && response?.ok) {
-          connectionBadge.textContent = "Conectado";
-          if (response.state) applyState(response.state);
-          if (response.danceSession) phoneApplyDanceSession(response.danceSession);
-          reportSensorStatus(sensorStreaming, true);
-          phoneMeasureServerClock(true);
-          phoneFlushDanceResults();
+          applyControllerResume(response, joinedRoom, myPlayerId);
         } else {
           connectionBadge.textContent = "Reconexão pendente";
         }
       });
+      return;
     }
+    tryResumeStoredPartySession();
   });
 }
 
@@ -1580,5 +1650,6 @@ enableSensorsBtn?.addEventListener("click", requestAndStartSensors);
 
 controllerBackBtn.addEventListener("click", () => {
   stopSensorStreaming({ keepPermission: false });
+  clearPartyControllerSession();
   window.location.href = "/";
 });

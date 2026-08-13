@@ -3792,11 +3792,14 @@ function danceMovesRevisionOf(moves) {
 }
 
 function broadcastDancePhoneSession(reason = "sync", force = false) {
-  if (!remoteSocket?.connected || !devSensorRoomCode || !danceTestMoves.length) return;
+  const partyTransport = gameMode === "party-dance" ? window.STEAMPartyDanceTransport : null;
+  const legacyReady = Boolean(remoteSocket?.connected && devSensorRoomCode);
+  const partyReady = Boolean(partyTransport?.publishSession && devSensorRoomCode);
+  if ((!legacyReady && !partyReady) || !devSensorRoomCode || !danceTestMoves.length) return;
   const now = performance.now();
   if (!force && now - dancePhoneSyncLastSentAt < 900) return;
   dancePhoneSyncLastSentAt = now;
-  measureDanceHostServerLatency(force);
+  if (!partyTransport) measureDanceHostServerLatency(force);
   const movesRevision = danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves);
   const payload = {
     roomCode: devSensorRoomCode,
@@ -3812,6 +3815,12 @@ function broadcastDancePhoneSession(reason = "sync", force = false) {
     hostOneWayMs: Math.max(0, Math.min(1000, danceHostServerRttMs / 2)),
     reason
   };
+  if (partyTransport) {
+    partyTransport.publishSession(payload).then(response => {
+      if (response?.ok) dancePhoneSessionRevision = Number(response.revision || dancePhoneSessionRevision);
+    }).catch(() => {});
+    return;
+  }
   remoteSocket.emit("host:dance-session", payload, response => {
     if (response?.ok) dancePhoneSessionRevision = Number(response.revision || dancePhoneSessionRevision);
   });
@@ -5310,6 +5319,87 @@ function testDevCard() {
   });
 }
 
+
+/* ---------- Ponte Just Dance -> novo tabuleiro ---------- */
+async function openPartyDanceSong(songId, roomCode) {
+  const song = getDanceSongConfig(songId);
+  if (!song || !roomCode) return { ok: false, message: "Música ou sala inválida." };
+
+  gameMode = "party-dance";
+  devSensorRoomCode = String(roomCode);
+  devSensorState = null;
+  devSensorModeEnabled = true;
+
+  const finalShell = document.getElementById("finalShell");
+  finalShell?.classList.add("hidden");
+  document.body.classList.remove("final-shell-v1");
+
+  resetDanceLabUi();
+  danceDevScreenEl?.classList.add("party-dance-session");
+  showOnly(danceDevScreenEl);
+
+  if (danceLabBackBtn) danceLabBackBtn.disabled = true;
+  if (danceLabMessage) danceLabMessage.textContent = "Minigame do tabuleiro • preparando música e celulares…";
+
+  const switched = await switchDanceSong(song.id, false);
+  if (!switched) return { ok: false, message: "Não foi possível carregar a música." };
+
+  const playerReady = await initializeDancePlayerSettings();
+  if (!playerReady) return { ok: false, message: "Não foi possível preparar o player." };
+
+  try { danceTestVideo.currentTime = 0; } catch {}
+  resetLocalDanceJudging();
+  broadcastDancePhoneSession("song", true);
+
+  return {
+    ok: true,
+    songId: song.id,
+    title: song.title,
+    artist: song.artist,
+    totalMoves: danceTestMoves.length,
+    movesRevision: danceTestMovesRevision || danceMovesRevisionOf(danceTestMoves)
+  };
+}
+
+async function startPartyDancePlayback() {
+  if (gameMode !== "party-dance") return false;
+  await playDanceMedia();
+  return isDanceMediaPlaying();
+}
+
+function closePartyDanceSong() {
+  if (gameMode !== "party-dance") return;
+  try { pauseDanceMedia(); } catch {}
+  resetDanceGoldMoveFx(true);
+  stopDanceYeahFx();
+  setDanceWindowMode(false);
+  danceDevScreenEl?.classList.remove("party-dance-session");
+  if (danceLabBackBtn) danceLabBackBtn.disabled = false;
+  danceDevScreenEl?.classList.add("hidden");
+
+  const finalShell = document.getElementById("finalShell");
+  finalShell?.classList.remove("hidden");
+  document.body.classList.add("final-shell-v1");
+
+  devSensorRoomCode = "";
+  devSensorState = null;
+  devSensorModeEnabled = false;
+  gameMode = "same-device";
+}
+
+window.STEAMJustDanceBridge = Object.freeze({
+  openPartyDanceSong,
+  startPartyDancePlayback,
+  closePartyDanceSong,
+  handleJudgement: handleDanceJudgementEvent,
+  getSongIds: () => Object.keys(DANCE_SONGS),
+  getSongInfo: id => {
+    const song = getDanceSongConfig(id);
+    return { id: song.id, title: song.title, artist: song.artist, cover: `${song.base}/${song.coverFile}` };
+  },
+  isPartyDance: () => gameMode === "party-dance"
+});
+
 /* ---------- Eventos ---------- */
 
 // V6.8: todos os eventos de gameplay seguem o MP4. O <audio> fica livre para preview futuro.
@@ -5322,6 +5412,11 @@ danceTestVideo?.addEventListener("ended", () => {
   danceJudgeActiveMoveIndex = -1;
   stopDanceVisualHud();
   updateDancePlayerControls();
+  if (gameMode === "party-dance") {
+    window.dispatchEvent(new CustomEvent("steam-party-dance-ended", {
+      detail: { songId: danceActiveSongId }
+    }));
+  }
 });
 danceTestVideo?.addEventListener("waiting", handleDancePlaybackStall);
 danceTestVideo?.addEventListener("stalled", handleDancePlaybackStall);
