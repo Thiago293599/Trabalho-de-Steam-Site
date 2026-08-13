@@ -16,7 +16,7 @@
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
   <link rel="stylesheet" href="final-shell.css?v=002-board-alpha" />
-  <link rel="stylesheet" href="final-board.css?v=020-v41-online-dance" />
+  <link rel="stylesheet" href="final-board.css?v=021-v42-local-profiles" />
 </head>
 <body class="site-loading">
 
@@ -558,6 +558,14 @@
 
           <form id="finalProfileEditor" class="final-profile-editor hidden">
             <div id="finalAvatarPreview" class="final-avatar-preview" aria-label="Prévia do avatar"></div>
+            <div class="final-profile-photo-actions">
+              <label class="final-file-button final-profile-photo-button">
+                Escolher foto
+                <input id="finalProfilePhoto" type="file" accept="image/png,image/jpeg,image/webp,image/*" />
+              </label>
+              <button id="finalRemoveProfilePhoto" class="final-secondary" type="button">Remover foto</button>
+            </div>
+            <p class="final-profile-photo-note">A foto fica somente neste dispositivo. Ela é reduzida automaticamente para o jogo ficar leve.</p>
             <label>
               Nome
               <input id="finalProfileName" maxlength="18" autocomplete="nickname" placeholder="Jogador" />
@@ -633,16 +641,45 @@
       <div class="final-panel">
         <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
         <p class="final-eyebrow">Configurações</p>
-        <h2>Base da versão pronta</h2>
-        <div class="final-settings-grid">
-          <div><span>Texto do Just Dance</span><strong>Normal</strong></div>
-          <div><span>Gold Move DEV</span><strong>1500 ms</strong></div>
-          <div><span>Where Have You Been</span><strong>-1900 ms</strong></div>
-          <div><span>Rain Over Me</span><strong>-1725 ms</strong></div>
+        <h2>Jogo e Just Dance</h2>
+        <p class="final-subtitle">Tudo fica salvo somente neste dispositivo.</p>
+        <div class="final-settings-form">
+          <label class="final-setting-row">
+            <span><strong>Qualidade do vídeo do Just Dance</strong><small>Automática escolhe de acordo com o aparelho e a conexão.</small></span>
+            <select id="finalSettingJdQuality">
+              <option value="auto">Automática</option>
+              <option value="low">Low • 360p</option>
+              <option value="medium">Medium • 720p</option>
+              <option value="high">High • 1080p</option>
+            </select>
+          </label>
+          <label class="final-setting-row">
+            <span><strong>Tamanho das letras</strong><small>Altera somente as letras durante o Just Dance.</small></span>
+            <select id="finalSettingJdLyrics">
+              <option value="small">Pequeno</option>
+              <option value="normal">Normal</option>
+              <option value="large">Grande</option>
+            </select>
+          </label>
+          <label class="final-setting-row">
+            <span><strong>Enquadramento do vídeo</strong><small>“Inteiro” não corta a imagem; “Preencher” ocupa toda a área.</small></span>
+            <select id="finalSettingJdFit">
+              <option value="contain">Mostrar inteiro</option>
+              <option value="cover">Preencher tela</option>
+            </select>
+          </label>
+          <label class="final-setting-row final-setting-volume">
+            <span><strong>Volume do Just Dance</strong><small>Vale para vídeo, feedbacks e Gold Moves.</small></span>
+            <span class="final-setting-range-wrap"><input id="finalSettingJdVolume" type="range" min="0" max="100" step="1" value="90" /><output id="finalSettingJdVolumeValue">90%</output></span>
+          </label>
+        </div>
+        <div class="final-settings-grid final-settings-info-grid">
+          <div><span>Minigames de contas</span><strong>25 segundos</strong></div>
           <div><span>Dado</span><strong>1–10</strong></div>
           <div><span>Jogadores</span><strong>Até 4</strong></div>
+          <div><span>Perfis</span><strong>Locais</strong></div>
         </div>
-        <p class="final-dev-note">Esses valores ficam centralizados em <code>final-game-config.js</code> para facilitar ajustes futuros.</p>
+        <p id="finalSettingsSaved" class="final-dev-note">As alterações são aplicadas automaticamente.</p>
       </div>
     </section>
   </div>
@@ -1334,10 +1371,10 @@
     });
   </script>
   <script src="final-game-config.js?v=001-base-nova"></script>
-  <script src="script.js?v=0711-v41-online-dance" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <script src="script.js?v=0712-v42-settings" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <script src="final-party-network.js?v=003-motion-sensor"></script>
-  <script src="final-shell.js?v=005-online-route-fix"></script>
-  <script src="final-board.js?v=015-v41-online-dance"></script>
+  <script src="final-shell.js?v=006-v42-local-profiles"></script>
+  <script src="final-board.js?v=016-v42-profiles-time"></script>
   <script src="final-online-v2.js?v=005-v41-online-dance"></script>
   <script src="final-presentation.js?v=001-demo"></script>
   <script src="final-save-manager.js?v=001-checkpoints"></script>

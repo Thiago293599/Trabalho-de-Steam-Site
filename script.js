@@ -469,6 +469,7 @@ let danceClassifierLoadSummary = { loaded: 0, total: 0, format: "" };
 const DANCE_QUALITY_STORAGE_KEY = "jdVideoQualityModeV1";
 const DANCE_LYRICS_SIZE_STORAGE_KEY = "jdLyricsSizeFinalV1";
 const DANCE_VIDEO_FIT_STORAGE_KEY = "jdVideoFitV1";
+const DANCE_VOLUME_STORAGE_KEY = "jdVolumeV1";
 let DANCE_VIDEO_SOURCES = {};
 let DANCE_AUDIO_SOURCE = ""; // reservado para preview futuro; não usado no gameplay V6.8
 let DANCE_PLAYER_AVATAR_SOURCE = "";
@@ -3817,9 +3818,11 @@ async function initializeDancePlayerSettings() {
   applyDanceVideoFit(safeLocalStorageGet(DANCE_VIDEO_FIT_STORAGE_KEY, "contain"), false);
   if (danceQualityMode) danceQualityMode.value = danceQualityPreference;
   if (danceVolume) {
-    const initialVolume = Number(danceVolume.value || .9);
+    const initialVolume = Math.max(0, Math.min(1, Number(safeLocalStorageGet(DANCE_VOLUME_STORAGE_KEY, danceVolume.value || .9))));
+    danceVolume.value = String(initialVolume);
     if (danceTestVideo) danceTestVideo.volume = initialVolume;
     if (danceSongAudio) danceSongAudio.volume = initialVolume; // reservado ao futuro preview
+    if (danceGoldMoveVideo) danceGoldMoveVideo.volume = initialVolume;
   }
   preloadDanceFeedbackAssets();
   renderDanceMainHud({ score: 0, stars: 0 });
@@ -6080,6 +6083,20 @@ danceVolume?.addEventListener("input", () => {
   if (danceTestVideo) danceTestVideo.volume = volume;
   if (danceSongAudio) danceSongAudio.volume = volume; // futuro preview, sem controlar o gameplay
   if (danceGoldMoveVideo) danceGoldMoveVideo.volume = volume;
+  safeLocalStorageSet(DANCE_VOLUME_STORAGE_KEY, String(volume));
+});
+window.addEventListener("steam-party-settings-changed", event => {
+  const key=String(event.detail?.key||""),value=String(event.detail?.value??"");
+  if(key===DANCE_QUALITY_STORAGE_KEY) applyDanceQualityPreference(value,false);
+  else if(key===DANCE_LYRICS_SIZE_STORAGE_KEY) applyDanceLyricsSize(value,false);
+  else if(key===DANCE_VIDEO_FIT_STORAGE_KEY) applyDanceVideoFit(value,false);
+  else if(key===DANCE_VOLUME_STORAGE_KEY){
+    const volume=Math.max(0,Math.min(1,Number(value||0)));
+    if(danceVolume)danceVolume.value=String(volume);
+    if(danceTestVideo)danceTestVideo.volume=volume;
+    if(danceSongAudio)danceSongAudio.volume=volume;
+    if(danceGoldMoveVideo)danceGoldMoveVideo.volume=volume;
+  }
 });
 danceSongSelect?.addEventListener("change", () => switchDanceSong(danceSongSelect.value, true));
 danceQualityMode?.addEventListener("change", () => applyDanceQualityPreference(danceQualityMode.value, true));

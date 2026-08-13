@@ -46,6 +46,8 @@ const REQUIRED_SERVER_PROTOCOL = 11;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 
 const PARTY_CONTROLLER_SESSION_KEY = "steamPartyControllerSessionV1";
+const LOCAL_PROFILE_KEY = "steamPartyProfilesV1";
+const LOCAL_ACTIVE_PROFILE_KEY = "steamPartyActiveProfileV1";
 
 function savePartyControllerSession(roomCodeValue, playerIdValue) {
   try {
@@ -102,6 +104,83 @@ const playerName = document.getElementById("playerName");
 const roomCode = document.getElementById("roomCode");
 const joinBtn = document.getElementById("joinBtn");
 const joinMessage = document.getElementById("joinMessage");
+const controllerProfileSelect = document.getElementById("controllerProfileSelect");
+const controllerProfileAvatar = document.getElementById("controllerProfileAvatar");
+const controllerProfileHint = document.getElementById("controllerProfileHint");
+const controllerManageProfile = document.getElementById("controllerManageProfile");
+
+function safeControllerAvatarPhoto(value) {
+  const text = String(value || "");
+  if (text.length > 140000) return "";
+  return /^data:image\/(?:png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(text) ? text : "";
+}
+function localControllerProfiles() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(LOCAL_PROFILE_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch { return []; }
+}
+function activeControllerProfile() {
+  const profiles = localControllerProfiles();
+  let id = "";
+  try { id = localStorage.getItem(LOCAL_ACTIVE_PROFILE_KEY) || ""; } catch {}
+  return profiles.find(p => p.id === id) || profiles[0] || null;
+}
+function controllerProfileMarkup(profile) {
+  const photo = safeControllerAvatarPhoto(profile?.avatarPhoto);
+  if (photo) return `<img src="${photo}" alt="" />`;
+  const colors={cyan:"#56d9ff",green:"#65f2a8",orange:"#ffae57",pink:"#ff72b8",purple:"#a987ff",yellow:"#f6df65"};
+  const color=colors[profile?.avatarColor]||"#65f2c3";
+  const face=profile?.avatarFace||"smile";
+  const mouth=face==="focus"?"M47 77 H73":face==="calm"?"M47 75 Q60 81 73 75":"M43 71 Q60 88 77 71";
+  return `<svg viewBox="0 0 120 120" aria-hidden="true"><rect x="14" y="14" width="92" height="92" rx="34" fill="${color}"/><circle cx="45" cy="52" r="5" fill="#082126"/><circle cx="75" cy="52" r="5" fill="#082126"/><path d="${mouth}" fill="none" stroke="#082126" stroke-width="5" stroke-linecap="round"/></svg>`;
+}
+function renderControllerProfilePicker() {
+  if (!controllerProfileSelect) return;
+  const profiles = localControllerProfiles();
+  let activeId="";
+  try { activeId=localStorage.getItem(LOCAL_ACTIVE_PROFILE_KEY)||""; } catch {}
+  controllerProfileSelect.innerHTML="";
+  if (!profiles.length) {
+    const option=document.createElement("option");option.value="";option.textContent="Sem perfil • usar nome abaixo";controllerProfileSelect.appendChild(option);
+    controllerProfileAvatar.innerHTML=controllerProfileMarkup(null);
+    if(controllerProfileHint)controllerProfileHint.textContent="Crie um perfil neste celular para levar nome, avatar ou foto para o Party.";
+    return;
+  }
+  profiles.forEach(profile=>{const option=document.createElement("option");option.value=profile.id;option.textContent=profile.name||"Jogador";controllerProfileSelect.appendChild(option)});
+  const chosen=profiles.find(p=>p.id===activeId)||profiles[0];
+  controllerProfileSelect.value=chosen.id;
+  try{localStorage.setItem(LOCAL_ACTIVE_PROFILE_KEY,chosen.id)}catch{}
+  if(playerName)playerName.value=chosen.name||"Jogador";
+  if(controllerProfileAvatar)controllerProfileAvatar.innerHTML=controllerProfileMarkup(chosen);
+  if(controllerProfileHint)controllerProfileHint.textContent=safeControllerAvatarPhoto(chosen.avatarPhoto)?"Foto local pronta para aparecer no Party.":"Avatar local pronto para aparecer no Party.";
+}
+function selectedControllerProfile() {
+  const profiles=localControllerProfiles();
+  return profiles.find(p=>p.id===controllerProfileSelect?.value)||activeControllerProfile();
+}
+function controllerProfilePayload() {
+  const profile=selectedControllerProfile();
+  if(!profile)return null;
+  return {
+    id:String(profile.id||"").slice(0,80),
+    name:String(profile.name||playerName?.value||"Jogador").trim().slice(0,18)||"Jogador",
+    avatarShape:String(profile.avatarShape||"round").slice(0,16),
+    avatarColor:String(profile.avatarColor||"cyan").slice(0,16),
+    avatarFace:String(profile.avatarFace||"smile").slice(0,16),
+    avatarPhoto:safeControllerAvatarPhoto(profile.avatarPhoto)
+  };
+}
+controllerProfileSelect?.addEventListener("change",()=>{
+  const p=selectedControllerProfile();
+  if(!p)return;
+  try{localStorage.setItem(LOCAL_ACTIVE_PROFILE_KEY,p.id)}catch{}
+  if(playerName)playerName.value=p.name||"Jogador";
+  if(controllerProfileAvatar)controllerProfileAvatar.innerHTML=controllerProfileMarkup(p);
+  if(controllerProfileHint)controllerProfileHint.textContent=safeControllerAvatarPhoto(p.avatarPhoto)?"Foto local pronta para aparecer no Party.":"Avatar local pronto para aparecer no Party.";
+});
+controllerManageProfile?.addEventListener("click",()=>{location.href="./index.html?profiles=1"});
+renderControllerProfilePicker();
 
 const playerColor = document.getElementById("playerColor");
 const playerLabel = document.getElementById("playerLabel");
@@ -1622,7 +1701,8 @@ joinBtn.addEventListener("click", async () => {
     return;
   }
 
-  socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:join", { roomCode: code, name }, (error, response) => {
+  const localProfile = controllerProfilePayload();
+  socket.timeout(MULTIPLAYER_TIMEOUT_MS).emit("controller:join", { roomCode: code, name, profile: localProfile }, (error, response) => {
     if (error) {
       joinBtn.disabled = false;
       showMessage(joinMessage, "O servidor não respondeu ao conectar. Reinicie o SERVIDOR_PC desta versão.");

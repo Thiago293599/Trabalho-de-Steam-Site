@@ -1528,3 +1528,25 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
 @media(prefers-reduced-motion:reduce){
   .final-online-dance-spinner{animation:none}
 }
+
+
+/* ==========================================================
+   V42 — Perfis locais com foto + Configurações reais
+   ========================================================== */
+.final-avatar-photo{display:block;width:100%;height:100%;border-radius:inherit;overflow:hidden;background:#151a20}
+.final-avatar-photo img{display:block;width:100%;height:100%;object-fit:cover}
+#finalAvatarPreview .final-avatar-photo{width:min(180px,42vw);height:min(180px,42vw);border-radius:38px;box-shadow:0 14px 36px rgba(0,0,0,.24)}
+.final-mini-avatar .final-avatar-photo,.avatar-slot .final-avatar-photo,.final-board-player-avatar .final-avatar-photo,.final-board-token .final-avatar-photo,.final-board-turn-avatar .final-avatar-photo{width:100%;height:100%}
+.final-profile-photo-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.final-profile-photo-button{display:inline-flex!important;align-items:center;justify-content:center}
+.final-profile-photo-note{margin:4px 0 14px;opacity:.66;font-size:.82rem;line-height:1.45}
+.final-settings-form{display:grid;gap:10px;margin:18px 0 20px}
+.final-setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 16px;border:1px solid rgba(255,255,255,.11);border-radius:18px;background:rgba(255,255,255,.045)}
+.final-setting-row>span:first-child{display:grid;gap:4px;min-width:0}.final-setting-row small{opacity:.66;line-height:1.35}
+.final-setting-row select{min-width:190px;max-width:45%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(5,18,28,.75);color:inherit}
+.final-setting-range-wrap{display:flex;align-items:center;gap:10px;min-width:220px}.final-setting-range-wrap input{width:160px}.final-setting-range-wrap output{min-width:44px;text-align:right;font-weight:900}
+.final-settings-info-grid{margin-top:8px}
+.final-party-connected-player{display:flex!important;align-items:center;gap:10px}
+.final-party-connected-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:13px;overflow:hidden;display:grid;place-items:center;background:rgba(255,255,255,.08)}
+.final-party-connected-avatar>svg,.final-party-connected-avatar .final-avatar-photo{width:100%;height:100%}
+@media(max-width:680px){.final-setting-row{align-items:stretch;flex-direction:column}.final-setting-row select{max-width:none;width:100%}.final-setting-range-wrap{min-width:0;width:100%}.final-setting-range-wrap input{flex:1;width:auto}}

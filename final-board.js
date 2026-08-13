@@ -13,6 +13,7 @@
   partyLobby=$("#finalPartyLobbyOverlay"),partyRoomCode=$("#finalPartyRoomCode"),partyQr=$("#finalPartyQr"),partyJoinUrl=$("#finalPartyJoinUrl"),partyConnectedCount=$("#finalPartyConnectedCount"),partyConnectedPlayers=$("#finalPartyConnectedPlayers"),partyStart=$("#finalPartyStartMatch"),partyStatus=$("#finalPartyLobbyStatus");
   const network=window.STEAMPartyNetwork||null,danceBridge=window.STEAMJustDanceBridge||null,spaceTypes=["start","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good"],symbols={start:"INÍCIO",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"},colors=["cyan","green","orange","pink","purple","yellow"],shapes=["round","square","triangle","hex"],triples=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[7,24,25],[9,12,15],[12,16,20]];
   const TUTORIAL_KEY="steamPartyBoardTutorialSeenV1";
+  const MATH_MINIGAME_TIME_MS=25000;
   let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,partyDanceBotScoreCache=new Map(),tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0;
   const api=()=>window.STEAMParty||{},toast=m=>api().showToast?.(m),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const avatar=p=>api().avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><rect x="18" y="18" width="84" height="84" rx="34" fill="#65f2c3"/></svg>`;
@@ -29,6 +30,7 @@
       avatarShape:String(player?.avatarShape||"round"),
       avatarColor:String(player?.avatarColor||"cyan"),
       avatarFace:String(player?.avatarFace||"smile"),
+      avatarPhoto:String(player?.avatarPhoto||"").slice(0,140000),
       difficulty:String(player?.difficulty||"normal"),
       position:Math.max(0,Math.min(SPACE_COUNT-1,Number(player?.position||0))),
       laps:Math.max(0,Number(player?.laps||0)),
@@ -491,8 +493,8 @@
   }
 
   function renderSpaces(){spacesLayer.innerHTML="";path.forEach((pt,i)=>{const type=spaceTypes[i%spaceTypes.length],el=document.createElement("div");el.className="final-board-space";el.dataset.index=i;el.dataset.type=type;el.style.left=`${pt.x}%`;el.style.top=`${pt.y}%`;el.innerHTML=`<span>${type==="start"?"INÍCIO":symbols[type]}</span>`;spacesLayer.appendChild(el)})}
-  function playerFromController(ctrl,slot){return{slot,id:ctrl.id,human:true,bot:false,name:ctrl.name||`Jogador ${slot}`,avatarShape:shapes[(slot-1)%shapes.length],avatarColor:colors[(slot-1)%colors.length],avatarFace:"smile",difficulty:"",position:0,laps:0,score:0,inventory:[],activeEffects:{gps:false,mapBoost:0}}}
-  function playerLocal(slot,profile){return{slot,id:`local-${slot}`,human:true,bot:false,name:profile?.name||`Jogador ${slot}`,avatarShape:profile?.avatarShape||shapes[(slot-1)%shapes.length],avatarColor:profile?.avatarColor||colors[(slot-1)%colors.length],avatarFace:profile?.avatarFace||"smile",difficulty:"",position:0,laps:0,score:0,inventory:[],activeEffects:{gps:false,mapBoost:0}}}
+  function playerFromController(ctrl,slot){return{slot,id:ctrl.id,human:true,bot:false,name:ctrl.name||`Jogador ${slot}`,avatarShape:ctrl.avatarShape||shapes[(slot-1)%shapes.length],avatarColor:ctrl.avatarColor||colors[(slot-1)%colors.length],avatarFace:ctrl.avatarFace||"smile",avatarPhoto:ctrl.avatarPhoto||"",profileId:ctrl.profileId||"",difficulty:"",position:0,laps:0,score:0,inventory:[],activeEffects:{gps:false,mapBoost:0}}}
+  function playerLocal(slot,profile){return{slot,id:`local-${slot}`,human:true,bot:false,name:profile?.name||`Jogador ${slot}`,avatarShape:profile?.avatarShape||shapes[(slot-1)%shapes.length],avatarColor:profile?.avatarColor||colors[(slot-1)%colors.length],avatarFace:profile?.avatarFace||"smile",avatarPhoto:profile?.avatarPhoto||"",profileId:profile?.id||"",difficulty:"",position:0,laps:0,score:0,inventory:[],activeEffects:{gps:false,mapBoost:0}}}
   function botPlayer(slot,diff="normal"){return{slot,id:`bot-${slot}`,human:false,bot:true,name:`Bot ${slot}`,avatarShape:shapes[(slot-1)%shapes.length],avatarColor:colors[(slot-1)%colors.length],avatarFace:"focus",difficulty:diff,position:0,laps:0,score:0,inventory:[],activeEffects:{gps:false,mapBoost:0}}}
   function buildPlayers(match,controllers=[]){const humans=Math.max(1,Math.min(4,Number(match.humanPlayers||1))),players=[],active=api().getActiveProfile?.()||null;for(let i=1;i<=humans;i++)players.push(controllers[i-1]?playerFromController(controllers[i-1],i):playerLocal(i,i===1?active:null));for(let i=humans+1;i<=4;i++)players.push(botPlayer(i,match.bots?.[i-humans-1]?.difficulty||"normal"));return players}
   function renderPlayers(){playersList.innerHTML="";state.players.forEach((p,i)=>{const row=document.createElement("div");row.className=`final-board-player${i===state.turnIndex?" is-turn":""}`;row.innerHTML=`<span class="final-board-player-avatar">${avatar(p)}</span><span><strong></strong><small></small></span><span class="final-board-player-score"><b>${p.score}</b><span>PTS</span></span>`;$("strong",row).textContent=p.name;ensurePlayerEquipment(p);
@@ -501,7 +503,7 @@
       playersList.appendChild(row)})}
   function renderTokens(){tokensLayer.innerHTML="";state.players.forEach(p=>{const pt=path[p.position]||path[0],t=document.createElement("div");t.className="final-board-token";t.dataset.playerId=p.id;t.dataset.slot=p.slot;t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`;t.innerHTML=avatar(p);tokensLayer.appendChild(t)})}
   function updateToken(p){const t=$(`[data-player-id="${CSS.escape(p.id)}"]`,tokensLayer),pt=path[p.position]||path[0];if(t&&pt){t.style.left=`${pt.x}%`;t.style.top=`${pt.y}%`}}
-  function partyState(phase="board",extra={}){if(!state)return{};return{phase,round:state.round,totalRounds:state.totalRounds,currentPlayerId:state.players[state.turnIndex]?.id||"",eventText:eventBox.textContent||"",players:state.players.map(p=>({id:p.id,slot:p.slot,name:p.name,human:p.human,bot:p.bot,difficulty:p.difficulty,position:p.position,score:p.score,laps:p.laps,avatarShape:p.avatarShape,avatarColor:p.avatarColor,avatarFace:p.avatarFace,inventory:[...(p.inventory||[])],activeEffects:{...(p.activeEffects||{})}})),...extra}}
+  function partyState(phase="board",extra={}){if(!state)return{};return{phase,round:state.round,totalRounds:state.totalRounds,currentPlayerId:state.players[state.turnIndex]?.id||"",eventText:eventBox.textContent||"",players:state.players.map(p=>({id:p.id,slot:p.slot,name:p.name,human:p.human,bot:p.bot,difficulty:p.difficulty,position:p.position,score:p.score,laps:p.laps,avatarShape:p.avatarShape,avatarColor:p.avatarColor,avatarFace:p.avatarFace,avatarPhoto:p.avatarPhoto||"",inventory:[...(p.inventory||[])],activeEffects:{...(p.activeEffects||{})}})),...extra}}
   function publish(phase="board",extra={}){
     if(state?.connected)network?.publishState(partyState(phase,extra));
     if(state?.onlineHost)window.STEAMOnlineV2?.publishState?.(partyState(phase,extra));
@@ -782,7 +784,7 @@
       droneAnswers.appendChild(wait);
     }
 
-    droneDeadline=performance.now()+12000;
+    droneDeadline=performance.now()+MATH_MINIGAME_TIME_MS;
     clearInterval(droneTimerId);
     droneTimerId=setInterval(updateTimer,100);
     updateTimer();
@@ -803,7 +805,7 @@
           b:currentProblem.b,
           c:currentProblem.c,
           answers:currentProblem.answers,
-          deadlineServerMs:Date.now()+12000
+          deadlineServerMs:Date.now()+MATH_MINIGAME_TIME_MS
         }
       }
     });
@@ -845,12 +847,12 @@
       .find(b=>Number(b.dataset.answer)===Number(currentProblem.answer))
       ?.classList.add("correct");
 
-    const reaction=Math.max(250,12000-Math.max(0,droneDeadline-performance.now()));
+    const reaction=Math.max(250,MATH_MINIGAME_TIME_MS-Math.max(0,droneDeadline-performance.now()));
     const humans=state.players.filter(p=>p.human);
     humans.forEach((p,i)=>minigameScores.push({
       player:p,
       correct:i===0?correct:false,
-      timeMs:i===0?reaction:12000,
+      timeMs:i===0?reaction:MATH_MINIGAME_TIME_MS,
       performance:i===0&&correct?10000-reaction:0
     }));
     addBots();
@@ -863,7 +865,7 @@
     if(!p)return;
 
     const correct=Number(action.answer)===Number(currentProblem.answer);
-    const timeMs=Math.max(200,Math.min(12000,12000-Math.max(0,droneDeadline-performance.now())));
+    const timeMs=Math.max(200,Math.min(MATH_MINIGAME_TIME_MS,MATH_MINIGAME_TIME_MS-Math.max(0,droneDeadline-performance.now())));
     phoneAnswers.set(p.id,true);
     minigameScores.push({player:p,correct,timeMs,performance:correct?10000-timeMs:0});
 
@@ -875,7 +877,7 @@
     if(!state?.onlineHost||!currentProblem||droneGame.dataset.finished==="1")return;
     const p=state.players.find(x=>x.id===state.onlineHostPlayerId&&x.human);if(!p||phoneAnswers.has(p.id))return;
     const correct=Number(value)===Number(currentProblem.answer);
-    const timeMs=Math.max(200,Math.min(12000,12000-Math.max(0,droneDeadline-performance.now())));
+    const timeMs=Math.max(200,Math.min(MATH_MINIGAME_TIME_MS,MATH_MINIGAME_TIME_MS-Math.max(0,droneDeadline-performance.now())));
     phoneAnswers.set(p.id,true);minigameScores.push({player:p,correct,timeMs,performance:correct?10000-timeMs:0});
     $$(".final-drone-answer",droneAnswers).forEach(x=>x.disabled=true);
     if(button)button.classList.add(correct?"correct":"wrong");
@@ -887,7 +889,7 @@
     if(!state?.onlineHost||!currentProblem||action.problemToken!==currentProblem.token||phoneAnswers.has(action.playerId))return;
     const p=state.players.find(x=>x.id===action.playerId&&x.human);if(!p)return;
     const correct=Number(action.answer)===Number(currentProblem.answer);
-    const timeMs=Math.max(200,Math.min(12000,12000-Math.max(0,droneDeadline-performance.now())));
+    const timeMs=Math.max(200,Math.min(MATH_MINIGAME_TIME_MS,MATH_MINIGAME_TIME_MS-Math.max(0,droneDeadline-performance.now())));
     phoneAnswers.set(p.id,true);minigameScores.push({player:p,correct,timeMs,performance:correct?10000-timeMs:0});
     const needed=state.players.filter(x=>x.human).length;if(phoneAnswers.size>=needed)finalizeConnectedGame();
   }
@@ -897,7 +899,7 @@
     droneGame.dataset.finished="1";
     clearInterval(droneTimerId);
     state.players.filter(p=>p.human&&!phoneAnswers.has(p.id)).forEach(p=>
-      minigameScores.push({player:p,correct:false,timeMs:12000,performance:0})
+      minigameScores.push({player:p,correct:false,timeMs:MATH_MINIGAME_TIME_MS,performance:0})
     );
     addBots();
     setTimeout(showResults,500);
@@ -1401,7 +1403,7 @@
 
   function closeMinigame(){clearInterval(droneTimerId);clearInterval(motionEscapeTimer);clearInterval(motionEscapeBotTimer);motionEscapeState=null;try{network?.setSensorMode(false,"motion-minigame")?.catch?.(()=>{})}catch{}minigameOverlay.classList.add("hidden");advanceRound()}
   function finishMatch(){clearCheckpoint();renderEducationSummary();matchResultOverlay.classList.remove("hidden");const sorted=[...state.players].sort((a,b)=>b.score-a.score||b.laps-a.laps);matchRanking.innerHTML="";sorted.forEach((p,i)=>{const row=document.createElement("div");row.className="final-ranking-row";row.innerHTML=`<b>${i+1}º</b><span><strong></strong><small></small></span><span><strong>${p.score} pts</strong></span>`;const info=$("span",row);$("strong",info).textContent=p.name;$("small",row).textContent=p.bot?`Bot • ${difficulty(p.difficulty)}`:"Humano";matchRanking.appendChild(row)});publish("match-result",{minigame:null})}
-  function renderLobby(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1)),connected=roomState.players?.length||0;partyConnectedCount.textContent=`${connected} / ${expected}`;partyConnectedPlayers.innerHTML="";(roomState.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-party-connected-player";el.innerHTML=`<strong></strong><small>Jogador ${i+1} • pronto</small>`;$("strong",el).textContent=p.name;partyConnectedPlayers.appendChild(el)});partyStart.disabled=connected<expected;partyStatus.textContent=connected<expected?`Aguardando ${expected-connected} celular${expected-connected===1?"":"es"}…`:"Todos os jogadores estão conectados."}
+  function renderLobby(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1)),connected=roomState.players?.length||0;partyConnectedCount.textContent=`${connected} / ${expected}`;partyConnectedPlayers.innerHTML="";(roomState.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-party-connected-player";el.innerHTML=`<span class="final-party-connected-avatar">${avatar(p)}</span><span><strong></strong><small>Jogador ${i+1} • perfil do celular</small></span>`;$("strong",el).textContent=p.name;partyConnectedPlayers.appendChild(el)});partyStart.disabled=connected<expected;partyStatus.textContent=connected<expected?`Aguardando ${expected-connected} celular${expected-connected===1?"":"es"}…`:"Todos os jogadores estão conectados."}
   async function startConnectedLobby(match){if(!network){toast("Ponte de rede indisponível.");return false}pendingStartConfig=match;roomState=null;api().showView?.("board");partyLobby.classList.remove("hidden");modeBadge.textContent="Celulares";try{const room=await network.createRoom();partyRoomCode.textContent=room.roomCode;partyJoinUrl.textContent=room.joinUrl;partyQr.src=room.qrUrl;partyStatus.textContent="Sala pronta. Aguardando celulares…";renderLobby();return true}catch(err){partyStatus.textContent=err.message||"Falha ao criar sala.";toast("Não foi possível criar a sala.");return false}}
   async function beginConnectedMatch(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1));if((roomState.players?.length||0)<expected)return;state={match:pendingStartConfig,players:buildPlayers(pendingStartConfig,roomState.players.slice(0,expected)),round:1,totalRounds:Math.max(1,Number(pendingStartConfig.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:true};renderSpaces();renderTokens();applyRoundEnvironmentEvent();partyLobby.classList.add("hidden");await network.startParty(expected,partyState("board"));pendingStartConfig=null;updateTurnUi()}
   function leaveBoard(){if(state&&!state.connected)checkpoint("board","exit");clearInterval(droneTimerId);stopPartyDanceBotFeedback();network?.closeRoom();state=null;pendingStartConfig=null;roomState=null;view.classList.add("hidden");partyLobby.classList.add("hidden");itemOverlay?.classList.add("hidden");minigameOverlay.classList.add("hidden");matchResultOverlay.classList.add("hidden");api().showView?.("main")}

@@ -16,7 +16,7 @@
   </script>
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="controller.css?v=040-earthsong-server-gate" />
-  <link rel="stylesheet" href="final-controller.css?v=009-v41-portrait" />
+  <link rel="stylesheet" href="final-controller.css?v=010-v42-profile" />
 </head>
 <body class="site-loading">
 
@@ -141,6 +141,16 @@
       <p class="eyebrow">Controle do jogador</p>
       <h1>Usar este dispositivo como controle</h1>
       <p class="subtitle">Digite o código mostrado no computador. Este dispositivo será usado como seu controle durante a partida.</p>
+
+      <section id="controllerLocalProfile" class="controller-local-profile">
+        <div id="controllerProfileAvatar" class="controller-profile-avatar" aria-hidden="true"></div>
+        <div class="controller-profile-copy">
+          <span class="tiny-label">Perfil deste celular</span>
+          <select id="controllerProfileSelect" aria-label="Perfil deste celular"></select>
+          <small id="controllerProfileHint">O Party usará este nome e avatar na tela principal.</small>
+        </div>
+        <button id="controllerManageProfile" class="controller-profile-manage" type="button">Perfis</button>
+      </section>
 
       <div class="form-stack">
         <label>
@@ -290,9 +300,9 @@
   </div>
 
   <script src="vendor/socket.io.min.js?v=4.8.1" onload="window.SiteLoader?.report?.(17, 'Rede carregada…'); window.ControllerLoader?.report?.(67, 'Conexão carregada…')"></script>
-  <script src="controller.js?v=063-v41-online-dance" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
+  <script src="controller.js?v=064-v42-profile" onload="window.ControllerLoader?.report(92, 'Controle carregado…'); window.ControllerLoader?.markReady()"></script>
   <script src="final-controller-shell.js?v=003-jd-clean"></script>
 <script src="final-party-controller.js?v=005-v41-portrait-online-dance"></script>
-<span class="version-badge" data-version>V. 1.2.1 • Retrato + Online JD</span>
+<span class="version-badge" data-version>V. 1.2.2 • Perfis locais + Retrato</span>
 </body>
 </html>

@@ -5,6 +5,10 @@
   const PROFILE_KEY = "steamPartyProfilesV1";
   const ACTIVE_PROFILE_KEY = "steamPartyActiveProfileV1";
   const MATCH_KEY = "steamPartyMatchConfigV1";
+  const JD_QUALITY_KEY = "jdVideoQualityModeV1";
+  const JD_LYRICS_KEY = "jdLyricsSizeFinalV1";
+  const JD_FIT_KEY = "jdVideoFitV1";
+  const JD_VOLUME_KEY = "jdVolumeV1";
 
   const qs = (s, root = document) => root.querySelector(s);
   const qsa = (s, root = document) => [...root.querySelectorAll(s)];
@@ -26,6 +30,7 @@
 
   let selectedMatchMode = "local";
   let editingProfileId = "";
+  let editingProfilePhoto = "";
   let toastTimer = 0;
 
   function safeParse(raw, fallback) {
@@ -75,6 +80,7 @@
   function showView(name) {
     Object.entries(views).forEach(([key, el]) => el?.classList.toggle("hidden", key !== name));
     if (name === "profiles") renderProfiles();
+    if (name === "settings") renderGameSettings();
     if (name === "saves") window.STEAMPartySaves?.render?.();
     if (name === "main") {
       renderProfileChip();
@@ -97,7 +103,45 @@
     })[name] || "#65f2c3";
   }
 
+  function safeAvatarPhoto(value) {
+    const text = String(value || "");
+    if (text.length > 140000) return "";
+    return /^data:image\/(?:png|jpe?g|webp);base64,[a-z0-9+/=]+$/i.test(text) ? text : "";
+  }
+
+  async function profilePhotoFromFile(file) {
+    if (!file || !String(file.type || "").startsWith("image/")) throw new Error("Selecione uma imagem.");
+    if (Number(file.size || 0) > 12 * 1024 * 1024) throw new Error("A imagem é grande demais.");
+    const bitmap = await new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Não foi possível abrir a imagem.")); };
+      img.src = url;
+    });
+    const render = (size, quality, type = "image/webp") => {
+      const canvas = document.createElement("canvas");
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext("2d", { alpha:false });
+      const iw = Math.max(1, bitmap.naturalWidth || bitmap.width || 1);
+      const ih = Math.max(1, bitmap.naturalHeight || bitmap.height || 1);
+      const scale = Math.max(size / iw, size / ih);
+      const sw = size / scale, sh = size / scale;
+      const sx = (iw - sw) / 2, sy = (ih - sh) / 2;
+      ctx.fillStyle = "#111"; ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, size, size);
+      return canvas.toDataURL(type, quality);
+    };
+    let data = render(224, .82, "image/webp");
+    if (!data.startsWith("data:image/webp") || data.length > 115000) data = render(192, .76, "image/jpeg");
+    if (data.length > 115000) data = render(160, .68, "image/jpeg");
+    if (!safeAvatarPhoto(data)) throw new Error("Não foi possível compactar a foto.");
+    return data;
+  }
+
   function avatarSvg(profile = {}, small = false) {
+    const photo = safeAvatarPhoto(profile.avatarPhoto);
+    if (photo) return `<span class="final-avatar-photo${small ? " is-small" : ""}"><img src="${photo}" alt="" /></span>`;
     const color = colorValue(profile.avatarColor || "cyan");
     const shape = profile.avatarShape || "round";
     const face = profile.avatarFace || "smile";
@@ -147,6 +191,7 @@
       avatarShape: "round",
       avatarColor: "cyan",
       avatarFace: "smile",
+      avatarPhoto: "",
       stats: { matches: 0, wins: 0 },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -193,6 +238,9 @@
     qs("#finalAvatarShape").value = profile.avatarShape || "round";
     qs("#finalAvatarColor").value = profile.avatarColor || "cyan";
     qs("#finalAvatarFace").value = profile.avatarFace || "smile";
+    editingProfilePhoto = safeAvatarPhoto(profile.avatarPhoto);
+    const removePhoto = qs("#finalRemoveProfilePhoto");
+    if (removePhoto) removePhoto.disabled = !editingProfilePhoto;
     renderAvatarPreview();
     if (!activeProfileId()) setActiveProfile(profile.id);
     else renderProfiles();
@@ -207,6 +255,7 @@
       avatarShape: qs("#finalAvatarShape")?.value || "round",
       avatarColor: qs("#finalAvatarColor")?.value || "cyan",
       avatarFace: qs("#finalAvatarFace")?.value || "smile",
+      avatarPhoto: safeAvatarPhoto(editingProfilePhoto),
       updatedAt: new Date().toISOString()
     };
   }
@@ -262,6 +311,7 @@
         ...source,
         id: `profile-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
         name: String(source.name || "Jogador").slice(0,18),
+        avatarPhoto: safeAvatarPhoto(source.avatarPhoto),
         stats: source.stats && typeof source.stats === "object" ? source.stats : { matches:0, wins:0 },
         importedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -283,6 +333,7 @@
     setProfiles(profiles);
     if (activeProfileId() === editingProfileId) setActiveProfile(profiles[0]?.id || "");
     editingProfileId = "";
+    editingProfilePhoto = "";
     qs("#finalProfileEditor")?.classList.add("hidden");
     renderProfiles();
     showToast("Perfil removido deste dispositivo.");
@@ -489,6 +540,67 @@
   qs("#finalContinuePrototype")?.addEventListener("click", openLegacyFromConfig);
   qs("#finalOpenLegacy")?.addEventListener("click", exitShellToLegacy);
 
+  function readLocalSetting(key, fallback) {
+    try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+  }
+
+  function writeLocalSetting(key, value) {
+    try { localStorage.setItem(key, String(value)); } catch {}
+  }
+
+  function renderGameSettings() {
+    const quality = qs("#finalSettingJdQuality");
+    const lyrics = qs("#finalSettingJdLyrics");
+    const fit = qs("#finalSettingJdFit");
+    const volume = qs("#finalSettingJdVolume");
+    const volumeValue = qs("#finalSettingJdVolumeValue");
+    if (quality) quality.value = ["auto","low","medium","high"].includes(readLocalSetting(JD_QUALITY_KEY,"auto")) ? readLocalSetting(JD_QUALITY_KEY,"auto") : "auto";
+    if (lyrics) lyrics.value = ["small","normal","large"].includes(readLocalSetting(JD_LYRICS_KEY,"normal")) ? readLocalSetting(JD_LYRICS_KEY,"normal") : "normal";
+    if (fit) fit.value = readLocalSetting(JD_FIT_KEY,"contain") === "cover" ? "cover" : "contain";
+    const v = Math.max(0, Math.min(100, Math.round(Number(readLocalSetting(JD_VOLUME_KEY,"0.9")) * 100)));
+    if (volume) volume.value = String(v);
+    if (volumeValue) volumeValue.textContent = `${v}%`;
+  }
+
+  function saveGameSetting(key, value, message = "Configuração salva.") {
+    writeLocalSetting(key, value);
+    const status = qs("#finalSettingsSaved");
+    if (status) status.textContent = message;
+    window.dispatchEvent(new CustomEvent("steam-party-settings-changed", { detail:{ key, value } }));
+  }
+
+  qs("#finalProfilePhoto")?.addEventListener("change", async event => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    try {
+      editingProfilePhoto = await profilePhotoFromFile(file);
+      const removePhoto = qs("#finalRemoveProfilePhoto");
+      if (removePhoto) removePhoto.disabled = false;
+      renderAvatarPreview();
+      showToast("Foto preparada. Toque em Salvar perfil.");
+    } catch (error) {
+      showToast(error?.message || "Não foi possível usar essa foto.");
+    }
+  });
+  qs("#finalRemoveProfilePhoto")?.addEventListener("click", () => {
+    editingProfilePhoto = "";
+    const button = qs("#finalRemoveProfilePhoto");
+    if (button) button.disabled = true;
+    renderAvatarPreview();
+  });
+
+  qs("#finalSettingJdQuality")?.addEventListener("change", event => saveGameSetting(JD_QUALITY_KEY, event.currentTarget.value, "Qualidade do Just Dance salva."));
+  qs("#finalSettingJdLyrics")?.addEventListener("change", event => saveGameSetting(JD_LYRICS_KEY, event.currentTarget.value, "Tamanho das letras salvo."));
+  qs("#finalSettingJdFit")?.addEventListener("change", event => saveGameSetting(JD_FIT_KEY, event.currentTarget.value, "Enquadramento do vídeo salvo."));
+  qs("#finalSettingJdVolume")?.addEventListener("input", event => {
+    const value = Math.max(0, Math.min(100, Number(event.currentTarget.value || 0)));
+    const output = qs("#finalSettingJdVolumeValue");
+    if (output) output.textContent = `${Math.round(value)}%`;
+    saveGameSetting(JD_VOLUME_KEY, (value / 100).toFixed(2), "Volume do Just Dance salvo.");
+  });
+
   qs("#finalNewProfile")?.addEventListener("click", () => openProfileEditor(""));
   qs("#finalProfileEditor")?.addEventListener("submit", saveProfile);
   qs("#finalExportProfile")?.addEventListener("click", exportProfile);
@@ -526,4 +638,8 @@
 
   renderProfileChip();
   fillLegacyNames();
+  renderGameSettings();
+  try {
+    if (new URLSearchParams(location.search).get("profiles") === "1") showView("profiles");
+  } catch {}
 })();
