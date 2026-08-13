@@ -988,7 +988,12 @@
     publish("just-dance-loading",{minigame:{id:"just-dance",title:info.title,status:"loading"}});
     try{
       await network.setSensorMode(true);
-      const prepared=await danceBridge.openPartyDanceSong(songId,network.getRoomCode(),state.players);
+      const dancePlayers=state.players.map((player,index)=>({
+        ...player,
+        partyPlayerNumber:index+1,
+        partyConnectionMode:player.bot?'bot':state.match?.mode==='online'?'online':'local'
+      }));
+      const prepared=await danceBridge.openPartyDanceSong(songId,network.getRoomCode(),dancePlayers);
       if(!prepared?.ok)throw new Error(prepared?.message||"Falha ao carregar música.");
       publish("just-dance",{minigame:{id:"just-dance",title:prepared.title,status:"playing"}});
       const playing=await danceBridge.startPartyDancePlayback();

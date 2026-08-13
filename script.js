@@ -3236,17 +3236,9 @@ function applyDanceHudStarRankVisual(score = 0) {
 }
 
 const DANCE_SCOREBAR_NATIVE_WIDTHS = Object.freeze({ 1: 28, 2: 59, 3: 90, 4: 121 });
+const DANCE_SCOREBAR_SINGLE_WIDTH = 28;
+const DANCE_SCOREBAR_STEP = 31;
 const DANCE_SCORE_STAR_THRESHOLDS = Object.freeze([2000, 4000, 6000, 8000, 10000]);
-
-const PARTY_DANCE_STAR_RANK_ASSETS = Object.freeze({
-  1: "minigames/just-dance/hud/images/star-ranks/star1.png",
-  2: "minigames/just-dance/hud/images/star-ranks/star2.png",
-  3: "minigames/just-dance/hud/images/star-ranks/star3.png",
-  4: "minigames/just-dance/hud/images/star-ranks/star4.png",
-  5: "minigames/just-dance/hud/images/star-ranks/star5.png",
-  superstar: "minigames/just-dance/hud/images/star-ranks/superstars.png",
-  megastar: "minigames/just-dance/hud/images/star-ranks/megastars.png"
-});
 
 function partyDanceScorebarAsset(playerCount, playerIndex) {
   const count = Math.max(1, Math.min(4, Number(playerCount || 1)));
@@ -3254,186 +3246,107 @@ function partyDanceScorebarAsset(playerCount, playerIndex) {
   return `minigames/just-dance/hud/images/scorebars/split/${count}P_P${index + 1}.png`;
 }
 
-function partyDanceStarState(score = 0) {
-  const value = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
-  const stars = DANCE_SCORE_STAR_THRESHOLDS.filter(threshold => value >= threshold).length;
-  if (value >= 12000) return { stars:5, rank:"megastar", asset:PARTY_DANCE_STAR_RANK_ASSETS.megastar };
-  if (value >= 11000) return { stars:5, rank:"superstar", asset:PARTY_DANCE_STAR_RANK_ASSETS.superstar };
-  return { stars, rank:stars ? `star${stars}` : "none", asset:stars ? PARTY_DANCE_STAR_RANK_ASSETS[stars] : "" };
-}
-
 function clearPartyDanceScoreBars() {
-  danceScoreBar?.querySelectorAll(".dance-party-score-column,.dance-party-meter-star").forEach(node => node.remove());
-  danceScoreBar?.classList.remove("party-multi", "party-player-cards");
-  if (danceScoreBar) {
-    danceScoreBar.style.removeProperty("display");
-    danceScoreBar.style.removeProperty("--jd-scorebar-width");
-  }
+  danceScoreBar?.querySelectorAll('.dance-party-score-column').forEach(node => node.remove());
+  danceScoreBar?.classList.remove('party-multi');
   if (danceScoreBarFill) {
-    danceScoreBarFill.style.removeProperty("display");
-    danceScoreBarFill.style.removeProperty("opacity");
+    danceScoreBarFill.style.removeProperty('display');
+    danceScoreBarFill.style.removeProperty('opacity');
   }
-  if (danceStarHud) danceStarHud.style.removeProperty("display");
-  danceVideoJudgements?.querySelectorAll(".dance-player-star-rank").forEach(node => node.remove());
+  if (danceStarHud) danceStarHud.style.removeProperty('display');
 }
 
-function updatePartyDanceMeterStars(score = 0) {
-  if (!danceScoreBar) return;
-  const value = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
-  const earned = DANCE_SCORE_STAR_THRESHOLDS.filter(threshold => value >= threshold).length;
-  const filled = danceScoreBar.querySelector(".dance-party-meter-star.is-filled");
-  const outline = danceScoreBar.querySelector(".dance-party-meter-star.is-outline");
+function partyDanceLeaderScore() {
+  return Math.max(0, ...(partyDanceDisplayPlayers || []).map(player => Number(player?.dance?.score || 0)));
+}
 
-  if (filled) {
-    if (earned > 0) {
-      const threshold = DANCE_SCORE_STAR_THRESHOLDS[earned - 1];
-      filled.hidden = false;
-      filled.style.top = `${((1 - threshold / DANCE_MAX_SCORE) * 100).toFixed(3)}%`;
-    } else {
-      filled.hidden = true;
-    }
-  }
+function updatePartyDanceSharedStars() {
+  if (!danceHudStars) return;
+  const safeScore = Math.max(0, Math.min(DANCE_MAX_SCORE, partyDanceLeaderScore()));
+  applyDanceHudStarRankVisual(safeScore);
 
-  if (outline) {
-    if (earned < DANCE_SCORE_STAR_THRESHOLDS.length) {
-      const threshold = DANCE_SCORE_STAR_THRESHOLDS[earned];
-      outline.hidden = false;
-      outline.style.top = `${((1 - threshold / DANCE_MAX_SCORE) * 100).toFixed(3)}%`;
-    } else {
-      outline.hidden = true;
-    }
-  }
+  const earned = DANCE_SCORE_STAR_THRESHOLDS.filter(threshold => safeScore >= threshold).length;
+  const barSpan = DANCE_SCORE_BAR_BOTTOM_PERCENT - DANCE_SCORE_BAR_TOP_PERCENT;
+  const slots = Array.from(danceHudStars.querySelectorAll('.dance-hud-star'));
+
+  // Party: uma progressão compartilhada. Só a última estrela conquistada
+  // e a próxima Outline ficam visíveis, independentemente de quem chegou primeiro.
+  slots.forEach((slot, index) => {
+    const threshold = Number(slot.dataset.threshold || 0);
+    const ratio = Math.max(0, Math.min(1, threshold / DANCE_MAX_SCORE));
+    const top = DANCE_SCORE_BAR_BOTTOM_PERCENT - barSpan * ratio;
+    slot.style.top = `${top.toFixed(4)}%`;
+    slot.classList.toggle('filled', earned > 0 && index === earned - 1);
+    slot.classList.toggle('next-outline', earned < slots.length && index === earned);
+  });
 }
 
 function updatePartyDancePlayerScoreBar(playerId, score = 0) {
+  const column = danceScoreBar?.querySelector(
+    `.dance-party-score-column[data-player-id="${CSS.escape(String(playerId || ''))}"]`
+  );
+  if (!column) return;
+
   const safeScore = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
   const progress = DANCE_MAX_SCORE > 0 ? safeScore / DANCE_MAX_SCORE : 0;
-
-  // Barra agrupada da esquerda: cada player possui máscara e fill independentes.
-  const column = danceScoreBar?.querySelector(
-    `.dance-party-score-column[data-player-id="${CSS.escape(String(playerId || ""))}"]`
-  );
-  const fill = column?.querySelector(".dance-party-score-fill");
+  const fill = column.querySelector('.dance-party-score-fill');
   if (fill) {
     fill.style.transform = `translateY(${((1 - progress) * 100).toFixed(4)}%)`;
-    fill.style.opacity = progress > 0 ? "1" : "0";
+    fill.style.opacity = progress > 0 ? '1' : '0';
   }
 
-  // Estrelas abaixo do Player Card permanecem como na V25.
-  const card = danceVideoJudgements?.querySelector(
-    `.dance-video-player-judge[data-player-id="${CSS.escape(String(playerId || ""))}"]`
-  );
-  const rank = partyDanceStarState(safeScore);
-  const strip = card?.querySelector(".dance-player-star-rank");
-  if (strip) {
-    const previous = strip.dataset.rank || "none";
-    strip.dataset.rank = rank.rank;
-    strip.hidden = !rank.asset;
-    if (rank.asset && strip.getAttribute("src") !== rank.asset) strip.setAttribute("src", rank.asset);
-    if (rank.asset && previous !== rank.rank) {
-      strip.classList.remove("rank-pop");
-      void strip.offsetWidth;
-      strip.classList.add("rank-pop");
-    }
-  }
-
-  const firstPlayer = partyDanceDisplayPlayers?.[0];
-  if (firstPlayer && String(firstPlayer.id) === String(playerId)) {
-    updatePartyDanceMeterStars(safeScore);
-  }
+  updatePartyDanceSharedStars();
 }
 
 function renderPartyDanceScoreBars(players = partyDanceDisplayPlayers) {
-  if (!danceScoreBar || !danceVideoJudgements) return;
+  if (!danceScoreBar) return;
   const visible = (Array.isArray(players) ? players : []).slice(0, 4);
   const count = Math.max(1, visible.length || 1);
+  const nativeWidth = DANCE_SCOREBAR_NATIVE_WIDTHS[count] || 28;
 
-  danceScoreBar.querySelectorAll(".dance-party-score-column,.dance-party-meter-star").forEach(node => node.remove());
-  danceScoreBar.classList.remove("party-player-cards");
-  danceScoreBar.classList.add("party-multi");
+  danceScoreBar.querySelectorAll('.dance-party-score-column').forEach(node => node.remove());
+  danceScoreBar.classList.add('party-multi');
   danceScoreBar.dataset.players = String(count);
-  danceScoreBar.style.removeProperty("display");
+  danceScoreBar.style.setProperty('--jd-scorebar-width', `${nativeWidth / 3840 * 100}%`);
+  if (danceScoreBarFill) danceScoreBarFill.style.display = 'none';
 
-  // Visualmente próximo da referência: grupo compacto de barras na lateral.
-  const partyWidths = { 1:0.72, 2:1.42, 3:2.12, 4:2.82 };
-  danceScoreBar.style.setProperty("--jd-scorebar-width", `${partyWidths[count]}%`);
-  if (danceScoreBarFill) danceScoreBarFill.style.display = "none";
-  if (danceStarHud) danceStarHud.style.display = "none";
-
-  const gapUnits = 3;
-  const barUnits = 10;
-  const totalUnits = count * barUnits + (count - 1) * gapUnits;
+  // Ao contrário da V20/V24 antiga, o Party usa o HUD de estrelas GLOBAL,
+  // não cinco estrelas dentro de cada coluna de score.
+  if (danceStarHud) danceStarHud.style.display = '';
 
   visible.forEach((player, playerIndex) => {
-    const column = document.createElement("div");
-    column.className = "dance-party-score-column";
+    const column = document.createElement('div');
+    column.className = 'dance-party-score-column';
     column.dataset.playerId = String(player.id);
     column.dataset.playerIndex = String(playerIndex + 1);
-    column.style.left = `${((playerIndex * (barUnits + gapUnits)) / totalUnits * 100).toFixed(4)}%`;
-    column.style.width = `${(barUnits / totalUnits * 100).toFixed(4)}%`;
+    column.style.left = `${(playerIndex * DANCE_SCOREBAR_STEP / nativeWidth * 100).toFixed(5)}%`;
+    column.style.width = `${(DANCE_SCOREBAR_SINGLE_WIDTH / nativeWidth * 100).toFixed(5)}%`;
     column.innerHTML = `
       <div class="dance-party-score-fill-mask">
-        <img class="dance-party-score-fill"
-             src="${partyDanceScorebarAsset(count, playerIndex)}"
-             alt="" aria-hidden="true">
+        <img class="dance-party-score-fill" src="${partyDanceScorebarAsset(count, playerIndex)}" alt="">
       </div>`;
     danceScoreBar.appendChild(column);
   });
 
-  const filledStar = document.createElement("img");
-  filledStar.className = "dance-party-meter-star is-filled";
-  filledStar.src = "minigames/just-dance/hud/images/Star.png";
-  filledStar.alt = "";
-  filledStar.hidden = true;
-  danceScoreBar.appendChild(filledStar);
-
-  const outlineStar = document.createElement("img");
-  outlineStar.className = "dance-party-meter-star is-outline";
-  outlineStar.src = "minigames/just-dance/hud/images/Outline.png";
-  outlineStar.alt = "";
-  danceScoreBar.appendChild(outlineStar);
-
-  // Estrelas horizontais continuam ligadas a cada card.
-  visible.forEach(player => {
-    const card = danceVideoJudgements.querySelector(
-      `.dance-video-player-judge[data-player-id="${CSS.escape(String(player.id))}"]`
-    );
-    const head = card?.querySelector(".dance-ipk-player-head");
-    if (!head) return;
-
-    let starStrip = card.querySelector(".dance-player-star-rank");
-    if (!starStrip) {
-      starStrip = document.createElement("img");
-      starStrip.className = "dance-player-star-rank";
-      starStrip.alt = "";
-      starStrip.setAttribute("aria-hidden", "true");
-      starStrip.hidden = true;
-      head.appendChild(starStrip);
-    }
-    updatePartyDancePlayerScoreBar(player.id, player.dance?.score || 0);
-  });
-
-  updatePartyDanceMeterStars(visible[0]?.dance?.score || 0);
+  visible.forEach(player => updatePartyDancePlayerScoreBar(player.id, player.dance?.score || 0));
+  updatePartyDanceSharedStars();
 }
 
 function updateDancePlayerHudOverlay(count = 1) {
   const safe = Math.max(1, Math.min(4, Number(count || 1)));
+  if (danceScoreBar) {
+    danceScoreBar.dataset.players = String(safe);
+    const nativeWidth = DANCE_SCOREBAR_NATIVE_WIDTHS[safe] || 28;
+    danceScoreBar.style.setProperty('--jd-scorebar-width', `${nativeWidth / 3840 * 100}%`);
+  }
 
-  if (gameMode === "party-dance" && partyDanceDisplayPlayers?.length) {
+  if (gameMode === 'party-dance' && partyDanceDisplayPlayers?.length) {
     renderPartyDanceScoreBars(partyDanceDisplayPlayers);
     return;
   }
 
   clearPartyDanceScoreBars();
-  if (danceScoreBar) {
-    danceScoreBar.dataset.players = String(safe);
-    const nativeWidth = DANCE_SCOREBAR_NATIVE_WIDTHS[safe] || 28;
-    danceScoreBar.style.setProperty("--jd-scorebar-width", `${nativeWidth / 3840 * 100}%`);
-  }
-  if (danceScoreBarFill) {
-    danceScoreBarFill.style.display = "";
-    danceScoreBarFill.src = `minigames/just-dance/hud/images/scorebars/${safe}P_bar.png`;
-  }
+  if (danceScoreBarFill) danceScoreBarFill.src = `minigames/just-dance/hud/images/scorebars/${safe}P_bar.png`;
 }
 
 function updateDanceScoreBarVisual(score = 0) {
@@ -3846,6 +3759,35 @@ function preloadDanceFeedbackAssets() {
   }
 }
 
+function partyDanceAvatarMarkup(player) {
+  const profile = {
+    name: player?.name || 'Jogador',
+    avatarShape: player?.avatarShape || 'round',
+    avatarColor: player?.avatarColor || 'cyan',
+    avatarFace: player?.avatarFace || 'smile'
+  };
+  try {
+    const svg = window.STEAMParty?.avatarSvg?.(profile, true);
+    if (svg) return svg;
+  } catch {}
+  const initial = String(profile.name || '?').trim().slice(0, 1).toUpperCase() || '?';
+  return `<span class="dance-player-avatar-fallback">${initial}</span>`;
+}
+
+function partyDanceOriginMarkup(player, playerIndex) {
+  if (player?.bot) return '';
+  const mode = String(player?.connectionMode || 'local');
+  if (mode === 'online') {
+    return `<span class="dance-player-origin is-online" aria-label="Jogador online">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5c5.2-4.8 11.8-4.8 17 0M6.8 13c3.2-2.9 7.2-2.9 10.4 0M10.1 16.4c1.2-1 2.6-1 3.8 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="19.3" r="1.4" fill="currentColor"/></svg>
+    </span>`;
+  }
+  const number = Math.max(1, Math.min(4, Number(player?.playerNumber || playerIndex + 1)));
+  return `<span class="dance-player-origin is-local" aria-label="Celular do jogador ${number}">
+    <span class="dance-player-phone-icon"><b>${number}</b></span>
+  </span>`;
+}
+
 function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
   if (gameMode === "party-dance" && partyDanceDisplayPlayers?.length) players = partyDanceDisplayPlayers;
   updateDancePlayerHudOverlay(players.length || 1);
@@ -3862,9 +3804,9 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
   // No nosso canvas de referência 960px, isso equivale à metade das coordenadas 1920x1080.
   const slotPositions = {
     1: [0],
-    2: [-330, 330],
-    3: [-500, 0, 500],
-    4: [-600, -200, 200, 600]
+    2: [-300, 300],
+    3: [-430, 0, 430],
+    4: [-560, -185, 185, 560]
   }[visiblePlayers.length] || [0];
 
   visiblePlayers.forEach((player, playerIndex) => {
@@ -3877,9 +3819,9 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
       item.innerHTML = `
         <div class="dance-ipk-player-head">
           <div class="dance-ipk-player-card">
-            <img class="dance-ipk-player-avatar" src="${DANCE_PLAYER_AVATAR_SOURCE}" alt="" aria-hidden="true">
             <span class="dance-ipk-player-color" aria-hidden="true"></span>
-            <span class="dance-ipk-player-index"></span>
+            <span class="dance-player-origin-slot"></span>
+            <span class="dance-ipk-player-avatar" aria-hidden="true"></span>
             <span class="dance-video-player-name"></span>
           </div>
           <span class="dance-ipk-player-line" aria-hidden="true"></span>
@@ -3889,16 +3831,15 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
           <img class="dance-video-judge-image" alt="">
         </div>`;
     }
-    const avatar = item.querySelector(".dance-ipk-player-avatar");
-    if (avatar) avatar.src = DANCE_PLAYER_AVATAR_SOURCE;
-    item.style.setProperty("--player-color", player.color || "#fff");
-    item.style.setProperty("--jd-player-slot-x", `${((slotPositions[playerIndex] || 0) / 1920 * 100).toFixed(4)}%`);
-    item.querySelector(".dance-ipk-player-index").textContent = `P${playerIndex + 1}`;
-    item.querySelector(".dance-video-player-name").textContent = player.name || "Jogador";
+    const avatar = item.querySelector('.dance-ipk-player-avatar');
+    if (avatar) avatar.innerHTML = partyDanceAvatarMarkup(player);
+    const origin = item.querySelector('.dance-player-origin-slot');
+    if (origin) origin.innerHTML = partyDanceOriginMarkup(player, playerIndex);
+    item.style.setProperty('--player-color', player.color || '#fff');
+    item.style.setProperty('--jd-player-slot-x', `${((slotPositions[playerIndex] || 0) / 1920 * 100).toFixed(4)}%`);
+    item.querySelector('.dance-video-player-name').textContent = player.name || 'Jogador';
     danceVideoJudgements.appendChild(item);
   });
-
-  if (gameMode === "party-dance") renderPartyDanceScoreBars(visiblePlayers);
 }
 
 function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
@@ -5559,6 +5500,11 @@ function setPartyDanceDisplayPlayers(players = []) {
     name: String(player?.name || (player?.bot ? `Bot ${index + 1}` : `Jogador ${index + 1}`)),
     color: partyDancePlayerColor(player, index),
     bot: Boolean(player?.bot),
+    connectionMode: player?.bot ? 'bot' : String(player?.partyConnectionMode || player?.connectionMode || 'local'),
+    playerNumber: Math.max(1, Math.min(4, Number(player?.partyPlayerNumber || player?.slot || index + 1))),
+    avatarShape: String(player?.avatarShape || ['round','square','triangle','hex'][index % 4]),
+    avatarColor: String(player?.avatarColor || ['cyan','green','orange','pink'][index % 4]),
+    avatarFace: String(player?.avatarFace || (player?.bot ? 'focus' : 'smile')),
     dance: {
       rawScore: 0,
       score: 0,
