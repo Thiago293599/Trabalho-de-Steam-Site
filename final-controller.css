@@ -98,3 +98,79 @@
 }
 @media(orientation:landscape){.sensor-mode-active #sensorModePanel.final-dance-controller-clean{display:none!important}}
 @media(prefers-reduced-motion:reduce){.final-mobile-jd-star.filled{animation:none!important}}
+
+
+/* ==========================================================
+   V25 — estrela do celular como faixa horizontal real
+   ========================================================== */
+.final-dance-controller-clean .final-mobile-jd-score-column{
+  left:max(18px,env(safe-area-inset-left))!important;
+  top:28%!important;
+  width:32px!important;
+  height:46%!important;
+}
+.final-dance-controller-clean .final-mobile-jd-scorebar{
+  left:50%!important;
+  width:clamp(7px,2vw,9px)!important;
+  translate:-50% 0!important;
+}
+.final-mobile-jd-stars,
+.final-mobile-jd-star{
+  display:none!important;
+}
+.final-mobile-jd-star-badge{
+  position:absolute!important;
+  left:50%!important;
+  top:-27px!important;
+  translate:-50% 0!important;
+  min-width:22px!important;
+  height:22px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0 3px!important;
+  border:2px solid rgba(78,224,255,.90)!important;
+  border-radius:6px!important;
+  background:rgba(5,25,35,.85)!important;
+  color:#fff!important;
+  font-size:13px!important;
+  font-weight:1000!important;
+  opacity:.45!important;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.65))!important;
+}
+.final-mobile-jd-star-badge.has-stars{
+  opacity:1!important;
+}
+.final-mobile-jd-star-badge[data-rank="superstar"]{
+  border-color:#69cfff!important;
+  box-shadow:0 0 10px rgba(53,164,255,.42)!important;
+}
+.final-mobile-jd-star-badge[data-rank="megastar"]{
+  border-color:#ff69db!important;
+  box-shadow:0 0 11px rgba(255,44,207,.46)!important;
+}
+.final-mobile-jd-star-rank{
+  position:absolute!important;
+  left:50%!important;
+  bottom:max(24vh,calc(env(safe-area-inset-bottom) + 155px))!important;
+  translate:-50% 0!important;
+  width:min(56vw,220px)!important;
+  height:auto!important;
+  object-fit:contain!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 3px 7px rgba(0,0,0,.48))!important;
+}
+.final-mobile-jd-star-rank[hidden]{
+  display:none!important;
+}
+.final-mobile-jd-star-rank.rank-pop{
+  animation:jdV25MobileRankPop .52s cubic-bezier(.17,.86,.21,1.15)!important;
+}
+@keyframes jdV25MobileRankPop{
+  0%{scale:.40;opacity:0}
+  58%{scale:1.16;opacity:1}
+  80%{scale:.95}
+  100%{scale:1;opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .final-mobile-jd-star-rank.rank-pop{animation:none!important}
+}

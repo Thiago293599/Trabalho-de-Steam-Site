@@ -638,3 +638,109 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   .final-inventory-panel{width:100%}
   .final-inventory-head>small{display:none}
 }
+
+
+/* ==========================================================
+   V25 — Just Dance: barra/estrelas junto de cada Player Card
+   Base visual: exemplos enviados pelo usuário.
+   ========================================================== */
+#danceDevScreen.party-dance-session #danceScoreBar.party-player-cards{
+  display:none!important;
+}
+#danceDevScreen.party-dance-session .dance-video-player-judge{
+  overflow:visible!important;
+}
+#danceDevScreen.party-dance-session .dance-ipk-player-head{
+  position:relative!important;
+  overflow:visible!important;
+}
+#danceDevScreen.party-dance-session .dance-card-score-meter{
+  position:absolute!important;
+  left:calc(-13px * var(--jd-ui-scale))!important;
+  top:calc(5px * var(--jd-ui-scale))!important;
+  width:calc(8px * var(--jd-ui-scale))!important;
+  height:calc(63px * var(--jd-ui-scale))!important;
+  overflow:visible!important;
+  z-index:8!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 calc(2px * var(--jd-ui-scale)) calc(2px * var(--jd-ui-scale)) rgba(0,0,0,.82));
+}
+#danceDevScreen.party-dance-session .dance-card-score-mask{
+  position:absolute!important;
+  inset:0!important;
+  overflow:hidden!important;
+  border-radius:calc(3px * var(--jd-ui-scale))!important;
+}
+#danceDevScreen.party-dance-session .dance-card-score-fill{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:fill!important;
+  transform:translateY(100%);
+  transform-origin:50% 100%!important;
+  opacity:0;
+  transition:transform .38s cubic-bezier(.2,.72,.18,1),opacity .10s linear!important;
+  will-change:transform;
+}
+#danceDevScreen.party-dance-session .dance-card-star-count{
+  position:absolute!important;
+  left:50%!important;
+  top:calc(-17px * var(--jd-ui-scale))!important;
+  translate:-50% 0!important;
+  min-width:calc(15px * var(--jd-ui-scale))!important;
+  height:calc(15px * var(--jd-ui-scale))!important;
+  padding:0 calc(2px * var(--jd-ui-scale))!important;
+  display:grid!important;
+  place-items:center!important;
+  border:calc(2px * var(--jd-ui-scale)) solid rgba(70,234,255,.9)!important;
+  border-radius:calc(4px * var(--jd-ui-scale))!important;
+  background:rgba(4,26,38,.82)!important;
+  color:#fff!important;
+  font-size:calc(9px * var(--jd-ui-scale))!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  opacity:.42!important;
+  box-shadow:0 0 calc(5px * var(--jd-ui-scale)) rgba(57,220,255,.28)!important;
+}
+#danceDevScreen.party-dance-session .dance-card-star-count.has-stars{
+  opacity:1!important;
+}
+#danceDevScreen.party-dance-session .dance-card-star-count[data-rank="superstar"]{
+  border-color:#69cfff!important;
+  box-shadow:0 0 calc(7px * var(--jd-ui-scale)) rgba(57,174,255,.52)!important;
+}
+#danceDevScreen.party-dance-session .dance-card-star-count[data-rank="megastar"]{
+  border-color:#ff70e2!important;
+  box-shadow:0 0 calc(8px * var(--jd-ui-scale)) rgba(255,44,208,.55)!important;
+}
+#danceDevScreen.party-dance-session .dance-player-star-rank{
+  position:absolute!important;
+  left:50%!important;
+  top:calc(100% - 1px * var(--jd-ui-scale))!important;
+  translate:-50% 0!important;
+  width:calc(116px * var(--jd-ui-scale))!important;
+  height:calc(31px * var(--jd-ui-scale))!important;
+  object-fit:contain!important;
+  z-index:7!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 calc(2px * var(--jd-ui-scale)) calc(3px * var(--jd-ui-scale)) rgba(0,0,0,.52))!important;
+}
+#danceDevScreen.party-dance-session .dance-player-star-rank[hidden]{
+  display:none!important;
+}
+#danceDevScreen.party-dance-session .dance-player-star-rank.rank-pop{
+  animation:jdV25RankPop .52s cubic-bezier(.17,.86,.21,1.15)!important;
+}
+@keyframes jdV25RankPop{
+  0%{scale:.42;opacity:0}
+  58%{scale:1.18;opacity:1}
+  78%{scale:.94}
+  100%{scale:1;opacity:1}
+}
+
+/* As estrelas antigas espalhadas ao longo da barra ficam definitivamente fora do Party Mode. */
+#danceDevScreen.party-dance-session .dance-party-score-stars,
+#danceDevScreen.party-dance-session .dance-party-score-star{
+  display:none!important;
+}

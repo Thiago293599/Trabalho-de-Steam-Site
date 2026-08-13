@@ -3240,104 +3240,142 @@ const DANCE_SCOREBAR_SINGLE_WIDTH = 28;
 const DANCE_SCOREBAR_STEP = 31;
 const DANCE_SCORE_STAR_THRESHOLDS = Object.freeze([2000, 4000, 6000, 8000, 10000]);
 
+const PARTY_DANCE_STAR_RANK_ASSETS = Object.freeze({
+  1: "minigames/just-dance/hud/images/star-ranks/star1.png",
+  2: "minigames/just-dance/hud/images/star-ranks/star2.png",
+  3: "minigames/just-dance/hud/images/star-ranks/star3.png",
+  4: "minigames/just-dance/hud/images/star-ranks/star4.png",
+  5: "minigames/just-dance/hud/images/star-ranks/star5.png",
+  superstar: "minigames/just-dance/hud/images/star-ranks/superstars.png",
+  megastar: "minigames/just-dance/hud/images/star-ranks/megastars.png"
+});
+
 function partyDanceScorebarAsset(playerCount, playerIndex) {
   const count = Math.max(1, Math.min(4, Number(playerCount || 1)));
   const index = Math.max(0, Math.min(count - 1, Number(playerIndex || 0)));
   return `minigames/just-dance/hud/images/scorebars/split/${count}P_P${index + 1}.png`;
 }
 
+function partyDanceStarState(score = 0) {
+  const value = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
+  const stars = DANCE_SCORE_STAR_THRESHOLDS.filter(threshold => value >= threshold).length;
+  if (value >= 12000) {
+    return { stars: 5, rank: "megastar", asset: PARTY_DANCE_STAR_RANK_ASSETS.megastar };
+  }
+  if (value >= 11000) {
+    return { stars: 5, rank: "superstar", asset: PARTY_DANCE_STAR_RANK_ASSETS.superstar };
+  }
+  return {
+    stars,
+    rank: stars ? `star${stars}` : "none",
+    asset: stars ? PARTY_DANCE_STAR_RANK_ASSETS[stars] : ""
+  };
+}
+
 function clearPartyDanceScoreBars() {
-  danceScoreBar?.querySelectorAll(".dance-party-score-column").forEach(node => node.remove());
-  danceScoreBar?.classList.remove("party-multi");
+  danceScoreBar?.classList.remove("party-player-cards");
+  if (danceScoreBar) danceScoreBar.style.removeProperty("display");
   if (danceScoreBarFill) {
     danceScoreBarFill.style.removeProperty("display");
     danceScoreBarFill.style.removeProperty("opacity");
   }
   if (danceStarHud) danceStarHud.style.removeProperty("display");
-}
 
-function partyDanceScoreRankAsset(score = 0) {
-  const value = Math.max(0, Number(score || 0));
-  if (value >= 12000) return DANCE_STAR_VISUALS.megastar;
-  if (value >= 11000) return DANCE_STAR_VISUALS.superstar;
-  return DANCE_STAR_VISUALS.normal;
+  danceVideoJudgements?.querySelectorAll(".dance-card-score-meter").forEach(node => node.remove());
+  danceVideoJudgements?.querySelectorAll(".dance-player-star-rank").forEach(node => node.remove());
 }
 
 function updatePartyDancePlayerScoreBar(playerId, score = 0) {
-  const column = danceScoreBar?.querySelector(`.dance-party-score-column[data-player-id="${CSS.escape(String(playerId || ""))}"]`);
-  if (!column) return;
+  const card = danceVideoJudgements?.querySelector(
+    `.dance-video-player-judge[data-player-id="${CSS.escape(String(playerId || ""))}"]`
+  );
+  if (!card) return;
 
   const safeScore = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
   const progress = DANCE_MAX_SCORE > 0 ? safeScore / DANCE_MAX_SCORE : 0;
-  const fill = column.querySelector(".dance-party-score-fill");
+  const fill = card.querySelector(".dance-card-score-fill");
   if (fill) {
     fill.style.transform = `translateY(${((1 - progress) * 100).toFixed(4)}%)`;
     fill.style.opacity = progress > 0 ? "1" : "0";
   }
 
-  const visual = partyDanceScoreRankAsset(safeScore);
-  let nextOutlineAssigned = false;
-  column.querySelectorAll(".dance-party-score-star").forEach(star => {
-    const threshold = Number(star.dataset.threshold || 0);
-    const ratio = Math.max(0, Math.min(1, threshold / DANCE_MAX_SCORE));
-    star.style.top = `${((1 - ratio) * 100).toFixed(4)}%`;
-    const filled = safeScore >= threshold;
-    star.classList.toggle("filled", filled);
+  const rank = partyDanceStarState(safeScore);
+  const badge = card.querySelector(".dance-card-star-count");
+  if (badge) {
+    badge.textContent = String(rank.stars);
+    badge.classList.toggle("has-stars", rank.stars > 0);
+    badge.dataset.rank = rank.rank;
+  }
 
-    const nextOutline = !filled && !nextOutlineAssigned;
-    star.classList.toggle("next-outline", nextOutline);
-    if (nextOutline) nextOutlineAssigned = true;
-
-    const fillImage = star.querySelector(".fill");
-    if (fillImage && fillImage.getAttribute("src") !== visual) fillImage.setAttribute("src", visual);
-  });
+  const strip = card.querySelector(".dance-player-star-rank");
+  if (strip) {
+    const previous = strip.dataset.rank || "none";
+    strip.dataset.rank = rank.rank;
+    strip.hidden = !rank.asset;
+    if (rank.asset && strip.getAttribute("src") !== rank.asset) {
+      strip.setAttribute("src", rank.asset);
+    }
+    if (rank.asset && previous !== rank.rank) {
+      strip.classList.remove("rank-pop");
+      void strip.offsetWidth;
+      strip.classList.add("rank-pop");
+    }
+  }
 }
 
 function renderPartyDanceScoreBars(players = partyDanceDisplayPlayers) {
-  if (!danceScoreBar) return;
+  if (!danceVideoJudgements) return;
   const visible = (Array.isArray(players) ? players : []).slice(0, 4);
   const count = Math.max(1, visible.length || 1);
-  const nativeWidth = DANCE_SCOREBAR_NATIVE_WIDTHS[count] || 28;
 
-  danceScoreBar.querySelectorAll(".dance-party-score-column").forEach(node => node.remove());
-  danceScoreBar.classList.add("party-multi");
-  danceScoreBar.dataset.players = String(count);
-  danceScoreBar.style.setProperty("--jd-scorebar-width", `${nativeWidth / 3840 * 100}%`);
-  if (danceScoreBarFill) danceScoreBarFill.style.display = "none";
+  // No modo Party, a barra global da lateral não é usada.
+  // Cada card possui a própria barra, como nos exemplos enviados.
+  danceScoreBar?.classList.add("party-player-cards");
+  if (danceScoreBar) danceScoreBar.style.display = "none";
   if (danceStarHud) danceStarHud.style.display = "none";
 
   visible.forEach((player, playerIndex) => {
-    const column = document.createElement("div");
-    column.className = "dance-party-score-column";
-    column.dataset.playerId = String(player.id);
-    column.dataset.playerIndex = String(playerIndex + 1);
-    column.style.left = `${(playerIndex * DANCE_SCOREBAR_STEP / nativeWidth * 100).toFixed(5)}%`;
-    column.style.width = `${(DANCE_SCOREBAR_SINGLE_WIDTH / nativeWidth * 100).toFixed(5)}%`;
+    const card = danceVideoJudgements.querySelector(
+      `.dance-video-player-judge[data-player-id="${CSS.escape(String(player.id))}"]`
+    );
+    if (!card) return;
 
-    const starMarkup = DANCE_SCORE_STAR_THRESHOLDS.map(threshold => `
-      <span class="dance-party-score-star" data-threshold="${threshold}">
-        <img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt="">
-        <img class="fill" src="minigames/just-dance/hud/images/Star.png" alt="">
-      </span>`).join("");
+    const head = card.querySelector(".dance-ipk-player-head");
+    if (!head) return;
 
-    column.innerHTML = `
-      <div class="dance-party-score-fill-mask">
-        <img class="dance-party-score-fill" src="${partyDanceScorebarAsset(count, playerIndex)}" alt="">
-      </div>
-      <div class="dance-party-score-stars" aria-hidden="true">${starMarkup}</div>`;
+    let meter = card.querySelector(".dance-card-score-meter");
+    if (!meter) {
+      meter = document.createElement("div");
+      meter.className = "dance-card-score-meter";
+      meter.innerHTML = `
+        <span class="dance-card-star-count" aria-hidden="true">0</span>
+        <div class="dance-card-score-mask">
+          <img class="dance-card-score-fill" alt="" aria-hidden="true">
+        </div>`;
+      head.appendChild(meter);
+    }
 
-    danceScoreBar.appendChild(column);
+    const meterFill = meter.querySelector(".dance-card-score-fill");
+    if (meterFill) {
+      meterFill.src = partyDanceScorebarAsset(count, playerIndex);
+    }
+
+    let starStrip = card.querySelector(".dance-player-star-rank");
+    if (!starStrip) {
+      starStrip = document.createElement("img");
+      starStrip.className = "dance-player-star-rank";
+      starStrip.alt = "";
+      starStrip.setAttribute("aria-hidden", "true");
+      starStrip.hidden = true;
+      head.appendChild(starStrip);
+    }
+
     updatePartyDancePlayerScoreBar(player.id, player.dance?.score || 0);
   });
 }
 
 function updateDancePlayerHudOverlay(count = 1) {
   const safe = Math.max(1, Math.min(4, Number(count || 1)));
-  if (danceScoreBar) {
-    danceScoreBar.dataset.players = String(safe);
-    const nativeWidth = DANCE_SCOREBAR_NATIVE_WIDTHS[safe] || 28;
-    danceScoreBar.style.setProperty("--jd-scorebar-width", `${nativeWidth / 3840 * 100}%`);
-  }
 
   if (gameMode === "party-dance" && partyDanceDisplayPlayers?.length) {
     renderPartyDanceScoreBars(partyDanceDisplayPlayers);
@@ -3345,7 +3383,14 @@ function updateDancePlayerHudOverlay(count = 1) {
   }
 
   clearPartyDanceScoreBars();
-  if (danceScoreBarFill) danceScoreBarFill.src = `minigames/just-dance/hud/images/scorebars/${safe}P_bar.png`;
+  if (danceScoreBar) {
+    danceScoreBar.dataset.players = String(safe);
+    const nativeWidth = DANCE_SCOREBAR_NATIVE_WIDTHS[safe] || 28;
+    danceScoreBar.style.setProperty("--jd-scorebar-width", `${nativeWidth / 3840 * 100}%`);
+  }
+  if (danceScoreBarFill) {
+    danceScoreBarFill.src = `minigames/just-dance/hud/images/scorebars/${safe}P_bar.png`;
+  }
 }
 
 function updateDanceScoreBarVisual(score = 0) {
@@ -3809,6 +3854,8 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
     item.querySelector(".dance-video-player-name").textContent = player.name || "Jogador";
     danceVideoJudgements.appendChild(item);
   });
+
+  if (gameMode === "party-dance") renderPartyDanceScoreBars(visiblePlayers);
 }
 
 function showDanceVideoJudgement(playerId, judgement, goldMove = false) {

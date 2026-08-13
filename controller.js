@@ -139,7 +139,8 @@ const sensorMotionFill = document.getElementById("sensorMotionFill");
 const sensorNotice = document.getElementById("sensorNotice");
 const sensorDanceScore = document.getElementById("sensorDanceScore");
 const sensorDanceRank = document.getElementById("sensorDanceRank");
-const sensorDanceStars = document.getElementById("sensorDanceStars");
+const sensorDanceStarRank = document.getElementById("sensorDanceStarRank");
+const mobileDanceStarBadge = document.getElementById("mobileDanceStarBadge");
 const sensorDanceJudgement = document.getElementById("sensorDanceJudgement");
 const sensorDanceProgress = document.getElementById("sensorDanceProgress");
 const mobileDanceScoreBarFill = document.getElementById("mobileDanceScoreBarFill");
@@ -1214,27 +1215,34 @@ function renderControllerDanceScore(dance = {}, animateJudgement = false) {
     mobileDanceScoreBarFill.style.opacity = progress > 0 ? "1" : "0";
   }
 
-  const visual = score >= 12000
-    ? "minigames/just-dance/hud/images/Megastar.png"
+  const rankAsset = score >= 12000
+    ? "minigames/just-dance/hud/images/star-ranks/megastars.png"
     : score >= 11000
-      ? "minigames/just-dance/hud/images/Superstar.png"
-      : "minigames/just-dance/hud/images/Star.png";
-  // O contêiner móvel já representa SOMENTE o trecho vertical da scorebar.
-  // Portanto a estrela usa coordenada local: 2k = 85%, 4k = 70%, ...
-  // A V18 reaplicava porcentagens da tela 16:9 inteira dentro desse recorte, deslocando as estrelas.
-  let nextOutline = false;
-  sensorDanceStars?.querySelectorAll(".final-mobile-jd-star").forEach(star => {
-    const threshold = Number(star.dataset.threshold || 0);
-    const ratio = Math.max(0, Math.min(1, threshold / 13333));
-    star.style.top = `${((1 - ratio) * 100).toFixed(4)}%`;
-    const filled = score >= threshold;
-    star.classList.toggle("filled", filled);
-    const showOutline = !filled && !nextOutline;
-    star.classList.toggle("next-outline", showOutline);
-    if (showOutline) nextOutline = true;
-    const fill = star.querySelector(".fill");
-    if (fill && fill.getAttribute("src") !== visual) fill.setAttribute("src", visual);
-  });
+      ? "minigames/just-dance/hud/images/star-ranks/superstars.png"
+      : stars > 0
+        ? `minigames/just-dance/hud/images/star-ranks/star${stars}.png`
+        : "";
+
+  if (mobileDanceStarBadge) {
+    mobileDanceStarBadge.textContent = String(stars);
+    mobileDanceStarBadge.classList.toggle("has-stars", stars > 0);
+    mobileDanceStarBadge.dataset.rank = score >= 12000 ? "megastar" : score >= 11000 ? "superstar" : `star${stars}`;
+  }
+
+  if (sensorDanceStarRank) {
+    const nextRank = score >= 12000 ? "megastar" : score >= 11000 ? "superstar" : stars ? `star${stars}` : "none";
+    const previousRank = sensorDanceStarRank.dataset.rank || "none";
+    sensorDanceStarRank.dataset.rank = nextRank;
+    sensorDanceStarRank.hidden = !rankAsset;
+    if (rankAsset && sensorDanceStarRank.getAttribute("src") !== rankAsset) {
+      sensorDanceStarRank.setAttribute("src", rankAsset);
+    }
+    if (animateJudgement && rankAsset && previousRank !== nextRank) {
+      sensorDanceStarRank.classList.remove("rank-pop");
+      void sensorDanceStarRank.offsetWidth;
+      sensorDanceStarRank.classList.add("rank-pop");
+    }
+  }
 
   // Mantém esses elementos apenas para compatibilidade interna; V18 os oculta.
   if (sensorDanceRank) {
