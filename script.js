@@ -3249,6 +3249,11 @@ function partyDanceScorebarAsset(playerCount, playerIndex) {
 function clearPartyDanceScoreBars() {
   danceScoreBar?.querySelectorAll('.dance-party-score-column').forEach(node => node.remove());
   danceScoreBar?.classList.remove('party-multi');
+  danceHudStars?.querySelectorAll('.dance-hud-star').forEach(slot => {
+    slot.classList.remove('party-always-visible');
+  });
+  danceVideoJudgements?.querySelectorAll('.dance-player-stars').forEach(node => node.remove());
+
   if (danceScoreBarFill) {
     danceScoreBarFill.style.removeProperty('display');
     danceScoreBarFill.style.removeProperty('opacity');
@@ -3265,19 +3270,87 @@ function updatePartyDanceSharedStars() {
   const safeScore = Math.max(0, Math.min(DANCE_MAX_SCORE, partyDanceLeaderScore()));
   applyDanceHudStarRankVisual(safeScore);
 
-  const earned = DANCE_SCORE_STAR_THRESHOLDS.filter(threshold => safeScore >= threshold).length;
   const barSpan = DANCE_SCORE_BAR_BOTTOM_PERCENT - DANCE_SCORE_BAR_TOP_PERCENT;
   const slots = Array.from(danceHudStars.querySelectorAll('.dance-hud-star'));
 
-  // Party: uma progressão compartilhada. Só a última estrela conquistada
-  // e a próxima Outline ficam visíveis, independentemente de quem chegou primeiro.
-  slots.forEach((slot, index) => {
+  // V28:
+  // As CINCO estrelas da racetrack permanecem sempre visíveis.
+  // Qualquer jogador pode desbloquear a progressão global:
+  // o maior score da partida decide quais estrelas já foram preenchidas.
+  slots.forEach(slot => {
     const threshold = Number(slot.dataset.threshold || 0);
     const ratio = Math.max(0, Math.min(1, threshold / DANCE_MAX_SCORE));
     const top = DANCE_SCORE_BAR_BOTTOM_PERCENT - barSpan * ratio;
+    const filled = safeScore >= threshold;
+
     slot.style.top = `${top.toFixed(4)}%`;
-    slot.classList.toggle('filled', earned > 0 && index === earned - 1);
-    slot.classList.toggle('next-outline', earned < slots.length && index === earned);
+    slot.classList.toggle('filled', filled);
+    slot.classList.toggle('next-outline', !filled);
+    slot.classList.add('party-always-visible');
+  });
+}
+
+
+function partyDancePlayerStarVisual(score = 0) {
+  const value = Math.max(0, Number(score || 0));
+  if (value >= 12000) return DANCE_STAR_VISUALS.megastar;
+  if (value >= 11000) return DANCE_STAR_VISUALS.superstar;
+  return DANCE_STAR_VISUALS.normal;
+}
+
+function ensurePartyDancePlayerStars(card) {
+  if (!card) return null;
+  const head = card.querySelector('.dance-ipk-player-head');
+  if (!head) return null;
+
+  let stars = card.querySelector('.dance-player-stars');
+  if (!stars) {
+    stars = document.createElement('div');
+    stars.className = 'dance-player-stars';
+    stars.setAttribute('aria-label', 'Estrelas do jogador');
+
+    for (let index = 0; index < DANCE_SCORE_STAR_THRESHOLDS.length; index++) {
+      const star = document.createElement('span');
+      star.className = `dance-player-star star-${index + 1}`;
+      star.dataset.threshold = String(DANCE_SCORE_STAR_THRESHOLDS[index]);
+      star.innerHTML = `
+        <img class="outline" src="minigames/just-dance/hud/images/Outline.png" alt="">
+        <img class="fill" src="minigames/just-dance/hud/images/Star.png" alt="">`;
+      stars.appendChild(star);
+    }
+
+    head.appendChild(stars);
+  }
+  return stars;
+}
+
+function updatePartyDancePlayerStars(playerId, score = 0) {
+  const card = danceVideoJudgements?.querySelector(
+    `.dance-video-player-judge[data-player-id="${CSS.escape(String(playerId || ''))}"]`
+  );
+  if (!card) return;
+
+  const stars = ensurePartyDancePlayerStars(card);
+  if (!stars) return;
+
+  const safeScore = Math.max(0, Math.min(DANCE_MAX_SCORE, Number(score || 0)));
+  const rankVisual = partyDancePlayerStarVisual(safeScore);
+
+  stars.dataset.rank = safeScore >= 12000
+    ? 'megastar'
+    : safeScore >= 11000
+      ? 'superstar'
+      : 'normal';
+
+  stars.querySelectorAll('.dance-player-star').forEach(star => {
+    const threshold = Number(star.dataset.threshold || 0);
+    const filled = safeScore >= threshold;
+    star.classList.toggle('filled', filled);
+
+    const fill = star.querySelector('.fill');
+    if (fill && fill.getAttribute('src') !== rankVisual) {
+      fill.setAttribute('src', rankVisual);
+    }
   });
 }
 
@@ -3295,6 +3368,7 @@ function updatePartyDancePlayerScoreBar(playerId, score = 0) {
     fill.style.opacity = progress > 0 ? '1' : '0';
   }
 
+  updatePartyDancePlayerStars(playerId, safeScore);
   updatePartyDanceSharedStars();
 }
 
@@ -3839,6 +3913,8 @@ function renderDanceVideoPlayerSlots(players = devSensorState?.players || []) {
     item.style.setProperty('--jd-player-slot-x', `${((slotPositions[playerIndex] || 0) / 1920 * 100).toFixed(4)}%`);
     item.querySelector('.dance-video-player-name').textContent = player.name || 'Jogador';
     danceVideoJudgements.appendChild(item);
+    ensurePartyDancePlayerStars(item);
+    updatePartyDancePlayerStars(player.id, player.dance?.score || 0);
   });
 }
 

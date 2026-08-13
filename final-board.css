@@ -870,3 +870,123 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
   #danceDevScreen.party-dance-session .dance-picto-lane{height:calc(154px * var(--jd-ui-scale))!important}
   #danceDevScreen.party-dance-session .dance-picto-item{width:calc(132px * var(--jd-ui-scale))!important}
 }
+
+
+/* ==========================================================
+   V28 — estrelas da racetrack + estrelas individuais dos players
+   Referência: CSS antigo fornecido pelo usuário.
+   ========================================================== */
+
+/* RACETRACK:
+   as cinco posições NUNCA somem.
+   Outline fica visível quando bloqueada; fill aparece ao desbloquear. */
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-always-visible{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-always-visible .outline{
+  display:block!important;
+  opacity:.78!important;
+  visibility:visible!important;
+}
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-always-visible .fill{
+  display:block!important;
+  opacity:0!important;
+  visibility:visible!important;
+  transform:scale(.78) rotate(0deg)!important;
+}
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-always-visible.filled .outline{
+  opacity:0!important;
+}
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-always-visible.filled .fill{
+  opacity:1!important;
+  animation:jdV28RacetrackStar 1.05s ease!important;
+}
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-always-visible.next-outline .outline{
+  opacity:.78!important;
+}
+/* Não é mais "só próxima outline": todas bloqueadas continuam em outline. */
+#danceDevScreen.party-dance-session #danceHudStars .dance-hud-star.party-always-visible.next-outline{
+  opacity:1!important;
+}
+
+@keyframes jdV28RacetrackStar{
+  0%{opacity:0;transform:scale(1.18) rotate(-48deg)}
+  50%{opacity:1;transform:scale(.82) rotate(0deg)}
+  72%{filter:brightness(2.35)}
+  100%{opacity:1;filter:brightness(1);transform:scale(.78) rotate(0deg)}
+}
+
+/* PLAYER CARDS:
+   estrelas próprias, separadas da barra global, como #players .stars
+   do CSS de referência. */
+#danceDevScreen.party-dance-session .dance-player-stars{
+  position:absolute!important;
+  left:50%!important;
+  top:calc(100% + 5px * var(--jd-ui-scale))!important;
+  translate:-50% 0!important;
+  width:max-content!important;
+  height:calc(22px * var(--jd-ui-scale))!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:calc(-2px * var(--jd-ui-scale))!important;
+  z-index:9!important;
+  pointer-events:none!important;
+  filter:drop-shadow(0 calc(1px * var(--jd-ui-scale)) calc(2px * var(--jd-ui-scale)) rgba(0,0,0,.60))!important;
+}
+
+#danceDevScreen.party-dance-session .dance-player-star{
+  position:relative!important;
+  display:block!important;
+  width:calc(20px * var(--jd-ui-scale))!important;
+  height:calc(20px * var(--jd-ui-scale))!important;
+  margin:0 calc(-2.5px * var(--jd-ui-scale))!important;
+  opacity:0!important;
+  transform:rotate(0deg)!important;
+}
+
+#danceDevScreen.party-dance-session .dance-player-star img{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+}
+
+#danceDevScreen.party-dance-session .dance-player-star .outline{
+  display:none!important;
+}
+
+/* Nos Player Cards aparecem apenas as estrelas conquistadas,
+   igual ao HUD original: 1 estrela = uma estrela, 5 = cinco. */
+#danceDevScreen.party-dance-session .dance-player-star.filled{
+  opacity:1!important;
+}
+#danceDevScreen.party-dance-session .dance-player-star .fill{
+  opacity:1!important;
+}
+#danceDevScreen.party-dance-session .dance-player-star.filled .fill{
+  animation:jdV28PlayerStar .62s cubic-bezier(.17,.86,.21,1.15)!important;
+}
+@keyframes jdV28PlayerStar{
+  0%{scale:.25;rotate:-28deg;opacity:0}
+  58%{scale:1.18;rotate:5deg;opacity:1}
+  80%{scale:.94;rotate:-2deg}
+  100%{scale:1;rotate:0deg;opacity:1}
+}
+
+/* Superstar / Megastar mantêm os mesmos cinco slots,
+   apenas trocando a arte do fill pelo rank individual daquele player. */
+#danceDevScreen.party-dance-session .dance-player-stars[data-rank="superstar"]{
+  filter:drop-shadow(0 0 calc(5px * var(--jd-ui-scale)) rgba(64,191,255,.70))!important;
+}
+#danceDevScreen.party-dance-session .dance-player-stars[data-rank="megastar"]{
+  filter:drop-shadow(0 0 calc(6px * var(--jd-ui-scale)) rgba(255,58,213,.74))!important;
+}
+
+/* Dá espaço entre nome/card e as estrelas do player sem mexer na barra lateral. */
+#danceDevScreen.party-dance-session .dance-video-feedback{
+  top:calc(68px * var(--jd-ui-scale))!important;
+}
