@@ -657,10 +657,60 @@ function phoneMsmCompetitiveAdjust(profile,stats,move,targetScore){
 
 function phoneIsShake(move){ return /(?:^|[^a-z0-9])shake(?:[^a-z0-9]|\d|$)/i.test(String(move?.name||"")); }
 function phoneMakeStats(){return{count:0,active:0,motionSum:0,motionPeak:0,rotationSum:0,rotationPeak:0,jerkSum:0,jerkPeak:0,reversals:0,strongReversals:0,prevMotion:null,prevUnit:null,prevTime:0,samples:[]};}
+
+// V45 — feedback do Just Dance pertence ao próprio celular do jogador.
+const PHONE_DANCE_FEEDBACK_SOUND_PATHS=Object.freeze({
+  star1:"minigames/just-dance/hud/sounds/star1.mp3",
+  star2:"minigames/just-dance/hud/sounds/star2.mp3",
+  star3:"minigames/just-dance/hud/sounds/star3.mp3",
+  star4:"minigames/just-dance/hud/sounds/star4.mp3",
+  star5:"minigames/just-dance/hud/sounds/star5.mp3",
+  superstar:"minigames/just-dance/hud/sounds/superstar.mp3",
+  megastar:"minigames/just-dance/hud/sounds/megastar.mp3",
+  yeah:"minigames/just-dance/hud/sounds/yeah.mp3"
+});
+const phoneDanceFeedbackAudios=new Map();
+let phoneDanceFeedbackAudioPrimed=false;
+function phoneDanceFeedbackAudio(name){
+  if(phoneDanceFeedbackAudios.has(name))return phoneDanceFeedbackAudios.get(name);
+  const src=PHONE_DANCE_FEEDBACK_SOUND_PATHS[name];if(!src)return null;
+  try{const audio=new Audio(src);audio.preload="auto";audio.volume=name==="yeah"?.92:.82;phoneDanceFeedbackAudios.set(name,audio);return audio}catch{return null}
+}
+function phoneDancePrimeFeedbackAudio(){
+  if(phoneDanceFeedbackAudioPrimed)return;phoneDanceFeedbackAudioPrimed=true;
+  Object.keys(PHONE_DANCE_FEEDBACK_SOUND_PATHS).forEach(name=>{const a=phoneDanceFeedbackAudio(name);try{a?.load?.()}catch{}});
+}
+function phoneDancePlayFeedbackSound(name){
+  phoneDancePrimeFeedbackAudio();const base=phoneDanceFeedbackAudio(name);if(!base)return;
+  try{const sound=base.cloneNode(true);sound.volume=base.volume;sound.currentTime=0;sound.play().catch(()=>{})}catch{}
+}
+function phoneDanceVibrate(pattern){
+  try{if(typeof navigator?.vibrate==="function")navigator.vibrate(pattern)}catch{}
+}
+function phoneDanceMilestone(beforeScore,afterScore){
+  const milestones=[[2000,"star1"],[4000,"star2"],[6000,"star3"],[8000,"star4"],[10000,"star5"],[11000,"superstar"],[12000,"megastar"]];
+  let hit="";for(const [threshold,name] of milestones)if(beforeScore<threshold&&afterScore>=threshold)hit=name;return hit;
+}
+function phoneDanceFeedbackFx(beforeScore,afterScore,judgement){
+  const milestone=phoneDanceMilestone(beforeScore,afterScore);
+  const patterns={star1:[28],star2:[32,25,32],star3:[38,24,38],star4:[44,22,44,22,44],star5:[52,20,52,20,52],superstar:[64,28,64,28,82],megastar:[82,28,82,28,112]};
+  let vibration=[];
+  if(milestone){phoneDancePlayFeedbackSound(milestone);vibration=[...(patterns[milestone]||[])];}
+  const j=String(judgement||"").toUpperCase();
+  if(j==="YEAH"){
+    phoneDancePlayFeedbackSound("yeah");
+    vibration=[...vibration,...(vibration.length?[34]:[]),58,32,86];
+  }else if(j==="PERFECT"){
+    vibration=[...vibration,...(vibration.length?[22]:[]),12];
+  }
+  if(vibration.length)phoneDanceVibrate(vibration);
+}
+if(typeof document!=="undefined")document.addEventListener("pointerdown",phoneDancePrimeFeedbackAudio,{once:true,passive:true});
 function phoneDanceResetLocal(clearQueue=true){phoneDanceActiveMoveIndex=-1;phoneDanceStats=null;phoneDanceJudgedMoves.clear();if(clearQueue)phoneDancePendingResults.clear();phoneDanceLocal={totalMoves:phoneDanceMoves.length,judgedMoves:0,rawScore:0,score:0,stars:0,rank:"SEM ESTRELAS",lastJudgement:"",judgementCounts:{PERFECT:0,SUPER:0,GOOD:0,OK:0,YEAH:0,X:0}};renderControllerDanceScore(phoneDanceLocal);}
 function phoneDanceRank(d){const score=Math.max(0,Math.min(PHONE_DANCE_MAX_SCORE,Number(d.score||0))),stars=[2000,4000,6000,8000,10000].filter(x=>score>=x).length;d.stars=stars;d.rank=score>=12000?"MEGASTAR":score>=11000?"SUPERSTAR":stars?`${stars} ESTRELA${stars===1?"":"S"}`:"SEM ESTRELAS";}
 function phoneDanceApplyLocalResult(move,result){
   if(!phoneDanceLocal)phoneDanceResetLocal(false);
+  const beforeScore=Number(phoneDanceLocal.score||0);
   const per=PHONE_DANCE_MAX_SCORE/Math.max(1,phoneDanceMoves.length);
   const factor=Number.isFinite(Number(result?.scoreFactor))
     ? phoneClamp01(result.scoreFactor)
@@ -680,6 +730,7 @@ function phoneDanceApplyLocalResult(move,result){
   phoneDanceLocal.judgementCounts[result.judgement]=(phoneDanceLocal.judgementCounts[result.judgement]||0)+1;
   phoneDanceRank(phoneDanceLocal);
   renderControllerDanceScore(phoneDanceLocal,true);
+  phoneDanceFeedbackFx(beforeScore,Number(phoneDanceLocal.score||0),result?.judgement);
 }
 function phoneMeasureServerClock(force=false){if(!socket?.connected||!joinedRoom)return;const now=performance.now();if(!force&&now-phoneDanceLatencyMeasuredAt<5000)return;phoneDanceLatencyMeasuredAt=now;const wallStart=Date.now(),perfStart=performance.now();socket.emit("controller:dance-clock-ping",{roomCode:joinedRoom},response=>{if(!response?.ok)return;const rtt=Math.max(0,Math.min(4000,performance.now()-perfStart));const midpoint=wallStart+rtt/2;const offset=Number(response.serverTime||Date.now())-midpoint;phoneDanceServerRttMs=phoneDanceServerRttMs*.72+rtt*.28;phoneDanceServerOffsetMs=phoneDanceServerOffsetMs*.72+offset*.28;});}
 function phoneUpdateCalibration(sample){const motion=phoneMagnitude(sample?.acceleration),rot=phoneMagnitude(sample?.rotationRate),g=phoneMagnitude(sample?.accelerationIncludingGravity);if(g>6&&g<13)phoneDanceCalibration.gravity=phoneDanceCalibration.gravity*.992+g*.008;if(motion<.30&&rot<18){phoneDanceCalibration.noiseMotion=phoneDanceCalibration.noiseMotion*.992+motion*.008;phoneDanceCalibration.noiseRotation=phoneDanceCalibration.noiseRotation*.992+rot*.008;phoneDanceCalibration.quietSamples++;}else{const targetM=Math.max(1.8,Math.min(7.5,motion*1.10));const targetR=Math.max(90,Math.min(520,rot*1.08));phoneDanceCalibration.motionScale=phoneDanceCalibration.motionScale*.997+targetM*.003;phoneDanceCalibration.rotationScale=phoneDanceCalibration.rotationScale*.997+targetR*.003;}}

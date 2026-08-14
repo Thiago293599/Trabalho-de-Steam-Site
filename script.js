@@ -732,8 +732,9 @@ function startDanceGoldSingleVideo(moveIndex, { elapsedMs = 0, preview = false }
     danceGoldMoveVideo.currentTime = startAt;
   } catch {}
   danceGoldMoveVideo.classList.add("active");
-  danceGoldMoveVideo.volume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
-  danceGoldMoveVideo.muted = false;
+  // V45: o efeito visual Gold/YEAH continua no PC, mas o áudio do YEAH pertence ao celular do jogador.
+  danceGoldMoveVideo.volume = 0;
+  danceGoldMoveVideo.muted = true;
   danceGoldMoveVideo.onended = () => {
     if (token !== danceGoldVideoToken) return;
     danceGoldMoveVideo.classList.remove("active");
@@ -783,7 +784,7 @@ function startDanceExactGoldImpactSequence(moveIndex, { preview = false } = {}) 
       if (token !== danceExactGoldSequenceToken) return;
       const startYeah = () => {
         if (token !== danceExactGoldSequenceToken) return;
-        playDanceGoldExactAudio("gold-yeah-exact");
+        // V45: sem áudio YEAH no PC; apenas a animação visual continua.
         const yeahStarted = startDanceGoldCanvasAnimation("yeah", {
           loop: false,
           onComplete: () => finishDanceExactGoldSequence(token)
@@ -2613,7 +2614,7 @@ function danceHudSoundSource(name) {
 }
 
 function unlockDanceHudAudio() {
-  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah"];
+  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar"];
   for (const name of names) {
     if (danceHudSounds.has(name)) continue;
     const audio = new Audio(danceHudSoundSource(name));
@@ -2796,7 +2797,7 @@ function preloadDanceImage(url) {
 async function preloadDanceHudSounds(onProgress = null) {
   if (danceHudSoundsPreloaded) { onProgress?.(1, 1, 1); return; }
   unlockDanceHudAudio();
-  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar", "yeah"];
+  const names = ["start-song", "star1", "star2", "star3", "star4", "star5", "superstar", "megastar"];
   for (let index = 0; index < names.length; index += 1) {
     const name = names[index];
     const blob = await fetchDanceBlob(danceHudSoundSource(name));
@@ -3979,8 +3980,7 @@ function showDanceVideoJudgement(playerId, judgement, goldMove = false) {
   feedback.classList.add("active");
 
   const normalizedJudgement = String(judgement || "").toUpperCase();
-  // A explosão global e seu áudio pertencem à timeline; aqui toca só o feedback YEAH do jogador.
-  if (normalizedJudgement.startsWith("YEAH") && !danceExactGoldSequenceActive) playDanceHudSound("yeah");
+  // V45: o julgamento YEAH continua visual no PC, mas o som toca somente no celular do jogador.
 }
 
 function pictoAtlasPosition(name) {
