@@ -3815,7 +3815,7 @@ async function initializeDancePlayerSettings() {
   danceQualityPreference = safeLocalStorageGet(DANCE_QUALITY_STORAGE_KEY, "auto");
   if (!["auto","low","medium","high"].includes(danceQualityPreference)) danceQualityPreference = "auto";
   applyDanceLyricsSize(safeLocalStorageGet(DANCE_LYRICS_SIZE_STORAGE_KEY, "normal"), false);
-  applyDanceVideoFit(safeLocalStorageGet(DANCE_VIDEO_FIT_STORAGE_KEY, "contain"), false);
+  applyDanceVideoFit("contain", false);
   if (danceQualityMode) danceQualityMode.value = danceQualityPreference;
   if (danceVolume) {
     const initialVolume = Math.max(0, Math.min(1, Number(safeLocalStorageGet(DANCE_VOLUME_STORAGE_KEY, danceVolume.value || .9))));

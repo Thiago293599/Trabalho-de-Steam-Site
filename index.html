@@ -16,7 +16,7 @@
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
   <link rel="stylesheet" href="final-shell.css?v=002-board-alpha" />
-  <link rel="stylesheet" href="final-board.css?v=021-v42-local-profiles" />
+  <link rel="stylesheet" href="final-board.css?v=022-v43-final-map-free" />
 </head>
 <body class="site-loading">
 
@@ -169,7 +169,7 @@
 
   <!-- ================================================================
        BASE NOVA V14
-       Camada nova da versão final. O protótipo antigo continua abaixo
+       Interface final do projeto. A base técnica legada permanece abaixo apenas para compatibilidade
        para que possamos migrar cada sistema sem quebrar o jogo atual.
        ================================================================ -->
   <div id="finalShell" class="final-shell" aria-live="polite">
@@ -184,7 +184,7 @@
         <button id="finalPressStart" class="final-press-start" type="button">
           Aperte <kbd>Enter</kbd> ou clique na tela para começar
         </button>
-        <p class="final-working-title">Título provisório • Base nova do projeto</p>
+        <p class="final-working-title">Projeto STEAM • versão final local</p>
       </div>
     </section>
 
@@ -219,6 +219,10 @@
             <span class="final-button-icon">?</span>
             <span><strong>Como funciona</strong><small>Veja o fluxo do tabuleiro e dos minigames.</small></span>
           </button>
+          <button id="finalFreeModeButton" class="final-main-button final-free-button" data-final-nav="free" type="button">
+            <span class="final-button-icon">◇</span>
+            <span><strong>Modo Livre</strong><small>Teste qualquer minigame em Local, Party ou Online.</small></span>
+          </button>
           <button id="finalPresentationMode" class="final-main-button final-presentation-button" type="button">
             <span class="final-button-icon">◆</span>
             <span><strong>Apresentação STEAM</strong><small>Demo curta com Pitágoras, Trigonometria e Tales garantidos.</small></span>
@@ -227,11 +231,14 @@
             <span class="final-button-icon">⚙</span>
             <span><strong>Configurações</strong><small>Preferências da nova versão.</small></span>
           </button>
+          <button class="final-main-button" data-final-nav="credits" type="button">
+            <span class="final-button-icon">✦</span>
+            <span><strong>Créditos</strong><small>Projeto, tecnologias e referências usadas.</small></span>
+          </button>
         </div>
 
         <div class="final-menu-footer">
-          <button id="finalOpenLegacy" class="final-text-button" type="button">Abrir protótipo atual</button>
-          <span>Base V14 • desenvolvimento gradual</span>
+          <span>Projeto STEAM • dados locais • 2026</span>
         </div>
       </div>
     </section>
@@ -374,9 +381,9 @@
 
           <div class="final-actions-row">
             <button id="finalSaveMatch" class="final-secondary" type="button">Salvar configuração</button>
-            <button id="finalContinuePrototype" class="final-primary" type="button">Iniciar tabuleiro experimental</button>
+            <button id="finalContinuePrototype" class="final-primary" type="button">Iniciar partida</button>
           <div id="finalOnlineV2Panel" class="final-online-v2-panel hidden">
-            <div class="final-online-v2-head"><span class="final-online-live-dot"></span><div><strong>Online • Tabuleiro Completo (Beta)</strong><p>Crie ou entre em uma sala pela Internet. Cada jogador vê o tabuleiro completo e sincronizado no próprio navegador.</p></div></div>
+            <div class="final-online-v2-head"><span class="final-online-live-dot"></span><div><strong>Online • Tabuleiro Completo</strong><p>Crie ou entre em uma sala pela Internet. Cada jogador vê o tabuleiro completo e sincronizado no próprio navegador.</p></div></div>
             <div id="finalOnlineV2Actions" class="final-online-v2-actions">
               <label>Seu nome<input id="finalOnlineV2Name" maxlength="18" placeholder="Jogador"></label>
               <div class="final-online-v2-buttons"><button id="finalOnlineV2Create" class="final-primary" type="button">Criar sala</button><button id="finalOnlineV2ShowJoin" class="final-secondary" type="button">Entrar em sala</button></div>
@@ -448,7 +455,7 @@
 
       <div class="final-board-shell">
         <header class="final-board-topbar">
-          <div><p class="final-eyebrow">Partida experimental</p><h2 id="finalBoardRound">Rodada 1 / 5</h2></div>
+          <div><p class="final-eyebrow">Partida</p><h2 id="finalBoardRound">Rodada 1 / 5</h2></div>
           <div class="final-board-top-actions">
             <span id="finalBoardModeBadge" class="final-status-pill">Local</span>
             <span id="finalBoardSaveStatus" class="final-board-save-status">Checkpoint automático</span>
@@ -480,8 +487,8 @@
                   <div id="finalInventorySlots" class="final-inventory-slots"></div>
                 </div>
 
-                <div class="final-dice-zone"><div id="finalDiceCube" class="final-dice-cube" aria-hidden="true"><span class="face front">1</span><span class="face back">2</span><span class="face right">3</span><span class="face left">4</span><span class="face top">5</span><span class="face bottom">6</span></div><button id="finalRollDice" class="final-primary final-roll-button" type="button">Rolar dado</button><strong id="finalDiceResult" class="final-dice-result" aria-live="polite"></strong></div>
-                <div id="finalBoardEvent" class="final-board-event">O dado digital possui 6 faces visuais e pode sortear de 1 a 10.</div>
+                <div class="final-dice-zone"><div id="finalPrototypeDiceMount" class="final-prototype-dice-mount"><div id="finalDiceCube" class="final-dice-cube final-dice-fallback" aria-hidden="true"><span class="face front">1</span><span class="face back">2</span><span class="face right">3</span><span class="face left">4</span><span class="face top">5</span><span class="face bottom">6</span></div><strong id="finalDiceNumberOverlay" class="final-dice-number-overlay" aria-live="polite">1</strong></div><button id="finalRollDice" class="final-primary final-roll-button" type="button">Rolar dado</button><strong id="finalDiceResult" class="final-dice-result" aria-live="polite"></strong></div>
+                <div id="finalBoardEvent" class="final-board-event">Casas normais valem +1 ponto. O dado 3D sorteia números de 1 a 10.</div>
               </div>
               <div id="finalBoardSpaces" class="final-board-spaces"></div><div id="finalBoardTokens" class="final-board-tokens"></div>
             </div>
@@ -524,6 +531,7 @@
           <div class="final-motion-scene"><div id="finalMotionEscapeWave" class="final-motion-wave"></div><div class="final-motion-skyline"></div></div>
           <div id="finalMotionEscapeLanes" class="final-motion-lanes"></div>
           <p id="finalMotionEscapeTimer" class="final-drone-timer">Tempo: 12.0 s</p>
+          <button id="finalMotionLocalRun" class="final-primary final-motion-local-run hidden" type="button">CORRER • Espaço / clique</button>
         </div>
         <div id="finalMinigameResult" class="final-minigame-result hidden"><p class="final-eyebrow">Resultado</p><h3 id="finalMinigameWinner">Vencedor</h3><div id="finalMinigameRanking" class="final-minigame-ranking"></div><p>O vencedor recebe <strong>+10 Pontos de Missão</strong>.</p><button id="finalReturnBoard" class="final-primary" type="button">Voltar ao tabuleiro</button></div>
       </div></div>
@@ -629,11 +637,58 @@
           <button id="finalReplayTutorial" class="final-secondary" type="button">Ver tutorial do tabuleiro</button>
         </div>
         <div class="final-info-cards">
-          <article><strong>Dado digital</strong><p>Visual de 6 faces, mas resultados de 1 a 10 para manter o ritmo do tabuleiro.</p></article>
+          <article><strong>Dado 3D</strong><p>O dado 3D foi integrado ao tabuleiro final. Ele gira durante a jogada e o resultado digital varia de 1 a 10.</p></article>
           <article><strong>Controles justos</strong><p>Se celulares forem usados no multiplayer, todos os humanos usam celular. Sensores podem ser ativados ou não.</p></article>
           <article><strong>Bots</strong><p>Vagas vazias são preenchidas automaticamente, com dificuldade configurável.</p></article>
           <article><strong>Minigames compatíveis</strong><p>O sistema filtra jogos por teclado, toque, sensores e número de participantes.</p></article>
         </div>
+      </div>
+    </section>
+
+
+    <section id="finalFreeMenu" class="final-view hidden">
+      <div class="final-panel final-free-panel">
+        <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
+        <p class="final-eyebrow">Modo Livre</p>
+        <h2>Teste os minigames sem jogar uma partida inteira</h2>
+        <p class="final-subtitle">Escolha onde testar. No Party todos olham para a mesma tela; no Online cada jogador usa a própria tela.</p>
+
+        <div class="final-free-options">
+          <div class="final-free-mode-grid" role="group" aria-label="Modo do teste">
+            <button class="final-free-mode-card is-selected" data-free-mode="local" type="button"><b>Local</b><small>Teste no computador. Sensores podem ser simulados por toque/teclado.</small></button>
+            <button class="final-free-mode-card" data-free-mode="party" type="button"><b>Party</b><small>Uma tela principal e celulares como controles completos.</small></button>
+            <button class="final-free-mode-card" data-free-mode="online" type="button"><b>Online</b><small>Cada pessoa vê o jogo na própria tela pela Internet.</small></button>
+          </div>
+          <div class="final-free-controls">
+            <label>Jogadores humanos<select id="finalFreeHumans"><option value="1">1 jogador</option><option value="2">2 jogadores</option><option value="3">3 jogadores</option><option value="4">4 jogadores</option></select></label>
+            <label id="finalFreeControlWrap">Controle<select id="finalFreeControl"><option value="keyboard">Teclado e mouse</option><option value="phone-motion">Celular como controle</option></select></label>
+          </div>
+        </div>
+
+        <div class="final-free-minigame-grid" id="finalFreeMinigameGrid">
+          <button type="button" data-free-minigame="drone-route"><span>△</span><b>Rota do Drone</b><small>Pitágoras • 25 s</small></button>
+          <button type="button" data-free-minigame="slope-sensor"><span>∠</span><b>Sensor de Encosta</b><small>Trigonometria • 25 s</small></button>
+          <button type="button" data-free-minigame="satellite-scale"><span>▦</span><b>Mapa de Satélite</b><small>Tales / escala • 25 s</small></button>
+          <button type="button" data-free-minigame="flood-escape"><span>≈</span><b>Fuga da Enchente</b><small>Movimento • 12 s</small></button>
+          <button type="button" data-free-minigame="just-dance"><span>♪</span><b>Just Dance</b><small>Movimento e ritmo</small></button>
+        </div>
+        <div id="finalFreeStatus" class="final-info-box">Escolha um minigame. No modo Local sem celular, Fuga da Enchente usa Espaço/clique para simular movimento e Just Dance funciona como teste visual.</div>
+      </div>
+    </section>
+
+    <section id="finalCreditsMenu" class="final-view hidden">
+      <div class="final-panel final-credits-panel">
+        <button class="final-back" data-final-back="main" type="button">‹ Voltar</button>
+        <p class="final-eyebrow">Créditos</p>
+        <h2>Missão: Prevenir Desastres</h2>
+        <p class="final-subtitle">Jogo desenvolvido para atividade STEAM sobre Tecnologia, Matemática e Desastres Ambientais.</p>
+        <div class="final-info-cards final-credit-cards">
+          <article><strong>Matemática</strong><p>Teorema de Pitágoras, trigonometria em triângulos retângulos e proporcionalidade/escala ligada ao Teorema de Tales.</p></article>
+          <article><strong>Tecnologia</strong><p>HTML, CSS, JavaScript, Three.js para o dado 3D, Socket.IO para multiplayer e sensores de movimento dos celulares.</p></article>
+          <article><strong>Ambiental</strong><p>Enchentes, deslizamentos, incêndios, barragens e secas aparecem ligados a drones, satélites, sensores e mapas.</p></article>
+          <article><strong>Dados e perfis</strong><p>Perfis, fotos, configurações e saves permanecem locais no dispositivo, com exportação quando disponível.</p></article>
+        </div>
+        <div class="final-info-box">O minigame de dança usa uma interface inspirada em jogos de dança. Marcas e materiais de terceiros pertencem aos respectivos titulares.</div>
       </div>
     </section>
 
@@ -661,23 +716,10 @@
               <option value="large">Grande</option>
             </select>
           </label>
-          <label class="final-setting-row">
-            <span><strong>Enquadramento do vídeo</strong><small>“Inteiro” não corta a imagem; “Preencher” ocupa toda a área.</small></span>
-            <select id="finalSettingJdFit">
-              <option value="contain">Mostrar inteiro</option>
-              <option value="cover">Preencher tela</option>
-            </select>
-          </label>
           <label class="final-setting-row final-setting-volume">
             <span><strong>Volume do Just Dance</strong><small>Vale para vídeo, feedbacks e Gold Moves.</small></span>
             <span class="final-setting-range-wrap"><input id="finalSettingJdVolume" type="range" min="0" max="100" step="1" value="90" /><output id="finalSettingJdVolumeValue">90%</output></span>
           </label>
-        </div>
-        <div class="final-settings-grid final-settings-info-grid">
-          <div><span>Minigames de contas</span><strong>25 segundos</strong></div>
-          <div><span>Dado</span><strong>1–10</strong></div>
-          <div><span>Jogadores</span><strong>Até 4</strong></div>
-          <div><span>Perfis</span><strong>Locais</strong></div>
         </div>
         <p id="finalSettingsSaved" class="final-dev-note">As alterações são aplicadas automaticamente.</p>
       </div>
@@ -1066,12 +1108,6 @@
               <option value="large">Grande</option>
             </select>
           </label>
-          <label>Enquadramento
-            <select id="danceVideoFit">
-              <option value="contain">Mostrar vídeo inteiro</option>
-              <option value="cover">Preencher player</option>
-            </select>
-          </label>
         </div>
         <div id="dancePlayerShell" class="dance-player-shell">
           <div id="danceVideoStage" class="dance-video-stage" data-lyrics-size="small" data-video-fit="contain">
@@ -1371,14 +1407,14 @@
     });
   </script>
   <script src="final-game-config.js?v=001-base-nova"></script>
-  <script src="script.js?v=0712-v42-settings" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
-  <script src="final-party-network.js?v=003-motion-sensor"></script>
-  <script src="final-shell.js?v=006-v42-local-profiles"></script>
-  <script src="final-board.js?v=016-v42-profiles-time"></script>
-  <script src="final-online-v2.js?v=005-v41-online-dance"></script>
+  <script src="script.js?v=0713-v43-final" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
+  <script src="final-party-network.js?v=004-v43-control"></script>
+  <script src="final-shell.js?v=007-v43-final"></script>
+  <script src="final-board.js?v=017-v43-final-map"></script>
+  <script src="final-online-v2.js?v=006-v43-free"></script>
   <script src="final-presentation.js?v=001-demo"></script>
   <script src="final-save-manager.js?v=001-checkpoints"></script>
-  <span class="version-badge" data-version>V. 1.1.5 • Online JD + Portrait</span>
+  <span class="version-badge" data-version>V. 1.2.0 • Finalização STEAM</span>
 </body>
 </html>
 

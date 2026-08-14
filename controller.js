@@ -42,7 +42,7 @@ themeToggle?.addEventListener("click", () => {
 
 applyTheme(getCurrentTheme(), false);
 
-const REQUIRED_SERVER_PROTOCOL = 11;
+const REQUIRED_SERVER_PROTOCOL = 16;
 const MULTIPLAYER_TIMEOUT_MS = 6000;
 
 const PARTY_CONTROLLER_SESSION_KEY = "steamPartyControllerSessionV1";

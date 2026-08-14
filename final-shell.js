@@ -7,7 +7,6 @@
   const MATCH_KEY = "steamPartyMatchConfigV1";
   const JD_QUALITY_KEY = "jdVideoQualityModeV1";
   const JD_LYRICS_KEY = "jdLyricsSizeFinalV1";
-  const JD_FIT_KEY = "jdVideoFitV1";
   const JD_VOLUME_KEY = "jdVolumeV1";
 
   const qs = (s, root = document) => root.querySelector(s);
@@ -23,12 +22,15 @@
     play: qs("#finalPlayMenu"),
     profiles: qs("#finalProfilesMenu"),
     how: qs("#finalHowMenu"),
+    free: qs("#finalFreeMenu"),
+    credits: qs("#finalCreditsMenu"),
     settings: qs("#finalSettingsMenu"),
     saves: qs("#finalSavesMenu"),
     board: qs("#finalBoardView")
   };
 
   let selectedMatchMode = "local";
+  let selectedFreeMode = "local";
   let editingProfileId = "";
   let editingProfilePhoto = "";
   let toastTimer = 0;
@@ -370,7 +372,7 @@
         ? "Abrir sala Online"
         : connected
           ? "Criar sala e iniciar tabuleiro"
-          : "Iniciar tabuleiro experimental";
+          : "Iniciar tabuleiro";
     }
     const motion = minigames && effectiveControl === "phone-motion";
 
@@ -447,7 +449,7 @@
     const continueButton = qs("#finalContinuePrototype");
     if (continueButton) {
       continueButton.textContent = mode === "local"
-        ? "Iniciar tabuleiro experimental"
+        ? "Iniciar partida"
         : mode === "online"
           ? "Abrir sala Online"
           : "Criar sala e iniciar tabuleiro";
@@ -459,6 +461,70 @@
       setTimeout(() => window.STEAMOnlineV2?.open?.(), 0);
     } else {
       window.STEAMOnlineV2?.close?.();
+    }
+  }
+
+
+  function renderFreeControls() {
+    qsa("[data-free-mode]").forEach(btn => btn.classList.toggle("is-selected", btn.dataset.freeMode === selectedFreeMode));
+    const control = qs("#finalFreeControl");
+    const humans = qs("#finalFreeHumans");
+    const wrap = qs("#finalFreeControlWrap");
+    const status = qs("#finalFreeStatus");
+    if (selectedFreeMode === "party") {
+      if (control) control.value = "phone-motion";
+      if (control) control.disabled = true;
+      if (humans && Number(humans.value) < 2) humans.value = "2";
+      if (wrap) wrap.classList.remove("is-muted");
+      if (status) status.textContent = "Party: todos usam celulares em pé e a tela principal fica apenas para acompanhar o jogo.";
+    } else if (selectedFreeMode === "online") {
+      if (control) control.disabled = false;
+      if (humans && Number(humans.value) < 2) humans.value = "2";
+      if (status) status.textContent = "Online: crie uma sala. Cada jogador usa a própria tela e, se escolher celular, o PC não recebe comandos de gameplay.";
+    } else {
+      if (control) control.disabled = false;
+      if (status) status.textContent = control?.value === "phone-motion"
+        ? "Local + celular: será criada uma sala de controle para este teste."
+        : "Local: Fuga da Enchente usa Espaço/clique para simular movimento; Just Dance funciona como teste visual.";
+    }
+  }
+
+  function freeConfig(minigameId) {
+    const humans = Math.max(1, Math.min(4, Number(qs("#finalFreeHumans")?.value || 1)));
+    const control = qs("#finalFreeControl")?.value === "phone-motion" ? "phone-motion" : "keyboard";
+    const phone = selectedFreeMode === "party" || control === "phone-motion";
+    const effectiveHumans = selectedFreeMode === "party" ? Math.max(2, humans) : humans;
+    return {
+      version: 1,
+      mode: phone ? "phones" : "local",
+      humanPlayers: effectiveHumans,
+      controlMethod: phone ? "phone-motion" : "keyboard",
+      bots: Array.from({length: Math.max(0,4-effectiveHumans)}, (_,i)=>({slot:effectiveHumans+i+1,difficulty:"normal"})),
+      minigamesEnabled: true,
+      motionMinigamesEnabled: phone || minigameId === "flood-escape",
+      rounds: 1,
+      activeProfileId: activeProfileId(),
+      freeMode: true,
+      freeModeSource: selectedFreeMode,
+      forcedFreeMinigame: minigameId,
+      savedAt: new Date().toISOString()
+    };
+  }
+
+  function startFreeMinigame(minigameId) {
+    if (!minigameId) return;
+    if (selectedFreeMode === "online") {
+      const control = qs("#finalFreeControl")?.value === "phone-motion" ? "phone-motion" : "keyboard";
+      if (!window.STEAMOnlineV2?.openFree) {
+        showToast("A interface Online ainda está carregando.");
+        return;
+      }
+      window.STEAMOnlineV2.openFree(minigameId, { controlMethod:control });
+      return;
+    }
+    const config = freeConfig(minigameId);
+    if (!window.STEAMPartyBoard?.startFree?.(config, minigameId)) {
+      showToast("Não foi possível iniciar este teste.");
     }
   }
 
@@ -534,11 +600,18 @@
   qsa("[data-final-back]").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.finalBack)));
   qsa("[data-match-mode]").forEach(btn => btn.addEventListener("click", () => selectMatchMode(btn.dataset.matchMode)));
 
+
+  qsa("[data-free-mode]").forEach(btn => btn.addEventListener("click", () => {
+    selectedFreeMode = btn.dataset.freeMode || "local";
+    renderFreeControls();
+  }));
+  qs("#finalFreeControl")?.addEventListener("change", renderFreeControls);
+  qsa("[data-free-minigame]").forEach(btn => btn.addEventListener("click", () => startFreeMinigame(btn.dataset.freeMinigame)));
+
   qs("#finalHumanPlayers")?.addEventListener("change", renderMatchRules);
   qs("#finalControlMethod")?.addEventListener("change", renderMatchRules);
   qs("#finalSaveMatch")?.addEventListener("click", saveMatchConfig);
   qs("#finalContinuePrototype")?.addEventListener("click", openLegacyFromConfig);
-  qs("#finalOpenLegacy")?.addEventListener("click", exitShellToLegacy);
 
   function readLocalSetting(key, fallback) {
     try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
@@ -551,12 +624,10 @@
   function renderGameSettings() {
     const quality = qs("#finalSettingJdQuality");
     const lyrics = qs("#finalSettingJdLyrics");
-    const fit = qs("#finalSettingJdFit");
     const volume = qs("#finalSettingJdVolume");
     const volumeValue = qs("#finalSettingJdVolumeValue");
     if (quality) quality.value = ["auto","low","medium","high"].includes(readLocalSetting(JD_QUALITY_KEY,"auto")) ? readLocalSetting(JD_QUALITY_KEY,"auto") : "auto";
     if (lyrics) lyrics.value = ["small","normal","large"].includes(readLocalSetting(JD_LYRICS_KEY,"normal")) ? readLocalSetting(JD_LYRICS_KEY,"normal") : "normal";
-    if (fit) fit.value = readLocalSetting(JD_FIT_KEY,"contain") === "cover" ? "cover" : "contain";
     const v = Math.max(0, Math.min(100, Math.round(Number(readLocalSetting(JD_VOLUME_KEY,"0.9")) * 100)));
     if (volume) volume.value = String(v);
     if (volumeValue) volumeValue.textContent = `${v}%`;
@@ -593,7 +664,6 @@
 
   qs("#finalSettingJdQuality")?.addEventListener("change", event => saveGameSetting(JD_QUALITY_KEY, event.currentTarget.value, "Qualidade do Just Dance salva."));
   qs("#finalSettingJdLyrics")?.addEventListener("change", event => saveGameSetting(JD_LYRICS_KEY, event.currentTarget.value, "Tamanho das letras salvo."));
-  qs("#finalSettingJdFit")?.addEventListener("change", event => saveGameSetting(JD_FIT_KEY, event.currentTarget.value, "Enquadramento do vídeo salvo."));
   qs("#finalSettingJdVolume")?.addEventListener("input", event => {
     const value = Math.max(0, Math.min(100, Number(event.currentTarget.value || 0)));
     const output = qs("#finalSettingJdVolumeValue");
@@ -639,6 +709,7 @@
   renderProfileChip();
   fillLegacyNames();
   renderGameSettings();
+  renderFreeControls();
   try {
     if (new URLSearchParams(location.search).get("profiles") === "1") showView("profiles");
   } catch {}

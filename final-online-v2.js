@@ -4,16 +4,18 @@
   const panel=$("#finalOnlineV2Panel"),actions=$("#finalOnlineV2Actions"),lobby=$("#finalOnlineV2Lobby"),remote=$("#finalOnlineV2Remote"),nameInput=$("#finalOnlineV2Name"),createBtn=$("#finalOnlineV2Create"),showJoin=$("#finalOnlineV2ShowJoin"),joinRow=$("#finalOnlineV2JoinRow"),codeInput=$("#finalOnlineV2CodeInput"),joinBtn=$("#finalOnlineV2Join"),roomCodeEl=$("#finalOnlineV2RoomCode"),playersEl=$("#finalOnlineV2Players"),statusEl=$("#finalOnlineV2Status"),startBtn=$("#finalOnlineV2Start"),leaveBtn=$("#finalOnlineV2Leave"),inviteBox=$("#finalOnlineV2Invite"),copyInvite=$("#finalOnlineV2CopyInvite"),controlSetup=$("#finalOnlineV2ControlSetup"),sensorPair=$("#finalOnlineV2SensorPair"),sensorStatus=$("#finalOnlineV2SensorStatus"),sensorQr=$("#finalOnlineV2SensorQr"),sensorLinkEl=$("#finalOnlineV2SensorLink"),sensorOpen=$("#finalOnlineV2SensorOpen"),sensorCopy=$("#finalOnlineV2SensorCopy");
   if(!panel)return;
 
-  const boardView=$("#finalBoardView"),spacesLayer=$("#finalBoardSpaces"),tokensLayer=$("#finalBoardTokens"),playersList=$("#finalBoardPlayers"),roundText=$("#finalBoardRound"),turnName=$("#finalBoardTurnName"),turnAvatar=$("#finalBoardTurnAvatar"),instruction=$("#finalBoardInstruction"),eventBox=$("#finalBoardEvent"),rollButton=$("#finalRollDice"),diceResult=$("#finalDiceResult"),modeBadge=$("#finalBoardModeBadge"),minigameOverlay=$("#finalMinigameOverlay"),minigameIntro=$("#finalMinigameIntro"),droneGame=$("#finalDroneGame"),motionGame=$("#finalMotionEscapeGame"),motionLanes=$("#finalMotionEscapeLanes"),motionTimer=$("#finalMotionEscapeTimer"),motionWave=$("#finalMotionEscapeWave"),minigameResult=$("#finalMinigameResult"),minigameTitle=$("#finalMinigameTitle"),minigameDescription=$("#finalMinigameDescription"),droneQuestion=$("#finalDroneQuestion"),droneAnswers=$("#finalDroneAnswers"),droneTimer=$("#finalDroneTimer"),eduTopic=$("#finalEduTopic"),minigameWinner=$("#finalMinigameWinner"),minigameRanking=$("#finalMinigameRanking"),returnBoard=$("#finalReturnBoard"),startMinigame=$("#finalStartMinigame"),matchResultOverlay=$("#finalMatchResultOverlay"),matchRanking=$("#finalMatchRanking");
+  const boardView=$("#finalBoardView"),spacesLayer=$("#finalBoardSpaces"),tokensLayer=$("#finalBoardTokens"),playersList=$("#finalBoardPlayers"),roundText=$("#finalBoardRound"),turnName=$("#finalBoardTurnName"),turnAvatar=$("#finalBoardTurnAvatar"),instruction=$("#finalBoardInstruction"),eventBox=$("#finalBoardEvent"),rollButton=$("#finalRollDice"),diceResult=$("#finalDiceResult"),diceNumber=$("#finalDiceNumberOverlay"),prototypeDiceMount=$("#finalPrototypeDiceMount"),diceCube=$("#finalDiceCube"),modeBadge=$("#finalBoardModeBadge"),minigameOverlay=$("#finalMinigameOverlay"),minigameIntro=$("#finalMinigameIntro"),droneGame=$("#finalDroneGame"),motionGame=$("#finalMotionEscapeGame"),motionLanes=$("#finalMotionEscapeLanes"),motionTimer=$("#finalMotionEscapeTimer"),motionWave=$("#finalMotionEscapeWave"),minigameResult=$("#finalMinigameResult"),minigameTitle=$("#finalMinigameTitle"),minigameDescription=$("#finalMinigameDescription"),droneQuestion=$("#finalDroneQuestion"),droneAnswers=$("#finalDroneAnswers"),droneTimer=$("#finalDroneTimer"),eduTopic=$("#finalEduTopic"),minigameWinner=$("#finalMinigameWinner"),minigameRanking=$("#finalMinigameRanking"),returnBoard=$("#finalReturnBoard"),startMinigame=$("#finalStartMinigame"),matchResultOverlay=$("#finalMatchResultOverlay"),matchRanking=$("#finalMatchRanking");
 
   const configured=String(window.GAME_CONFIG?.SERVER_URL||"").trim().replace(/\/+$/,"");
   const SESSION_KEY="steamPartyOnlineSessionV2";
-  const SPACE_COUNT=28;
-  const spaceTypes=["start","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good","tech","bad","good","challenge","event","good","bad","tech","good","challenge","bad","event","good"];
-  const symbols={start:"INÍCIO",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"};
-  const path=(()=>{const p=[];for(let x=10;x<=90;x+=80/7)p.push({x,y:10});for(let y=21.5;y<=78.5;y+=57/5)p.push({x:90,y});for(let x=90;x>=10;x-=80/7)p.push({x,y:90});for(let y=78.5;y>=21.5;y-=57/5)p.push({x:10,y});return p.slice(0,SPACE_COUNT)})();
+  const mapSpec=window.STEAMPartyBoard?.getMapSpec?.()||{};
+  const SPACE_COUNT=Number(mapSpec.spaceCount||56);
+  const spaceTypes=Array.isArray(mapSpec.spaceTypes)?mapSpec.spaceTypes:["start",...Array(55).fill("normal")];
+  const symbols=mapSpec.symbols||{start:"INÍCIO",normal:"+1",good:"+",bad:"−",tech:"T",challenge:"?",event:"!"};
+  const path=Array.isArray(mapSpec.path)&&mapSpec.path.length?mapSpec.path:Array.from({length:SPACE_COUNT},(_,i)=>({x:8+(i%14)*6.2,y:12+Math.floor(i/14)*25}));
 
-  let socket=null,roomCode="",playerId="",resumeToken="",state=null,isHost=false,v2State=null,wired=false,resuming=false,timer=0,onlineDance=null,danceStartTimer=0;
+  let socket=null,roomCode="",playerId="",resumeToken="",state=null,isHost=false,v2State=null,wired=false,resuming=false,timer=0,onlineDance=null,danceStartTimer=0,freeSelection="",freeControlPreference="keyboard";
+  let lastReplicaRollSerial=0;
   const normalize=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
   const selectedOnline=()=>document.querySelector('[data-match-mode="online"]')?.classList.contains("is-selected");
   const avatar=p=>window.STEAMParty?.avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="42" fill="#65f2c3"/><circle cx="45" cy="52" r="5"/><circle cx="75" cy="52" r="5"/></svg>`;
@@ -198,7 +200,7 @@
   }
 
   function ack(event,payload){return connect().then(sock=>new Promise((resolve,reject)=>sock.timeout(7000).emit(event,payload,(err,res)=>err?reject(new Error("Servidor não respondeu.")):res?.ok?resolve(res):reject(new Error(res?.message||"Ação recusada.")))))}
-  function buildConfig(){let raw={};try{raw=JSON.parse(localStorage.getItem("steamPartyMatchConfigV1")||"{}")||{}}catch{}const mode=state?.controlMethod==="phone-motion"?"phone-motion":"keyboard";return{...raw,mode:"online",humanPlayers:Math.max(2,state?.players?.length||2),controlMethod:mode==="phone-motion"?"online-phone-motion":"online-keyboard",motionMinigamesEnabled:mode==="phone-motion",minigamesEnabled:true}}
+  function buildConfig(){let raw={};try{raw=JSON.parse(localStorage.getItem("steamPartyMatchConfigV1")||"{}")||{}}catch{}const mode=state?.controlMethod==="phone-motion"?"phone-motion":"keyboard";return{...raw,mode:"online",humanPlayers:Math.max(2,state?.players?.length||2),controlMethod:mode==="phone-motion"?"online-phone-motion":"online-keyboard",motionMinigamesEnabled:mode==="phone-motion"||freeSelection==="flood-escape",minigamesEnabled:true,freeMode:Boolean(freeSelection),forcedFreeMinigame:freeSelection||"",rounds:freeSelection?1:Number(raw.rounds||5)}}
   function privateSensorUrl(){if(!roomCode||!playerId||!resumeToken)return"";const u=new URL("controller.html",location.href);u.searchParams.set("onlineControl","1");u.searchParams.set("onlineRoom",roomCode);u.searchParams.set("onlinePlayer",playerId);u.searchParams.set("onlineToken",resumeToken);return u.toString()}
   function placeOnlinePanel(){
     const setup=document.querySelector("#finalMatchSetup");
@@ -250,11 +252,35 @@
     startBtn.classList.toggle("hidden",!isHost); startBtn.disabled=!isHost||(state.players?.length||0)<2||!sensorReady;
     if(inviteBox){inviteBox.textContent=isHost?inviteUrl():`Sala ${roomCode}`;inviteBox.classList.toggle("hidden",!isHost)}
     copyInvite?.classList.toggle("hidden",!isHost);
-    setStatus(isHost?((state.players?.length||0)<2?"Compartilhe o link da sala. Cada jogador entra pela Internet.":phoneMode&&!sensorReady?"Modo celular: todos os jogadores precisam parear e ativar o próprio controle.":"Pronto. Todos jogarão no próprio navegador."):phoneMode&&!sensorReady?"Pareie seu celular-controle abaixo e ative os sensores.":"Aguarde o host iniciar a partida.");
+    setStatus(isHost?((state.players?.length||0)<2?`Compartilhe o link da sala.${freeSelection?" Modo Livre: "+freeSelection:""}`:phoneMode&&!sensorReady?"Modo celular: todos os jogadores precisam parear e ativar o próprio controle.":freeSelection?"Modo Livre pronto. Inicie para abrir diretamente o minigame selecionado.":"Pronto. Todos jogarão no próprio navegador."):phoneMode&&!sensorReady?"Pareie seu celular-controle abaixo e ative os sensores.":"Aguarde o host iniciar a partida.");
+  }
+
+  function mountReplicaDice(){
+    if(!prototypeDiceMount)return null;
+    const scene=document.getElementById("diceScene");
+    if(scene&&scene.parentElement!==prototypeDiceMount){prototypeDiceMount.prepend(scene);scene.classList.add("final-board-prototype-dice");prototypeDiceMount.classList.add("has-prototype");diceCube?.classList.add("hidden")}
+    return scene;
+  }
+  async function animateReplicaDice(value,serial){
+    const result=Math.max(1,Math.min(10,Number(value||1)));if(!serial||serial===lastReplicaRollSerial)return;lastReplicaRollSerial=serial;
+    const scene=mountReplicaDice();let ticker=0;const cycle=setInterval(()=>{ticker=ticker%10+1;if(diceNumber)diceNumber.textContent=String(ticker)},64);
+    try{const face=((result-1)%6)+1;if(scene&&window.Dice3D?.rollTo){scene.classList.add("is-rolling");await window.Dice3D.rollTo(face);window.Dice3D.setFace?.(face)}else await new Promise(r=>setTimeout(r,700))}catch{}finally{clearInterval(cycle);scene?.classList.remove("is-rolling")}
+    if(diceNumber)diceNumber.textContent=String(result);if(diceResult)diceResult.textContent=`Saiu ${result}!`;
   }
 
   function ensureSpaces(){
     if(!spacesLayer||spacesLayer.children.length)return;
+    const waypoints=Array.isArray(mapSpec.waypoints)?mapSpec.waypoints:[];
+    if(waypoints.length>1){
+      const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+      svg.setAttribute("viewBox","0 0 100 100");
+      svg.setAttribute("preserveAspectRatio","none");
+      svg.classList.add("final-board-route-svg");
+      const poly=document.createElementNS("http://www.w3.org/2000/svg","polyline");
+      poly.setAttribute("points",waypoints.map(p=>p.join(",")).join(" "));
+      poly.classList.add("final-board-route-main");
+      svg.appendChild(poly);spacesLayer.appendChild(svg);
+    }
     path.forEach((pt,i)=>{const type=spaceTypes[i%spaceTypes.length],el=document.createElement("div");el.className="final-board-space";el.dataset.index=i;el.dataset.type=type;el.style.left=`${pt.x}%`;el.style.top=`${pt.y}%`;el.innerHTML=`<span>${type==="start"?"INÍCIO":symbols[type]}</span>`;spacesLayer.appendChild(el)});
   }
   function renderReplicaPlayers(){
@@ -269,7 +295,7 @@
   function showBoardReplica(){
     document.getElementById("finalShell")?.classList.remove("hidden"); document.body.classList.add("final-shell-v1");
     document.querySelectorAll("#finalShell .final-view").forEach(v=>v.classList.toggle("hidden",v!==boardView)); boardView?.classList.remove("hidden");
-    if(boardView)boardView.dataset.onlineReplica="1";
+    if(boardView)boardView.dataset.onlineReplica="1";mountReplicaDice();
   }
   function formatAnswer(v,unit){const n=Number(v),s=Number.isInteger(n)?String(n):String(Math.round(n*10)/10);return unit==="°"?`${s}°`:`${s} ${unit||""}`.trim()}
   function clearReplicaTimer(){clearInterval(timer);timer=0}
@@ -277,6 +303,7 @@
     clearReplicaTimer(); if(!v2State)return;
     const phase=v2State.phase,mg=v2State.minigame;
     if(phase==="board"){minigameOverlay?.classList.add("hidden");matchResultOverlay?.classList.add("hidden");return}
+    if(phase==="free-complete"){minigameOverlay?.classList.add("hidden");if(instruction)instruction.textContent="Teste concluído. O host pode iniciar outro minigame pelo Modo Livre.";return}
     if(phase==="match-result"){minigameOverlay?.classList.add("hidden");matchResultOverlay?.classList.remove("hidden");if(matchRanking){matchRanking.innerHTML="";[...(v2State.players||[])].sort((a,b)=>Number(b.score||0)-Number(a.score||0)).forEach((p,i)=>{const r=document.createElement("div");r.className="final-ranking-row";r.innerHTML=`<b>${i+1}º</b><span><strong></strong><small></small></span><span><strong>${Math.round(Number(p.score||0))} pts</strong></span>`;r.querySelector("strong").textContent=p.name;r.querySelector("small").textContent=p.id===playerId?"Você":"Online";matchRanking.appendChild(r)})}return}
     matchResultOverlay?.classList.add("hidden"); minigameOverlay?.classList.remove("hidden");
     if(phase==="minigame-intro"){minigameIntro?.classList.remove("hidden");droneGame?.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult?.classList.add("hidden");if(minigameTitle)minigameTitle.textContent=mg?.title||"Minigame";if(minigameDescription)minigameDescription.textContent="Aguardando o host iniciar. Você joga nesta própria tela.";startMinigame?.classList.add("hidden");return}
@@ -301,15 +328,16 @@
     const me=(v2State.players||[]).find(p=>p.id===playerId),current=(v2State.players||[]).find(p=>p.id===v2State.currentPlayerId),phoneControl=state?.controlMethod==="phone-motion",myTurn=v2State.currentPlayerId===playerId&&v2State.phase==="board";
     if(roundText)roundText.textContent=`Rodada ${v2State.round} / ${v2State.totalRounds}`;if(modeBadge)modeBadge.textContent=`Online • ${roomCode}`;if(turnName)turnName.textContent=current?.name||"Aguardando";if(turnAvatar)turnAvatar.innerHTML=current?avatar(current):"";if(eventBox)eventBox.textContent=v2State.eventText||"Partida Online sincronizada.";
     if(instruction)instruction.textContent=myTurn?(phoneControl?"Sua vez — use o celular-controle pareado.":"Sua vez — role o dado neste dispositivo."):current?`Vez de ${current.name}. O tabuleiro continuará sincronizado aqui.`:"Sincronizando partida…";
-    if(rollButton){rollButton.disabled=!myTurn||phoneControl;rollButton.textContent=myTurn?(phoneControl?"Use o celular":"Rolar dado"):"Aguardando…"}if(diceResult)diceResult.textContent="";
+    if(rollButton){rollButton.disabled=!myTurn||phoneControl;rollButton.textContent=myTurn?(phoneControl?"Use o celular":"Rolar dado"):"Aguardando…"}
+    if(Number(v2State.rollSerial||0)!==lastReplicaRollSerial)void animateReplicaDice(v2State.lastRoll,v2State.rollSerial);
     renderReplicaMinigame();
   }
 
   function sendAction(type,data={}){return new Promise((resolve,reject)=>{if(!socket||!roomCode){reject(new Error("Sala desconectada."));return}socket.timeout(6500).emit("online:v2-action",{roomCode,type,...data,clientTime:Date.now()},(err,res)=>{if(err)reject(new Error("Servidor não respondeu."));else if(!res?.ok)reject(new Error(res?.message||"Ação recusada."));else resolve(res)})})}
   async function resumeCurrentSession(showErrors=true){if(resuming||!roomCode||!playerId||!resumeToken)return false;resuming=true;try{const r=await ack("online:resume",{roomCode,playerId,resumeToken});state=r.state;isHost=playerId===state.hostPlayerId;v2State=r.onlineV2State||v2State;saveSession();if(state.started&&v2State&&!isHost)renderReplica();else renderLobby();return true}catch(e){if(showErrors)setStatus(e.message);if(e.invalidSession)clearSession();return false}finally{resuming=false}}
-  function reset(message=""){clearReplicaTimer();clearTimeout(danceStartTimer);hideDanceWait();try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}onlineDance=null;roomCode="";playerId="";resumeToken="";state=null;v2State=null;isHost=false;clearSession();boardView?.removeAttribute("data-online-replica");lobby.classList.add("hidden");remote?.classList.add("hidden");actions.classList.remove("hidden");if(message)window.STEAMParty?.showToast?.(message)}
+  function reset(message=""){clearReplicaTimer();clearTimeout(danceStartTimer);hideDanceWait();try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}onlineDance=null;lastReplicaRollSerial=0;freeSelection="";freeControlPreference="keyboard";roomCode="";playerId="";resumeToken="";state=null;v2State=null;isHost=false;clearSession();boardView?.removeAttribute("data-online-replica");lobby.classList.add("hidden");remote?.classList.add("hidden");actions.classList.remove("hidden");if(message)window.STEAMParty?.showToast?.(message)}
 
-  createBtn?.addEventListener("click",async()=>{try{const r=await ack("online:create-room",{name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=true;saveSession();renderLobby()}catch(e){setStatus(e.message)}});
+  createBtn?.addEventListener("click",async()=>{try{const r=await ack("online:create-room",{name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=true;saveSession();if(freeSelection&&freeControlPreference==="phone-motion"){const c=await ack("online:v2-control-mode",{roomCode,controlMethod:"phone-motion"});state=c.state||state}renderLobby()}catch(e){setStatus(e.message)}});
   showJoin?.addEventListener("click",()=>joinRow.classList.toggle("hidden")); codeInput?.addEventListener("input",()=>codeInput.value=normalize(codeInput.value));
   joinBtn?.addEventListener("click",async()=>{try{const r=await ack("online:join-room",{roomCode:normalize(codeInput.value),name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=false;saveSession();renderLobby()}catch(e){setStatus(e.message)}});
   startBtn?.addEventListener("click",async()=>{if(!isHost||!state)return;const config=buildConfig();const initial={phase:"board",round:1,totalRounds:Number(config.rounds||5),currentPlayerId:state.players[0]?.id||"",eventText:"Partida Online iniciada.",players:state.players.map((p,i)=>({id:p.id,slot:i+1,name:p.name,human:true,bot:false,difficulty:"",position:0,score:0,laps:0,avatarShape:["round","square","triangle","hex"][i%4],avatarColor:["cyan","green","orange","pink"][i%4],avatarFace:"smile"})),minigame:null};try{await ack("online:v2-start",{roomCode,config,state:initial})}catch(e){setStatus(e.message)}});
@@ -345,6 +373,11 @@
 
   window.STEAMOnlineV2=Object.freeze({
     open:showPanel,
+    openFree(minigameId,options={}){
+      freeSelection=String(minigameId||"");freeControlPreference=options.controlMethod==="phone-motion"?"phone-motion":"keyboard";
+      showPanel();setStatus(`Modo Livre Online • ${freeSelection}. Crie ou entre em uma sala e inicie o teste.`);
+      panel.dataset.freeMode="1";
+    },
     close:hidePanel,
     publishState(next){
       if(!isHost||!socket||!roomCode)return;
