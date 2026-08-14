@@ -1591,3 +1591,73 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
 .final-menu-footer{justify-content:flex-end!important}
 @media(max-width:1050px){.final-free-minigame-grid{grid-template-columns:repeat(3,1fr)}.final-board-center{width:min(340px,38%)}}
 @media(max-width:760px){.final-free-mode-grid,.final-free-controls{grid-template-columns:1fr}.final-free-minigame-grid{grid-template-columns:1fr 1fr}.final-board-stage{min-height:620px}.final-board-space{width:30px}.final-board-center{width:46%;padding:10px}.final-prototype-dice-mount{scale:.82;margin-block:-8px}.final-board-turn-avatar{width:50px;height:50px}}
+
+
+/* ==========================================================
+   V44 — HUD horizontal, dado frontal e novos minigames sensor
+   ========================================================== */
+.final-board-center.final-board-hud-horizontal{
+  width:min(940px,82%)!important;
+  min-height:154px;
+  padding:12px 16px 14px!important;
+  display:grid!important;
+  grid-template-columns:minmax(170px,.9fr) minmax(260px,1.35fr) minmax(150px,.72fr) minmax(200px,1fr);
+  grid-template-areas:
+    "mark mark mark mark"
+    "turn inventory dice event";
+  align-items:center;
+  gap:9px 14px;
+  background:linear-gradient(100deg,rgba(4,20,24,.86),rgba(8,36,40,.76))!important;
+  backdrop-filter:blur(13px)!important;
+  border-radius:22px!important;
+}
+.final-board-hud-horizontal .final-board-mission-mark{grid-area:mark;text-align:left;padding-left:4px;margin:0}
+.final-board-hud-horizontal .final-turn-identity{grid-area:turn;display:flex;align-items:center;gap:10px;min-width:0;text-align:left}
+.final-board-hud-horizontal .final-board-turn-avatar{width:54px;height:54px;margin:0;flex:0 0 auto}
+.final-board-hud-horizontal .final-turn-copy{min-width:0}
+.final-board-hud-horizontal .final-turn-copy p{margin:1px 0;color:var(--final-muted);font-size:.68rem}
+.final-board-hud-horizontal .final-turn-copy h3{font-size:1.22rem;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.final-board-hud-horizontal #finalBoardInstruction{line-height:1.25}
+.final-board-hud-horizontal .final-inventory-panel{grid-area:inventory;margin:0!important;min-width:0}
+.final-board-hud-horizontal .final-inventory-head{margin-bottom:5px}
+.final-board-hud-horizontal .final-inventory-slots{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.final-board-hud-horizontal .final-dice-zone{grid-area:dice;margin:0!important;align-self:center}
+.final-board-hud-horizontal .final-board-event{grid-area:event;margin:0!important;max-width:none;min-height:62px;display:flex;align-items:center;text-align:left}
+.final-board-hud-horizontal .final-prototype-dice-mount{width:104px;height:104px;margin:-8px auto -2px}
+.final-board-hud-horizontal .final-prototype-dice-mount .dice-scene.final-board-prototype-dice{width:104px!important;height:104px!important}
+.final-board-hud-horizontal .final-prototype-dice-mount .dice-webgl,.final-board-hud-horizontal .final-prototype-dice-mount .dice-canvas{width:104px!important;height:104px!important}
+.final-board-hud-horizontal .final-roll-button{min-width:112px;padding:10px 14px}
+.final-board-hud-horizontal .final-dice-result{height:14px;margin-top:2px;font-size:.88rem}
+
+/* A placa numérica cobre completamente as bolinhas da face frontal do dado. */
+.final-dice-number-overlay{
+  min-width:59px!important;width:59px;height:59px!important;padding:0!important;
+  border-radius:12px!important;background:linear-gradient(145deg,#fbfffe,#d9f1ea)!important;
+  color:#09292d!important;font-size:1.72rem!important;
+  border:1px solid rgba(255,255,255,.96)!important;
+  box-shadow:inset 0 0 12px rgba(18,91,74,.10),0 2px 7px rgba(0,0,0,.13)!important;
+  transition:opacity .08s ease,filter .08s ease,transform .08s ease;
+}
+.final-prototype-dice-mount .is-rolling~.final-dice-number-overlay{animation:none!important;opacity:.76;filter:blur(.22px);transform:scale(.96)}
+.final-dice-number-overlay.is-number-shifting{opacity:.42;filter:blur(1.2px);transform:scale(.985)}
+
+/* Temas dos minigames de movimento. */
+.final-motion-game[data-motion-game="wildfire-pump"]{background:linear-gradient(180deg,rgba(65,25,14,.97),rgba(22,13,10,.99));border-color:rgba(255,137,75,.28)}
+.final-motion-game[data-motion-game="wildfire-pump"] .final-motion-water{background:linear-gradient(90deg,#ff6b38,#ffbe55);opacity:.36}
+.final-motion-game[data-motion-game="wildfire-pump"] .final-motion-progress{background:linear-gradient(90deg,rgba(76,205,255,.30),rgba(76,205,255,.08))}
+.final-motion-game[data-motion-game="drone-balance"]{background:linear-gradient(180deg,rgba(12,36,47,.98),rgba(7,18,25,.99));border-color:rgba(93,201,255,.28)}
+.final-motion-game[data-motion-game="drone-balance"] .final-motion-water{background:linear-gradient(90deg,#5dc9ff,#70efd1);opacity:.18}
+.final-motion-game[data-motion-game="dam-alarm"]{background:linear-gradient(180deg,rgba(42,25,58,.98),rgba(17,12,28,.99));border-color:rgba(187,141,255,.30)}
+.final-motion-game[data-motion-game="dam-alarm"] .final-motion-water{background:linear-gradient(90deg,#a984ff,#ff7db8);opacity:.22}
+.final-party-phone-motion-meter small{display:block;margin:12px auto 0;max-width:330px;opacity:.72;line-height:1.4}
+
+.final-credit-cards article strong{font-size:1.02rem}
+.final-credit-cards article p{line-height:1.5}
+
+@media(max-width:1050px){
+  .final-board-center.final-board-hud-horizontal{width:min(910px,88%)!important;grid-template-columns:minmax(150px,.8fr) minmax(220px,1.2fr) 140px minmax(170px,.9fr);gap:8px}
+}
+@media(max-width:780px){
+  .final-board-center.final-board-hud-horizontal{width:84%!important;grid-template-columns:1fr 130px;grid-template-areas:"mark mark" "turn dice" "inventory inventory" "event event";min-height:0;padding:10px!important}
+  .final-board-hud-horizontal .final-board-event{display:none}
+}

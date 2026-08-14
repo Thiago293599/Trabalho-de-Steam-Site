@@ -475,9 +475,12 @@
                   <span id="finalEnvironmentDescription"></span>
                 </div>
               </div>
-              <div class="final-board-center">
+              <div class="final-board-center final-board-hud-horizontal">
                 <div class="final-board-mission-mark">CENTRAL DE MONITORAMENTO</div>
-                <div id="finalBoardTurnAvatar" class="final-board-turn-avatar"></div><p>Vez de</p><h3 id="finalBoardTurnName">Jogador</h3><p id="finalBoardInstruction">Role o dado para continuar.</p>
+                <div class="final-turn-identity">
+                  <div id="finalBoardTurnAvatar" class="final-board-turn-avatar"></div>
+                  <div class="final-turn-copy"><p>Vez de</p><h3 id="finalBoardTurnName">Jogador</h3><p id="finalBoardInstruction">Role o dado para continuar.</p></div>
+                </div>
 
                 <div id="finalInventoryPanel" class="final-inventory-panel">
                   <div class="final-inventory-head">
@@ -526,12 +529,12 @@
 <div id="finalMinigameOverlay" class="final-minigame-overlay hidden" aria-live="polite"><div class="final-minigame-card">
         <div id="finalMinigameIntro"><p class="final-eyebrow">Fim da rodada</p><h2>Minigame!</h2><div id="finalMinigameIcon" class="final-minigame-icon">△</div><h3 id="finalMinigameTitle">Rota do Drone</h3><p id="finalMinigameDescription">Use a matemática para cumprir a missão.</p><button id="finalStartMinigame" class="final-primary" type="button">Começar</button></div>
         <div id="finalDroneGame" class="final-drone-game hidden"><div id="finalEduVisual" class="final-drone-visual final-edu-visual" aria-hidden="true"><div class="final-route-leg final-route-a"><span id="finalDroneA">6 km</span></div><div class="final-route-leg final-route-b"><span id="finalDroneB">8 km</span></div><div class="final-drone-direct">✈</div></div><p id="finalEduTopic" class="final-eyebrow">Teorema de Pitágoras</p><h3 id="finalDroneQuestion">Qual é a distância direta?</h3><div id="finalDroneAnswers" class="final-drone-answers"></div><p id="finalDroneTimer" class="final-drone-timer">Tempo: 12 s</p></div>
-        <div id="finalMotionEscapeGame" class="final-motion-game hidden">
-          <div class="final-motion-head"><p class="final-eyebrow">Sensor de movimento • Enchente</p><h3>Fuga da Enchente</h3><p>Chacoalhe o celular para correr até o abrigo antes da água.</p></div>
+        <div id="finalMotionEscapeGame" class="final-motion-game hidden" data-motion-game="flood-escape">
+          <div class="final-motion-head"><p id="finalMotionKicker" class="final-eyebrow">Sensor de movimento • Enchente</p><h3 id="finalMotionTitle">Fuga da Enchente</h3><p id="finalMotionDescription">Chacoalhe o celular para correr até o abrigo antes da água.</p></div>
           <div class="final-motion-scene"><div id="finalMotionEscapeWave" class="final-motion-wave"></div><div class="final-motion-skyline"></div></div>
           <div id="finalMotionEscapeLanes" class="final-motion-lanes"></div>
           <p id="finalMotionEscapeTimer" class="final-drone-timer">Tempo: 12.0 s</p>
-          <button id="finalMotionLocalRun" class="final-primary final-motion-local-run hidden" type="button">CORRER • Espaço / clique</button>
+          <button id="finalMotionLocalRun" class="final-primary final-motion-local-run hidden" type="button">MOVER • Espaço / clique</button>
         </div>
         <div id="finalMinigameResult" class="final-minigame-result hidden"><p class="final-eyebrow">Resultado</p><h3 id="finalMinigameWinner">Vencedor</h3><div id="finalMinigameRanking" class="final-minigame-ranking"></div><p>O vencedor recebe <strong>+10 Pontos de Missão</strong>.</p><button id="finalReturnBoard" class="final-primary" type="button">Voltar ao tabuleiro</button></div>
       </div></div>
@@ -669,10 +672,13 @@
           <button type="button" data-free-minigame="drone-route"><span>△</span><b>Rota do Drone</b><small>Pitágoras • 25 s</small></button>
           <button type="button" data-free-minigame="slope-sensor"><span>∠</span><b>Sensor de Encosta</b><small>Trigonometria • 25 s</small></button>
           <button type="button" data-free-minigame="satellite-scale"><span>▦</span><b>Mapa de Satélite</b><small>Tales / escala • 25 s</small></button>
-          <button type="button" data-free-minigame="flood-escape"><span>≈</span><b>Fuga da Enchente</b><small>Movimento • 12 s</small></button>
+          <button type="button" data-free-minigame="flood-escape"><span>≈</span><b>Fuga da Enchente</b><small>Chacoalhar • 12 s</small></button>
+          <button type="button" data-free-minigame="wildfire-pump"><span>♨</span><b>Combate à Queimada</b><small>Chacoalhar • 14 s</small></button>
+          <button type="button" data-free-minigame="drone-balance"><span>✦</span><b>Estabilize o Drone</b><small>Inclinação • 14 s</small></button>
+          <button type="button" data-free-minigame="dam-alarm"><span>↔</span><b>Alerta da Barragem</b><small>Inclinar lados • 14 s</small></button>
           <button type="button" data-free-minigame="just-dance"><span>♪</span><b>Just Dance</b><small>Movimento e ritmo</small></button>
         </div>
-        <div id="finalFreeStatus" class="final-info-box">Escolha um minigame. No modo Local sem celular, Fuga da Enchente usa Espaço/clique para simular movimento e Just Dance funciona como teste visual.</div>
+        <div id="finalFreeStatus" class="final-info-box">Escolha um minigame. No modo Local sem celular, os minigames de sensor usam Espaço/clique para simular movimento. No Party e Online, use os sensores reais do celular.</div>
       </div>
     </section>
 
@@ -683,12 +689,14 @@
         <h2>Missão: Prevenir Desastres</h2>
         <p class="final-subtitle">Jogo desenvolvido para atividade STEAM sobre Tecnologia, Matemática e Desastres Ambientais.</p>
         <div class="final-info-cards final-credit-cards">
-          <article><strong>Matemática</strong><p>Teorema de Pitágoras, trigonometria em triângulos retângulos e proporcionalidade/escala ligada ao Teorema de Tales.</p></article>
-          <article><strong>Tecnologia</strong><p>HTML, CSS, JavaScript, Three.js para o dado 3D, Socket.IO para multiplayer e sensores de movimento dos celulares.</p></article>
-          <article><strong>Ambiental</strong><p>Enchentes, deslizamentos, incêndios, barragens e secas aparecem ligados a drones, satélites, sensores e mapas.</p></article>
-          <article><strong>Dados e perfis</strong><p>Perfis, fotos, configurações e saves permanecem locais no dispositivo, com exportação quando disponível.</p></article>
+          <article><strong>Thiago</strong><p>Programação do projeto, integração das mecânicas, organização das builds e desenvolvimento do jogo.</p></article>
+          <article><strong>Enzo e Juan</strong><p>Apoio criativo e colaboração com algumas ideias usadas durante o desenvolvimento do trabalho.</p></article>
+          <article><strong>ChatGPT • OpenAI</strong><p>Apoio na maior parte da decoração, reorganização visual, reajustes de interface e revisão técnica do site.</p></article>
+          <article><strong>Professora Daniella C. Bentivoglio Vidigal</strong><p>Professora responsável pela atividade STEAM “Tecnologia, Matemática e Desastres Ambientais”.</p></article>
+          <article><strong>Ubisoft Entertainment</strong><p>Crédito pelas referências e materiais relacionados a Just Dance e Michael Jackson: The Experience. Marcas pertencem aos respectivos titulares.</p></article>
+          <article><strong>Projeto escolar</strong><p>Missão: Prevenir Desastres foi criado para fins educacionais, relacionando matemática, tecnologia, prevenção e monitoramento ambiental.</p></article>
         </div>
-        <div class="final-info-box">O minigame de dança usa uma interface inspirada em jogos de dança. Marcas e materiais de terceiros pertencem aos respectivos titulares.</div>
+        <div class="final-info-box">Projeto escolar sem afiliação ou endosso oficial. Just Dance, Michael Jackson: The Experience e demais marcas de terceiros pertencem aos respectivos titulares.</div>
       </div>
     </section>
 
@@ -1414,7 +1422,7 @@
   <script src="final-online-v2.js?v=006-v43-free"></script>
   <script src="final-presentation.js?v=001-demo"></script>
   <script src="final-save-manager.js?v=001-checkpoints"></script>
-  <span class="version-badge" data-version>V. 1.2.0 • Finalização STEAM</span>
+  <span class="version-badge" data-version>V. 1.2.1 • Sensores + HUD Final</span>
 </body>
 </html>
 

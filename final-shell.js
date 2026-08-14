@@ -485,7 +485,7 @@
       if (control) control.disabled = false;
       if (status) status.textContent = control?.value === "phone-motion"
         ? "Local + celular: será criada uma sala de controle para este teste."
-        : "Local: Fuga da Enchente usa Espaço/clique para simular movimento; Just Dance funciona como teste visual.";
+        : "Local: minigames de sensor usam Espaço/clique para simular movimento; Just Dance funciona como teste visual.";
     }
   }
 
@@ -501,7 +501,7 @@
       controlMethod: phone ? "phone-motion" : "keyboard",
       bots: Array.from({length: Math.max(0,4-effectiveHumans)}, (_,i)=>({slot:effectiveHumans+i+1,difficulty:"normal"})),
       minigamesEnabled: true,
-      motionMinigamesEnabled: phone || minigameId === "flood-escape",
+      motionMinigamesEnabled: phone || ["flood-escape","wildfire-pump","drone-balance","dam-alarm"].includes(minigameId),
       rounds: 1,
       activeProfileId: activeProfileId(),
       freeMode: true,

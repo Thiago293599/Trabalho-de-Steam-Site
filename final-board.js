@@ -3,7 +3,7 @@
   const MATCH_KEY="steamPartyMatchConfigV1",SAVE_KEY="steamPartyBoardAutosaveV1",SAVE_FORMAT="steam-party-save",SAVE_VERSION=1,CONFIG=window.STEAM_PARTY_CONFIG||{},BOARD_CONFIG=CONFIG.board||{},SPACE_COUNT=56,MIN_ROLL=Number(BOARD_CONFIG.diceMin||1),MAX_ROLL=Number(BOARD_CONFIG.diceMax||10),MINIGAME_REWARD=Number(BOARD_CONFIG.minigameReward||10);
   const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
   const view=$("#finalBoardView"),spacesLayer=$("#finalBoardSpaces"),tokensLayer=$("#finalBoardTokens"),playersList=$("#finalBoardPlayers"),roundText=$("#finalBoardRound"),turnName=$("#finalBoardTurnName"),turnAvatar=$("#finalBoardTurnAvatar"),instruction=$("#finalBoardInstruction"),eventBox=$("#finalBoardEvent"),rollButton=$("#finalRollDice"),diceCube=$("#finalDiceCube"),diceResult=$("#finalDiceResult"),diceNumber=$("#finalDiceNumberOverlay"),prototypeDiceMount=$("#finalPrototypeDiceMount"),modeBadge=$("#finalBoardModeBadge");
-  const minigameOverlay=$("#finalMinigameOverlay"),minigameIntro=$("#finalMinigameIntro"),droneGame=$("#finalDroneGame"),motionGame=$("#finalMotionEscapeGame"),motionLanes=$("#finalMotionEscapeLanes"),motionTimer=$("#finalMotionEscapeTimer"),motionWave=$("#finalMotionEscapeWave"),motionLocalRun=$("#finalMotionLocalRun"),minigameResult=$("#finalMinigameResult"),minigameTitle=$("#finalMinigameTitle"),minigameDescription=$("#finalMinigameDescription"),droneAnswers=$("#finalDroneAnswers"),droneQuestion=$("#finalDroneQuestion"),droneA=$("#finalDroneA"),droneB=$("#finalDroneB"),droneTimer=$("#finalDroneTimer"),eduVisual=$("#finalEduVisual"),eduTopic=$("#finalEduTopic"),minigameWinner=$("#finalMinigameWinner"),minigameRanking=$("#finalMinigameRanking"),matchResultOverlay=$("#finalMatchResultOverlay"),matchRanking=$("#finalMatchRanking");
+  const minigameOverlay=$("#finalMinigameOverlay"),minigameIntro=$("#finalMinigameIntro"),droneGame=$("#finalDroneGame"),motionGame=$("#finalMotionEscapeGame"),motionLanes=$("#finalMotionEscapeLanes"),motionTimer=$("#finalMotionEscapeTimer"),motionWave=$("#finalMotionEscapeWave"),motionLocalRun=$("#finalMotionLocalRun"),motionKicker=$("#finalMotionKicker"),motionTitle=$("#finalMotionTitle"),motionDescription=$("#finalMotionDescription"),minigameResult=$("#finalMinigameResult"),minigameTitle=$("#finalMinigameTitle"),minigameDescription=$("#finalMinigameDescription"),droneAnswers=$("#finalDroneAnswers"),droneQuestion=$("#finalDroneQuestion"),droneA=$("#finalDroneA"),droneB=$("#finalDroneB"),droneTimer=$("#finalDroneTimer"),eduVisual=$("#finalEduVisual"),eduTopic=$("#finalEduTopic"),minigameWinner=$("#finalMinigameWinner"),minigameRanking=$("#finalMinigameRanking"),matchResultOverlay=$("#finalMatchResultOverlay"),matchRanking=$("#finalMatchRanking");
   const boardStage=$("#finalBoardStage"),manualSaveButton=$("#finalBoardManualSave"),saveStatus=$("#finalBoardSaveStatus"),
   tutorialOverlay=$("#finalBoardTutorial"),tutorialProgress=$("#finalTutorialProgress"),tutorialIcon=$("#finalTutorialIcon"),tutorialEyebrow=$("#finalTutorialEyebrow"),tutorialTitle=$("#finalTutorialTitle"),tutorialText=$("#finalTutorialText"),tutorialDots=$("#finalTutorialDots"),tutorialNext=$("#finalTutorialNext"),tutorialSkip=$("#finalTutorialSkip"),
   inventoryPanel=$("#finalInventoryPanel"),inventorySlots=$("#finalInventorySlots"),inventoryHint=$("#finalInventoryHint"),
@@ -406,6 +406,18 @@
       addUnique(state.education.concepts,"Movimento e tempo de reação");
       addUnique(state.education.technologies,"Sensores do celular");
       addUnique(state.education.disasters,"Enchente");
+    }else if(id==="wildfire-pump"){
+      addUnique(state.education.concepts,"Movimento e intensidade");
+      addUnique(state.education.technologies,"Acelerômetro do celular");
+      addUnique(state.education.disasters,"Queimada");
+    }else if(id==="drone-balance"){
+      addUnique(state.education.concepts,"Inclinação e estabilidade");
+      addUnique(state.education.technologies,"Giroscópio e drone");
+      addUnique(state.education.disasters,"Monitoramento de áreas de risco");
+    }else if(id==="dam-alarm"){
+      addUnique(state.education.concepts,"Mudança de direção e tempo de reação");
+      addUnique(state.education.technologies,"Orientação do celular e sistema de alerta");
+      addUnique(state.education.disasters,"Rompimento de barragem");
     }
   }
 
@@ -540,7 +552,7 @@
   function startCurrentMinigame(){
     const id=state?.currentMinigame?.id;if(!id)return;
     if(["drone-route","slope-sensor","satellite-scale"].includes(id))startEduGame(id);
-    else if(id==="flood-escape")startMotionEscape();
+    else if(["flood-escape","wildfire-pump","drone-balance","dam-alarm"].includes(id))startMotionEscape(id);
     else if(id==="just-dance")startPartyDance();
   }
   function handleControllerContinue(type){
@@ -560,20 +572,43 @@
     if(scene&&scene.parentElement!==prototypeDiceMount){prototypeDiceMount.prepend(scene);scene.classList.add("final-board-prototype-dice");prototypeDiceMount.classList.add("has-prototype");diceCube?.classList.add("hidden")}
     return scene;
   }
-  function updateDice(result=null){
-    const value=result??rand(MIN_ROLL,MAX_ROLL);if(diceNumber)diceNumber.textContent=String(value);
-    if(diceCube)$$(".face",diceCube).forEach((f,i)=>f.textContent=String(i===0?value:rand(MIN_ROLL,MAX_ROLL)));
+  function updateDice(result=null,soft=false){
+    const value=result??rand(MIN_ROLL,MAX_ROLL);
+    if(diceNumber){
+      if(soft){
+        diceNumber.classList.add("is-number-shifting");
+        window.setTimeout(()=>{diceNumber.textContent=String(value);diceNumber.classList.remove("is-number-shifting")},34);
+      }else diceNumber.textContent=String(value);
+    }
+    if(diceCube)$$('.face',diceCube).forEach((f,i)=>f.textContent=String(i===0?value:rand(MIN_ROLL,MAX_ROLL)));
   }
   async function animateDice(result){
-    const scene=mountPrototypeDice();let ticker=0;
-    const cycle=setInterval(()=>{ticker=ticker%MAX_ROLL+1;updateDice(ticker)},64);
+    const scene=mountPrototypeDice();let ticker=rand(MIN_ROLL,MAX_ROLL),lastSwap=0;
+    // O número troca de forma discreta enquanto o cubo gira: blur curto + ritmo irregular.
+    const cycle=setInterval(()=>{
+      const now=performance.now();
+      if(now-lastSwap<86+Math.random()*70)return;
+      lastSwap=now;
+      let next=ticker;
+      while(next===ticker)next=rand(MIN_ROLL,MAX_ROLL);
+      ticker=next;updateDice(ticker,true);
+    },42);
     try{
-      const face=((Number(result)-1)%6)+1;
-      if(scene&&window.Dice3D?.rollTo){scene.classList.add("is-rolling");await window.Dice3D.rollTo(face);window.Dice3D.setFace?.(face)}
-      else{diceCube?.classList.add("rolling");await sleep(850);diceCube?.classList.remove("rolling");if(diceCube)diceCube.style.transform="rotateX(0deg) rotateY(0deg)"}
-    }catch(error){console.warn("[V43 Dice] fallback",error);await sleep(350)}
+      if(scene&&window.Dice3D?.rollTo){
+        scene.classList.add("is-rolling");
+        // O modelo continua fazendo uma rolagem física normal. No fim, a face 1
+        // fica totalmente voltada à câmera e o número real (1–10) é desenhado
+        // por cima dela, cobrindo as bolinhas do protótipo.
+        const visualFace=((Number(result)-1)%6)+1;
+        await window.Dice3D.rollTo(visualFace);
+        window.Dice3D.setFace?.(1);
+      }else{
+        diceCube?.classList.add("rolling");await sleep(850);diceCube?.classList.remove("rolling");
+        if(diceCube)diceCube.style.transform="rotateX(0deg) rotateY(0deg)";
+      }
+    }catch(error){console.warn("[V44 Dice] fallback",error);await sleep(350)}
     finally{clearInterval(cycle);scene?.classList.remove("is-rolling")}
-    updateDice(result);diceResult.textContent=`Saiu ${result}!`;await sleep(420)
+    updateDice(result,false);diceResult.textContent=`Saiu ${result}!`;await sleep(420)
   }
   async function movePlayer(p,steps){for(let i=0;i<steps;i++){const prev=p.position;p.position=(p.position+1)%SPACE_COUNT;if(p.position<prev){p.laps++;p.score+=3;eventBox.textContent=`${p.name} completou uma volta e ganhou +3 Pontos de Missão.`}updateToken(p);publish("board");await sleep(180)}}
   function resolveSpace(p){
@@ -664,6 +699,27 @@
         topic:"Sensores • Evacuação"
       },
       {
+        id:"wildfire-pump",
+        title:"Combate à Queimada",
+        description:"Chacoalhe o celular para bombear água e aumentar a pressão do sistema de combate ao incêndio.",
+        sensorRequired:true,
+        topic:"Acelerômetro • Queimada"
+      },
+      {
+        id:"drone-balance",
+        title:"Estabilize o Drone",
+        description:"Mantenha o celular quase nivelado para estabilizar um drone de monitoramento em uma área de risco.",
+        sensorRequired:true,
+        topic:"Giroscópio • Drone"
+      },
+      {
+        id:"dam-alarm",
+        title:"Alerta da Barragem",
+        description:"Incline o celular alternando esquerda e direita para carregar e disparar o sistema de alerta da barragem.",
+        sensorRequired:true,
+        topic:"Orientação • Barragem"
+      },
+      {
         id:"just-dance",
         title:"Just Dance",
         description:"Use o celular em pé e acompanhe a coreografia. O próprio celular calcula seus julgamentos.",
@@ -674,11 +730,11 @@
     return games.filter(g=>{
       if(g.sensorRequired&&!state.match.motionMinigamesEnabled)return false;
       if(g.id==="just-dance"&&(!(state.connected||state.onlineHost)||!danceBridge))return false;
-      if(g.id==="flood-escape"&&!(state.connected||(state.onlineHost&&state.match.motionMinigamesEnabled)))return false;
+      if(["flood-escape","wildfire-pump","drone-balance","dam-alarm"].includes(g.id)&&!(state.connected||(state.onlineHost&&state.match.motionMinigamesEnabled)))return false;
       return true;
     });
   }
-  function openMinigame(forcedId=null){const games=compatibleMinigames();let g=games.find(game=>game.id===forcedId);if(!g&&forcedId&&state?.match?.freeMode)g={id:forcedId,title:{"drone-route":"Rota do Drone","slope-sensor":"Sensor de Encosta","satellite-scale":"Mapa de Satélite","flood-escape":"Fuga da Enchente","just-dance":"Just Dance"}[forcedId]||"Minigame",description:"Teste livre do minigame selecionado."};if(!g)g=games[rand(0,games.length-1)];if(!g){advanceRound();return}state.currentMinigame=g;registerEducationForMinigame(g.id);minigameTitle.textContent=g.title;minigameDescription.textContent=g.description;minigameIntro.classList.remove("hidden");droneGame.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");syncPcGameplayLock("minigame-intro");checkpoint("minigame-intro","auto");publish("minigame-intro",{minigame:{id:g.id,title:g.title,status:"intro"}})}
+  function openMinigame(forcedId=null){const games=compatibleMinigames();let g=games.find(game=>game.id===forcedId);if(!g&&forcedId&&state?.match?.freeMode)g={id:forcedId,title:{"drone-route":"Rota do Drone","slope-sensor":"Sensor de Encosta","satellite-scale":"Mapa de Satélite","flood-escape":"Fuga da Enchente","wildfire-pump":"Combate à Queimada","drone-balance":"Estabilize o Drone","dam-alarm":"Alerta da Barragem","just-dance":"Just Dance"}[forcedId]||"Minigame",description:"Teste livre do minigame selecionado."};if(!g)g=games[rand(0,games.length-1)];if(!g){advanceRound();return}state.currentMinigame=g;registerEducationForMinigame(g.id);minigameTitle.textContent=g.title;minigameDescription.textContent=g.description;minigameIntro.classList.remove("hidden");droneGame.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");syncPcGameplayLock("minigame-intro");checkpoint("minigame-intro","auto");publish("minigame-intro",{minigame:{id:g.id,title:g.title,status:"intro"}})}
   function shuffled(values){
     return [...values].sort(()=>Math.random()-.5);
   }
@@ -1015,120 +1071,96 @@
   }
 
 
+  const MOTION_GAMES=Object.freeze({
+    "flood-escape":{
+      id:"flood-escape",title:"Fuga da Enchente",kicker:"Sensor de movimento • Enchente",topic:"Enchente • Evacuação",mechanic:"shake",duration:12000,
+      description:"Chacoalhe o celular para correr até o abrigo antes da água.",question:"CHACOALHE O CELULAR para correr!",goal:"ABRIGO",localLabel:"CORRER • Espaço / clique"
+    },
+    "wildfire-pump":{
+      id:"wildfire-pump",title:"Combate à Queimada",kicker:"Sensor de movimento • Queimada",topic:"Queimada • Combate",mechanic:"shake",duration:14000,
+      description:"Chacoalhe o celular para bombear água e elevar a pressão da linha de combate.",question:"CHACOALHE O CELULAR para BOMBEAR ÁGUA!",goal:"PRESSÃO",localLabel:"BOMBEAR • Espaço / clique"
+    },
+    "drone-balance":{
+      id:"drone-balance",title:"Estabilize o Drone",kicker:"Giroscópio • Monitoramento",topic:"Drone • Estabilidade",mechanic:"level",duration:14000,
+      description:"Mantenha o celular em pé e quase nivelado. Quanto mais estável, mais o drone estabiliza.",question:"MANTENHA O CELULAR NIVELADO!",goal:"ESTÁVEL",localLabel:"SIMULAR ESTABILIDADE • Espaço / clique"
+    },
+    "dam-alarm":{
+      id:"dam-alarm",title:"Alerta da Barragem",kicker:"Orientação • Barragem",topic:"Barragem • Alerta",mechanic:"alternate",duration:14000,
+      description:"Incline o celular para a esquerda e para a direita alternadamente para carregar a sirene de emergência.",question:"ALTERNE ESQUERDA ↔ DIREITA!",goal:"SIRENE",localLabel:"ALTERNAR • Espaço / clique"
+    }
+  });
+  function motionDef(id=state?.currentMinigame?.id){return MOTION_GAMES[id]||MOTION_GAMES["flood-escape"]}
   function motionEscapePublicProgress(){
     if(!motionEscapeState)return[];
     return state.players.map(p=>({playerId:p.id,name:p.name,progress:Math.round(Number(motionEscapeState.progress.get(p.id)||0)*10)/10,bot:Boolean(p.bot)}));
   }
-
   function renderMotionEscape(){
     if(!motionGame||!motionEscapeState)return;
+    const def=motionEscapeState.def||motionDef();
+    motionGame.dataset.motionGame=def.id;
+    if(motionKicker)motionKicker.textContent=def.kicker;
+    if(motionTitle)motionTitle.textContent=def.title;
+    if(motionDescription)motionDescription.textContent=def.description;
+    if(motionLocalRun)motionLocalRun.textContent=def.localLabel;
     motionLanes.innerHTML="";
     const list=motionEscapePublicProgress();
-    list.forEach((entry,index)=>{
-      const row=document.createElement("div");
-      row.className="final-motion-lane";
+    list.forEach(entry=>{
+      const row=document.createElement("div");row.className="final-motion-lane";
       const pct=Math.max(0,Math.min(100,entry.progress));
-      row.innerHTML=`<div class="final-motion-lane-label"><strong></strong><span>${Math.round(pct)}%</span></div><div class="final-motion-track"><div class="final-motion-water"></div><div class="final-motion-safe">ABRIGO</div><div class="final-motion-runner">${entry.bot?"◆":"●"}</div><div class="final-motion-progress"></div></div>`;
-      $("strong",row).textContent=entry.name;
-      $(".final-motion-runner",row).style.left=`calc(${pct}% - 12px)`;
-      $(".final-motion-progress",row).style.width=`${pct}%`;
-      motionLanes.appendChild(row);
+      row.innerHTML=`<div class="final-motion-lane-label"><strong></strong><span>${Math.round(pct)}%</span></div><div class="final-motion-track"><div class="final-motion-water"></div><div class="final-motion-safe"></div><div class="final-motion-runner">${entry.bot?"◆":"●"}</div><div class="final-motion-progress"></div></div>`;
+      $("strong",row).textContent=entry.name;$(".final-motion-safe",row).textContent=def.goal;
+      $(".final-motion-runner",row).style.left=`calc(${pct}% - 12px)`;$(".final-motion-progress",row).style.width=`${pct}%`;motionLanes.appendChild(row);
     });
-    const elapsed=Math.max(0,12000-Math.max(0,motionEscapeState.deadline-performance.now()));
-    const danger=Math.max(0,Math.min(100,elapsed/12000*100));
-    if(motionWave)motionWave.style.width=`${Math.min(86,danger*.72)}%`;
+    const duration=Number(def.duration||12000),elapsed=Math.max(0,duration-Math.max(0,motionEscapeState.deadline-performance.now()));
+    const danger=Math.max(0,Math.min(100,elapsed/duration*100));
+    if(motionWave)motionWave.style.width=def.id==="flood-escape"?`${Math.min(86,danger*.72)}%`:`${Math.min(100,danger*.24)}%`;
   }
-
   function publishMotionEscape(force=false){
-    if(!motionEscapeState)return;
-    const now=performance.now();
-    if(!force&&now-motionEscapeLastPublish<180)return;
-    motionEscapeLastPublish=now;
-    publish("minigame",{minigame:{id:"flood-escape",title:"Fuga da Enchente",status:"playing",problem:{token:motionEscapeState.token,kind:"motion-escape",topic:"Enchente • Evacuação",scenario:"Uma enchente repentina bloqueou a área. Corra para o abrigo usando o celular como sensor de movimento.",question:"CHACOALHE O CELULAR para correr!",unit:"%",a:0,b:0,c:0,answers:[],deadlineServerMs:Date.now()+Math.max(0,motionEscapeState.deadline-performance.now()),progress:motionEscapePublicProgress()}}});
+    if(!motionEscapeState)return;const now=performance.now();if(!force&&now-motionEscapeLastPublish<180)return;motionEscapeLastPublish=now;
+    const def=motionEscapeState.def||motionDef();
+    publish("minigame",{minigame:{id:def.id,title:def.title,status:"playing",problem:{token:motionEscapeState.token,kind:`motion-${def.mechanic}`,mechanic:def.mechanic,topic:def.topic,scenario:def.description,question:def.question,unit:"%",a:0,b:0,c:0,answers:[],deadlineServerMs:Date.now()+Math.max(0,motionEscapeState.deadline-performance.now()),durationMs:def.duration,goal:def.goal,progress:motionEscapePublicProgress()}}});
   }
-
   function finishMotionEscape(){
-    if(!motionEscapeState||motionEscapeState.finished)return;
-    motionEscapeState.finished=true;
-    clearInterval(motionEscapeTimer);motionEscapeTimer=0;
-    clearInterval(motionEscapeBotTimer);motionEscapeBotTimer=0;
-    try{network?.setSensorMode(false,"motion-minigame")?.catch?.(()=>{})}catch{}
-    motionLocalRun?.classList.add("hidden");
-    renderMotionEscape();
-    const rows=motionEscapePublicProgress().map(entry=>({player:state.players.find(p=>p.id===entry.playerId),progress:entry.progress})).filter(x=>x.player);
-    rows.sort((a,b)=>b.progress-a.progress);
-    const winner=rows[0];
-    if(winner?.player)winner.player.score+=MINIGAME_REWARD;
-    motionGame?.classList.add("hidden");
-    minigameResult.classList.remove("hidden");
-    minigameWinner.textContent=winner?.player?`${winner.player.name} chegou mais longe na evacuação!`:"Evacuação concluída.";
-    minigameRanking.innerHTML="";
-    const results=[];
-    rows.forEach((entry,index)=>{
-      const row=document.createElement("div");row.className="final-ranking-row";
-      row.innerHTML=`<b>${index+1}º</b><span><strong></strong><small></small></span><span>${Math.round(entry.progress)}%</span>`;
-      $("strong",row).textContent=entry.player.name;
-      $("small",row).textContent=entry.progress>=100?"Chegou ao abrigo":"Rota percorrida";
-      minigameRanking.appendChild(row);
-      results.push({playerId:entry.player.id,name:entry.player.name,correct:entry.progress>=100,timeMs:Math.round((1-entry.progress/100)*12000),place:index+1});
-    });
-    renderPlayers();syncPcGameplayLock("minigame-result");checkpoint("post-minigame","auto");
-    publish("minigame-result",{minigame:{id:"flood-escape",title:"Fuga da Enchente",status:"result",results}});
-    motionEscapeState=null;
+    if(!motionEscapeState||motionEscapeState.finished)return;motionEscapeState.finished=true;
+    const def=motionEscapeState.def||motionDef();
+    clearInterval(motionEscapeTimer);motionEscapeTimer=0;clearInterval(motionEscapeBotTimer);motionEscapeBotTimer=0;
+    try{network?.setSensorMode(false,"motion-minigame")?.catch?.(()=>{})}catch{}motionLocalRun?.classList.add("hidden");renderMotionEscape();
+    const rows=motionEscapePublicProgress().map(entry=>({player:state.players.find(p=>p.id===entry.playerId),progress:entry.progress})).filter(x=>x.player);rows.sort((a,b)=>b.progress-a.progress);
+    const winner=rows[0];if(winner?.player)winner.player.score+=MINIGAME_REWARD;motionGame?.classList.add("hidden");minigameResult.classList.remove("hidden");
+    minigameWinner.textContent=winner?.player?`${winner.player.name} venceu ${def.title}!`:`${def.title} concluído.`;minigameRanking.innerHTML="";const results=[];
+    rows.forEach((entry,index)=>{const row=document.createElement("div");row.className="final-ranking-row";row.innerHTML=`<b>${index+1}º</b><span><strong></strong><small></small></span><span>${Math.round(entry.progress)}%</span>`;$("strong",row).textContent=entry.player.name;$("small",row).textContent=entry.progress>=100?def.goal:"Progresso";minigameRanking.appendChild(row);results.push({playerId:entry.player.id,name:entry.player.name,correct:entry.progress>=100,timeMs:Math.round((1-entry.progress/100)*def.duration),place:index+1,score:Math.round(entry.progress)})});
+    renderPlayers();syncPcGameplayLock("minigame-result");checkpoint("post-minigame","auto");publish("minigame-result",{minigame:{id:def.id,title:def.title,status:"result",results}});motionEscapeState=null;
   }
-
-  async function startMotionEscape(){
-    const onlineMotion=Boolean(state?.onlineHost&&state?.match?.motionMinigamesEnabled);
-    const localFreeMotion=Boolean(state?.match?.freeMode&&!state.connected&&!state.onlineHost);
-    if(!state||(!state.connected&&!onlineMotion&&!localFreeMotion))return;
-    if(state.connected&&!network)return;
+  async function startMotionEscape(gameId=state?.currentMinigame?.id){
+    const def=motionDef(gameId),onlineMotion=Boolean(state?.onlineHost&&state?.match?.motionMinigamesEnabled),localFreeMotion=Boolean(state?.match?.freeMode&&!state.connected&&!state.onlineHost);
+    if(!state||(!state.connected&&!onlineMotion&&!localFreeMotion))return;if(state.connected&&!network)return;
     minigameIntro.classList.add("hidden");droneGame.classList.add("hidden");minigameResult.classList.add("hidden");motionGame?.classList.remove("hidden");
-    motionEscapeState={token:`escape-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,deadline:performance.now()+12000,progress:new Map(),lastSample:new Map(),finished:false};
-    state.players.forEach(p=>motionEscapeState.progress.set(p.id,0));
-    if(state.connected)await network.setSensorMode(true,"motion-minigame").catch(()=>null);
-    motionLocalRun?.classList.toggle("hidden",!localFreeMotion);
-    renderMotionEscape();publishMotionEscape(true);
-    clearInterval(motionEscapeBotTimer);
-    motionEscapeBotTimer=setInterval(()=>{
-      if(!motionEscapeState||motionEscapeState.finished)return;
-      state.players.filter(p=>p.bot).forEach(bot=>{
-        const speed=bot.difficulty==="hard"?1.45:bot.difficulty==="easy"?.75:1.08;
-        const noise=(Math.random()-.5)*.65;
-        const next=Math.min(100,Number(motionEscapeState.progress.get(bot.id)||0)+Math.max(.12,speed+noise));
-        motionEscapeState.progress.set(bot.id,next);
-      });
-      renderMotionEscape();publishMotionEscape();
-    },130);
-    clearInterval(motionEscapeTimer);
-    motionEscapeTimer=setInterval(()=>{
-      if(!motionEscapeState)return;
-      const left=Math.max(0,motionEscapeState.deadline-performance.now());
-      if(motionTimer)motionTimer.textContent=`Tempo: ${(left/1000).toFixed(1)} s`;
-      renderMotionEscape();publishMotionEscape();
-      const anyone=[...motionEscapeState.progress.values()].some(v=>v>=100);
-      if(left<=0||anyone)setTimeout(finishMotionEscape,anyone?500:0);
-    },80);
+    motionEscapeState={token:`${def.id}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,def,deadline:performance.now()+def.duration,progress:new Map(),lastSample:new Map(),lastSide:new Map(),finished:false};state.players.forEach(p=>motionEscapeState.progress.set(p.id,0));
+    if(state.connected)await network.setSensorMode(true,"motion-minigame").catch(()=>null);motionLocalRun?.classList.toggle("hidden",!localFreeMotion);renderMotionEscape();publishMotionEscape(true);
+    clearInterval(motionEscapeBotTimer);motionEscapeBotTimer=setInterval(()=>{if(!motionEscapeState||motionEscapeState.finished)return;state.players.filter(p=>p.bot).forEach(bot=>{let speed=bot.difficulty==="hard"?1.45:bot.difficulty==="easy"?.75:1.08;if(def.mechanic==="level")speed*=.78;if(def.mechanic==="alternate")speed*=.92;const noise=(Math.random()-.5)*.65,next=Math.min(100,Number(motionEscapeState.progress.get(bot.id)||0)+Math.max(.10,speed+noise));motionEscapeState.progress.set(bot.id,next)});renderMotionEscape();publishMotionEscape()},130);
+    clearInterval(motionEscapeTimer);motionEscapeTimer=setInterval(()=>{if(!motionEscapeState)return;const left=Math.max(0,motionEscapeState.deadline-performance.now());if(motionTimer)motionTimer.textContent=`Tempo: ${(left/1000).toFixed(1)} s`;renderMotionEscape();publishMotionEscape();const anyone=[...motionEscapeState.progress.values()].some(v=>v>=100);if(left<=0||anyone)setTimeout(finishMotionEscape,anyone?500:0)},80);
   }
-
-
   function localFreeMotionStep(){
-    if(!motionEscapeState||motionEscapeState.finished||!state?.match?.freeMode||state.connected||state.onlineHost)return;
-    const p=state.players.find(x=>x.human);if(!p)return;
-    const next=Math.min(100,Number(motionEscapeState.progress.get(p.id)||0)+3.6);motionEscapeState.progress.set(p.id,next);renderMotionEscape();
-    if(next>=100)setTimeout(finishMotionEscape,280);
+    if(!motionEscapeState||motionEscapeState.finished||!state?.match?.freeMode||state.connected||state.onlineHost)return;const p=state.players.find(x=>x.human);if(!p)return;
+    const next=Math.min(100,Number(motionEscapeState.progress.get(p.id)||0)+3.6);motionEscapeState.progress.set(p.id,next);renderMotionEscape();if(next>=100)setTimeout(finishMotionEscape,280);
   }
-
   function handleMotionSensor(payload){
-    if(!motionEscapeState||motionEscapeState.finished||state?.currentMinigame?.id!=="flood-escape")return;
+    if(!motionEscapeState||motionEscapeState.finished)return;const def=motionEscapeState.def||motionDef();if(state?.currentMinigame?.id!==def.id)return;
     const player=state.players.find(p=>p.id===payload?.playerId&&p.human);if(!player)return;
-    const now=performance.now();const last=Number(motionEscapeState.lastSample.get(player.id)||now-40);const dt=Math.max(.025,Math.min(.12,(now-last)/1000));motionEscapeState.lastSample.set(player.id,now);
-    const intensity=Math.max(0,Math.min(1,Number(payload?.intensity||payload?.sample?.intensity||0)));
-    const effective=Math.max(0,intensity-.10);
-    const delta=Math.pow(effective,1.18)*44*dt;
-    if(delta<=0)return;
-    const next=Math.min(100,Number(motionEscapeState.progress.get(player.id)||0)+delta);
-    motionEscapeState.progress.set(player.id,next);
-    renderMotionEscape();publishMotionEscape();
+    const sample=payload?.sample||{},now=performance.now(),last=Number(motionEscapeState.lastSample.get(player.id)||now-40),dt=Math.max(.025,Math.min(.12,(now-last)/1000));motionEscapeState.lastSample.set(player.id,now);
+    const intensity=Math.max(0,Math.min(1,Number(payload?.intensity||sample?.intensity||0)));let delta=0;
+    if(def.mechanic==="level"){
+      const beta=Math.abs(Number(sample?.orientation?.beta||0)),gamma=Math.abs(Number(sample?.orientation?.gamma||0));
+      // Em retrato, beta perto de 0–25° e gamma perto de 0 significam um aparelho estável.
+      const error=Math.min(90,Math.hypot(Math.max(0,beta-10),gamma));const quality=Math.max(0,1-error/48);delta=Math.pow(quality,1.65)*10.5*dt;
+    }else if(def.mechanic==="alternate"){
+      const gamma=Number(sample?.orientation?.gamma||0);const side=gamma>18?1:gamma<-18?-1:0,previous=Number(motionEscapeState.lastSide.get(player.id)||0);
+      if(side&&previous&&side!==previous)delta=4.6; if(side)motionEscapeState.lastSide.set(player.id,side);
+      delta+=Math.max(0,intensity-.18)*3.2*dt;
+    }else{
+      const effective=Math.max(0,intensity-.10);delta=Math.pow(effective,1.18)*(def.id==="wildfire-pump"?49:44)*dt;
+    }
+    if(delta<=0)return;const next=Math.min(100,Number(motionEscapeState.progress.get(player.id)||0)+delta);motionEscapeState.progress.set(player.id,next);renderMotionEscape();publishMotionEscape();
   }
 
   function stopPartyDanceBotFeedback(){
@@ -1193,15 +1225,16 @@
         partyDanceBotEvents[partyDanceBotEventCursor].atMs<=now+18
       ){
         const event=partyDanceBotEvents[partyDanceBotEventCursor++];
-        const botDance=danceBridge.applyBotMoveJudgement(
-          event.bot.id,
-          event.judgement,
-          event.move.index,
-          Boolean(event.move.goldMove)
-        );
-        if(botDance){
-          partyDanceBotScoreCache.set(String(event.bot.id),{...botDance});
-        }
+        // V44: score do bot também é calculado no tabuleiro, independente do HUD.
+        // Assim o fechamento do vídeo não consegue apagar a pontuação antes do ranking.
+        const key=String(event.bot.id),previous=partyDanceBotScoreCache.get(key)||{rawScore:0,score:0,stars:0,judgedMoves:0};
+        const weights={PERFECT:1,SUPER:.8,GOOD:.6,OK:.35,YEAH:1,X:0};
+        const totalMoves=Math.max(1,timeline.length),pointsPerMove=13000/totalMoves,weight=Number(weights[event.judgement]??0);
+        const rawScore=Math.min(13000,Number(previous.rawScore||previous.score||0)+pointsPerMove*weight);
+        const own={...previous,rawScore,score:Math.round(rawScore),stars:[2000,4000,6000,8000,10000].filter(v=>rawScore>=v).length,judgedMoves:Number(previous.judgedMoves||0)+1,lastJudgement:event.judgement};
+        partyDanceBotScoreCache.set(key,own);
+        // A chamada ao bridge fica apenas para atualizar HUD/animações do bot.
+        try{danceBridge.applyBotMoveJudgement(event.bot.id,event.judgement,event.move.index,Boolean(event.move.goldMove))}catch{}
       }
     },45);
   }
@@ -1391,7 +1424,7 @@
         $("strong",row).textContent=entry.player.name;
         $("small",row).textContent=entry.player.bot?`Bot • ${difficulty(entry.player.difficulty)}`:`Score Just Dance`;
         minigameRanking.appendChild(row);
-        results.push({playerId:entry.player.id,name:entry.player.name,correct:true,timeMs:0,place:index+1});
+        results.push({playerId:entry.player.id,name:entry.player.name,correct:true,timeMs:0,place:index+1,score:Math.round(entry.score),stars:Math.round(entry.stars||0)});
       });
 
       minigameOverlay.classList.remove("hidden");
