@@ -461,3 +461,6 @@ body{
   .final-party-phone-motion-meter .final-motion-phone-coach>span,
   .final-party-phone-board .roll-button.your-turn{animation:none!important}
 }
+
+/* V49 JD selection phone */
+.final-party-phone-song{display:grid;grid-template-columns:76px minmax(0,1fr);gap:11px;align-items:center;padding:9px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);text-align:left}.final-party-phone-song.is-selected{border-color:rgba(102,241,194,.9);box-shadow:0 0 0 2px rgba(102,241,194,.12)}.final-party-phone-song img{width:76px;height:76px;object-fit:cover;border-radius:13px}.final-party-phone-song>div{min-width:0;display:grid;gap:4px}.final-party-phone-song small{opacity:.66;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.final-party-phone-song-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.final-party-phone-song-actions button{min-height:38px;border:0;border-radius:12px;font:inherit;font-weight:800;background:rgba(255,255,255,.12);color:inherit}.final-party-phone-song-actions button:last-child{background:linear-gradient(135deg,#63efc0,#50c8ff);color:#07131d}

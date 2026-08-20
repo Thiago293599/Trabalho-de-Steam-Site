@@ -382,6 +382,7 @@ const DANCE_SONGS = Object.freeze({
     base: "minigames/just-dance/songs/ItsRainingMen", mapFile: "ItsRainingMen.json", movesFile: "ItsRainingMen_moves0.json",
     videos: Object.freeze({
       low: "ItsRainingMen_Low.mp4",
+      // V49: IDs reconfirmados pelos links públicos enviados pelo usuário.
       medium: "gdrive:1wl6BIcYwU16GNbM646SXAFz2_ZjZDDX9",
       high: "gdrive:1vZIEAqkriCp6Hw9j-CgeRRHxxp_zi7E5"
     }),
@@ -6043,7 +6044,8 @@ window.STEAMJustDanceBridge = Object.freeze({
   getSongIds: () => Object.keys(DANCE_SONGS),
   getSongInfo: id => {
     const song = getDanceSongConfig(id);
-    return { id: song.id, title: song.title, artist: song.artist, cover: `${song.base}/${song.coverFile}` };
+    const previewStarts = { RainOverMe: 24, EarthSong: 33, ItsRainingMen: 26, WhereHaveYou: 29 };
+    return { id:song.id, title:song.title, artist:song.artist, edition:song.edition, cover:`${song.base}/${song.coverFile}`, poster:`${song.base}/${song.posterFile}`, previewSource:resolveDanceSongVideoSource(song,song.videos.low), previewStartSec:Number(previewStarts[song.id]||24), previewDurationSec:12 };
   },
   isPartyDance: () => gameMode === "party-dance"
 });
