@@ -104,6 +104,7 @@
 
     clearTimeout(danceStartTimer);
     hideDanceWait();
+    window.dispatchEvent(new CustomEvent("eco:jd-loading-start"));
     onlineDance={...packet,localFinished:false};
 
     try{
@@ -123,12 +124,14 @@
       const delay=Math.max(250,Number(packet.startDelayMs||4000));
       danceStartTimer=setTimeout(async()=>{
         try{
+          window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
           await bridge.startPartyDancePlayback?.();
         }catch(error){
           console.error("[OnlineDance] playback",error);
         }
       },delay);
     }catch(error){
+      window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
       console.error("[OnlineDance] start",error);
       window.STEAMParty?.showToast?.("Não foi possível iniciar o Just Dance neste dispositivo.");
     }
@@ -138,6 +141,7 @@
     if(!onlineDance||onlineDance.localFinished)return;
     onlineDance.localFinished=true;
     clearTimeout(danceStartTimer);
+    window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
 
     try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}
     try{window.STEAMParty?.showView?.("board")}catch{}

@@ -121,10 +121,11 @@
     requestAnimationFrame(tick);
   }
 
-  async function setMusic(name) {
+  async function setMusic(name, options = {}) {
     if (!MUSIC[name]) return stopMusic();
     pendingMusic = name;
-    if (!unlocked || inJustDance()) return false;
+    const allowDuringDance = Boolean(options.allowDuringDance);
+    if (!unlocked || (inJustDance() && !allowDuringDance)) return false;
     if (currentMusic === name && !music.paused) return true;
 
     const [file, target, fadeMs] = MUSIC[name];
@@ -180,6 +181,17 @@
   }
 
   function loadingStart() { return setMusic("loading"); }
+
+  // V48: loadingThemeLolLoop também acompanha o carregamento do Just Dance.
+  // Ele pode tocar enquanto a tela de preload do JD está aberta, mas é
+  // encerrado antes do vídeo começar para nunca disputar áudio com a música.
+  function justDanceLoadingStart() {
+    return setMusic("loading", { allowDuringDance:true });
+  }
+  function justDanceLoadingEnd() {
+    if (currentMusic === "loading" || pendingMusic === "loading") stopMusic(260);
+  }
+
   function lobbyWaiting() { return setMusic("waiting"); }
   function lobbyEnded(next = "board") {
     if (next === "menu" || next === "play" || next === "main") return setMusic("menu");
@@ -201,13 +213,15 @@
 
   window.addEventListener("eco:view-changed", event => musicForView(event.detail?.name));
   window.addEventListener("eco:loading-start", loadingStart);
+  window.addEventListener("eco:jd-loading-start", justDanceLoadingStart);
+  window.addEventListener("eco:jd-loading-end", justDanceLoadingEnd);
   window.addEventListener("eco:lobby-waiting", lobbyWaiting);
   window.addEventListener("eco:lobby-ended", event => lobbyEnded(event.detail?.next));
   window.addEventListener("eco:music-stop", () => stopMusic());
 
   window.EcoAudio = Object.freeze({
     unlock, sfx, step, setMusic, stopMusic, musicForView,
-    loadingStart, lobbyWaiting, lobbyEnded,
+    loadingStart, justDanceLoadingStart, justDanceLoadingEnd, lobbyWaiting, lobbyEnded,
     getCurrentMusic: () => currentMusic
   });
 })();

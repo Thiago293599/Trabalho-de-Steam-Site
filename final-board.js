@@ -1317,6 +1317,9 @@
   async function startPartyDance(){
     if(!danceBridge)return;
 
+    // V48: loadingThemeLolLoop toca durante a preparação do Just Dance.
+    window.dispatchEvent(new CustomEvent("eco:jd-loading-start"));
+
     partyDanceFinishing=false;
     partyDanceBotScoreCache=new Map();
 
@@ -1334,6 +1337,7 @@
       const online=window.STEAMOnlineV2;
       const roomCode=online?.getRoomCode?.();
       if(!online||!roomCode){
+        window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
         eventBox.textContent="Sala Online indisponível para o Just Dance.";
         minigameOverlay.classList.remove("hidden");
         minigameIntro.classList.remove("hidden");
@@ -1375,6 +1379,7 @@
           }
         });
       }catch(error){
+        window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
         try{danceBridge.closePartyDanceSong?.()}catch{}
         eventBox.textContent=`Não foi possível iniciar o Just Dance Online: ${error?.message||error}`;
         minigameOverlay.classList.remove("hidden");
@@ -1391,8 +1396,9 @@
         const prepared=await danceBridge.openPartyDanceSong(songId,"FREELOCAL",dancePlayers);
         if(!prepared?.ok)throw new Error(prepared?.message||"Falha ao carregar música.");
         publish("just-dance",{minigame:{id:"just-dance",title:prepared.title,status:"playing",localPreview:true}});
+        window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
         await danceBridge.startPartyDancePlayback();startPartyDanceBotFeedback();
-      }catch(error){eventBox.textContent=`Não foi possível iniciar o teste visual do Just Dance: ${error?.message||error}`;minigameOverlay.classList.remove("hidden");minigameIntro.classList.remove("hidden")}
+      }catch(error){window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));eventBox.textContent=`Não foi possível iniciar o teste visual do Just Dance: ${error?.message||error}`;minigameOverlay.classList.remove("hidden");minigameIntro.classList.remove("hidden")}
       return;
     }
 
@@ -1410,10 +1416,12 @@
       const prepared=await danceBridge.openPartyDanceSong(songId,network.getRoomCode(),dancePlayers);
       if(!prepared?.ok)throw new Error(prepared?.message||"Falha ao carregar música.");
       publish("just-dance",{minigame:{id:"just-dance",title:prepared.title,status:"playing"}});
+      window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
       const playing=await danceBridge.startPartyDancePlayback();
       if(!playing)toast("O navegador bloqueou a reprodução automática. Tente iniciar novamente.");
       startPartyDanceBotFeedback();
     }catch(error){
+      window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
       try{await network.setSensorMode(false)}catch{}
       danceBridge.closePartyDanceSong?.();
       eventBox.textContent=`Não foi possível iniciar o Just Dance: ${error?.message||error}`;
@@ -1423,6 +1431,7 @@
   }
 
   function forceRestoreBoardAfterDance(){
+    window.dispatchEvent(new CustomEvent("eco:jd-loading-end"));
     // Cada operação é isolada: nenhuma falha pode impedir o tabuleiro de voltar.
     try{danceBridge?.closePartyDanceSong?.()}catch(error){console.error("[PartyBoard] closePartyDanceSong:",error)}
     try{document.getElementById("danceDevScreen")?.classList.add("hidden")}catch{}
