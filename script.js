@@ -359,6 +359,7 @@ const DANCE_SONGS = Object.freeze({
       medium: "gdrive:1W25oD85TwgHpc0WOMGVkFcsWYHiKgDbH",
       high: "gdrive:1ogG3xCIolWix3w5oUmAmFN6sB-tDM570"
     }),
+    previewVideo: "gdrive:1L7c3Kyi_A2-ZBzzaXcvIT52LuDBMlGOQ",
     audioFile: "RainOverMe_Audio.mp3", coverFile: "rainoverme_cover@2x.jpg", posterFile: "RainOverMe.jpg", avatarFile: "rainoverme_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsFinalV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
@@ -372,6 +373,7 @@ const DANCE_SONGS = Object.freeze({
       medium: "gdrive:1E5iQ9QYqTSh0I2e3xOM6_paKcjSUwl_p",
       high: "gdrive:1Uo07L9tLuK-yQNvLK87o8VP_jPqwNBmt"
     }),
+    previewVideo: "gdrive:1BglncNLYeVJIepBy6KulQ7YJNA2DCohA",
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 10 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
     classifierFormat: "auto", classifierFolder: "classifiers_WIIU", fallbackClassifierFolder: "classifiers_WII_source", sourceSongAliases: Object.freeze(["EarthSong", "Earth Song"]),
@@ -382,10 +384,11 @@ const DANCE_SONGS = Object.freeze({
     base: "minigames/just-dance/songs/ItsRainingMen", mapFile: "ItsRainingMen.json", movesFile: "ItsRainingMen_moves0.json",
     videos: Object.freeze({
       low: "ItsRainingMen_Low.mp4",
-      // V49: IDs reconfirmados pelos links públicos enviados pelo usuário.
+      // V50: IDs reconfirmados pelos links públicos enviados pelo usuário.
       medium: "gdrive:1wl6BIcYwU16GNbM646SXAFz2_ZjZDDX9",
       high: "gdrive:1vZIEAqkriCp6Hw9j-CgeRRHxxp_zi7E5"
     }),
+    previewVideo: "gdrive:17RZU2TvLw0LVyX_RpbtESDAFh6WudzQF",
     audioFile: "ItsRainingMen_Audio.mp3", coverFile: "itsrainingmen_cover@2x.jpg", posterFile: "ItsRainingMen.jpg", avatarFile: "itsrainingmen_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 5, rows: 5 }), pictoIndividualFolder: "pictos-individual", defaultSyncMs: 0, syncStorageKey: "jdItsRainingMenSyncOffsetMsV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
@@ -401,6 +404,7 @@ const DANCE_SONGS = Object.freeze({
       medium: "gdrive:14tdzgR-LSZDGuNDFSsLhRWLI63zqwpj-",
       high: "gdrive:1GGiGZ0Xdx1hO6DDLlUi7Ljgi47N3Nhpi"
     }),
+    previewVideo: "gdrive:1PorgR3w2asxb_m-SrPDVBUmg3B9w0mqM",
     audioFile: "WhereHaveYou_Audio.mp3", coverFile: "wherehaveyou_cover@2x.jpg", posterFile: "WhereHaveYou.jpg", avatarFile: "wherehaveyou_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 8 }), defaultSyncMs: -1900, syncStorageKey: "jdWhereHaveYouSyncOffsetMsFinalV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
@@ -2747,6 +2751,7 @@ function danceGoogleDriveStreamCandidates(source) {
   // Mantemos o acesso direto apenas como segunda tentativa, caso o servidor
   // esteja em uma versão antiga ou o proxy esteja temporariamente inacessível.
   candidates.push(
+    `https://drive.usercontent.google.com/download?id=${encoded}&export=download&authuser=0&confirm=t&acknowledgeAbuse=true`,
     `https://drive.usercontent.google.com/download?id=${encoded}&export=download&confirm=t`,
     `https://drive.google.com/uc?export=download&id=${encoded}&confirm=t`
   );
@@ -2888,6 +2893,7 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
     const currentTime = Math.max(0, Number(options.currentTime ?? getDanceMediaCurrentTime() ?? 0));
 
     try {
+      let resolvedQuality = quality;
       const coreNeeded = !danceCoreMediaPreloaded;
       // V6.8: o próprio MP4 contém o áudio principal. Não carregamos o MP3 de gameplay.
       const videoEnd = coreNeeded ? 84 : 95;
@@ -2908,6 +2914,7 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
             setDancePreloadUi(18 + (videoEnd - 18) * ratio, `Drive indisponível • carregando Low local…`);
           });
           await installDanceMediaBlob("video", fallbackBlob, danceTestVideo);
+          resolvedQuality = "low";
           if (danceLabMessage) danceLabMessage.textContent = `O servidor não conseguiu obter ${label} do Google Drive; Low local foi usado automaticamente.`;
         }
       } else {
@@ -2918,7 +2925,7 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
         });
         await installDanceMediaBlob("video", videoBlob, danceTestVideo);
       }
-      dancePreloadedVideoQuality = quality;
+      dancePreloadedVideoQuality = resolvedQuality;
     if (getDanceSongConfig().id === "WhereHaveYou") applyDanceAutomaticVideoFraming();
 
       if (coreNeeded) {
@@ -2940,9 +2947,9 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       await preloadDanceCriticalImages(ratio => setDancePreloadUi(imageStart + ratio * (100 - imageStart), "Preparando HUD, pictos e julgamentos…"));
 
       try { if (danceTestVideo) danceTestVideo.currentTime = currentTime; } catch {}
-      danceActiveQuality = quality;
+      danceActiveQuality = resolvedQuality;
       danceQualitySwitching = false;
-      updateDanceQualityUi(options.reason || "");
+      updateDanceQualityUi(resolvedQuality===quality?(options.reason||""):`fallback ${DANCE_QUALITY_LABELS[resolvedQuality]||resolvedQuality}`);
       setDancePreloadUi(100, "Tudo carregado. Pronto para dançar!", "Pronto");
       setDancePlayerReadyState(true);
       window.setTimeout(() => {
@@ -6044,8 +6051,24 @@ window.STEAMJustDanceBridge = Object.freeze({
   getSongIds: () => Object.keys(DANCE_SONGS),
   getSongInfo: id => {
     const song = getDanceSongConfig(id);
-    const previewStarts = { RainOverMe: 24, EarthSong: 33, ItsRainingMen: 26, WhereHaveYou: 29 };
-    return { id:song.id, title:song.title, artist:song.artist, edition:song.edition, cover:`${song.base}/${song.coverFile}`, poster:`${song.base}/${song.posterFile}`, previewSource:resolveDanceSongVideoSource(song,song.videos.low), previewStartSec:Number(previewStarts[song.id]||24), previewDurationSec:12 };
+    const rawPreview = resolveDanceSongVideoSource(song, song.previewVideo || song.videos.low);
+    const previewSources = isDanceDirectStreamSource(rawPreview) ? danceGoogleDriveStreamCandidates(rawPreview) : [rawPreview];
+    return {
+      id:song.id,
+      title:song.title,
+      artist:song.artist,
+      edition:song.edition,
+      cover:`${song.base}/${song.coverFile}`,
+      poster:`${song.base}/${song.posterFile}`,
+      previewSource:previewSources[0] || "",
+      previewStartSec:0,
+      previewDurationSec:30
+    };
+  },
+  getSongPreviewSources: id => {
+    const song = getDanceSongConfig(id);
+    const rawPreview = resolveDanceSongVideoSource(song, song.previewVideo || song.videos.low);
+    return isDanceDirectStreamSource(rawPreview) ? danceGoogleDriveStreamCandidates(rawPreview) : [rawPreview].filter(Boolean);
   },
   isPartyDance: () => gameMode === "party-dance"
 });

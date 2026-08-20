@@ -906,9 +906,11 @@ async function phoneApplyDanceSession(payload){
   }
   phoneDanceSessionId=incomingSessionId || phoneDanceSessionId;
   phoneDanceSession={...payload};
+  const danceSessionEnded=String(payload.reason||"")==="ended";
+  sensorModePanel?.classList.toggle("dance-session-active",!danceSessionEnded);
 
   if(onlineFullControllerMode){
-    const ended=String(payload.reason||"")==="ended";
+    const ended=danceSessionEnded;
     controlScreen?.classList.toggle("sensor-mode-active",!ended);
     sensorModePanel?.classList.toggle("hidden",ended);
     sensorModeRequested=!ended;
@@ -1579,6 +1581,7 @@ function applySensorLabState(nextState, me) {
   sensorModePanel?.classList.toggle("hidden", !isSensorLab);
   if (!isSensorLab) {
     sensorModeRequested = false;
+    if(!phoneDanceSession || String(phoneDanceSession?.reason||"")==="ended") sensorModePanel?.classList.remove("dance-session-active");
     stopSensorStreaming({ keepPermission:true, keepReady:true });
     return false;
   }

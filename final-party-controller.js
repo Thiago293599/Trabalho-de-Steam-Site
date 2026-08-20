@@ -91,10 +91,11 @@
       setReadyButton(sensorButton,"Pronto","Prepare o movimento antes do minigame","idle",false);
     }
   }
-  function renderBoard(){if(danceMode)return;ui(true);continueBtn?.classList.add("hidden");game.classList.remove("hidden");mini.classList.add("hidden");result.classList.add("hidden");stopTimer();const mine=me(),current=gameState?.players?.find(p=>p.id===gameState.currentPlayerId),myTurn=gameState?.currentPlayerId===myId();round.textContent=`Rodada ${gameState?.round||1} / ${gameState?.totalRounds||5}`;score.textContent=`${Math.round(mine?.score||0)} PTS`;kicker.textContent=myTurn?"Sua vez":transport==="online"?"Online":"Aguarde";title.textContent=myTurn?"Role o dado":`Vez de ${current?.name||"outro jogador"}`;description.textContent=myTurn?"Este celular é seu controle. Use itens e role o dado aqui.":"Acompanhe a partida na tela principal; o controle será liberado na sua vez.";roll.disabled=!myTurn;roll.classList.toggle("your-turn",myTurn);if(!myTurn)dice.textContent="?";renderItems();renderSensorButton()}
+  function renderBoard(){if(danceMode)return;answers?.classList.remove("is-jd-song-selection");ui(true);continueBtn?.classList.add("hidden");game.classList.remove("hidden");mini.classList.add("hidden");result.classList.add("hidden");stopTimer();const mine=me(),current=gameState?.players?.find(p=>p.id===gameState.currentPlayerId),myTurn=gameState?.currentPlayerId===myId();round.textContent=`Rodada ${gameState?.round||1} / ${gameState?.totalRounds||5}`;score.textContent=`${Math.round(mine?.score||0)} PTS`;kicker.textContent=myTurn?"Sua vez":transport==="online"?"Online":"Aguarde";title.textContent=myTurn?"Role o dado":`Vez de ${current?.name||"outro jogador"}`;description.textContent=myTurn?"Este celular é seu controle. Use itens e role o dado aqui.":"Acompanhe a partida na tela principal; o controle será liberado na sua vez.";roll.disabled=!myTurn;roll.classList.toggle("your-turn",myTurn);if(!myTurn)dice.textContent="?";renderItems();renderSensorButton()}
   function renderTimer(deadline){stopTimer();const tick=()=>{const left=Math.max(0,Number(deadline||0)-Date.now());if(timer)timer.textContent=`Tempo: ${(left/1000).toFixed(1)} s`;if(left<=0)stopTimer()};tick();timerId=setInterval(tick,100)}
   function renderMinigame(){
     if(danceMode)return;
+    answers?.classList.remove("is-jd-song-selection");
     ui(true);continueBtn?.classList.add("hidden");game.classList.add("hidden");mini.classList.remove("hidden");result.classList.add("hidden");items?.classList.add("hidden");
     const p=gameState?.minigame?.problem;
     if(String(p?.kind||"").startsWith("motion-")){
@@ -159,9 +160,60 @@
     });
     renderTimer(p.deadlineServerMs)
   }
-  function renderDanceSongSelection(){ui(true);game.classList.add("hidden");mini.classList.remove("hidden");result.classList.add("hidden");items?.classList.add("hidden");stopTimer();const mg=gameState?.minigame||{},songs=Array.isArray(mg.songs)?mg.songs:[],owner=String(mg.selectorPlayerId||""),mine=String(myId()||"");if(miniTopic)miniTopic.textContent="Just Dance";if(miniTitle)miniTitle.textContent="Escolha a música";question.textContent=owner===mine?"Escolha uma música, veja o preview na tela e confirme.":"O jogador responsável está escolhendo a música.";answers.innerHTML="";songs.forEach(song=>{const card=document.createElement("div");card.className=`final-party-phone-song${song.id===mg.selectedSongId?" is-selected":""}`;card.innerHTML=`<img alt=""><div><strong></strong><small></small><div class="final-party-phone-song-actions"></div></div>`;card.querySelector("img").src=song.cover||"";card.querySelector("img").alt=`Capa de ${song.title||"música"}`;card.querySelector("strong").textContent=song.title||"Música";card.querySelector("small").textContent=song.artist||"";const actions=card.querySelector(".final-party-phone-song-actions"),preview=document.createElement("button"),choose=document.createElement("button");preview.type="button";preview.textContent="Ver preview";preview.disabled=owner!==mine;preview.onclick=async()=>{preview.disabled=true;try{await send("jd-song-preview",{songId:song.id})}catch(e){description.textContent=e.message}finally{preview.disabled=false}};choose.type="button";choose.textContent=song.id===mg.selectedSongId?"Selecionada":"Escolher";choose.disabled=owner!==mine;choose.onclick=async()=>{try{await send("jd-song-select",{songId:song.id})}catch(e){description.textContent=e.message}};actions.append(preview,choose);answers.appendChild(card)});if(continueBtn){continueBtn.classList.toggle("hidden",owner!==mine);continueBtn.disabled=owner!==mine||!mg.selectedSongId;continueBtn.dataset.action="jd-song-confirm";continueBtn.textContent="Confirmar música"}if(timer)timer.textContent=owner===mine?"O preview toca na tela principal.":"Aguardando escolha…"}
-  function renderIntro(){ui(true);game.classList.add("hidden");mini.classList.remove("hidden");result.classList.add("hidden");question.textContent="Prepare-se!";answers.innerHTML="";timer.textContent="Confirme abaixo para começar.";stopTimer();if(continueBtn){continueBtn.classList.remove("hidden");continueBtn.disabled=false;continueBtn.dataset.action="minigame-start";continueBtn.textContent="Começar minigame"}}
-  function renderResult(){ui(true);game.classList.add("hidden");mini.classList.add("hidden");result.classList.remove("hidden");items?.classList.add("hidden");stopTimer();if(continueBtn&&gameState?.phase!=="match-result"){continueBtn.classList.remove("hidden");continueBtn.disabled=false;continueBtn.dataset.action="minigame-continue";continueBtn.textContent="Continuar"}else continueBtn?.classList.add("hidden");const results=gameState?.minigame?.results||[],mineResult=results.find(r=>String(r.playerId)===String(myId()));resultTitle.textContent=mineResult?`${mineResult.place}º lugar`:"Resultado";score.textContent=`${Math.round(me()?.score||0)} PTS`;ranking.innerHTML="";results.forEach(r=>{const row=document.createElement("div");row.className="final-party-phone-rank-row";row.innerHTML=`<strong>${r.place}º ${r.name}</strong><span>${r.correct===false?"×":"✓"}</span>`;ranking.appendChild(row)})}
+  function renderDanceSongSelection(){
+    ui(true);
+    game.classList.add("hidden");
+    mini.classList.remove("hidden");
+    result.classList.add("hidden");
+    items?.classList.add("hidden");
+    stopTimer();
+    answers?.classList.add("is-jd-song-selection");
+    const mg=gameState?.minigame||{},songs=Array.isArray(mg.songs)?mg.songs:[],owner=String(mg.selectorPlayerId||""),mine=String(myId()||""),canChoose=owner===mine;
+    if(miniTopic)miniTopic.textContent="MINIGAME • JUST DANCE";
+    if(miniTitle)miniTitle.textContent="Escolha a música";
+    question.textContent=canChoose?"Escolha uma faixa. O preview aparece na tela do computador.":"Aguardando o jogador responsável escolher a música.";
+    answers.innerHTML="";
+    songs.forEach(song=>{
+      const selected=song.id===mg.selectedSongId;
+      const card=document.createElement("article");
+      card.className=`final-party-phone-song${selected?" is-selected":""}`;
+      card.innerHTML=`<div class="final-party-phone-song-art"><img alt=""><span></span></div><div class="final-party-phone-song-copy"><strong></strong><small class="artist"></small><small class="edition"></small><div class="final-party-phone-song-actions"></div></div>`;
+      const img=card.querySelector("img"),tag=card.querySelector(".final-party-phone-song-art span");
+      img.src=song.cover||"";
+      img.alt=`Capa de ${song.title||"música"}`;
+      tag.textContent=selected?"✓":"♪";
+      card.querySelector("strong").textContent=song.title||"Música";
+      card.querySelector(".artist").textContent=song.artist||"";
+      card.querySelector(".edition").textContent=song.edition||"Just Dance";
+      const actions=card.querySelector(".final-party-phone-song-actions"),preview=document.createElement("button"),choose=document.createElement("button");
+      preview.type="button";
+      preview.textContent="▶ Preview";
+      preview.disabled=!canChoose;
+      preview.onclick=async()=>{
+        preview.disabled=true;
+        const old=preview.textContent;
+        preview.textContent="Abrindo…";
+        try{await send("jd-song-preview",{songId:song.id});window.EcoAudio?.sfx?.("confirm",{cooldown:80})}
+        catch(e){description.textContent=e.message}
+        finally{preview.disabled=!canChoose;preview.textContent=old}
+      };
+      choose.type="button";
+      choose.textContent=selected?"Selecionada":"Escolher";
+      choose.disabled=!canChoose;
+      choose.onclick=async()=>{try{await send("jd-song-select",{songId:song.id});window.EcoAudio?.sfx?.("confirm",{cooldown:80})}catch(e){description.textContent=e.message}};
+      actions.append(preview,choose);
+      answers.appendChild(card);
+    });
+    if(continueBtn){
+      continueBtn.classList.toggle("hidden",!canChoose);
+      continueBtn.disabled=!canChoose||!mg.selectedSongId;
+      continueBtn.dataset.action="jd-song-confirm";
+      continueBtn.textContent="Confirmar música";
+    }
+    if(timer)timer.textContent=canChoose?"Preview na tela principal • escolha e confirme":"Aguardando escolha…";
+  }
+  function renderIntro(){answers?.classList.remove("is-jd-song-selection");ui(true);game.classList.add("hidden");mini.classList.remove("hidden");result.classList.add("hidden");question.textContent="Prepare-se!";answers.innerHTML="";timer.textContent="Confirme abaixo para começar.";stopTimer();if(continueBtn){continueBtn.classList.remove("hidden");continueBtn.disabled=false;continueBtn.dataset.action="minigame-start";continueBtn.textContent="Começar minigame"}}
+  function renderResult(){answers?.classList.remove("is-jd-song-selection");ui(true);game.classList.add("hidden");mini.classList.add("hidden");result.classList.remove("hidden");items?.classList.add("hidden");stopTimer();if(continueBtn&&gameState?.phase!=="match-result"){continueBtn.classList.remove("hidden");continueBtn.disabled=false;continueBtn.dataset.action="minigame-continue";continueBtn.textContent="Continuar"}else continueBtn?.classList.add("hidden");const results=gameState?.minigame?.results||[],mineResult=results.find(r=>String(r.playerId)===String(myId()));resultTitle.textContent=mineResult?`${mineResult.place}º lugar`:"Resultado";score.textContent=`${Math.round(me()?.score||0)} PTS`;ranking.innerHTML="";results.forEach(r=>{const row=document.createElement("div");row.className="final-party-phone-rank-row";row.innerHTML=`<strong>${r.place}º ${r.name}</strong><span>${r.correct===false?"×":"✓"}</span>`;ranking.appendChild(row)})}
   function render(){if(!gameState)return;if(danceMode){panel?.classList.add("hidden");return}if(gameState.phase==="board")renderBoard();else if(gameState.phase==="minigame")renderMinigame();else if(gameState.phase==="minigame-intro")renderIntro();else if(gameState.phase==="just-dance-select")renderDanceSongSelection();else if(gameState.phase==="minigame-result"||gameState.phase==="match-result")renderResult()}
   continueBtn?.addEventListener("click",async()=>{
     const type=continueBtn.dataset.action;if(!type)return;continueBtn.disabled=true;const old=continueBtn.textContent;continueBtn.textContent="Enviando…";

@@ -24,7 +24,7 @@
   }
   const TUTORIAL_KEY="steamPartyBoardTutorialSeenV1";
   const MATH_MINIGAME_TIME_MS=25000;
-  let state=null,rolling=false,roomState=null,lastPartyLobbyPlayerCount=0,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,partyDanceBotScoreCache=new Map(),tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0,danceSelectedSongId="",danceSelectionPreviewTimer=0,danceSelectionPreviewVideo=null;
+  let state=null,rolling=false,roomState=null,lastPartyLobbyPlayerCount=0,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,partyDanceBotScoreCache=new Map(),tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0,danceSelectedSongId="",danceSelectionPreviewTimer=0,danceSelectionPreviewVideo=null,diceSoftDisplayTimer=0;
   const api=()=>window.STEAMParty||{},toast=m=>api().showToast?.(m),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const avatar=p=>api().avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><rect x="18" y="18" width="84" height="84" rx="34" fill="#65f2c3"/></svg>`;
   const isPhoneMatch=match=>Boolean(match&&(match.mode==="phones"||String(match.controlMethod||"").startsWith("phone-")));
@@ -562,13 +562,46 @@
   }
   function danceSongSelectionOwnerId(){if(state?.onlineHost)return String(state.onlineHostPlayerId||state.players?.find(p=>p.human)?.id||"");return String(state?.players?.find(p=>p.human)?.id||"")}
   function danceSongCatalog(){return (danceBridge?.getSongIds?.()||[]).map(id=>danceBridge?.getSongInfo?.(id)).filter(Boolean).map(song=>({id:String(song.id||""),title:String(song.title||"Just Dance"),artist:String(song.artist||""),edition:String(song.edition||""),cover:String(song.cover||""),poster:String(song.poster||""),previewSource:String(song.previewSource||""),previewStartSec:Number(song.previewStartSec||0),previewDurationSec:Number(song.previewDurationSec||12)}))}
-  function stopDanceSelectionPreview(){clearTimeout(danceSelectionPreviewTimer);danceSelectionPreviewTimer=0;if(danceSelectionPreviewVideo){try{danceSelectionPreviewVideo.pause()}catch{}try{danceSelectionPreviewVideo.removeAttribute("src");danceSelectionPreviewVideo.load()}catch{}}document.getElementById("finalDancePreviewStage")?.classList.add("hidden")}
-  function ensureDanceSongSelection(){let el=document.getElementById("finalDanceSongSelection");if(el)return el;const card=minigameOverlay?.querySelector(".final-minigame-card");if(!card)return null;el=document.createElement("section");el.id="finalDanceSongSelection";el.className="final-dance-song-selection hidden";el.innerHTML=`<div class="final-dance-select-head"><div><p class="final-eyebrow">Just Dance</p><h2>Escolha a música</h2><p>Veja um trecho antes de confirmar.</p></div><div class="final-dance-select-badge">4 músicas</div></div><div id="finalDanceSongGrid" class="final-dance-song-grid"></div><div id="finalDancePreviewStage" class="final-dance-preview-stage hidden"><video id="finalDancePreviewVideo" playsinline preload="metadata"></video><div class="final-dance-preview-info"><strong id="finalDancePreviewTitle">Preview</strong><span>Trecho de 12 segundos</span></div><button id="finalDancePreviewClose" type="button" class="final-secondary">Fechar preview</button></div><div class="final-dance-select-footer"><span id="finalDanceSelectionHint">Escolha uma música para continuar.</span><button id="finalDanceConfirmSong" type="button" class="final-primary">Confirmar música</button></div>`;card.appendChild(el);danceSelectionPreviewVideo=el.querySelector("#finalDancePreviewVideo");el.querySelector("#finalDancePreviewClose")?.addEventListener("click",stopDanceSelectionPreview);el.querySelector("#finalDanceConfirmSong")?.addEventListener("click",()=>{if(!phoneExclusiveControl())confirmDanceSongSelection()});return el}
-  function renderDanceSongSelection(){const el=ensureDanceSongSelection();if(!el)return;const songs=danceSongCatalog();if(!danceSelectedSongId||!songs.some(x=>x.id===danceSelectedSongId))danceSelectedSongId=songs[0]?.id||"RainOverMe";minigameIntro.classList.add("hidden");droneGame.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");el.classList.remove("hidden");const grid=el.querySelector("#finalDanceSongGrid");grid.innerHTML="";const locked=phoneExclusiveControl();songs.forEach(song=>{const item=document.createElement("article");item.className=`final-dance-song-card${song.id===danceSelectedSongId?" is-selected":""}`;const img=document.createElement("img");img.src=song.cover;img.alt=`Capa de ${song.title}`;const meta=document.createElement("div");meta.className="final-dance-song-meta";const h=document.createElement("strong");h.textContent=song.title;const a=document.createElement("span");a.textContent=song.artist;const actions=document.createElement("div");actions.className="final-dance-song-actions";const prev=document.createElement("button");prev.type="button";prev.className="final-secondary";prev.textContent="Ver preview";prev.disabled=locked;prev.onclick=()=>previewDanceSong(song.id);const choose=document.createElement("button");choose.type="button";choose.className="final-primary";choose.textContent=song.id===danceSelectedSongId?"Selecionada":"Escolher";choose.disabled=locked;choose.onclick=()=>selectDanceSong(song.id);actions.append(prev,choose);meta.append(h,a,actions);item.append(img,meta);grid.appendChild(item)});const confirm=el.querySelector("#finalDanceConfirmSong"),hint=el.querySelector("#finalDanceSelectionHint");if(confirm){confirm.disabled=locked;confirm.textContent=locked?"Confirme pelo celular":"Confirmar música"}if(hint)hint.textContent=locked?"A escolha é feita pelo celular do jogador responsável.":"Escolha, veja o preview e confirme."}
+  function stopDanceSelectionPreview(){clearTimeout(danceSelectionPreviewTimer);danceSelectionPreviewTimer=0;if(danceSelectionPreviewVideo){try{danceSelectionPreviewVideo.pause()}catch{}danceSelectionPreviewVideo.onerror=null;danceSelectionPreviewVideo.ontimeupdate=null;danceSelectionPreviewVideo.onloadedmetadata=null;try{danceSelectionPreviewVideo.removeAttribute("src");danceSelectionPreviewVideo.load()}catch{}}document.getElementById("finalDancePreviewStage")?.classList.add("hidden")}
+  function ensureDanceSongSelection(){let el=document.getElementById("finalDanceSongSelection");if(el)return el;const card=minigameOverlay?.querySelector(".final-minigame-card");if(!card)return null;el=document.createElement("section");el.id="finalDanceSongSelection";el.className="final-dance-song-selection hidden";el.innerHTML=`<div class="final-dance-select-head"><div><p class="final-eyebrow">MINIGAME • JUST DANCE</p><h2>Escolha a música</h2><p>Selecione uma faixa, veja o preview e confirme para começar.</p></div><div class="final-dance-select-badge"><span>♪</span><b>4 músicas</b></div></div><div id="finalDanceSongGrid" class="final-dance-song-grid"></div><div id="finalDancePreviewStage" class="final-dance-preview-stage hidden"><div class="final-dance-preview-screen"><video id="finalDancePreviewVideo" playsinline preload="metadata"></video><span class="final-dance-preview-label">PREVIEW</span></div><div class="final-dance-preview-info"><strong id="finalDancePreviewTitle">Preview</strong><span>Trecho da música selecionada</span></div><button id="finalDancePreviewClose" type="button" class="final-secondary">Fechar preview</button></div><div class="final-dance-select-footer"><span id="finalDanceSelectionHint">Escolha uma música para continuar.</span><button id="finalDanceConfirmSong" type="button" class="final-primary">Confirmar música</button></div>`;card.appendChild(el);danceSelectionPreviewVideo=el.querySelector("#finalDancePreviewVideo");el.querySelector("#finalDancePreviewClose")?.addEventListener("click",stopDanceSelectionPreview);el.querySelector("#finalDanceConfirmSong")?.addEventListener("click",()=>{if(!phoneExclusiveControl())confirmDanceSongSelection()});return el}
+  function renderDanceSongSelection(){const el=ensureDanceSongSelection();if(!el)return;const songs=danceSongCatalog();if(!danceSelectedSongId||!songs.some(x=>x.id===danceSelectedSongId))danceSelectedSongId=songs[0]?.id||"RainOverMe";minigameIntro.classList.add("hidden");droneGame.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");el.classList.remove("hidden");const grid=el.querySelector("#finalDanceSongGrid");grid.innerHTML="";const locked=phoneExclusiveControl();songs.forEach(song=>{const selected=song.id===danceSelectedSongId,item=document.createElement("article");item.className=`final-dance-song-card${selected?" is-selected":""}`;item.dataset.songId=song.id;const art=document.createElement("div");art.className="final-dance-song-art";const img=document.createElement("img");img.src=song.cover;img.alt=`Capa de ${song.title}`;const tag=document.createElement("span");tag.className="final-dance-song-selected-tag";tag.textContent=selected?"✓ SELECIONADA":"JUST DANCE";art.append(img,tag);const meta=document.createElement("div");meta.className="final-dance-song-meta";const h=document.createElement("strong");h.textContent=song.title;const a=document.createElement("span");a.textContent=song.artist;const edition=document.createElement("small");edition.textContent=song.edition||"Just Dance";const actions=document.createElement("div");actions.className="final-dance-song-actions";const prev=document.createElement("button");prev.type="button";prev.className="final-secondary";prev.textContent="▶ Ver preview";prev.disabled=locked;prev.onclick=()=>previewDanceSong(song.id);const choose=document.createElement("button");choose.type="button";choose.className="final-primary";choose.textContent=selected?"Selecionada":"Escolher";choose.disabled=locked;choose.onclick=()=>selectDanceSong(song.id);actions.append(prev,choose);meta.append(h,a,edition,actions);item.append(art,meta);grid.appendChild(item)});const confirm=el.querySelector("#finalDanceConfirmSong"),hint=el.querySelector("#finalDanceSelectionHint");if(confirm){confirm.disabled=locked;confirm.textContent=locked?"Confirme pelo celular":"Confirmar música"}if(hint)hint.textContent=locked?"A escolha é feita pelo celular do jogador responsável.":"Escolha, veja o preview e confirme."}
   function publishDanceSongSelection(){const songs=danceSongCatalog().map(({previewSource,poster,...song})=>song);publish("just-dance-select",{minigame:{id:"just-dance",title:"Just Dance",status:"select",songs,selectedSongId:danceSelectedSongId,selectorPlayerId:danceSongSelectionOwnerId()}})}
   function openDanceSongSelection(){stopDanceSelectionPreview();const songs=danceSongCatalog(),remembered=String(state?.selectedDanceSongId||"");danceSelectedSongId=songs.some(x=>x.id===remembered)?remembered:(songs[0]?.id||"RainOverMe");if(state)state.selectedDanceSongId=danceSelectedSongId;renderDanceSongSelection();publishDanceSongSelection()}
   function selectDanceSong(songId){const song=danceSongCatalog().find(x=>x.id===String(songId||""));if(!song)return false;danceSelectedSongId=song.id;if(state)state.selectedDanceSongId=song.id;renderDanceSongSelection();publishDanceSongSelection();return true}
-  function previewDanceSong(songId){const song=danceSongCatalog().find(x=>x.id===String(songId||""));if(!song?.previewSource)return;const el=ensureDanceSongSelection(),stage=el?.querySelector("#finalDancePreviewStage"),video=el?.querySelector("#finalDancePreviewVideo"),title=el?.querySelector("#finalDancePreviewTitle");if(!stage||!video)return;stopDanceSelectionPreview();danceSelectionPreviewVideo=video;stage.classList.remove("hidden");if(title)title.textContent=`Preview • ${song.title}`;video.poster=song.poster||song.cover;video.src=song.previewSource;video.volume=.68;const begin=()=>{try{video.currentTime=Math.max(0,Number(song.previewStartSec||0))}catch{}video.play().catch(()=>{})};if(video.readyState>=1)begin();else video.addEventListener("loadedmetadata",begin,{once:true});const stopAt=Math.max(4,Number(song.previewDurationSec||12)),onTime=()=>{if(Number(video.currentTime||0)>=Number(song.previewStartSec||0)+stopAt){video.removeEventListener("timeupdate",onTime);try{video.pause()}catch{}}};video.addEventListener("timeupdate",onTime);danceSelectionPreviewTimer=setTimeout(()=>{video.removeEventListener("timeupdate",onTime);try{video.pause()}catch{}},(stopAt+2)*1000)}
+  function previewDanceSong(songId){
+    const song=danceSongCatalog().find(x=>x.id===String(songId||""));
+    if(!song)return;
+    const el=ensureDanceSongSelection(),stage=el?.querySelector("#finalDancePreviewStage"),video=el?.querySelector("#finalDancePreviewVideo"),title=el?.querySelector("#finalDancePreviewTitle");
+    if(!stage||!video)return;
+    stopDanceSelectionPreview();
+    danceSelectionPreviewVideo=video;
+    stage.classList.remove("hidden");
+    if(title)title.textContent=`${song.title} • ${song.artist}`;
+    video.poster=song.poster||song.cover;
+    const candidates=(danceBridge?.getSongPreviewSources?.(song.id)||[song.previewSource]).filter(Boolean);
+    let candidateIndex=0,finished=false;
+    const stopAt=Math.max(4,Number(song.previewDurationSec||30));
+    const cleanup=()=>{video.onerror=null;video.ontimeupdate=null;video.onloadedmetadata=null};
+    const onTime=()=>{if(Number(video.currentTime||0)>=Number(song.previewStartSec||0)+stopAt){finished=true;cleanup();try{video.pause()}catch{}}};
+    const begin=()=>{try{video.currentTime=Math.max(0,Number(song.previewStartSec||0))}catch{}video.play().catch(()=>{})};
+    const loadCandidate=()=>{
+      if(candidateIndex>=candidates.length){
+        cleanup();
+        if(title)title.textContent=`Não foi possível abrir o preview de ${song.title}`;
+        return;
+      }
+      const src=candidates[candidateIndex++];
+      try{video.pause()}catch{}
+      video.src=src;
+      video.load();
+      if(video.readyState>=1)begin();else video.onloadedmetadata=()=>{video.onloadedmetadata=null;begin()};
+    };
+    const tryNext=()=>{if(finished)return;loadCandidate()};
+    video.onerror=tryNext;
+    video.ontimeupdate=onTime;
+    loadCandidate();
+    danceSelectionPreviewTimer=setTimeout(()=>{finished=true;cleanup();try{video.pause()}catch{}},(stopAt+4)*1000);
+  }
   function confirmDanceSongSelection(){const song=danceSongCatalog().find(x=>x.id===danceSelectedSongId);if(!song)return;stopDanceSelectionPreview();ensureDanceSongSelection()?.classList.add("hidden");if(state)state.selectedDanceSongId=song.id;void startPartyDance(song.id)}
   function handleDanceSelectionAction(a){if(!a||!state?.currentMinigame||state.currentMinigame.id!=="just-dance")return false;if(String(a.playerId||"")!==danceSongSelectionOwnerId())return false;if(a.type==="jd-song-preview"){previewDanceSong(a.songId);return true}if(a.type==="jd-song-select"){selectDanceSong(a.songId);return true}if(a.type==="jd-song-confirm"){confirmDanceSongSelection();return true}return false}
   function startCurrentMinigame(){const id=state?.currentMinigame?.id;if(!id)return;if(["drone-route","slope-sensor","satellite-scale"].includes(id))startEduGame(id);else if(["flood-escape","wildfire-pump","drone-balance","dam-alarm","landslide-rescue","storm-scan"].includes(id))startMotionEscape(id);else if(id==="just-dance")openDanceSongSelection()}
@@ -590,12 +623,21 @@
     return scene;
   }
   function updateDice(result=null,soft=false){
-    const value=result??rand(MIN_ROLL,MAX_ROLL);
+    const value=Math.max(MIN_ROLL,Math.min(MAX_ROLL,Number(result??rand(MIN_ROLL,MAX_ROLL))||MIN_ROLL));
+    window.clearTimeout(diceSoftDisplayTimer);
+    diceSoftDisplayTimer=0;
     if(diceNumber){
       if(soft){
         diceNumber.classList.add("is-number-shifting");
-        window.setTimeout(()=>{diceNumber.textContent=String(value);diceNumber.classList.remove("is-number-shifting")},34);
-      }else diceNumber.textContent=String(value);
+        diceSoftDisplayTimer=window.setTimeout(()=>{
+          diceSoftDisplayTimer=0;
+          diceNumber.textContent=String(value);
+          diceNumber.classList.remove("is-number-shifting");
+        },34);
+      }else{
+        diceNumber.textContent=String(value);
+        diceNumber.classList.remove("is-number-shifting");
+      }
     }
     if(diceCube)$$('.face',diceCube).forEach((f,i)=>f.textContent=String(i===0?value:rand(MIN_ROLL,MAX_ROLL)));
   }
@@ -649,6 +691,8 @@
       prototypeDiceMount?.classList.remove("is-rolling");
     }
 
+    window.clearTimeout(diceSoftDisplayTimer);
+    diceSoftDisplayTimer=0;
     updateDice(result,false);
     diceNumber?.classList.add("is-result");
     diceResult.textContent=`Saiu ${result}!`;
@@ -695,15 +739,21 @@
     eventBox.textContent=(events[type]||events.good)();
     renderInventory();renderPlayers();checkpoint("board","auto");publish("board");
   }
-  async function rollForCurrentPlayer(source="pc",sourcePlayerId=""){if(!state||rolling)return;const p=state.players[state.turnIndex];if(state.connected&&p.human&&source!=="phone")return;if(state.onlineHost&&p.human){if(source==="pc"&&(p.id!==state.onlineHostPlayerId||state.match?.controlMethod==="online-phone-motion"))return;if(["online","online-controller"].includes(source)&&String(sourcePlayerId)!==String(p.id))return;}rolling=true;rollButton.disabled=true;let result=rand(MIN_ROLL,MAX_ROLL);
+  async function rollForCurrentPlayer(source="pc",sourcePlayerId=""){if(!state||rolling)return;const p=state.players[state.turnIndex];if(state.connected&&p.human&&source!=="phone")return;if(state.onlineHost&&p.human){if(source==="pc"&&(p.id!==state.onlineHostPlayerId||state.match?.controlMethod==="online-phone-motion"))return;if(["online","online-controller"].includes(source)&&String(sourcePlayerId)!==String(p.id))return;}rolling=true;rollButton.disabled=true;let result=Math.max(MIN_ROLL,Math.min(MAX_ROLL,rand(MIN_ROLL,MAX_ROLL)));
     ensurePlayerEquipment(p);
     if(p.activeEffects.gps){
       result=Math.max(6,result);
       p.activeEffects.gps=false;
       eventBox.textContent=`GPS de ${p.name}: resultado mínimo garantido em 6.`;
     }
+    result=Math.max(MIN_ROLL,Math.min(MAX_ROLL,Number(result)||MIN_ROLL));
     state.lastRoll=result;state.rollSerial=Number(state.rollSerial||0)+1;publish("board");
-    await animateDice(result);await movePlayer(p,result);resolveSpace(p);await sleep(p.bot?700:950);rolling=false;nextTurn()}
+    await animateDice(result);
+    // V50: o mesmo valor final mostrado no visor é a única fonte usada no movimento.
+    // Isso elimina o caso em que um timeout visual antigo deixava "10" na face
+    // enquanto a peça usava outro resultado interno.
+    await movePlayer(p,result);
+    resolveSpace(p);await sleep(p.bot?700:950);rolling=false;nextTurn()}
   function nextTurn(){state.turnIndex++;if(state.turnIndex>=state.players.length){state.turnIndex=0;endRound();return}updateTurnUi()}
   function endRound(){
     if(state.match.minigamesEnabled){
