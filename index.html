@@ -16,7 +16,7 @@
   <script src="config.js?v=040-earthsong-server-gate"></script>
   <link rel="stylesheet" href="style.css?v=067-utf8-fix" />
   <link rel="stylesheet" href="final-shell.css?v=002-board-alpha" />
-  <link rel="stylesheet" href="final-board.css?v=024-v45-hud" />
+  <link rel="stylesheet" href="final-board.css?v=025-v46-polish" />
 </head>
 <body class="site-loading">
 
@@ -173,6 +173,38 @@
        para que possamos migrar cada sistema sem quebrar o jogo atual.
        ================================================================ -->
   <div id="finalShell" class="final-shell" aria-live="polite">
+    <div class="final-theme-decor-layer" aria-hidden="true">
+      <svg class="final-theme-decor final-theme-decor-satellite" viewBox="0 0 120 70">
+        <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="48" y="22" width="24" height="26" rx="5"></rect>
+          <path d="M45 29 28 20v30l17-9M75 29l17-9v30l-17-9M55 18V9M65 18V9M60 48v12"></path>
+          <circle cx="60" cy="9" r="3" fill="currentColor"></circle>
+        </g>
+      </svg>
+      <svg class="final-theme-decor final-theme-decor-drone" viewBox="0 0 120 70">
+        <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M38 35h44M49 35l8 10h6l8-10M43 30 30 18M77 30 90 18"></path>
+          <circle cx="25" cy="15" r="10"></circle><circle cx="95" cy="15" r="10"></circle>
+          <circle cx="25" cy="55" r="10"></circle><circle cx="95" cy="55" r="10"></circle>
+          <path d="M43 40 30 52M77 40 90 52"></path>
+        </g>
+      </svg>
+      <svg class="final-theme-decor final-theme-decor-mountain" viewBox="0 0 130 80">
+        <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 68 44 22l19 25 14-18 42 39"></path>
+          <path d="m34 36 10-14 9 12M78 29l9 9"></path>
+          <circle cx="104" cy="23" r="7"></circle>
+          <path d="M104 5v7M104 34v7M86 23h7M115 23h7"></path>
+        </g>
+      </svg>
+      <svg class="final-theme-decor final-theme-decor-water" viewBox="0 0 130 80">
+        <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+          <path d="M5 28c14-12 28 12 42 0s28 12 42 0 28 12 36 4M5 50c14-12 28 12 42 0s28 12 42 0 28 12 36 4"></path>
+        </g>
+      </svg>
+      <span class="final-theme-decor final-theme-decor-sensor">◉</span>
+      <span class="final-theme-decor final-theme-decor-map">⌖</span>
+    </div>
     <section id="finalStartScreen" class="final-view final-start-view">
       <div class="final-bg-grid" aria-hidden="true"></div>
       <div class="final-radar final-radar-a" aria-hidden="true"></div>
@@ -214,6 +246,10 @@
           <button class="final-main-button" data-final-nav="profiles" type="button">
             <span class="final-button-icon">◎</span>
             <span><strong>Perfis</strong><small>Crie, importe ou exporte seu perfil.</small></span>
+          </button>
+          <button id="finalOpenController" class="final-main-button final-controller-menu-button" type="button">
+            <span class="final-button-icon">▯</span>
+            <span><strong>Controle</strong><small>Abra este celular como controle do Party ou Online.</small></span>
           </button>
           <button class="final-main-button" data-final-nav="how" type="button">
             <span class="final-button-icon">?</span>
@@ -676,6 +712,8 @@
           <button type="button" data-free-minigame="wildfire-pump"><span>♨</span><b>Combate à Queimada</b><small>Chacoalhar • 14 s</small></button>
           <button type="button" data-free-minigame="drone-balance"><span>✦</span><b>Estabilize o Drone</b><small>Inclinação • 14 s</small></button>
           <button type="button" data-free-minigame="dam-alarm"><span>↔</span><b>Alerta da Barragem</b><small>Inclinar lados • 14 s</small></button>
+          <button type="button" data-free-minigame="landslide-rescue"><span>⛰</span><b>Resgate no Deslizamento</b><small>Inclinação guiada • 15 s</small></button>
+          <button type="button" data-free-minigame="storm-scan"><span>⌁</span><b>Varredura da Tempestade</b><small>Giroscópio • 15 s</small></button>
           <button type="button" data-free-minigame="just-dance"><span>♪</span><b>Just Dance</b><small>Movimento e ritmo</small></button>
         </div>
         <div id="finalFreeStatus" class="final-info-box">Escolha um minigame. No modo Local sem celular, os minigames de sensor usam Espaço/clique para simular movimento. No Party e Online, use os sensores reais do celular.</div>
@@ -1254,13 +1292,13 @@
 
           <div class="dev-actions-row dance-lab-buttons">
             <button id="createDanceRoomBtn" class="primary" type="button">Criar sala de sensores</button>
-            <button id="enableDanceSensorsBtn" class="secondary" type="button" disabled>Ativar sensores</button>
+            <button id="enableDanceSensorsBtn" class="secondary" type="button" disabled>Pronto</button>
             <button id="stopDanceSensorsBtn" class="secondary" type="button" disabled>Parar sensores</button>
             <button id="resetDanceScoreBtn" class="secondary" type="button" disabled>Zerar score</button>
           </div>
 
           <p id="danceLabMessage" class="dev-tool-status">Nenhuma sala criada.</p>
-          <p class="dance-security-note">Em iPhone/iPad, o navegador exige um toque em <b>Ativar sensores</b> no próprio celular. Para maior compatibilidade, use a página do controle em HTTPS.</p>
+          <p class="dance-security-note">Em iPhone/iPad, o navegador exige um toque em <b>Pronto</b> no próprio celular. Para maior compatibilidade, use a página do controle em HTTPS.</p>
         </section>
 
         <section class="dance-lab-monitor">
@@ -1417,9 +1455,9 @@
   <script src="final-game-config.js?v=001-base-nova"></script>
   <script src="script.js?v=0715-v45-phone-yeah" onload="window.SiteLoader?.report(24, 'Lógica do jogo carregada…'); window.SiteLoader?.markAppReady?.()" onerror="window.SiteLoader?.markAppError?.()"></script>
   <script src="final-party-network.js?v=004-v43-control"></script>
-  <script src="final-shell.js?v=007-v43-final"></script>
-  <script src="final-board.js?v=017-v43-final-map"></script>
-  <script src="final-online-v2.js?v=006-v43-free"></script>
+  <script src="final-shell.js?v=008-v46-control"></script>
+  <script src="final-board.js?v=018-v46-motion-dice"></script>
+  <script src="final-online-v2.js?v=007-v46-ready-motion"></script>
   <script src="final-presentation.js?v=001-demo"></script>
   <script src="final-save-manager.js?v=001-checkpoints"></script>
   <span class="version-badge" data-version>V. 1.2.1 • Sensores + HUD Final</span>

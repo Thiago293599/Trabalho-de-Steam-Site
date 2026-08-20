@@ -418,6 +418,14 @@
       addUnique(state.education.concepts,"Mudança de direção e tempo de reação");
       addUnique(state.education.technologies,"Orientação do celular e sistema de alerta");
       addUnique(state.education.disasters,"Rompimento de barragem");
+    }else if(id==="landslide-rescue"){
+      addUnique(state.education.concepts,"Inclinação, equilíbrio e trajetória");
+      addUnique(state.education.technologies,"Giroscópio e navegação de resgate");
+      addUnique(state.education.disasters,"Deslizamento");
+    }else if(id==="storm-scan"){
+      addUnique(state.education.concepts,"Rotação, varredura e cobertura");
+      addUnique(state.education.technologies,"Giroscópio e radar meteorológico");
+      addUnique(state.education.disasters,"Tempestade severa");
     }
   }
 
@@ -552,7 +560,7 @@
   function startCurrentMinigame(){
     const id=state?.currentMinigame?.id;if(!id)return;
     if(["drone-route","slope-sensor","satellite-scale"].includes(id))startEduGame(id);
-    else if(["flood-escape","wildfire-pump","drone-balance","dam-alarm"].includes(id))startMotionEscape(id);
+    else if(["flood-escape","wildfire-pump","drone-balance","dam-alarm","landslide-rescue","storm-scan"].includes(id))startMotionEscape(id);
     else if(id==="just-dance")startPartyDance();
   }
   function handleControllerContinue(type){
@@ -583,32 +591,60 @@
     if(diceCube)$$('.face',diceCube).forEach((f,i)=>f.textContent=String(i===0?value:rand(MIN_ROLL,MAX_ROLL)));
   }
   async function animateDice(result){
-    const scene=mountPrototypeDice();let ticker=rand(MIN_ROLL,MAX_ROLL),lastSwap=0;
-    // O número troca de forma discreta enquanto o cubo gira: blur curto + ritmo irregular.
-    const cycle=setInterval(()=>{
-      const now=performance.now();
-      if(now-lastSwap<86+Math.random()*70)return;
-      lastSwap=now;
-      let next=ticker;
-      while(next===ticker)next=rand(MIN_ROLL,MAX_ROLL);
-      ticker=next;updateDice(ticker,true);
-    },42);
+    const scene=mountPrototypeDice();
+    const started=performance.now();
+    let ticker=rand(MIN_ROLL,MAX_ROLL),swapTimer=0,stopped=false;
+
+    // Trocas irregulares e cada vez mais lentas: parece um visor embarcado no dado,
+    // não um contador passando 1,2,3...
+    const scheduleSwap=()=>{
+      if(stopped)return;
+      const elapsed=performance.now()-started;
+      const slow=Math.min(150,elapsed*.10);
+      const delay=86+Math.random()*72+slow;
+      swapTimer=window.setTimeout(()=>{
+        let next=ticker;
+        while(next===ticker)next=rand(MIN_ROLL,MAX_ROLL);
+        ticker=next;
+        updateDice(ticker,true);
+        scheduleSwap();
+      },delay);
+    };
+    scheduleSwap();
+
     try{
       if(scene&&window.Dice3D?.rollTo){
         scene.classList.add("is-rolling");
-        // O modelo continua fazendo uma rolagem física normal. No fim, a face 1
-        // fica totalmente voltada à câmera e o número real (1–10) é desenhado
-        // por cima dela, cobrindo as bolinhas do protótipo.
+        prototypeDiceMount?.classList.add("is-rolling");
+        // O modelo rola normalmente; ao terminar, fixamos a face física 1
+        // exatamente de frente e usamos o visor 1–10 por cima dela.
         const visualFace=((Number(result)-1)%6)+1;
         await window.Dice3D.rollTo(visualFace);
+        window.__pendingDiceFace=1;
+        window.Dice3D.setFace?.(1);
+        await sleep(90);
         window.Dice3D.setFace?.(1);
       }else{
-        diceCube?.classList.add("rolling");await sleep(850);diceCube?.classList.remove("rolling");
+        diceCube?.classList.add("rolling");
+        await sleep(900);
+        diceCube?.classList.remove("rolling");
         if(diceCube)diceCube.style.transform="rotateX(0deg) rotateY(0deg)";
       }
-    }catch(error){console.warn("[V44 Dice] fallback",error);await sleep(350)}
-    finally{clearInterval(cycle);scene?.classList.remove("is-rolling")}
-    updateDice(result,false);diceResult.textContent=`Saiu ${result}!`;await sleep(420)
+    }catch(error){
+      console.warn("[V46 Dice] fallback",error);
+      await sleep(360);
+    }finally{
+      stopped=true;
+      clearTimeout(swapTimer);
+      scene?.classList.remove("is-rolling");
+      prototypeDiceMount?.classList.remove("is-rolling");
+    }
+
+    updateDice(result,false);
+    diceNumber?.classList.add("is-result");
+    diceResult.textContent=`Saiu ${result}!`;
+    await sleep(520);
+    diceNumber?.classList.remove("is-result");
   }
   async function movePlayer(p,steps){for(let i=0;i<steps;i++){const prev=p.position;p.position=(p.position+1)%SPACE_COUNT;if(p.position<prev){p.laps++;p.score+=3;eventBox.textContent=`${p.name} completou uma volta e ganhou +3 Pontos de Missão.`}updateToken(p);publish("board");await sleep(180)}}
   function resolveSpace(p){
@@ -720,6 +756,20 @@
         topic:"Orientação • Barragem"
       },
       {
+        id:"landslide-rescue",
+        title:"Resgate no Deslizamento",
+        description:"Incline suavemente o celular acompanhando a rota para conduzir a equipe de resgate entre os destroços.",
+        sensorRequired:true,
+        topic:"Inclinação • Deslizamento"
+      },
+      {
+        id:"storm-scan",
+        title:"Varredura da Tempestade",
+        description:"Gire o celular de forma controlada para completar uma varredura de radar e localizar a área de maior risco.",
+        sensorRequired:true,
+        topic:"Giroscópio • Radar"
+      },
+      {
         id:"just-dance",
         title:"Just Dance",
         description:"Use o celular em pé e acompanhe a coreografia. O próprio celular calcula seus julgamentos.",
@@ -730,11 +780,11 @@
     return games.filter(g=>{
       if(g.sensorRequired&&!state.match.motionMinigamesEnabled)return false;
       if(g.id==="just-dance"&&(!(state.connected||state.onlineHost)||!danceBridge))return false;
-      if(["flood-escape","wildfire-pump","drone-balance","dam-alarm"].includes(g.id)&&!(state.connected||(state.onlineHost&&state.match.motionMinigamesEnabled)))return false;
+      if(["flood-escape","wildfire-pump","drone-balance","dam-alarm","landslide-rescue","storm-scan"].includes(g.id)&&!(state.connected||(state.onlineHost&&state.match.motionMinigamesEnabled)))return false;
       return true;
     });
   }
-  function openMinigame(forcedId=null){const games=compatibleMinigames();let g=games.find(game=>game.id===forcedId);if(!g&&forcedId&&state?.match?.freeMode)g={id:forcedId,title:{"drone-route":"Rota do Drone","slope-sensor":"Sensor de Encosta","satellite-scale":"Mapa de Satélite","flood-escape":"Fuga da Enchente","wildfire-pump":"Combate à Queimada","drone-balance":"Estabilize o Drone","dam-alarm":"Alerta da Barragem","just-dance":"Just Dance"}[forcedId]||"Minigame",description:"Teste livre do minigame selecionado."};if(!g)g=games[rand(0,games.length-1)];if(!g){advanceRound();return}state.currentMinigame=g;registerEducationForMinigame(g.id);minigameTitle.textContent=g.title;minigameDescription.textContent=g.description;minigameIntro.classList.remove("hidden");droneGame.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");syncPcGameplayLock("minigame-intro");checkpoint("minigame-intro","auto");publish("minigame-intro",{minigame:{id:g.id,title:g.title,status:"intro"}})}
+  function openMinigame(forcedId=null){const games=compatibleMinigames();let g=games.find(game=>game.id===forcedId);if(!g&&forcedId&&state?.match?.freeMode)g={id:forcedId,title:{"drone-route":"Rota do Drone","slope-sensor":"Sensor de Encosta","satellite-scale":"Mapa de Satélite","flood-escape":"Fuga da Enchente","wildfire-pump":"Combate à Queimada","drone-balance":"Estabilize o Drone","dam-alarm":"Alerta da Barragem","landslide-rescue":"Resgate no Deslizamento","storm-scan":"Varredura da Tempestade","just-dance":"Just Dance"}[forcedId]||"Minigame",description:"Teste livre do minigame selecionado."};if(!g)g=games[rand(0,games.length-1)];if(!g){advanceRound();return}state.currentMinigame=g;registerEducationForMinigame(g.id);minigameTitle.textContent=g.title;minigameDescription.textContent=g.description;minigameIntro.classList.remove("hidden");droneGame.classList.add("hidden");motionGame?.classList.add("hidden");minigameResult.classList.add("hidden");minigameOverlay.classList.remove("hidden");syncPcGameplayLock("minigame-intro");checkpoint("minigame-intro","auto");publish("minigame-intro",{minigame:{id:g.id,title:g.title,status:"intro"}})}
   function shuffled(values){
     return [...values].sort(()=>Math.random()-.5);
   }
@@ -1087,6 +1137,14 @@
     "dam-alarm":{
       id:"dam-alarm",title:"Alerta da Barragem",kicker:"Orientação • Barragem",topic:"Barragem • Alerta",mechanic:"alternate",duration:14000,
       description:"Incline o celular para a esquerda e para a direita alternadamente para carregar a sirene de emergência.",question:"ALTERNE ESQUERDA ↔ DIREITA!",goal:"SIRENE",localLabel:"ALTERNAR • Espaço / clique"
+    },
+    "landslide-rescue":{
+      id:"landslide-rescue",title:"Resgate no Deslizamento",kicker:"Inclinação • Deslizamento",topic:"Deslizamento • Resgate",mechanic:"lean",duration:15000,
+      description:"Acompanhe a rota inclinando suavemente o celular para os lados. Quanto mais perto da trajetória segura, mais a equipe avança.",question:"ACOMPANHE A ROTA INCLINANDO O CELULAR!",goal:"RESGATE",localLabel:"GUIAR • Espaço / clique"
+    },
+    "storm-scan":{
+      id:"storm-scan",title:"Varredura da Tempestade",kicker:"Giroscópio • Radar",topic:"Tempestade • Monitoramento",mechanic:"rotate",duration:15000,
+      description:"Gire o celular de forma contínua e controlada para completar a varredura do radar. Girar rápido demais reduz a precisão.",question:"GIRE O CELULAR PARA VARRER A ÁREA!",goal:"RADAR",localLabel:"VARRER • Espaço / clique"
     }
   });
   function motionDef(id=state?.currentMinigame?.id){return MOTION_GAMES[id]||MOTION_GAMES["flood-escape"]}
@@ -1137,7 +1195,7 @@
     minigameIntro.classList.add("hidden");droneGame.classList.add("hidden");minigameResult.classList.add("hidden");motionGame?.classList.remove("hidden");
     motionEscapeState={token:`${def.id}-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,def,deadline:performance.now()+def.duration,progress:new Map(),lastSample:new Map(),lastSide:new Map(),finished:false};state.players.forEach(p=>motionEscapeState.progress.set(p.id,0));
     if(state.connected)await network.setSensorMode(true,"motion-minigame").catch(()=>null);motionLocalRun?.classList.toggle("hidden",!localFreeMotion);renderMotionEscape();publishMotionEscape(true);
-    clearInterval(motionEscapeBotTimer);motionEscapeBotTimer=setInterval(()=>{if(!motionEscapeState||motionEscapeState.finished)return;state.players.filter(p=>p.bot).forEach(bot=>{let speed=bot.difficulty==="hard"?1.45:bot.difficulty==="easy"?.75:1.08;if(def.mechanic==="level")speed*=.78;if(def.mechanic==="alternate")speed*=.92;const noise=(Math.random()-.5)*.65,next=Math.min(100,Number(motionEscapeState.progress.get(bot.id)||0)+Math.max(.10,speed+noise));motionEscapeState.progress.set(bot.id,next)});renderMotionEscape();publishMotionEscape()},130);
+    clearInterval(motionEscapeBotTimer);motionEscapeBotTimer=setInterval(()=>{if(!motionEscapeState||motionEscapeState.finished)return;state.players.filter(p=>p.bot).forEach(bot=>{let speed=bot.difficulty==="hard"?1.45:bot.difficulty==="easy"?.75:1.08;if(def.mechanic==="level")speed*=.78;if(def.mechanic==="alternate")speed*=.92;if(def.mechanic==="lean")speed*=.86;if(def.mechanic==="rotate")speed*=.82;const noise=(Math.random()-.5)*.65,next=Math.min(100,Number(motionEscapeState.progress.get(bot.id)||0)+Math.max(.10,speed+noise));motionEscapeState.progress.set(bot.id,next)});renderMotionEscape();publishMotionEscape()},130);
     clearInterval(motionEscapeTimer);motionEscapeTimer=setInterval(()=>{if(!motionEscapeState)return;const left=Math.max(0,motionEscapeState.deadline-performance.now());if(motionTimer)motionTimer.textContent=`Tempo: ${(left/1000).toFixed(1)} s`;renderMotionEscape();publishMotionEscape();const anyone=[...motionEscapeState.progress.values()].some(v=>v>=100);if(left<=0||anyone)setTimeout(finishMotionEscape,anyone?500:0)},80);
   }
   function localFreeMotionStep(){
@@ -1157,6 +1215,20 @@
       const gamma=Number(sample?.orientation?.gamma||0);const side=gamma>18?1:gamma<-18?-1:0,previous=Number(motionEscapeState.lastSide.get(player.id)||0);
       if(side&&previous&&side!==previous)delta=4.6; if(side)motionEscapeState.lastSide.set(player.id,side);
       delta+=Math.max(0,intensity-.18)*3.2*dt;
+    }else if(def.mechanic==="lean"){
+      const gamma=Number(sample?.orientation?.gamma||0);
+      const elapsed=Math.max(0,Number(def.duration||15000)-Math.max(0,motionEscapeState.deadline-now));
+      const target=Math.sin(elapsed/780)*24;
+      const error=Math.abs(gamma-target);
+      const quality=Math.max(0,1-error/34);
+      delta=Math.pow(quality,1.55)*9.2*dt;
+    }else if(def.mechanic==="rotate"){
+      const rotation=sample?.rotationRate||{};
+      const rotationMag=Math.hypot(Number(rotation.x||0),Number(rotation.y||0),Number(rotation.z||0));
+      const fallback=Math.max(0,intensity-.12)*115;
+      const speed=Math.max(rotationMag,fallback);
+      const quality=speed<16?0:speed<=105?Math.min(1,(speed-16)/52):Math.max(.18,1-(speed-105)/260);
+      delta=Math.pow(Math.max(0,quality),1.15)*8.6*dt;
     }else{
       const effective=Math.max(0,intensity-.10);delta=Math.pow(effective,1.18)*(def.id==="wildfire-pump"?49:44)*dt;
     }

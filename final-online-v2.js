@@ -200,7 +200,7 @@
   }
 
   function ack(event,payload){return connect().then(sock=>new Promise((resolve,reject)=>sock.timeout(7000).emit(event,payload,(err,res)=>err?reject(new Error("Servidor não respondeu.")):res?.ok?resolve(res):reject(new Error(res?.message||"Ação recusada.")))))}
-  function buildConfig(){let raw={};try{raw=JSON.parse(localStorage.getItem("steamPartyMatchConfigV1")||"{}")||{}}catch{}const mode=state?.controlMethod==="phone-motion"?"phone-motion":"keyboard";return{...raw,mode:"online",humanPlayers:Math.max(2,state?.players?.length||2),controlMethod:mode==="phone-motion"?"online-phone-motion":"online-keyboard",motionMinigamesEnabled:mode==="phone-motion"||["flood-escape","wildfire-pump","drone-balance","dam-alarm"].includes(freeSelection),minigamesEnabled:true,freeMode:Boolean(freeSelection),forcedFreeMinigame:freeSelection||"",rounds:freeSelection?1:Number(raw.rounds||5)}}
+  function buildConfig(){let raw={};try{raw=JSON.parse(localStorage.getItem("steamPartyMatchConfigV1")||"{}")||{}}catch{}const mode=state?.controlMethod==="phone-motion"?"phone-motion":"keyboard";return{...raw,mode:"online",humanPlayers:Math.max(2,state?.players?.length||2),controlMethod:mode==="phone-motion"?"online-phone-motion":"online-keyboard",motionMinigamesEnabled:mode==="phone-motion"||["flood-escape","wildfire-pump","drone-balance","dam-alarm","landslide-rescue","storm-scan"].includes(freeSelection),minigamesEnabled:true,freeMode:Boolean(freeSelection),forcedFreeMinigame:freeSelection||"",rounds:freeSelection?1:Number(raw.rounds||5)}}
   function privateSensorUrl(){if(!roomCode||!playerId||!resumeToken)return"";const u=new URL("controller.html",location.href);u.searchParams.set("onlineControl","1");u.searchParams.set("onlineRoom",roomCode);u.searchParams.set("onlinePlayer",playerId);u.searchParams.set("onlineToken",resumeToken);return u.toString()}
   function placeOnlinePanel(){
     const setup=document.querySelector("#finalMatchSetup");
@@ -241,18 +241,18 @@
     if(state.started&&v2State&&!isHost){renderReplica();return}
     actions.classList.add("hidden"); remote?.classList.add("hidden"); lobby.classList.remove("hidden");
     roomCodeEl.textContent=state.roomCode||roomCode; playersEl.innerHTML="";
-    (state.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-online-v2-player"+(p.connected===false?" is-offline":" ")+(p.controllerActive?" has-sensor has-controller":" ");el.innerHTML=`<span class="final-online-v2-avatar" style="--online-color:${p.color||'#45d9ff'}">${i+1}</span><span><strong></strong><small></small></span><span class="final-online-sensor-dot" title="Sensor"></span>`;el.querySelector("strong").textContent=p.name;const sensorText=state.controlMethod==="phone-motion"?(p.controllerActive?"Celular-controle pronto":p.controllerConnected?"Celular pareado • ative sensores":"Aguardando celular-controle"):"Controle na própria tela";el.querySelector("small").textContent=p.id===state.hostPlayerId?`Host • ${sensorText}`:p.connected===false?"Reconectando…":`Online • ${sensorText}`;playersEl.appendChild(el)});
+    (state.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-online-v2-player"+(p.connected===false?" is-offline":" ")+(p.controllerActive?" has-sensor has-controller":" ");el.innerHTML=`<span class="final-online-v2-avatar" style="--online-color:${p.color||'#45d9ff'}">${i+1}</span><span><strong></strong><small></small></span><span class="final-online-sensor-dot" title="Sensor"></span>`;el.querySelector("strong").textContent=p.name;const sensorText=state.controlMethod==="phone-motion"?(p.controllerActive?"Celular-controle pronto":p.controllerConnected?"Celular pareado • toque em Pronto":"Aguardando celular-controle"):"Controle na própria tela";el.querySelector("small").textContent=p.id===state.hostPlayerId?`Host • ${sensorText}`:p.connected===false?"Reconectando…":`Online • ${sensorText}`;playersEl.appendChild(el)});
     isHost=playerId===state.hostPlayerId;
     controlSetup?.classList.toggle("hidden",!isHost);
     if(isHost&&controlSetup){controlSetup.querySelectorAll('input[name="finalOnlineControlMode"]').forEach(r=>r.checked=r.value===(state.controlMethod||"keyboard"))}
     const phoneMode=state.controlMethod==="phone-motion";
     sensorPair?.classList.toggle("hidden",!phoneMode);
-    if(phoneMode){const me=(state.players||[]).find(p=>p.id===playerId),url=privateSensorUrl();if(sensorStatus)sensorStatus.textContent=me?.controllerActive?"Controle completo pronto.":me?.controllerConnected?"Celular pareado. Ative os sensores nele para liberar minigames de movimento.":"Pareie seu celular. Ele controlará dado, itens, respostas e movimento.";if(sensorLinkEl)sensorLinkEl.textContent=url;if(sensorQr&&url)sensorQr.src=`${configured}/api/qr?text=${encodeURIComponent(url)}`;if(sensorOpen)sensorOpen.dataset.url=url}
+    if(phoneMode){const me=(state.players||[]).find(p=>p.id===playerId),url=privateSensorUrl();if(sensorStatus)sensorStatus.textContent=me?.controllerActive?"Controle completo pronto.":me?.controllerConnected?"Celular pareado. Toque em Pronto no celular para liberar os movimentos.":"Pareie seu celular. Ele controlará dado, itens, respostas e movimento.";if(sensorLinkEl)sensorLinkEl.textContent=url;if(sensorQr&&url)sensorQr.src=`${configured}/api/qr?text=${encodeURIComponent(url)}`;if(sensorOpen)sensorOpen.dataset.url=url}
     const sensorReady=!phoneMode||(state.players||[]).every(p=>p.controllerConnected&&p.controllerActive);
     startBtn.classList.toggle("hidden",!isHost); startBtn.disabled=!isHost||(state.players?.length||0)<2||!sensorReady;
     if(inviteBox){inviteBox.textContent=isHost?inviteUrl():`Sala ${roomCode}`;inviteBox.classList.toggle("hidden",!isHost)}
     copyInvite?.classList.toggle("hidden",!isHost);
-    setStatus(isHost?((state.players?.length||0)<2?`Compartilhe o link da sala.${freeSelection?" Modo Livre: "+freeSelection:""}`:phoneMode&&!sensorReady?"Modo celular: todos os jogadores precisam parear e ativar o próprio controle.":freeSelection?"Modo Livre pronto. Inicie para abrir diretamente o minigame selecionado.":"Pronto. Todos jogarão no próprio navegador."):phoneMode&&!sensorReady?"Pareie seu celular-controle abaixo e ative os sensores.":"Aguarde o host iniciar a partida.");
+    setStatus(isHost?((state.players?.length||0)<2?`Compartilhe o link da sala.${freeSelection?" Modo Livre: "+freeSelection:""}`:phoneMode&&!sensorReady?"Modo celular: todos precisam parear o controle e tocar em Pronto.":freeSelection?"Modo Livre pronto. Inicie para abrir diretamente o minigame selecionado.":"Pronto. Todos jogarão no próprio navegador."):phoneMode&&!sensorReady?"Pareie seu celular-controle abaixo e toque em Pronto.":"Aguarde o host iniciar a partida.");
   }
 
   function mountReplicaDice(){
@@ -262,10 +262,50 @@
     return scene;
   }
   async function animateReplicaDice(value,serial){
-    const result=Math.max(1,Math.min(10,Number(value||1)));if(!serial||serial===lastReplicaRollSerial)return;lastReplicaRollSerial=serial;
-    const scene=mountReplicaDice();let ticker=0;const cycle=setInterval(()=>{ticker=ticker%10+1;if(diceNumber)diceNumber.textContent=String(ticker)},64);
-    try{const face=((result-1)%6)+1;if(scene&&window.Dice3D?.rollTo){scene.classList.add("is-rolling");await window.Dice3D.rollTo(face);window.Dice3D.setFace?.(face)}else await new Promise(r=>setTimeout(r,700))}catch{}finally{clearInterval(cycle);scene?.classList.remove("is-rolling")}
-    if(diceNumber)diceNumber.textContent=String(result);if(diceResult)diceResult.textContent=`Saiu ${result}!`;
+    const result=Math.max(1,Math.min(10,Number(value||1)));
+    if(!serial||serial===lastReplicaRollSerial)return;
+    lastReplicaRollSerial=serial;
+    const scene=mountReplicaDice();
+    const started=performance.now();
+    let ticker=Math.max(1,Math.min(10,Math.floor(Math.random()*10)+1)),timer=0,stopped=false;
+    const cycle=()=>{
+      if(stopped)return;
+      const elapsed=performance.now()-started;
+      const delay=92+Math.random()*76+Math.min(145,elapsed*.10);
+      timer=setTimeout(()=>{
+        let next=ticker;
+        while(next===ticker)next=Math.floor(Math.random()*10)+1;
+        ticker=next;
+        if(diceNumber){
+          diceNumber.classList.add("is-number-shifting");
+          setTimeout(()=>{diceNumber.textContent=String(next);diceNumber.classList.remove("is-number-shifting")},30);
+        }
+        cycle();
+      },delay);
+    };
+    cycle();
+    try{
+      if(scene&&window.Dice3D?.rollTo){
+        scene.classList.add("is-rolling");
+        prototypeDiceMount?.classList.add("is-rolling");
+        await window.Dice3D.rollTo(((result-1)%6)+1);
+        window.__pendingDiceFace=1;
+        window.Dice3D.setFace?.(1);
+        await new Promise(r=>setTimeout(r,90));
+        window.Dice3D.setFace?.(1);
+      }else await new Promise(r=>setTimeout(r,850));
+    }catch{}finally{
+      stopped=true;
+      clearTimeout(timer);
+      scene?.classList.remove("is-rolling");
+      prototypeDiceMount?.classList.remove("is-rolling");
+    }
+    if(diceNumber){
+      diceNumber.textContent=String(result);
+      diceNumber.classList.add("is-result");
+      setTimeout(()=>diceNumber.classList.remove("is-result"),520);
+    }
+    if(diceResult)diceResult.textContent=`Saiu ${result}!`;
   }
 
   function ensureSpaces(){

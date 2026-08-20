@@ -225,6 +225,15 @@ const mobileDanceScoreBarFill = document.getElementById("mobileDanceScoreBarFill
 const mobileDanceScoreBar = document.getElementById("mobileDanceScoreBar");
 const boardControllerArea = document.getElementById("boardControllerArea");
 
+function setSensorReadyButton(label = "Pronto", detail = "Preparar movimento e sensores", options = {}) {
+  if (!enableSensorsBtn) return;
+  const disabled = Boolean(options.disabled);
+  const state = String(options.state || "");
+  enableSensorsBtn.disabled = disabled;
+  enableSensorsBtn.dataset.readyState = state;
+  enableSensorsBtn.innerHTML = `<span class="final-ready-check" aria-hidden="true">${state === "ready" ? "✓" : state === "loading" ? "…" : "✓"}</span><span class="final-ready-copy"><b>${label}</b><small>${detail}</small></span>`;
+}
+
 let myPlayerId = "";
 let joinedRoom = "";
 let state = null;
@@ -261,6 +270,7 @@ window.STEAMPartyControllerBridge = Object.freeze({
   getRoomState: () => state,
   requestSensors: () => requestAndStartSensors(),
   sensorsGranted: () => Boolean(sensorPermissionGranted),
+  sensorsReady: () => Boolean(sensorPermissionGranted && (sensorObserved.motion || sensorObserved.orientation || sensorObserved.gyro || sensorObserved.accelerometer || sensorObserved.orientationFallback)),
   sensorsStreaming: () => Boolean(sensorStreaming),
   latestIntensity: () => Number(sensorLatestIntensity || 0),
   applyDanceSession: payload => phoneApplyDanceSession(payload),
@@ -1199,10 +1209,7 @@ function showSensorReceivingUi() {
       ? "Giroscópio/aceleração detectados. O julgamento dos movimentos acontece neste celular."
       : "Movimento detectado. A rotação pode ser estimada pela orientação; a nota continua sendo calculada localmente.";
   }
-  if (enableSensorsBtn) {
-    enableSensorsBtn.textContent = "Sensores ativados";
-    enableSensorsBtn.disabled = true;
-  }
+  setSensorReadyButton("Pronto ✓", "Movimento preparado neste celular", { disabled:true, state:"ready" });
   if (sensorNotice) {
     const cls = phoneDanceClassifierSummary.total ? ` • ${phoneDanceClassifierSummary.loaded}/${phoneDanceClassifierSummary.total} ${phoneDanceClassifierSummary.format}` : "";
     sensorNotice.textContent = sensorObserved.gyro
@@ -1212,7 +1219,7 @@ function showSensorReceivingUi() {
 }
 
 function sendLatestSensorSample(source = "mixed", interval = 0) {
-  if (!sensorStreaming || !sensorModeRequested) return;
+  if (!sensorStreaming) return;
   const now = performance.now();
   if (now - sensorLastSentAt < 26) return;
   sensorLastSentAt = now;
@@ -1238,15 +1245,17 @@ function sendLatestSensorSample(source = "mixed", interval = 0) {
   };
 
   phoneUpdateCalibration(sample);
-  // CRÍTICO: primeiro pontua localmente. Isto não depende de ping, Render ou PC.
-  phoneCollectDanceSample(sample);
+  if (sensorModeRequested) {
+    // CRÍTICO: primeiro pontua localmente. Isto não depende de ping, Render ou PC.
+    phoneCollectDanceSample(sample);
 
-  // Telemetria visual bem mais leve; se a rede cair ela simplesmente é descartada.
-  if (socket?.connected && joinedRoom && now - phoneDanceLastTelemetryAt >= 240) {
-    phoneDanceLastTelemetryAt = now;
-    const emitter = socket.volatile || socket;
-    if (onlineFullControllerMode) emitter.emit("online:controller-sensor-data", { sample });
-    else emitter.emit("controller:sensor-data", { roomCode: joinedRoom, sample });
+    // Telemetria visual bem mais leve; se a rede cair ela simplesmente é descartada.
+    if (socket?.connected && joinedRoom && now - phoneDanceLastTelemetryAt >= 240) {
+      phoneDanceLastTelemetryAt = now;
+      const emitter = socket.volatile || socket;
+      if (onlineFullControllerMode) emitter.emit("online:controller-sensor-data", { sample });
+      else emitter.emit("controller:sensor-data", { roomCode: joinedRoom, sample });
+    }
   }
 }
 
@@ -1375,7 +1384,7 @@ function stopGenericSensors() {
   sensorGenericSensors = [];
 }
 
-function stopSensorStreaming({ keepPermission = true } = {}) {
+function stopSensorStreaming({ keepPermission = true, keepReady = false } = {}) {
   window.removeEventListener("devicemotion", handleDeviceMotion);
   window.removeEventListener("deviceorientation", handleDeviceOrientation);
   stopGenericSensors();
@@ -1385,7 +1394,7 @@ function stopSensorStreaming({ keepPermission = true } = {}) {
   sensorModePanel?.classList.remove("sensors-ready");
   sensorOrientationPrevious = null;
   if (!keepPermission) sensorPermissionGranted = false;
-  reportSensorStatus(false, true);
+  reportSensorStatus(Boolean(keepReady && sensorPermissionGranted && (sensorObserved.motion || sensorObserved.orientation || sensorObserved.gyro || sensorObserved.accelerometer || sensorObserved.orientationFallback)), true);
   sensorModePanel?.classList.remove("is-live");
   renderLocalSensorMeter(0);
 }
@@ -1430,13 +1439,11 @@ function startSensorStreaming() {
   setSensorBadge("waiting", "Testando");
   if (sensorModeTitle) sensorModeTitle.textContent = "Procurando sensores…";
   if (sensorModeText) sensorModeText.textContent = "Mova e gire o celular por alguns segundos para confirmar acelerômetro e giroscópio.";
-  if (enableSensorsBtn) {
-    enableSensorsBtn.textContent = "Testando sensores…";
-    enableSensorsBtn.disabled = true;
-  }
+  setSensorReadyButton("Preparando…", "Mova o celular por um instante", { disabled:true, state:"loading" });
   if (sensorNotice) sensorNotice.textContent = "O sistema tenta DeviceMotion, DeviceOrientation e a Generic Sensor API automaticamente.";
   renderLocalSensorMeter(0);
-  reportSensorStatus(true, true);
+  // Só marca "Pronto" no servidor quando chegar a primeira leitura real.
+  // markObserved() fará reportSensorStatus(true) assim que o aparelho responder.
 
   sensorWatchdogTimer = setTimeout(() => {
     if (!sensorStreaming || sensorPacketCount > 0) return;
@@ -1444,10 +1451,7 @@ function startSensorStreaming() {
     sensorModePanel?.classList.add("is-error");
     if (sensorModeTitle) sensorModeTitle.textContent = "Sensor não enviou dados";
     if (sensorModeText) sensorModeText.textContent = "A API existe, mas nenhuma leitura chegou. Isso costuma ser permissão do navegador, HTTPS ou acesso a sensores desativado no aparelho.";
-    if (enableSensorsBtn) {
-      enableSensorsBtn.disabled = false;
-      enableSensorsBtn.textContent = "Tentar sensores novamente";
-    }
+    setSensorReadyButton("Tentar novamente", "Não recebemos movimento ainda", { disabled:false, state:"retry" });
     if (sensorNotice) {
       const extra = sensorGenericErrors.length ? ` Erros: ${[...new Set(sensorGenericErrors)].join(", ")}.` : "";
       sensorNotice.textContent = `No Chrome/Android, confira a permissão “Sensores de movimento”. No iPhone/iPad, aceite Movimento e Orientação ao tocar no botão.${extra}`;
@@ -1458,10 +1462,6 @@ function startSensorStreaming() {
 
 async function requestAndStartSensors() {
   const caps = getSensorCapabilities();
-  if (!sensorModeRequested) {
-    if (sensorModeText) sensorModeText.textContent = "O computador ainda não ativou o Sensor Lab.";
-    return;
-  }
   if (!caps.secureContext) {
     setSensorPanelError(
       "Sensores de movimento exigem uma página segura neste navegador.",
@@ -1475,8 +1475,7 @@ async function requestAndStartSensors() {
     return;
   }
 
-  enableSensorsBtn.disabled = true;
-  enableSensorsBtn.textContent = "Solicitando permissão…";
+  setSensorReadyButton("Preparando…", "Autorize Movimento e Orientação se o navegador pedir", { disabled:true, state:"loading" });
   try {
     const requests = [];
     if (window.DeviceMotionEvent && typeof window.DeviceMotionEvent.requestPermission === "function") {
@@ -1494,8 +1493,7 @@ async function requestAndStartSensors() {
     startSensorStreaming();
   } catch (error) {
     sensorPermissionGranted = false;
-    enableSensorsBtn.disabled = false;
-    enableSensorsBtn.textContent = "Tentar ativar sensores novamente";
+    setSensorReadyButton("Tentar novamente", "Permita Movimento e Orientação no navegador", { disabled:false, state:"retry" });
     setSensorPanelError("A permissão de movimento/orientação não foi concedida.", "Toque novamente no botão e permita Movimento e Orientação nas permissões do navegador.");
   }
 }
@@ -1581,7 +1579,7 @@ function applySensorLabState(nextState, me) {
   sensorModePanel?.classList.toggle("hidden", !isSensorLab);
   if (!isSensorLab) {
     sensorModeRequested = false;
-    stopSensorStreaming();
+    stopSensorStreaming({ keepPermission:true, keepReady:true });
     return false;
   }
 
@@ -1605,9 +1603,8 @@ function applySensorLabState(nextState, me) {
     setSensorBadge("waiting", "Aguardando");
     sensorModePanel?.classList.remove("is-error", "is-live");
     sensorModeTitle.textContent = "Celular conectado ao Sensor Lab";
-    sensorModeText.textContent = "Aguarde o computador ativar os sensores. Depois toque no botão para liberar o movimento.";
-    enableSensorsBtn.disabled = true;
-    enableSensorsBtn.textContent = "Aguardando o computador";
+    sensorModeText.textContent = "Aguarde o jogo pedir movimento. Quando liberar, toque em Pronto uma única vez.";
+    setSensorReadyButton("Aguardando", "O jogo ainda não pediu movimento", { disabled:true, state:"waiting" });
     sensorNotice.textContent = window.isSecureContext ? "Conexão segura detectada." : "Este endereço não está em HTTPS; alguns navegadores podem bloquear sensores.";
     return true;
   }
@@ -1617,10 +1614,9 @@ function applySensorLabState(nextState, me) {
   } else {
     setSensorBadge("waiting", "Permissão");
     sensorModePanel?.classList.remove("is-error", "is-live");
-    sensorModeTitle.textContent = "Ative os sensores";
-    sensorModeText.textContent = "O computador está pronto. Ative os sensores: classifiers, recalibração Wii→celular e julgamento serão processados neste celular.";
-    enableSensorsBtn.disabled = false;
-    enableSensorsBtn.textContent = "Ativar sensores deste celular";
+    sensorModeTitle.textContent = "Prepare seu celular";
+    sensorModeText.textContent = "O computador está pronto. Toque em Pronto uma vez; depois o movimento e o julgamento ficam preparados neste celular.";
+    setSensorReadyButton("Pronto", "Toque uma vez para preparar o movimento", { disabled:false, state:"idle" });
     sensorNotice.textContent = window.isSecureContext ? "Pronto para solicitar a permissão do navegador." : "Recomendado abrir esta página por HTTPS para liberar os sensores.";
   }
   return true;
@@ -1973,7 +1969,7 @@ if (socket) {
     if (!joinedRoom || payload?.roomCode !== joinedRoom) return;
     sensorModeRequested = Boolean(payload.enabled);
     if (payload.state) applyState(payload.state);
-    if (!sensorModeRequested) stopSensorStreaming();
+    if (!sensorModeRequested) stopSensorStreaming({ keepPermission:true, keepReady:true });
   });
 
   socket.on("room:state", nextState => {

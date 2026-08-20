@@ -1688,3 +1688,180 @@ body:has(#danceDevScreen.party-dance-session:not(.hidden)){
 @media(min-width:781px) and (max-width:1050px){
   .final-board-center.final-board-hud-horizontal{width:min(730px,80%)!important;grid-template-columns:minmax(140px,.85fr) minmax(210px,1.2fr) 122px!important}
 }
+
+
+/* ==========================================================
+   V46 — polimento visual, fundo temático, dado e sensores
+   ========================================================== */
+#finalShell{
+  overflow:hidden;
+  isolation:isolate;
+}
+#finalShell > .final-view{
+  z-index:2;
+}
+.final-theme-decor-layer{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+  color:var(--accent,#69f1c4);
+  opacity:.13;
+}
+.final-theme-decor{
+  position:absolute;
+  filter:drop-shadow(0 12px 28px rgba(0,0,0,.18));
+  animation:finalThemeFloat 9s ease-in-out infinite alternate;
+}
+.final-theme-decor-satellite{width:130px;right:5%;top:8%;rotate:8deg}
+.final-theme-decor-drone{width:138px;left:4%;top:31%;rotate:-7deg;animation-delay:-2.4s}
+.final-theme-decor-mountain{width:170px;right:8%;bottom:8%;opacity:.75;animation-delay:-4.2s}
+.final-theme-decor-water{width:190px;left:3%;bottom:9%;opacity:.7;animation-delay:-5.8s}
+.final-theme-decor-sensor{right:23%;top:47%;font-size:66px;font-weight:200;opacity:.55;animation-delay:-3.2s}
+.final-theme-decor-map{left:24%;top:10%;font-size:58px;opacity:.48;animation-delay:-6.3s}
+@keyframes finalThemeFloat{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(0,-12px,0) scale(1.035)}
+}
+.final-menu-view::after,
+#finalFreeMenu::after,
+#finalHowMenu::after,
+#finalProfilesMenu::after,
+#finalSettingsMenu::after,
+#finalCreditsMenu::after{
+  content:"";
+  position:absolute;
+  inset:6% 4%;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 15% 18%,rgba(105,241,196,.08),transparent 26%),
+    radial-gradient(circle at 82% 72%,rgba(74,194,255,.07),transparent 24%);
+  border-radius:40px;
+}
+
+/* O botão Controle recebe uma identidade própria, mas continua dentro do menu. */
+.final-controller-menu-button{
+  border-color:rgba(80,220,208,.26)!important;
+  background:
+    linear-gradient(135deg,rgba(51,205,190,.09),rgba(66,134,255,.055)),
+    var(--panel,rgba(7,29,31,.82))!important;
+}
+.final-controller-menu-button .final-button-icon{
+  box-shadow:0 0 0 1px rgba(105,241,196,.18),0 10px 24px rgba(0,0,0,.12);
+}
+
+/* Dado V46: visor maior cobre toda a face frontal e parece parte do cubo. */
+.final-prototype-dice-mount{
+  perspective:720px;
+}
+.final-dice-number-overlay{
+  width:70px!important;
+  min-width:70px!important;
+  height:70px!important;
+  border-radius:15px!important;
+  translate:-50% -53%!important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.99),rgba(218,239,234,.99))!important;
+  border:1px solid rgba(255,255,255,.98)!important;
+  box-shadow:
+    inset 0 0 0 2px rgba(14,67,61,.055),
+    inset 0 -7px 16px rgba(13,88,72,.07),
+    0 7px 18px rgba(0,0,0,.20)!important;
+  font-size:2rem!important;
+  letter-spacing:-.055em;
+  font-variant-numeric:tabular-nums;
+  will-change:opacity,filter,transform;
+}
+.final-dice-number-overlay::after{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:11px;
+  border:1px solid rgba(10,70,62,.07);
+  pointer-events:none;
+}
+.final-prototype-dice-mount.is-rolling .final-dice-number-overlay,
+.final-prototype-dice-mount .is-rolling~.final-dice-number-overlay{
+  opacity:.69!important;
+  filter:blur(.18px) saturate(.9)!important;
+  transform:scale(.955)!important;
+}
+.final-dice-number-overlay.is-number-shifting{
+  opacity:.32!important;
+  filter:blur(1.5px)!important;
+  transform:scale(.975)!important;
+}
+.final-dice-number-overlay.is-result{
+  animation:finalDiceResultV46 .54s cubic-bezier(.16,.86,.23,1.18)!important;
+}
+@keyframes finalDiceResultV46{
+  0%{transform:scale(.86);filter:brightness(1.45);box-shadow:0 0 0 rgba(105,241,196,0)}
+  55%{transform:scale(1.12);filter:brightness(1.12);box-shadow:0 0 30px rgba(105,241,196,.34)}
+  100%{transform:scale(1);filter:none}
+}
+
+/* Minigames de movimento: cartões mais vivos e claramente diferentes. */
+.final-motion-game{
+  overflow:hidden;
+}
+.final-motion-game::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(115deg,transparent 0 44%,rgba(255,255,255,.025) 44% 46%,transparent 46% 100%);
+  background-size:44px 44px;
+  opacity:.9;
+}
+.final-motion-game[data-motion-game="landslide-rescue"]{
+  background:
+    radial-gradient(circle at 78% 12%,rgba(229,190,103,.12),transparent 24%),
+    linear-gradient(180deg,rgba(39,38,25,.98),rgba(16,24,20,.99));
+  border-color:rgba(225,194,115,.30);
+}
+.final-motion-game[data-motion-game="landslide-rescue"] .final-motion-water{
+  background:linear-gradient(90deg,#b48a58,#dacd8d);
+  opacity:.24;
+}
+.final-motion-game[data-motion-game="landslide-rescue"] .final-motion-progress{
+  background:linear-gradient(90deg,rgba(105,241,196,.27),rgba(230,210,130,.10));
+}
+.final-motion-game[data-motion-game="storm-scan"]{
+  background:
+    radial-gradient(circle at 16% 8%,rgba(114,184,255,.13),transparent 28%),
+    linear-gradient(180deg,rgba(22,29,55,.98),rgba(9,15,33,.99));
+  border-color:rgba(119,162,255,.30);
+}
+.final-motion-game[data-motion-game="storm-scan"] .final-motion-water{
+  background:repeating-linear-gradient(90deg,#7ca8ff 0 13px,#a87cff 13px 26px);
+  opacity:.20;
+}
+.final-motion-game[data-motion-game="storm-scan"] .final-motion-progress{
+  background:linear-gradient(90deg,rgba(92,214,255,.28),rgba(164,126,255,.12));
+}
+.final-motion-game[data-motion-game="storm-scan"] .final-motion-track::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:rgba(143,224,255,.72);
+  box-shadow:0 0 18px rgba(143,224,255,.65);
+  animation:finalRadarSweep 1.55s ease-in-out infinite alternate;
+}
+@keyframes finalRadarSweep{from{left:12%}to{left:86%}}
+
+@media(max-width:760px){
+  .final-theme-decor-satellite{width:94px;right:-2%;top:7%}
+  .final-theme-decor-drone{width:96px;left:-4%;top:36%}
+  .final-theme-decor-mountain{width:120px;right:-1%;bottom:5%}
+  .final-theme-decor-water{width:130px;left:-3%;bottom:8%}
+  .final-theme-decor-sensor,.final-theme-decor-map{font-size:42px}
+  .final-dice-number-overlay{width:64px!important;min-width:64px!important;height:64px!important;font-size:1.82rem!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .final-theme-decor,.final-dice-number-overlay.is-result,.final-motion-game[data-motion-game="storm-scan"] .final-motion-track::after{animation:none!important}
+}

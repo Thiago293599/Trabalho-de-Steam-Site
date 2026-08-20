@@ -29,6 +29,16 @@
     board: qs("#finalBoardView")
   };
 
+  const decorTemplate = qs(".final-theme-decor-layer", shell);
+  if (decorTemplate) {
+    Object.values(views).filter(Boolean).forEach(view => {
+      const clone = decorTemplate.cloneNode(true);
+      clone.classList.add("is-view-decor");
+      view.prepend(clone);
+    });
+    decorTemplate.remove();
+  }
+
   let selectedMatchMode = "local";
   let selectedFreeMode = "local";
   let editingProfileId = "";
@@ -501,7 +511,7 @@
       controlMethod: phone ? "phone-motion" : "keyboard",
       bots: Array.from({length: Math.max(0,4-effectiveHumans)}, (_,i)=>({slot:effectiveHumans+i+1,difficulty:"normal"})),
       minigamesEnabled: true,
-      motionMinigamesEnabled: phone || ["flood-escape","wildfire-pump","drone-balance","dam-alarm"].includes(minigameId),
+      motionMinigamesEnabled: phone || ["flood-escape","wildfire-pump","drone-balance","dam-alarm","landslide-rescue","storm-scan"].includes(minigameId),
       rounds: 1,
       activeProfileId: activeProfileId(),
       freeMode: true,
@@ -597,6 +607,14 @@
   });
 
   qsa("[data-final-nav]").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.finalNav)));
+  qs("#finalOpenController")?.addEventListener("click", () => {
+    try {
+      const url = new URL("controller.html", window.location.href);
+      window.location.href = url.toString();
+    } catch {
+      window.location.href = "controller.html";
+    }
+  });
   qsa("[data-final-back]").forEach(btn => btn.addEventListener("click", () => showView(btn.dataset.finalBack)));
   qsa("[data-match-mode]").forEach(btn => btn.addEventListener("click", () => selectMatchMode(btn.dataset.matchMode)));
 

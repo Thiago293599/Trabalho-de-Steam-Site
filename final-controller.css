@@ -186,3 +186,278 @@ body.controller-portrait-only .final-orientation-phone{
 /* V43 - confirmacao de fluxo pelo celular */
 .final-party-phone-continue{width:100%;min-height:58px;margin-top:16px;font-size:1.05rem;font-weight:950;border-radius:18px}
 .final-party-phone-continue.hidden{display:none!important}
+
+
+/* ==========================================================
+   V46 — identidade visual EcoResgate no controle + botão Pronto
+   ========================================================== */
+html,body{
+  min-height:100%;
+}
+body.controller-portrait-only,
+body{
+  background:
+    radial-gradient(circle at 15% 0%,rgba(48,188,170,.18),transparent 32%),
+    radial-gradient(circle at 90% 20%,rgba(54,145,223,.14),transparent 28%),
+    linear-gradient(180deg,#051b1f 0%,#041316 52%,#020b0d 100%)!important;
+  color:#effffb;
+}
+.controller-theme-background{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  overflow:hidden;
+}
+.controller-theme-grid{
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(94,226,207,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(94,226,207,.035) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:linear-gradient(to bottom,black,transparent 88%);
+}
+.controller-theme-orb{
+  position:absolute;
+  width:240px;height:240px;border-radius:50%;
+  border:1px solid rgba(105,241,196,.10);
+  box-shadow:0 0 0 28px rgba(105,241,196,.025),0 0 0 58px rgba(105,241,196,.018);
+  animation:controllerRadarPulse 6s ease-in-out infinite alternate;
+}
+.controller-theme-orb-a{right:-115px;top:12%}
+.controller-theme-orb-b{left:-145px;bottom:5%;animation-delay:-2.6s}
+.controller-theme-icon{
+  position:absolute;
+  color:rgba(125,243,214,.13);
+  font-weight:900;
+  user-select:none;
+  animation:controllerThemeFloat 7.5s ease-in-out infinite alternate;
+}
+.controller-theme-icon-satellite{right:8%;top:8%;font-size:3.4rem;rotate:18deg}
+.controller-theme-icon-sensor{left:7%;top:29%;font-size:3.1rem;animation-delay:-2s}
+.controller-theme-icon-water{right:6%;bottom:18%;font-size:4rem;animation-delay:-4s}
+.controller-theme-icon-map{left:8%;bottom:8%;font-size:3rem;animation-delay:-5.4s}
+@keyframes controllerRadarPulse{to{scale:1.08;opacity:.7}}
+@keyframes controllerThemeFloat{to{transform:translateY(-12px) rotate(3deg)}}
+
+.controller-shell{
+  position:relative;
+  z-index:2;
+  width:min(100%,480px)!important;
+  padding:18px 14px max(28px,env(safe-area-inset-bottom))!important;
+  margin:0 auto!important;
+}
+.controller-game-brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  width:min(100%,440px);
+  margin:4px auto 14px;
+  padding:9px 12px;
+  border-radius:18px;
+  border:1px solid rgba(105,241,196,.13);
+  background:rgba(4,24,27,.58);
+  backdrop-filter:blur(14px);
+  box-shadow:0 16px 40px rgba(0,0,0,.18);
+}
+.controller-game-mark{
+  width:46px;height:46px;border-radius:15px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#72f0ca,#4ecfd9);
+  color:#052923;
+  font-weight:1000;
+  letter-spacing:-.08em;
+  box-shadow:0 8px 22px rgba(65,220,193,.20);
+}
+.controller-game-brand>div:last-child{display:grid;line-height:1.03}
+.controller-game-brand small{font-size:.60rem;letter-spacing:.16em;font-weight:900;color:#74dcca}
+.controller-game-brand strong{font-size:1.05rem;margin-top:3px}
+.controller-game-brand span{font-size:.74rem;color:rgba(225,249,244,.62);margin-top:3px}
+
+.controller-card{
+  border:1px solid rgba(107,224,204,.15)!important;
+  border-radius:28px!important;
+  background:
+    linear-gradient(160deg,rgba(12,47,50,.88),rgba(4,24,27,.94))!important;
+  backdrop-filter:blur(20px)!important;
+  box-shadow:0 26px 70px rgba(0,0,0,.34)!important;
+}
+.controller-card h1,.controller-card h2{letter-spacing:-.035em}
+.controller-card .subtitle{color:rgba(220,244,239,.67)!important}
+.controller-card input,
+.controller-card select{
+  border:1px solid rgba(113,220,202,.16)!important;
+  background:rgba(0,0,0,.20)!important;
+  color:#f4fffc!important;
+  outline:none;
+}
+.controller-card input:focus,
+.controller-card select:focus{
+  border-color:rgba(105,241,196,.62)!important;
+  box-shadow:0 0 0 3px rgba(105,241,196,.08)!important;
+}
+.controller-card .primary,
+.controller-card .roll-button{
+  background:linear-gradient(135deg,#69f1c4,#48d7d0)!important;
+  color:#032a24!important;
+  border:0!important;
+  box-shadow:0 10px 28px rgba(64,218,190,.18)!important;
+}
+.controller-card .primary:active,
+.controller-card .roll-button:active{transform:translateY(1px) scale(.99)}
+.controller-back{
+  background:rgba(255,255,255,.055)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  color:#dff9f3!important;
+}
+.connection-badge{
+  border-color:rgba(105,241,196,.18)!important;
+  background:rgba(105,241,196,.075)!important;
+  color:#8cf5d5!important;
+}
+
+/* Botão bonito de preparação: o usuário só vê Pronto; a permissão fica por trás. */
+.final-controller-ready-button{
+  width:100%!important;
+  min-height:68px!important;
+  display:grid!important;
+  grid-template-columns:44px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:11px!important;
+  padding:10px 14px!important;
+  border-radius:20px!important;
+  text-align:left!important;
+  background:
+    radial-gradient(circle at 15% 0%,rgba(255,255,255,.24),transparent 32%),
+    linear-gradient(135deg,#6cf0c7,#44d6cc)!important;
+  color:#062c26!important;
+  border:1px solid rgba(255,255,255,.36)!important;
+  box-shadow:0 13px 32px rgba(38,210,179,.19)!important;
+}
+.final-controller-ready-button .final-ready-check{
+  width:42px;height:42px;border-radius:50%;
+  display:grid;place-items:center;
+  background:rgba(5,58,49,.12);
+  border:1px solid rgba(4,63,53,.13);
+  font-size:1.35rem;font-weight:1000;
+}
+.final-controller-ready-button .final-ready-copy{display:grid;gap:2px}
+.final-controller-ready-button .final-ready-copy b{font-size:1.08rem;line-height:1}
+.final-controller-ready-button .final-ready-copy small{font-size:.76rem;opacity:.70;line-height:1.25}
+.final-controller-ready-button[data-ready-state="loading"] .final-ready-check{animation:finalReadySpin .8s linear infinite}
+.final-controller-ready-button[data-ready-state="ready"]{
+  background:linear-gradient(135deg,#78f2ca,#6ae6a6)!important;
+}
+.final-controller-ready-button[data-ready-state="retry"]{
+  background:linear-gradient(135deg,#ffd27a,#f2b967)!important;
+}
+.final-controller-ready-button:disabled{opacity:.82!important}
+@keyframes finalReadySpin{to{transform:rotate(360deg)}}
+
+/* Pronto antes do minigame em vez do antigo botão técnico de sensores. */
+.final-motion-ready-card{
+  display:grid;
+  justify-items:center;
+  gap:10px;
+  padding:20px 14px;
+  border:1px solid rgba(105,241,196,.15);
+  border-radius:24px;
+  background:rgba(1,18,22,.52);
+}
+.final-motion-ready-card>strong{font-size:1.22rem}
+.final-motion-ready-card>small{max-width:300px;line-height:1.45;color:rgba(221,246,241,.68)}
+.final-motion-ready-icon{
+  width:72px;height:72px;border-radius:24px;
+  display:grid;place-items:center;
+  font-size:2.25rem;font-weight:1000;
+  background:linear-gradient(145deg,rgba(105,241,196,.16),rgba(69,163,255,.10));
+  border:1px solid rgba(105,241,196,.16);
+  color:#79f0d0;
+}
+.final-motion-ready-button{margin-top:3px!important}
+
+/* Minigames de movimento no celular */
+.final-party-phone-motion-meter{
+  position:relative;
+  overflow:hidden;
+  gap:13px!important;
+  padding:18px!important;
+  border-radius:25px!important;
+  background:
+    radial-gradient(circle at 75% 0%,rgba(93,214,255,.11),transparent 31%),
+    rgba(3,22,28,.82)!important;
+  border:1px solid rgba(105,241,196,.16)!important;
+}
+.final-motion-phone-coach{
+  display:grid;
+  justify-items:center;
+  gap:4px;
+  margin-bottom:2px;
+}
+.final-motion-phone-coach>span{
+  width:64px;height:64px;border-radius:22px;
+  display:grid;place-items:center;
+  font-size:2rem;font-weight:1000;
+  color:#7bf0d1;
+  background:rgba(105,241,196,.08);
+  border:1px solid rgba(105,241,196,.14);
+}
+.final-motion-phone-coach>small{
+  font-weight:900;
+  letter-spacing:.02em;
+  color:rgba(233,253,249,.82)!important;
+}
+.final-party-phone-motion-track{
+  height:68px!important;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(0,0,0,.28)!important;
+}
+.final-party-phone-motion-fill{
+  background:linear-gradient(90deg,#49d9d0,#78efbd)!important;
+  box-shadow:0 0 26px rgba(83,228,199,.18);
+}
+.final-motion-runner-dot{
+  color:white;
+  text-shadow:0 2px 10px rgba(0,0,0,.7);
+}
+.final-party-phone-motion-meter.motion-shake .final-motion-phone-coach>span{animation:motionCoachShake .42s ease-in-out infinite alternate}
+.final-party-phone-motion-meter.motion-level .final-motion-phone-coach>span{animation:motionCoachLevel 1.25s ease-in-out infinite}
+.final-party-phone-motion-meter.motion-alternate .final-motion-phone-coach>span{animation:motionCoachAlternate .78s ease-in-out infinite alternate}
+.final-party-phone-motion-meter.motion-lean .final-motion-phone-coach>span{animation:motionCoachLean 1.55s ease-in-out infinite}
+.final-party-phone-motion-meter.motion-rotate .final-motion-phone-coach>span{animation:motionCoachRotate 1.25s linear infinite}
+@keyframes motionCoachShake{to{transform:translateY(-7px) rotate(-4deg)}}
+@keyframes motionCoachLevel{50%{transform:rotate(5deg)}}
+@keyframes motionCoachAlternate{from{transform:translateX(-10px) rotate(-8deg)}to{transform:translateX(10px) rotate(8deg)}}
+@keyframes motionCoachLean{0%,100%{transform:translateX(-9px) rotate(-8deg)}50%{transform:translateX(9px) rotate(8deg)}}
+@keyframes motionCoachRotate{to{transform:rotate(360deg)}}
+
+/* Just Dance mantém tela limpa; o Pronto central herda o novo visual. */
+.final-dance-controller-clean .final-controller-ready-button{
+  width:min(82vw,310px)!important;
+  min-width:0!important;
+  z-index:30!important;
+}
+.final-dance-controller-clean.sensors-ready .final-controller-ready-button{display:none!important}
+
+/* Pequeno brilho de foco no turno */
+.final-party-phone-board .roll-button.your-turn{
+  animation:controllerYourTurn 1.25s ease-in-out infinite alternate;
+}
+@keyframes controllerYourTurn{
+  from{box-shadow:0 10px 28px rgba(64,218,190,.16)!important}
+  to{box-shadow:0 10px 34px rgba(74,232,201,.34),0 0 0 4px rgba(105,241,196,.055)!important}
+}
+
+@media(max-width:390px){
+  .controller-shell{padding-inline:9px!important}
+  .controller-game-brand{width:calc(100% - 4px)}
+  .controller-card{border-radius:24px!important}
+  .final-controller-ready-button{min-height:64px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .controller-theme-orb,.controller-theme-icon,
+  .final-controller-ready-button[data-ready-state="loading"] .final-ready-check,
+  .final-party-phone-motion-meter .final-motion-phone-coach>span,
+  .final-party-phone-board .roll-button.your-turn{animation:none!important}
+}
