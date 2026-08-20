@@ -85,6 +85,7 @@
     }
     toast.textContent = message;
     toast.classList.add("is-visible");
+    window.EcoAudio?.sfx?.("notification", { cooldown:420 });
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 2200);
   }
@@ -98,6 +99,7 @@
       renderProfileChip();
       window.STEAMPartySaves?.renderMenuCard?.();
     }
+    window.dispatchEvent(new CustomEvent("eco:view-changed", { detail:{ name } }));
   }
 
   function startGameShell() {

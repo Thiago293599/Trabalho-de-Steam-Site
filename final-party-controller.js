@@ -4,7 +4,7 @@
   const $=s=>document.querySelector(s);
   const panel=$("#finalPartyControllerPanel"),legacy=$("#boardControllerArea"),sensor=$("#sensorModePanel"),round=$("#finalPartyPhoneRound"),score=$("#finalPartyPhoneScore"),kicker=$("#finalPartyPhoneKicker"),title=$("#finalPartyPhoneTitle"),description=$("#finalPartyPhoneDescription"),dice=$("#finalPartyPhoneDice"),roll=$("#finalPartyPhoneRoll"),items=$("#finalPartyPhoneItems"),sensorButton=$("#finalPartyPhoneEnableSensors"),game=$("#finalPartyPhoneBoard"),mini=$("#finalPartyPhoneMinigame"),miniTopic=$("#finalPartyPhoneMiniTopic"),miniTitle=$("#finalPartyPhoneMiniTitle"),question=$("#finalPartyPhoneQuestion"),answers=$("#finalPartyPhoneAnswers"),timer=$("#finalPartyPhoneTimer"),result=$("#finalPartyPhoneResult"),resultTitle=$("#finalPartyPhoneResultTitle"),ranking=$("#finalPartyPhoneRanking"),continueBtn=$("#finalPartyPhoneContinue"),controlScreen=$("#controlScreen"),connection=$("#connectionBadge"),orientationGate=$("#finalControllerOrientationGate"),orientationTitle=$("#finalOrientationTitle"),orientationText=$("#finalOrientationText"),fullscreenBtn=$("#finalEnterFullscreen");
   const socket=bridge.getSocket();
-  let transport=bridge.getTransportMode?.()||"party",gameState=null,lobbyState=null,activeProblemToken="",answeredToken="",timerId=0,danceMode=false,lastMotionToken="",lastMotionMilestone=0;
+  let transport=bridge.getTransportMode?.()||"party",gameState=null,lobbyState=null,activeProblemToken="",answeredToken="",timerId=0,danceMode=false,lastMotionToken="",lastMotionMilestone=0,lastInventorySnapshot=null;
   const myId=()=>bridge.getPlayerId(),room=()=>bridge.getRoomCode();
   const me=()=>gameState?.players?.find(p=>String(p.id)===String(myId()))||null;
 
@@ -72,7 +72,14 @@
   function stopTimer(){clearInterval(timerId);timerId=0}
   function ui(active=true){panel?.classList.toggle("hidden",!active);legacy?.classList.add("hidden");if(active){sensor?.classList.add("hidden");controlScreen?.classList.remove("sensor-mode-active")}}
   function send(type,data={}){if(!socket||!room())return Promise.reject(new Error("Controle desconectado."));const event=transport==="online"?"online:controller-action":"controller:party-action";return new Promise((resolve,reject)=>socket.timeout(6500).emit(event,{roomCode:room(),type,...data,clientTime:Date.now()},(err,res)=>{if(err||!res?.ok){const e=new Error(res?.message||"O servidor não respondeu.");reject(e)}else resolve(res)}))}
-  function renderItems(){if(!items)return;const mine=me(),inv=Array.isArray(mine?.inventory)?mine.inventory:[];items.innerHTML="";if(!inv.length){items.classList.add("hidden");return}items.classList.remove("hidden");inv.forEach(id=>{const meta={gps:["⌖","GPS","Próximo dado: mínimo 6"],map:["▦","Mapa","Avance 3 casas antes do dado"],rescue:["✚","Resgate","Proteção automática"],sensor:["◉","Alerta","Proteção automática"]}[id]||["◆",id,"Equipamento"];const b=document.createElement("button");b.type="button";b.className="final-party-phone-item";b.innerHTML=`<b>${meta[0]} ${meta[1]}</b><small>${meta[2]}</small>`;const usable=["gps","map"].includes(id)&&gameState?.phase==="board"&&gameState.currentPlayerId===myId();b.disabled=!usable;b.onclick=async()=>{b.disabled=true;try{await send("use-item",{itemId:id})}catch(e){description.textContent=e.message;renderItems()}};items.appendChild(b)})}
+  function renderItems(){if(!items)return;const mine=me(),inv=Array.isArray(mine?.inventory)?mine.inventory:[];
+    const currentKey=inv.slice().sort().join("|");
+    if(lastInventorySnapshot!==null){
+      const before=lastInventorySnapshot?lastInventorySnapshot.split("|").filter(Boolean):[];
+      if(inv.length>before.length)window.EcoAudio?.sfx?.("itemReceived",{cooldown:260});
+    }
+    lastInventorySnapshot=currentKey;
+    items.innerHTML="";if(!inv.length){items.classList.add("hidden");return}items.classList.remove("hidden");inv.forEach(id=>{const meta={gps:["⌖","GPS","Próximo dado: mínimo 6"],map:["▦","Mapa","Avance 3 casas antes do dado"],rescue:["✚","Resgate","Proteção automática"],sensor:["◉","Alerta","Proteção automática"]}[id]||["◆",id,"Equipamento"];const b=document.createElement("button");b.type="button";b.className="final-party-phone-item";b.innerHTML=`<b>${meta[0]} ${meta[1]}</b><small>${meta[2]}</small>`;const usable=["gps","map"].includes(id)&&gameState?.phase==="board"&&gameState.currentPlayerId===myId();b.disabled=!usable;b.onclick=async()=>{b.disabled=true;try{await send("use-item",{itemId:id});window.EcoAudio?.sfx?.("itemUsed",{cooldown:180})}catch(e){description.textContent=e.message;renderItems()}};items.appendChild(b)})}
   function renderSensorButton(){
     if(!sensorButton)return;
     const onlineNeeds=transport==="online"&&lobbyState?.controlMethod==="phone-motion";
@@ -172,8 +179,8 @@
       setReadyButton(sensorButton,"Tentar novamente","Não foi possível preparar o movimento","retry",false);
     }
   });
-  window.addEventListener("steam-party-controller-joined",e=>{if(e.detail?.state?.purpose==="party-board-v2"){transport="party";ui(true);kicker.textContent="Party";title.textContent="Controle conectado";description.textContent="Dado, itens, respostas e sensores serão controlados por este celular."}});
-  window.addEventListener("steam-online-controller-joined",e=>{transport="online";lobbyState=e.detail?.state||null;gameState=e.detail?.onlineV2State||null;ui(true);if(connection)connection.textContent="Controle Online";kicker.textContent="Online";title.textContent=gameState?"Controle retomado":"Controle completo conectado";description.textContent="Mantenha este celular aberto durante a partida.";renderSensorButton();if(gameState)render()});
+  window.addEventListener("steam-party-controller-joined",e=>{if(e.detail?.state?.purpose==="party-board-v2"){window.EcoAudio?.sfx?.("playerConnected",{cooldown:500});transport="party";ui(true);kicker.textContent="Party";title.textContent="Controle conectado";description.textContent="Dado, itens, respostas e sensores serão controlados por este celular."}});
+  window.addEventListener("steam-online-controller-joined",e=>{window.EcoAudio?.sfx?.("playerConnected",{cooldown:500});transport="online";lobbyState=e.detail?.state||null;gameState=e.detail?.onlineV2State||null;ui(true);if(connection)connection.textContent="Controle Online";kicker.textContent="Online";title.textContent=gameState?"Controle retomado":"Controle completo conectado";description.textContent="Mantenha este celular aberto durante a partida.";renderSensorButton();if(gameState)render()});
   window.addEventListener("phone-dance-session",e=>{
     const reason=String(e.detail?.reason||"");
     if(!["party","online"].includes(transport))return;
@@ -204,5 +211,5 @@
   socket?.on("online:state",p=>{if(transport!=="online"||p?.roomCode!==room())return;lobbyState=p;renderSensorButton()});
   socket?.on("online:v2-started",p=>{if(transport!=="online"||p?.roomCode!==room())return;gameState=p.state;render()});
   socket?.on("online:v2-state",p=>{if(transport!=="online"||p?.roomCode!==room())return;gameState=p.state;render()});
-  socket?.on("online:room-closed",()=>{if(transport==="online"){stopTimer();title.textContent="Sala encerrada";roll.disabled=true}});
+  socket?.on("online:room-closed",()=>{if(transport==="online"){window.EcoAudio?.sfx?.("playerDisconnected",{cooldown:700});stopTimer();title.textContent="Sala encerrada";roll.disabled=true}});
 })();

@@ -15,7 +15,7 @@
   const path=Array.isArray(mapSpec.path)&&mapSpec.path.length?mapSpec.path:Array.from({length:SPACE_COUNT},(_,i)=>({x:8+(i%14)*6.2,y:12+Math.floor(i/14)*25}));
 
   let socket=null,roomCode="",playerId="",resumeToken="",state=null,isHost=false,v2State=null,wired=false,resuming=false,timer=0,onlineDance=null,danceStartTimer=0,freeSelection="",freeControlPreference="keyboard";
-  let lastReplicaRollSerial=0;
+  let lastReplicaRollSerial=0,lastOnlinePlayersSnapshot=new Map(),lastReplicaPositions=new Map();
   const normalize=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
   const selectedOnline=()=>document.querySelector('[data-match-mode="online"]')?.classList.contains("is-selected");
   const avatar=p=>window.STEAMParty?.avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="42" fill="#65f2c3"/><circle cx="45" cy="52" r="5"/><circle cx="75" cy="52" r="5"/></svg>`;
@@ -24,6 +24,22 @@
   function readSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||"null")}catch{return null}}
   function inviteUrl(){const u=new URL(location.href);u.searchParams.set("onlineRoom",roomCode);u.hash="";return u.toString()}
   function setStatus(t){if(statusEl)statusEl.textContent=t}
+  function soundOnlinePlayers(nextState){
+    const players=Array.isArray(nextState?.players)?nextState.players:[];
+    const next=new Map(players.map(p=>[String(p.id),p.connected!==false]));
+    if(lastOnlinePlayersSnapshot.size){
+      next.forEach((connected,id)=>{
+        const prev=lastOnlinePlayersSnapshot.get(id);
+        if(prev===undefined&&connected)window.EcoAudio?.sfx?.("playerConnected",{cooldown:500});
+        else if(prev===false&&connected)window.EcoAudio?.sfx?.("playerConnected",{cooldown:500});
+      });
+      lastOnlinePlayersSnapshot.forEach((connected,id)=>{
+        const n=next.get(id);
+        if(connected&&(n===false||n===undefined))window.EcoAudio?.sfx?.("playerDisconnected",{cooldown:700});
+      });
+    }
+    lastOnlinePlayersSnapshot=next;
+  }
 
   function ensureDanceWaitOverlay(){
     let overlay=document.querySelector("#finalOnlineDanceWait");
@@ -163,8 +179,8 @@
   function wire(){
     if(wired||!socket)return; wired=true;
     socket.on("connect",()=>{if(roomCode&&playerId&&resumeToken&&!resuming)void resumeCurrentSession(false)});
-    socket.on("online:state",s=>{if(s?.roomCode!==roomCode)return;state=s;isHost=playerId===state.hostPlayerId;renderLobby()});
-    socket.on("online:v2-started",p=>{if(p?.roomCode!==roomCode)return;v2State=p.state;isHost=playerId===(p.hostPlayerId||state?.hostPlayerId);if(isHost){window.STEAMPartyBoard?.startOnlineHost?.(p.config||buildConfig(),state.players,p.hostPlayerId||playerId)}else renderReplica();});
+    socket.on("online:state",s=>{if(s?.roomCode!==roomCode)return;soundOnlinePlayers(s);state=s;isHost=playerId===state.hostPlayerId;if(!s.started)window.dispatchEvent(new CustomEvent("eco:lobby-waiting"));renderLobby()});
+    socket.on("online:v2-started",p=>{if(p?.roomCode!==roomCode)return;window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"board"}}));v2State=p.state;isHost=playerId===(p.hostPlayerId||state?.hostPlayerId);if(isHost){window.STEAMPartyBoard?.startOnlineHost?.(p.config||buildConfig(),state.players,p.hostPlayerId||playerId)}else renderReplica();});
     socket.on("online:v2-state",p=>{if(p?.roomCode!==roomCode)return;v2State=p.state;if(!isHost)renderReplica()});
     socket.on("online:v2-action",action=>{if(!action||action.roomCode!==roomCode||!isHost)return;window.dispatchEvent(new CustomEvent("steam-online-v2-action",{detail:action}))});
     socket.on("online:v2-sensor",payload=>{if(!payload||payload.roomCode!==roomCode||!isHost)return;window.dispatchEvent(new CustomEvent("steam-online-v2-sensor",{detail:payload}))});
@@ -367,6 +383,13 @@
   function renderReplica(){
     if(!v2State||isHost)return; showBoardReplica(); ensureSpaces(); renderReplicaPlayers(); renderReplicaTokens();
     const me=(v2State.players||[]).find(p=>p.id===playerId),current=(v2State.players||[]).find(p=>p.id===v2State.currentPlayerId),phoneControl=state?.controlMethod==="phone-motion",myTurn=v2State.currentPlayerId===playerId&&v2State.phase==="board";
+    let moved=false;
+    (v2State.players||[]).forEach(p=>{
+      const id=String(p.id),pos=Number(p.position||0),prev=lastReplicaPositions.get(id);
+      if(prev!==undefined&&prev!==pos)moved=true;
+      lastReplicaPositions.set(id,pos);
+    });
+    if(moved)window.EcoAudio?.step?.();
     if(roundText)roundText.textContent=`Rodada ${v2State.round} / ${v2State.totalRounds}`;if(modeBadge)modeBadge.textContent=`Online • ${roomCode}`;if(turnName)turnName.textContent=current?.name||"Aguardando";if(turnAvatar)turnAvatar.innerHTML=current?avatar(current):"";if(eventBox)eventBox.textContent=v2State.eventText||"Partida Online sincronizada.";
     if(instruction)instruction.textContent=myTurn?(phoneControl?"Sua vez — use o celular-controle pareado.":"Sua vez — role o dado neste dispositivo."):current?`Vez de ${current.name}. O tabuleiro continuará sincronizado aqui.`:"Sincronizando partida…";
     if(rollButton){rollButton.disabled=!myTurn||phoneControl;rollButton.textContent=myTurn?(phoneControl?"Use o celular":"Rolar dado"):"Aguardando…"}
@@ -376,12 +399,12 @@
 
   function sendAction(type,data={}){return new Promise((resolve,reject)=>{if(!socket||!roomCode){reject(new Error("Sala desconectada."));return}socket.timeout(6500).emit("online:v2-action",{roomCode,type,...data,clientTime:Date.now()},(err,res)=>{if(err)reject(new Error("Servidor não respondeu."));else if(!res?.ok)reject(new Error(res?.message||"Ação recusada."));else resolve(res)})})}
   async function resumeCurrentSession(showErrors=true){if(resuming||!roomCode||!playerId||!resumeToken)return false;resuming=true;try{const r=await ack("online:resume",{roomCode,playerId,resumeToken});state=r.state;isHost=playerId===state.hostPlayerId;v2State=r.onlineV2State||v2State;saveSession();if(state.started&&v2State&&!isHost)renderReplica();else renderLobby();return true}catch(e){if(showErrors)setStatus(e.message);if(e.invalidSession)clearSession();return false}finally{resuming=false}}
-  function reset(message=""){clearReplicaTimer();clearTimeout(danceStartTimer);hideDanceWait();try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}onlineDance=null;lastReplicaRollSerial=0;freeSelection="";freeControlPreference="keyboard";roomCode="";playerId="";resumeToken="";state=null;v2State=null;isHost=false;clearSession();boardView?.removeAttribute("data-online-replica");lobby.classList.add("hidden");remote?.classList.add("hidden");actions.classList.remove("hidden");if(message)window.STEAMParty?.showToast?.(message)}
+  function reset(message=""){window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"play"}}));clearReplicaTimer();clearTimeout(danceStartTimer);hideDanceWait();try{window.STEAMJustDanceBridge?.closePartyDanceSong?.()}catch{}onlineDance=null;lastReplicaRollSerial=0;freeSelection="";freeControlPreference="keyboard";roomCode="";playerId="";resumeToken="";state=null;v2State=null;isHost=false;clearSession();boardView?.removeAttribute("data-online-replica");lobby.classList.add("hidden");remote?.classList.add("hidden");actions.classList.remove("hidden");if(message)window.STEAMParty?.showToast?.(message)}
 
-  createBtn?.addEventListener("click",async()=>{try{const r=await ack("online:create-room",{name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=true;saveSession();if(freeSelection&&freeControlPreference==="phone-motion"){const c=await ack("online:v2-control-mode",{roomCode,controlMethod:"phone-motion"});state=c.state||state}renderLobby()}catch(e){setStatus(e.message)}});
+  createBtn?.addEventListener("click",async()=>{window.dispatchEvent(new CustomEvent("eco:loading-start"));try{const r=await ack("online:create-room",{name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=true;saveSession();window.dispatchEvent(new CustomEvent("eco:lobby-waiting"));if(freeSelection&&freeControlPreference==="phone-motion"){const c=await ack("online:v2-control-mode",{roomCode,controlMethod:"phone-motion"});state=c.state||state}renderLobby()}catch(e){window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"play"}}));setStatus(e.message)}});
   showJoin?.addEventListener("click",()=>joinRow.classList.toggle("hidden")); codeInput?.addEventListener("input",()=>codeInput.value=normalize(codeInput.value));
-  joinBtn?.addEventListener("click",async()=>{try{const r=await ack("online:join-room",{roomCode:normalize(codeInput.value),name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=false;saveSession();renderLobby()}catch(e){setStatus(e.message)}});
-  startBtn?.addEventListener("click",async()=>{if(!isHost||!state)return;const config=buildConfig();const initial={phase:"board",round:1,totalRounds:Number(config.rounds||5),currentPlayerId:state.players[0]?.id||"",eventText:"Partida Online iniciada.",players:state.players.map((p,i)=>({id:p.id,slot:i+1,name:p.name,human:true,bot:false,difficulty:"",position:0,score:0,laps:0,avatarShape:["round","square","triangle","hex"][i%4],avatarColor:["cyan","green","orange","pink"][i%4],avatarFace:"smile"})),minigame:null};try{await ack("online:v2-start",{roomCode,config,state:initial})}catch(e){setStatus(e.message)}});
+  joinBtn?.addEventListener("click",async()=>{window.dispatchEvent(new CustomEvent("eco:loading-start"));try{const r=await ack("online:join-room",{roomCode:normalize(codeInput.value),name:(nameInput.value||"Jogador").trim()});roomCode=r.roomCode;playerId=r.playerId;resumeToken=r.resumeToken;state=r.state;isHost=false;saveSession();window.dispatchEvent(new CustomEvent("eco:lobby-waiting"));renderLobby()}catch(e){window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"play"}}));setStatus(e.message)}});
+  startBtn?.addEventListener("click",async()=>{if(!isHost||!state)return;window.dispatchEvent(new CustomEvent("eco:loading-start"));const config=buildConfig();const initial={phase:"board",round:1,totalRounds:Number(config.rounds||5),currentPlayerId:state.players[0]?.id||"",eventText:"Partida Online iniciada.",players:state.players.map((p,i)=>({id:p.id,slot:i+1,name:p.name,human:true,bot:false,difficulty:"",position:0,score:0,laps:0,avatarShape:["round","square","triangle","hex"][i%4],avatarColor:["cyan","green","orange","pink"][i%4],avatarFace:"smile"})),minigame:null};try{await ack("online:v2-start",{roomCode,config,state:initial})}catch(e){window.dispatchEvent(new CustomEvent("eco:lobby-waiting"));setStatus(e.message)}});
   leaveBtn?.addEventListener("click",()=>{if(socket&&roomCode)socket.emit("online:leave-room",{roomCode},()=>{});reset()});
   rollButton?.addEventListener("click",async()=>{if(boardView?.dataset.onlineReplica!=="1")return;if(v2State?.phase!=="board"||v2State.currentPlayerId!==playerId)return;rollButton.disabled=true;rollButton.textContent="Enviando…";try{await sendAction("roll")}catch(e){rollButton.disabled=false;rollButton.textContent="Rolar dado";if(instruction)instruction.textContent=e.message||"Não foi possível rolar o dado."}});
   controlSetup?.addEventListener("change",async e=>{const input=e.target.closest('input[name="finalOnlineControlMode"]');if(!input||!isHost)return;try{await ack("online:v2-control-mode",{roomCode,controlMethod:input.value})}catch(err){setStatus(err.message)}});

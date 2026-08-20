@@ -24,7 +24,7 @@
   }
   const TUTORIAL_KEY="steamPartyBoardTutorialSeenV1";
   const MATH_MINIGAME_TIME_MS=25000;
-  let state=null,rolling=false,roomState=null,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,partyDanceBotScoreCache=new Map(),tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0;
+  let state=null,rolling=false,roomState=null,lastPartyLobbyPlayerCount=0,droneTimerId=0,droneDeadline=0,currentProblem=null,minigameScores=[],phoneAnswers=new Map(),pendingStartConfig=null,partyDanceBotTimer=0,partyDanceBotEvents=[],partyDanceBotEventCursor=0,partyDanceBotScoreCache=new Map(),tutorialStep=0,environmentBannerTimer=0,partyDanceFinishing=false,motionEscapeState=null,motionEscapeTimer=0,motionEscapeBotTimer=0,motionEscapeLastPublish=0;
   const api=()=>window.STEAMParty||{},toast=m=>api().showToast?.(m),sleep=ms=>new Promise(r=>setTimeout(r,ms)),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
   const avatar=p=>api().avatarSvg?.(p,true)||`<svg viewBox="0 0 120 120"><rect x="18" y="18" width="84" height="84" rx="34" fill="#65f2c3"/></svg>`;
   const isPhoneMatch=match=>Boolean(match&&(match.mode==="phones"||String(match.controlMethod||"").startsWith("phone-")));
@@ -267,6 +267,7 @@
     const item=equipmentById(chosen);
     if(item){
       eventBox.textContent=`${player.name} encontrou ${item.name}.`;
+      window.EcoAudio?.sfx?.("collectItem", { cooldown:260 });
       if(player.human&&!player.bot)showItemOverlay(item);
     }
     renderInventory();
@@ -303,6 +304,7 @@
       player.activeEffects.gps=true;
       eventBox.textContent=`${player.name} ativou o GPS: o próximo dado terá resultado mínimo 6.`;
       renderInventory();renderPlayers();checkpoint("board","auto");
+      window.EcoAudio?.sfx?.("itemUsed", { cooldown:180 });
       if(player.human&&source==="pc")showItemOverlay(equipmentById(id),"Equipamento ativado");
       return true;
     }
@@ -313,6 +315,7 @@
       renderInventory();renderPlayers();
       await movePlayer(player,3);
       checkpoint("board","auto");
+      window.EcoAudio?.sfx?.("itemUsed", { cooldown:180 });
       if(player.human&&source==="pc")showItemOverlay(equipmentById(id),"Equipamento usado");
       return true;
     }
@@ -646,7 +649,7 @@
     await sleep(520);
     diceNumber?.classList.remove("is-result");
   }
-  async function movePlayer(p,steps){for(let i=0;i<steps;i++){const prev=p.position;p.position=(p.position+1)%SPACE_COUNT;if(p.position<prev){p.laps++;p.score+=3;eventBox.textContent=`${p.name} completou uma volta e ganhou +3 Pontos de Missão.`}updateToken(p);publish("board");await sleep(180)}}
+  async function movePlayer(p,steps){for(let i=0;i<steps;i++){const prev=p.position;p.position=(p.position+1)%SPACE_COUNT;if(p.position<prev){p.laps++;p.score+=3;eventBox.textContent=`${p.name} completou uma volta e ganhou +3 Pontos de Missão.`}window.EcoAudio?.step?.();updateToken(p);publish("board");await sleep(180)}}
   function resolveSpace(p){
     ensurePlayerEquipment(p);
     const type=spaceTypes[p.position%spaceTypes.length],mods=roundModifiers();
@@ -1597,12 +1600,13 @@
   function closeMinigame(){clearInterval(droneTimerId);clearInterval(motionEscapeTimer);clearInterval(motionEscapeBotTimer);motionEscapeState=null;motionLocalRun?.classList.add("hidden");try{network?.setSensorMode(false,"motion-minigame")?.catch?.(()=>{})}catch{}minigameOverlay.classList.add("hidden");if(state?.match?.freeMode){if(state.onlineHost)publish("free-complete",{minigame:null});const connected=state.connected;const online=state.onlineHost;if(connected)network?.closeRoom();state=null;view.classList.add("hidden");api().showView?.("free");toast(online?"Teste Online concluído.":connected?"Teste Party concluído.":"Teste concluído.");return}advanceRound()}
   function finishMatch(){clearCheckpoint();renderEducationSummary();matchResultOverlay.classList.remove("hidden");const sorted=[...state.players].sort((a,b)=>b.score-a.score||b.laps-a.laps);matchRanking.innerHTML="";sorted.forEach((p,i)=>{const row=document.createElement("div");row.className="final-ranking-row";row.innerHTML=`<b>${i+1}º</b><span><strong></strong><small></small></span><span><strong>${p.score} pts</strong></span>`;const info=$("span",row);$("strong",info).textContent=p.name;$("small",row).textContent=p.bot?`Bot • ${difficulty(p.difficulty)}`:"Humano";matchRanking.appendChild(row)});publish("match-result",{minigame:null})}
   function renderLobby(){if(!pendingStartConfig||!roomState)return;const expected=Math.max(1,Number(pendingStartConfig.humanPlayers||1)),connected=roomState.players?.length||0;partyConnectedCount.textContent=`${connected} / ${expected}`;partyConnectedPlayers.innerHTML="";(roomState.players||[]).forEach((p,i)=>{const el=document.createElement("div");el.className="final-party-connected-player";el.innerHTML=`<span class="final-party-connected-avatar">${avatar(p)}</span><span><strong></strong><small>Jogador ${i+1} • perfil do celular</small></span>`;$("strong",el).textContent=p.name;partyConnectedPlayers.appendChild(el)});partyStart.disabled=connected<expected;partyStatus.textContent=connected<expected?`Aguardando ${expected-connected} celular${expected-connected===1?"":"es"}…`:"Todos os jogadores estão conectados."}
-  async function startConnectedLobby(match){if(!network){toast("Ponte de rede indisponível.");return false}pendingStartConfig=match;roomState=null;api().showView?.("board");partyLobby.classList.remove("hidden");modeBadge.textContent="Celulares";try{const room=await network.createRoom();partyRoomCode.textContent=room.roomCode;partyJoinUrl.textContent=room.joinUrl;partyQr.src=room.qrUrl;partyStatus.textContent="Sala pronta. Aguardando celulares…";renderLobby();return true}catch(err){partyStatus.textContent=err.message||"Falha ao criar sala.";toast("Não foi possível criar a sala.");return false}}
-  async function beginConnectedMatch(){if(!pendingStartConfig||!roomState)return;const config=pendingStartConfig;const expected=Math.max(1,Number(config.humanPlayers||1));if((roomState.players?.length||0)<expected)return;state={match:config,players:buildPlayers(config,roomState.players.slice(0,expected)),round:1,totalRounds:Math.max(1,Number(config.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:true};renderSpaces();renderTokens();applyRoundEnvironmentEvent();partyLobby.classList.add("hidden");mountPrototypeDice();await network.startParty(expected,partyState("board"));pendingStartConfig=null;updateTurnUi();if(config.freeMode&&config.forcedFreeMinigame)setTimeout(()=>openMinigame(config.forcedFreeMinigame),260)}
-  function leaveBoard(){if(state&&!state.connected)checkpoint("board","exit");clearInterval(droneTimerId);stopPartyDanceBotFeedback();network?.closeRoom();state=null;pendingStartConfig=null;roomState=null;view.classList.add("hidden");partyLobby.classList.add("hidden");itemOverlay?.classList.add("hidden");minigameOverlay.classList.add("hidden");matchResultOverlay.classList.add("hidden");api().showView?.("main")}
+  async function startConnectedLobby(match){if(!network){toast("Ponte de rede indisponível.");return false}pendingStartConfig=match;roomState=null;lastPartyLobbyPlayerCount=0;api().showView?.("board");partyLobby.classList.remove("hidden");modeBadge.textContent="Celulares";window.dispatchEvent(new CustomEvent("eco:loading-start"));try{const room=await network.createRoom();partyRoomCode.textContent=room.roomCode;partyJoinUrl.textContent=room.joinUrl;partyQr.src=room.qrUrl;partyStatus.textContent="Sala pronta. Aguardando celulares…";window.dispatchEvent(new CustomEvent("eco:lobby-waiting"));renderLobby();return true}catch(err){window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"play"}}));partyStatus.textContent=err.message||"Falha ao criar sala.";toast("Não foi possível criar a sala.");return false}}
+  async function beginConnectedMatch(){if(!pendingStartConfig||!roomState)return;window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"board"}}));const config=pendingStartConfig;const expected=Math.max(1,Number(config.humanPlayers||1));if((roomState.players?.length||0)<expected)return;state={match:config,players:buildPlayers(config,roomState.players.slice(0,expected)),round:1,totalRounds:Math.max(1,Number(config.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:true};renderSpaces();renderTokens();applyRoundEnvironmentEvent();partyLobby.classList.add("hidden");mountPrototypeDice();await network.startParty(expected,partyState("board"));pendingStartConfig=null;updateTurnUi();if(config.freeMode&&config.forcedFreeMinigame)setTimeout(()=>openMinigame(config.forcedFreeMinigame),260)}
+  function leaveBoard(){window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"main"}}));if(state&&!state.connected)checkpoint("board","exit");clearInterval(droneTimerId);stopPartyDanceBotFeedback();network?.closeRoom();state=null;pendingStartConfig=null;roomState=null;view.classList.add("hidden");partyLobby.classList.add("hidden");itemOverlay?.classList.add("hidden");minigameOverlay.classList.add("hidden");matchResultOverlay.classList.add("hidden");api().showView?.("main")}
 
   function startOnlineHost(match,onlinePlayers=[],hostPlayerId=""){
     if(!match||!Array.isArray(onlinePlayers)||onlinePlayers.length<2)return false;
+    window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"board"}}));
     if(manualSaveButton)manualSaveButton.disabled=true;
     const config={...match,mode:"online",humanPlayers:Math.min(4,onlinePlayers.length),controlMethod:String(match.controlMethod||"online-keyboard"),minigamesEnabled:true,motionMinigamesEnabled:Boolean(match.motionMinigamesEnabled)};
     const players=buildPlayers(config,onlinePlayers.slice(0,4));
@@ -1610,7 +1614,7 @@
     renderSpaces();renderTokens();modeBadge.textContent=config.freeMode?"Modo Livre • Online":"Online";matchResultOverlay.classList.add("hidden");minigameOverlay.classList.add("hidden");api().showView?.("board");mountPrototypeDice();applyRoundEnvironmentEvent();updateTurnUi();if(config.freeMode&&config.forcedFreeMinigame)setTimeout(()=>openMinigame(config.forcedFreeMinigame),320);return true;
   }
 
-  function start(match=null){const saved=match||JSON.parse(localStorage.getItem(MATCH_KEY)||"{}");if(!saved?.humanPlayers){toast("Configure a partida primeiro.");return false}if(saved.mode==="online"){return false}if(isPhoneMatch(saved)){if(manualSaveButton)manualSaveButton.disabled=true;startConnectedLobby(saved);return true}if(manualSaveButton)manualSaveButton.disabled=false;state={match:saved,players:buildPlayers(saved),round:1,totalRounds:Math.max(1,Number(saved.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:false};renderSpaces();renderTokens();modeBadge.textContent=saved.presentationMode?"Apresentação STEAM":saved.freeMode?"Modo Livre • Local":"Local";matchResultOverlay.classList.add("hidden");minigameOverlay.classList.add("hidden");api().showView?.("board");applyRoundEnvironmentEvent();updateTurnUi();mountPrototypeDice();if(saved.freeMode&&saved.forcedFreeMinigame)setTimeout(()=>openMinigame(saved.forcedFreeMinigame),300);else setTimeout(()=>showTutorial(false),350);return true}
+  function start(match=null){window.dispatchEvent(new CustomEvent("eco:lobby-ended",{detail:{next:"board"}}));const saved=match||JSON.parse(localStorage.getItem(MATCH_KEY)||"{}");if(!saved?.humanPlayers){toast("Configure a partida primeiro.");return false}if(saved.mode==="online"){return false}if(isPhoneMatch(saved)){if(manualSaveButton)manualSaveButton.disabled=true;startConnectedLobby(saved);return true}if(manualSaveButton)manualSaveButton.disabled=false;state={match:saved,players:buildPlayers(saved),round:1,totalRounds:Math.max(1,Number(saved.rounds||BOARD_CONFIG.defaultRounds||5)),turnIndex:0,currentMinigame:null,education:{concepts:[],disasters:[],technologies:[]},roundEvent:null,connected:false};renderSpaces();renderTokens();modeBadge.textContent=saved.presentationMode?"Apresentação STEAM":saved.freeMode?"Modo Livre • Local":"Local";matchResultOverlay.classList.add("hidden");minigameOverlay.classList.add("hidden");api().showView?.("board");applyRoundEnvironmentEvent();updateTurnUi();mountPrototypeDice();if(saved.freeMode&&saved.forcedFreeMinigame)setTimeout(()=>openMinigame(saved.forcedFreeMinigame),300);else setTimeout(()=>showTutorial(false),350);return true}
   itemClose?.addEventListener("click",closeItemOverlay);
   motionLocalRun?.addEventListener("click",localFreeMotionStep);
   document.addEventListener("keydown",e=>{if((e.code==="Space"||e.key==="Enter")&&motionEscapeState&&state?.match?.freeMode&&!state.connected&&!state.onlineHost){e.preventDefault();localFreeMotionStep()}});
@@ -1623,7 +1627,16 @@
     toast("Partida salva neste dispositivo.");
   });
   rollButton?.addEventListener("click",()=>{if(!phoneExclusiveControl())rollForCurrentPlayer("pc")});$("#finalStartMinigame")?.addEventListener("click",()=>{if(!phoneExclusiveControl())startCurrentMinigame()});$("#finalReturnBoard")?.addEventListener("click",()=>{if(!phoneExclusiveControl())closeMinigame()});$("#finalBoardExit")?.addEventListener("click",leaveBoard);$("#finalMatchBackMenu")?.addEventListener("click",leaveBoard);partyStart?.addEventListener("click",beginConnectedMatch);$("#finalPartyCancelLobby")?.addEventListener("click",leaveBoard);$("#finalPartyCopyLink")?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(partyJoinUrl.textContent||"");toast("Link copiado.")}catch{toast("Não foi possível copiar automaticamente.")}});
-  window.addEventListener("steam-party-room-state",e=>{const next=e.detail;if(!next||next.purpose!=="party-board-v2")return;roomState=next;renderLobby()});
+  window.addEventListener("steam-party-room-state",e=>{
+    const next=e.detail;if(!next||next.purpose!=="party-board-v2")return;
+    const count=Array.isArray(next.players)?next.players.filter(p=>p.connected!==false).length:0;
+    if(pendingStartConfig){
+      if(count>lastPartyLobbyPlayerCount)window.EcoAudio?.sfx?.("playerConnected",{cooldown:500});
+      else if(count<lastPartyLobbyPlayerCount)window.EcoAudio?.sfx?.("playerDisconnected",{cooldown:700});
+      lastPartyLobbyPlayerCount=count;
+    }
+    roomState=next;renderLobby()
+  });
   window.addEventListener("steam-party-dance-judgement",e=>{if(e.detail?.state)roomState=e.detail.state;danceBridge?.handleJudgement?.(e.detail)});
   window.addEventListener("steam-party-dance-ended",e=>{
     if(state?.onlineHost&&state?.currentMinigame?.id==="just-dance"&&window.STEAMOnlineV2?.isDanceActive?.()){
@@ -1639,7 +1652,10 @@
     const p=state?.players?.find(x=>x.id===e.detail?.playerId);
     if(!p||!state?.connected)return;
     if(e.detail?.connected===false){
+      window.EcoAudio?.sfx?.("playerDisconnected",{cooldown:700});
       eventBox.textContent=`${p.name} perdeu a conexão. Aguardando até ${Math.round(Number(e.detail?.graceMs||30000)/1000)} s para reconectar.`;
+    }else if(e.detail?.connected===true){
+      window.EcoAudio?.sfx?.("playerConnected",{cooldown:700});
     }
   });
   window.addEventListener("steam-party-player-timeout",e=>{
