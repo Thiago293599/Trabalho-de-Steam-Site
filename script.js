@@ -2745,8 +2745,24 @@ async function installDanceMediaBlob(key, blob, element) {
 
 function danceServerLocalVideoUrl(songId, quality) {
   const q = String(quality || "").toLowerCase();
-  if (!songId || !["medium", "high"].includes(q)) return "";
+  if (!songId || !["preview", "medium", "high"].includes(q)) return "";
   return serverEndpoint(`/api/media/local-jd/${encodeURIComponent(songId)}/${encodeURIComponent(q)}`);
+}
+
+function danceSongPreviewSourceCandidates(song) {
+  if (!song) return [];
+  const candidates = [];
+  const localPreview = danceServerLocalVideoUrl(song.id, "preview");
+  if (localPreview) candidates.push(localPreview);
+
+  const rawPreview = resolveDanceSongVideoSource(song, song.previewVideo || song.videos?.low);
+  if (isDanceDirectStreamSource(rawPreview)) candidates.push(...danceGoogleDriveStreamCandidates(rawPreview));
+  else if (rawPreview) candidates.push(rawPreview);
+
+  const lowFallback = resolveDanceSongVideoSource(song, song.videos?.low);
+  if (lowFallback && !candidates.includes(lowFallback)) candidates.push(lowFallback);
+
+  return [...new Set(candidates.filter(Boolean))];
 }
 
 async function probeDanceServerLocalVideo(url, timeoutMs = 3500) {
@@ -6135,8 +6151,7 @@ window.STEAMJustDanceBridge = Object.freeze({
   getSongIds: () => Object.keys(DANCE_SONGS),
   getSongInfo: id => {
     const song = getDanceSongConfig(id);
-    const rawPreview = resolveDanceSongVideoSource(song, song.previewVideo || song.videos.low);
-    const previewSources = isDanceDirectStreamSource(rawPreview) ? danceGoogleDriveStreamCandidates(rawPreview) : [rawPreview];
+    const previewSources = danceSongPreviewSourceCandidates(song);
     return {
       id:song.id,
       title:song.title,
@@ -6151,8 +6166,7 @@ window.STEAMJustDanceBridge = Object.freeze({
   },
   getSongPreviewSources: id => {
     const song = getDanceSongConfig(id);
-    const rawPreview = resolveDanceSongVideoSource(song, song.previewVideo || song.videos.low);
-    return isDanceDirectStreamSource(rawPreview) ? danceGoogleDriveStreamCandidates(rawPreview) : [rawPreview].filter(Boolean);
+    return danceSongPreviewSourceCandidates(song);
   },
   isPartyDance: () => gameMode === "party-dance"
 });
