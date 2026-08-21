@@ -4,7 +4,7 @@
   const $=s=>document.querySelector(s);
   const panel=$("#finalPartyControllerPanel"),legacy=$("#boardControllerArea"),sensor=$("#sensorModePanel"),round=$("#finalPartyPhoneRound"),score=$("#finalPartyPhoneScore"),kicker=$("#finalPartyPhoneKicker"),title=$("#finalPartyPhoneTitle"),description=$("#finalPartyPhoneDescription"),dice=$("#finalPartyPhoneDice"),roll=$("#finalPartyPhoneRoll"),items=$("#finalPartyPhoneItems"),sensorButton=$("#finalPartyPhoneEnableSensors"),game=$("#finalPartyPhoneBoard"),mini=$("#finalPartyPhoneMinigame"),miniTopic=$("#finalPartyPhoneMiniTopic"),miniTitle=$("#finalPartyPhoneMiniTitle"),question=$("#finalPartyPhoneQuestion"),answers=$("#finalPartyPhoneAnswers"),timer=$("#finalPartyPhoneTimer"),result=$("#finalPartyPhoneResult"),resultTitle=$("#finalPartyPhoneResultTitle"),ranking=$("#finalPartyPhoneRanking"),continueBtn=$("#finalPartyPhoneContinue"),controlScreen=$("#controlScreen"),connection=$("#connectionBadge"),orientationGate=$("#finalControllerOrientationGate"),orientationTitle=$("#finalOrientationTitle"),orientationText=$("#finalOrientationText"),fullscreenBtn=$("#finalEnterFullscreen");
   const socket=bridge.getSocket();
-  let transport=bridge.getTransportMode?.()||"party",gameState=null,lobbyState=null,activeProblemToken="",answeredToken="",timerId=0,danceMode=false,lastMotionToken="",lastMotionMilestone=0,lastInventorySnapshot=null,actionSeq=0,actionAckTimer=0,lastActionAckId="";
+  let transport=bridge.getTransportMode?.()||"party",gameState=null,lobbyState=null,activeProblemToken="",answeredToken="",timerId=0,danceMode=false,lastMotionToken="",lastMotionMilestone=0,lastInventorySnapshot=null;
   const myId=()=>bridge.getPlayerId(),room=()=>bridge.getRoomCode();
   const me=()=>gameState?.players?.find(p=>String(p.id)===String(myId()))||null;
 
@@ -71,63 +71,7 @@
   portraitOnly();
   function stopTimer(){clearInterval(timerId);timerId=0}
   function ui(active=true){panel?.classList.toggle("hidden",!active);legacy?.classList.add("hidden");if(active){sensor?.classList.add("hidden");controlScreen?.classList.remove("sensor-mode-active")}}
-  function actionLabel(type){
-    return {
-      roll:"Dado",
-      "use-item":"Item",
-      "minigame-answer":"Resposta",
-      "minigame-start":"Início",
-      "minigame-continue":"Continuar",
-      "jd-song-preview":"Preview",
-      "jd-song-select":"Música",
-      "jd-song-confirm":"Confirmação",
-      ready:"Pronto",
-      ping:"Conexão"
-    }[type]||"Ação";
-  }
-  function ensureActionAck(){
-    let el=$("#finalPartyActionAck");
-    if(el)return el;
-    el=document.createElement("div");
-    el.id="finalPartyActionAck";
-    el.className="final-controller-action-ack hidden";
-    el.setAttribute("role","status");
-    el.setAttribute("aria-live","polite");
-    if(description?.parentNode)description.insertAdjacentElement("afterend",el);
-    else panel?.prepend(el);
-    return el;
-  }
-  function showActionAck(state,text,actionId=""){
-    const el=ensureActionAck();if(!el)return;
-    if(actionId)lastActionAckId=String(actionId);
-    clearTimeout(actionAckTimer);
-    el.className=`final-controller-action-ack is-${state}`;
-    el.textContent=text;
-    el.classList.remove("hidden");
-    if(state==="ok"){
-      actionAckTimer=setTimeout(()=>{if(!actionId||String(actionId)===lastActionAckId)el.classList.add("hidden")},2200);
-    }else if(state==="error"){
-      actionAckTimer=setTimeout(()=>{if(!actionId||String(actionId)===lastActionAckId)el.classList.add("hidden")},4200);
-    }
-  }
-  function send(type,data={}){
-    if(!socket||!room())return Promise.reject(new Error("Controle desconectado."));
-    const event=transport==="online"?"online:controller-action":"controller:party-action";
-    const actionId=`${Date.now().toString(36)}-${(++actionSeq).toString(36)}`;
-    const label=actionLabel(type);
-    showActionAck("sending",`${label}: enviando…`,actionId);
-    const packet={roomCode:room(),type,...data,clientTime:Date.now(),actionId};
-    return new Promise((resolve,reject)=>socket.timeout(6500).emit(event,packet,(err,res)=>{
-      if(err||!res?.ok){
-        const e=new Error(res?.message||"O servidor não respondeu.");
-        showActionAck("error",`${label}: não enviado • ${e.message}`,actionId);
-        reject(e);
-      }else{
-        showActionAck("ok",`${label}: recebido ✓`,res?.actionId||actionId);
-        resolve({...res,actionId:res?.actionId||actionId});
-      }
-    }));
-  }
+  function send(type,data={}){if(!socket||!room())return Promise.reject(new Error("Controle desconectado."));const event=transport==="online"?"online:controller-action":"controller:party-action";return new Promise((resolve,reject)=>socket.timeout(6500).emit(event,{roomCode:room(),type,...data,clientTime:Date.now()},(err,res)=>{if(err||!res?.ok){const e=new Error(res?.message||"O servidor não respondeu.");reject(e)}else resolve(res)}))}
   function renderItems(){if(!items)return;const mine=me(),inv=Array.isArray(mine?.inventory)?mine.inventory:[];
     const currentKey=inv.slice().sort().join("|");
     if(lastInventorySnapshot!==null){
@@ -135,7 +79,7 @@
       if(inv.length>before.length)window.EcoAudio?.sfx?.("itemReceived",{cooldown:260});
     }
     lastInventorySnapshot=currentKey;
-    items.innerHTML="";if(!inv.length){items.classList.add("hidden");return}items.classList.remove("hidden");inv.forEach(id=>{const meta={gps:["⌖","GPS","Próximo dado: mínimo 6"],map:["▦","Mapa","Avance 3 casas antes do dado"],rescue:["✚","Resgate","Proteção automática"],sensor:["◉","Alerta","Proteção automática"]}[id]||["◆",id,"Equipamento"];const b=document.createElement("button");b.type="button";b.className="final-party-phone-item";b.innerHTML=`<b>${meta[0]} ${meta[1]}</b><small>${meta[2]}</small>`;const usable=["gps","map"].includes(id)&&gameState?.phase==="board"&&gameState.currentPlayerId===myId();b.disabled=!usable;b.onclick=async()=>{b.disabled=true;const oldHtml=b.innerHTML;try{await send("use-item",{itemId:id});b.classList.add("is-sent");b.innerHTML=`<b>✓ ${meta[1]}</b><small>Comando recebido</small>`;window.EcoAudio?.sfx?.("itemUsed",{cooldown:180})}catch(e){description.textContent=e.message;b.innerHTML=oldHtml;renderItems()}};items.appendChild(b)})}
+    items.innerHTML="";if(!inv.length){items.classList.add("hidden");return}items.classList.remove("hidden");inv.forEach(id=>{const meta={gps:["⌖","GPS","Próximo dado: mínimo 6"],map:["▦","Mapa","Avance 3 casas antes do dado"],rescue:["✚","Resgate","Proteção automática"],sensor:["◉","Alerta","Proteção automática"]}[id]||["◆",id,"Equipamento"];const b=document.createElement("button");b.type="button";b.className="final-party-phone-item";b.innerHTML=`<b>${meta[0]} ${meta[1]}</b><small>${meta[2]}</small>`;const usable=["gps","map"].includes(id)&&gameState?.phase==="board"&&gameState.currentPlayerId===myId();b.disabled=!usable;b.onclick=async()=>{b.disabled=true;try{await send("use-item",{itemId:id});window.EcoAudio?.sfx?.("itemUsed",{cooldown:180})}catch(e){description.textContent=e.message;renderItems()}};items.appendChild(b)})}
   function renderSensorButton(){
     if(!sensorButton)return;
     const onlineNeeds=transport==="online"&&lobbyState?.controlMethod==="phone-motion";
@@ -209,12 +153,7 @@
       b.onclick=async()=>{
         if(answeredToken===activeProblemToken)return;
         answeredToken=activeProblemToken;answers.querySelectorAll("button").forEach(x=>x.disabled=true);b.classList.add("is-selected");
-        try{
-          await send("minigame-answer",{answer:n,problemToken:activeProblemToken});
-          b.classList.add("is-sent");
-          b.setAttribute("aria-label",`${b.textContent}, resposta enviada`);
-          if(timer)timer.textContent="Resposta enviada ✓ • aguardando os demais";
-        }
+        try{await send("minigame-answer",{answer:n,problemToken:activeProblemToken})}
         catch(e){answeredToken="";description.textContent=e.message;answers.querySelectorAll("button").forEach(x=>x.disabled=false)}
       };
       answers.appendChild(b)
@@ -278,20 +217,9 @@
   function render(){if(!gameState)return;if(danceMode){panel?.classList.add("hidden");return}if(gameState.phase==="board")renderBoard();else if(gameState.phase==="minigame")renderMinigame();else if(gameState.phase==="minigame-intro")renderIntro();else if(gameState.phase==="just-dance-select")renderDanceSongSelection();else if(gameState.phase==="minigame-result"||gameState.phase==="match-result")renderResult()}
   continueBtn?.addEventListener("click",async()=>{
     const type=continueBtn.dataset.action;if(!type)return;continueBtn.disabled=true;const old=continueBtn.textContent;continueBtn.textContent="Enviando…";
-    try{
-      await send(type);
-      continueBtn.textContent="Enviado ✓";
-    }catch(e){continueBtn.disabled=false;continueBtn.textContent=old;if(description)description.textContent=e.message}
+    try{await send(type)}catch(e){continueBtn.disabled=false;continueBtn.textContent=old;if(description)description.textContent=e.message}
   });
-  roll?.addEventListener("click",async()=>{
-    if(!gameState||gameState.currentPlayerId!==myId())return;
-    roll.disabled=true;dice.textContent="…";
-    try{
-      await send("roll");
-      dice.textContent="✓";
-      if(description)description.textContent="Dado recebido pelo jogo ✓ • aguardando o resultado…";
-    }catch(e){description.textContent=e.message;roll.disabled=false;dice.textContent="?"}
-  });
+  roll?.addEventListener("click",async()=>{if(!gameState||gameState.currentPlayerId!==myId())return;roll.disabled=true;dice.textContent="…";try{await send("roll")}catch(e){description.textContent=e.message;roll.disabled=false;dice.textContent="?"}});
   sensorButton?.addEventListener("click",async()=>{
     setReadyButton(sensorButton,"Preparando…","Autorize o movimento se o navegador pedir","loading",true);
     try{
@@ -325,14 +253,6 @@
       return;
     }
     render();
-  });
-  socket?.on("controller:action-received",payload=>{
-    if(transport!=="party"||payload?.roomCode!==room())return;
-    showActionAck("ok",`${actionLabel(payload?.type)}: recebido ✓`,payload?.actionId||"");
-  });
-  socket?.on("online:controller-action-received",payload=>{
-    if(transport!=="online"||payload?.roomCode!==room())return;
-    showActionAck("ok",`${actionLabel(payload?.type)}: recebido ✓`,payload?.actionId||"");
   });
   socket?.on("online:controller-dance-session",payload=>{
     if(transport!=="online"||payload?.roomCode!==room())return;
