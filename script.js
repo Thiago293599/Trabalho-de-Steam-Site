@@ -363,7 +363,7 @@ const DANCE_SONGS = Object.freeze({
     audioFile: "RainOverMe_Audio.mp3", coverFile: "rainoverme_cover@2x.jpg", posterFile: "RainOverMe.jpg", avatarFile: "rainoverme_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 6 }), defaultSyncMs: -1725, syncStorageKey: "jdRainOverMeSyncOffsetMsFinalV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
-    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
+    videoQualityNote: "Medium/High: servidor local → Google Drive → Low do site"
   }),
   EarthSong: Object.freeze({
     id: "EarthSong", title: "Earth Song", artist: "Michael Jackson", edition: "Michael Jackson: The Experience", coaches: 1, beta: false, lyricsColor: "#FFFFFF",
@@ -377,7 +377,7 @@ const DANCE_SONGS = Object.freeze({
     audioFile: "EarthSong_Audio.mp3", coverFile: "earthsong_cover@2x.jpg", posterFile: "EarthSong.jpg", avatarFile: "earthsong_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 10 }), defaultSyncMs: 0, syncStorageKey: "jdEarthSongSyncOffsetMsV1",
     classifierFormat: "auto", classifierFolder: "classifiers_WIIU", fallbackClassifierFolder: "classifiers_WII_source", sourceSongAliases: Object.freeze(["EarthSong", "Earth Song"]),
-    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
+    videoQualityNote: "Medium/High: servidor local → Google Drive → Low do site"
   }),
   ItsRainingMen: Object.freeze({
     id: "ItsRainingMen", title: "It's Raining Men", artist: "The Weather Girls", edition: "Just Dance 2", coaches: 1, beta: false, lyricsColor: "#35C5ED",
@@ -392,7 +392,7 @@ const DANCE_SONGS = Object.freeze({
     audioFile: "ItsRainingMen_Audio.mp3", coverFile: "itsrainingmen_cover@2x.jpg", posterFile: "ItsRainingMen.jpg", avatarFile: "itsrainingmen_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 5, rows: 5 }), pictoIndividualFolder: "pictos-individual", defaultSyncMs: 0, syncStorageKey: "jdItsRainingMenSyncOffsetMsV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
-    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor"
+    videoQualityNote: "Medium/High: servidor local → Google Drive → Low do site"
   }),
   WhereHaveYou: Object.freeze({
     id: "WhereHaveYou", title: "Where Have You Been", artist: "Rihanna", edition: "Just Dance 2014", coaches: 1, beta: false, lyricsColor: "#F61F87",
@@ -408,7 +408,7 @@ const DANCE_SONGS = Object.freeze({
     audioFile: "WhereHaveYou_Audio.mp3", coverFile: "wherehaveyou_cover@2x.jpg", posterFile: "WhereHaveYou.jpg", avatarFile: "wherehaveyou_thumb_kiwi.jpg",
     atlasImageFile: "pictos-atlas.png", atlasDataFile: "pictos-atlas.json", atlasGrid: Object.freeze({ columns: 6, rows: 8 }), defaultSyncMs: -1900, syncStorageKey: "jdWhereHaveYouSyncOffsetMsFinalV1",
     classifierFormat: "msm", classifierFolder: "classifiers_WIIU",
-    videoQualityNote: "Low local • Medium/High via Google Drive pelo servidor, sem interface do Drive"
+    videoQualityNote: "Medium/High: servidor local → Google Drive → Low do site"
   })
 });
 const EARTHSONG_CLASSIFIER_FILES = Object.freeze({
@@ -2743,6 +2743,47 @@ async function installDanceMediaBlob(key, blob, element) {
   await waitDanceMediaMetadata(element);
 }
 
+function danceServerLocalVideoUrl(songId, quality) {
+  const q = String(quality || "").toLowerCase();
+  if (!songId || !["medium", "high"].includes(q)) return "";
+  return serverEndpoint(`/api/media/local-jd/${encodeURIComponent(songId)}/${encodeURIComponent(q)}`);
+}
+
+async function probeDanceServerLocalVideo(url, timeoutMs = 3500) {
+  if (!url) throw new Error("Servidor local não configurado.");
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timer = window.setTimeout(() => controller?.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      method: "HEAD",
+      cache: "no-store",
+      signal: controller?.signal
+    });
+    if (!response.ok) throw new Error(`Vídeo local respondeu HTTP ${response.status}.`);
+    return true;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function installDanceVideoUrl(url, element, timeoutMs = 30000) {
+  if (!element || !url) throw new Error("Fonte local de vídeo indisponível.");
+  element.removeAttribute("crossorigin");
+  element.src = url;
+  element.preload = "metadata";
+  element.muted = false;
+  element.volume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
+  element.load();
+  await waitDanceMediaMetadata(element, timeoutMs);
+  return url;
+}
+
+async function installDanceServerLocalVideo(songId, quality, element) {
+  const url = danceServerLocalVideoUrl(songId, quality);
+  await probeDanceServerLocalVideo(url);
+  return installDanceVideoUrl(url, element, 20000);
+}
+
 function danceGoogleDriveStreamCandidates(source) {
   const value = String(source || "").trim();
   if (!value.startsWith("gdrive:")) return [value].filter(Boolean);
@@ -2908,23 +2949,53 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
       const videoEnd = coreNeeded ? 84 : 95;
       const videoSource = DANCE_VIDEO_SOURCES[quality];
       const directStream = isDanceDirectStreamSource(videoSource);
-      if (directStream) {
-        setDancePreloadUi(12, `Conectando ao vídeo ${label} no Google Drive…`, "Preparando stream pelo servidor");
+      if (quality !== "low") {
+        const songConfig = getDanceSongConfig();
+        let loadedFrom = "";
+        let localError = null;
+        let driveError = null;
+
+        setDancePreloadUi(8, `Procurando vídeo ${label} no computador do servidor…`, "Prioridade 1 de 3 • servidor local");
         try {
-          await installDanceDirectVideoStream(videoSource, danceTestVideo);
-          setDancePreloadUi(videoEnd, `Stream ${label} pronto • Google Drive via servidor, sem interface do Drive.`);
-        } catch (driveError) {
-          // Se o proxy/Drive falhar, mantemos a música jogável usando o Low local.
+          await installDanceServerLocalVideo(songConfig.id, quality, danceTestVideo);
+          loadedFrom = "server-local";
+          setDancePreloadUi(videoEnd, `${label} pronto • arquivo local do computador.`);
+        } catch (error) {
+          localError = error;
+          try { danceTestVideo?.removeAttribute("src"); danceTestVideo?.load(); } catch {}
+        }
+
+        if (!loadedFrom) {
+          setDancePreloadUi(14, `Vídeo ${label} não encontrado no PC; tentando Google Drive…`, "Prioridade 2 de 3 • Google Drive");
+          try {
+            if (directStream) {
+              await installDanceDirectVideoStream(videoSource, danceTestVideo);
+            } else {
+              const videoBlob = await fetchDanceBlob(videoSource, ratio => {
+                if (generation !== dancePreloadGeneration) return;
+                setDancePreloadUi(14 + (videoEnd - 14) * ratio, `Carregando ${label} da fonte externa…`);
+              });
+              await installDanceMediaBlob("video", videoBlob, danceTestVideo);
+            }
+            loadedFrom = "drive";
+            setDancePreloadUi(videoEnd, `${label} pronto • Google Drive.`);
+          } catch (error) {
+            driveError = error;
+            try { danceTestVideo?.removeAttribute("src"); danceTestVideo?.load(); } catch {}
+          }
+        }
+
+        if (!loadedFrom) {
           const fallbackSource = DANCE_VIDEO_SOURCES.low;
-          if (quality === "low" || !fallbackSource || isDanceDirectStreamSource(fallbackSource)) throw driveError;
-          setDancePreloadUi(18, `Drive indisponível para ${label}; usando Low local…`);
+          if (!fallbackSource || isDanceDirectStreamSource(fallbackSource)) throw (driveError || localError || new Error("Nenhuma fonte de vídeo disponível."));
+          setDancePreloadUi(18, `PC e Drive indisponíveis para ${label}; usando Low do site…`, "Prioridade 3 de 3 • fallback");
           const fallbackBlob = await fetchDanceBlob(fallbackSource, ratio => {
             if (generation !== dancePreloadGeneration) return;
-            setDancePreloadUi(18 + (videoEnd - 18) * ratio, `Drive indisponível • carregando Low local…`);
+            setDancePreloadUi(18 + (videoEnd - 18) * ratio, `Carregando Low do site…`);
           });
           await installDanceMediaBlob("video", fallbackBlob, danceTestVideo);
           resolvedQuality = "low";
-          if (danceLabMessage) danceLabMessage.textContent = `O servidor não conseguiu obter ${label} do Google Drive; Low local foi usado automaticamente.`;
+          if (danceLabMessage) danceLabMessage.textContent = `${label} não foi encontrado no servidor local nem carregou pelo Google Drive; Low do site foi usado automaticamente.`;
         }
       } else {
         setDancePreloadUi(0, `Carregando vídeo + áudio ${label}…`, "Carregando antes de iniciar");
