@@ -737,9 +737,12 @@ function startDanceGoldSingleVideo(moveIndex, { elapsedMs = 0, preview = false }
     danceGoldMoveVideo.currentTime = startAt;
   } catch {}
   danceGoldMoveVideo.classList.add("active");
-  // V45: o efeito visual Gold/YEAH continua no PC, mas o áudio do YEAH pertence ao celular do jogador.
-  danceGoldMoveVideo.volume = 0;
-  danceGoldMoveVideo.muted = true;
+  // V51: o MP4 do Gold Move possui o próprio áudio e deve ser ouvido no PC.
+  // O som sintético de julgamento YEAH continua exclusivo do celular; aqui só
+  // restauramos a trilha que já existe dentro do vídeo do Gold Move.
+  const goldVideoVolume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
+  danceGoldMoveVideo.volume = goldVideoVolume;
+  danceGoldMoveVideo.muted = false;
   danceGoldMoveVideo.onended = () => {
     if (token !== danceGoldVideoToken) return;
     danceGoldMoveVideo.classList.remove("active");
@@ -755,9 +758,15 @@ function startDanceGoldSingleVideo(moveIndex, { elapsedMs = 0, preview = false }
   if (playPromise?.catch) {
     playPromise.catch(() => {
       if (token !== danceGoldVideoToken) return;
-      // Fallback visual para navegadores que bloqueiam uma nova mídia com áudio.
-      danceGoldMoveVideo.muted = true;
-      danceGoldMoveVideo.play().catch(() => danceGoldMoveVideo.classList.remove("active"));
+      // Se o navegador bloquear a segunda mídia com áudio, não silencie para sempre:
+      // tente novamente no próximo gesto/estado de reprodução do vídeo principal.
+      danceGoldMoveVideo.muted = false;
+      const retry = () => {
+        if (token !== danceGoldVideoToken) return;
+        danceGoldMoveVideo.play().catch(() => danceGoldMoveVideo.classList.remove("active"));
+      };
+      if (danceTestVideo && !danceTestVideo.paused) window.setTimeout(retry, 60);
+      else danceGoldMoveVideo.classList.remove("active");
     });
   }
   if (preview && danceLabMessage) {
@@ -5770,6 +5779,7 @@ function applyPartyDanceBotMoveJudgement(playerId, judgement = "GOOD", moveIndex
   }
 
   const value = String(judgement || "X").toUpperCase();
+  const previousScore = Number(player.dance.score || 0);
   const weight = PARTY_DANCE_JUDGEMENT_WEIGHTS[value] ?? 0;
   const totalMoves = Math.max(1, danceTestMoves.length || player.dance.totalMoves || 1);
   const pointsPerMove = DANCE_MAX_SCORE / totalMoves;
@@ -5785,6 +5795,9 @@ function applyPartyDanceBotMoveJudgement(playerId, judgement = "GOOD", moveIndex
   player.dance.stars = DANCE_SCORE_STAR_THRESHOLDS.filter(threshold => player.dance.score >= threshold).length;
   player.dance.judgementCounts[value] = Number(player.dance.judgementCounts[value] || 0) + 1;
 
+  // V51: bots também disparam os sons de 1–5 estrelas/Superstar/Megastar
+  // no computador, exatamente como jogadores humanos e jogadores remotos.
+  handleDanceHudMilestones(player.id, previousScore, player.dance.score);
   updatePartyDancePlayerScoreBar(player.id, player.dance.score);
   showDanceVideoJudgement(player.id, value, Boolean(goldMove));
   return { ...player.dance };

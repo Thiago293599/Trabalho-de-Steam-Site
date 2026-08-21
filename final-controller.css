@@ -705,3 +705,166 @@ body.online-sensor-controller #sensorModePanel.dance-session-active #finalDanceS
   .final-party-phone-song-actions button{min-height:38px!important}
   #sensorModePanel.dance-session-active .final-dance-song-card{width:calc(100vw - 18px)!important}
 }
+
+
+/* ==========================================================
+   V51 — Just Dance mobile: HUD realmente fullscreen
+   ========================================================== */
+body.jd-controller-live{
+  overflow:hidden!important;
+  min-height:100dvh!important;
+  background:#071019!important;
+}
+body.jd-controller-live .controller-game-brand,
+body.jd-controller-live #themeToggle,
+body.jd-controller-live #controlScreen>.player-top,
+body.jd-controller-live #controlScreen>.turn-area,
+body.jd-controller-live #finalPartyControllerPanel,
+body.jd-controller-live #boardControllerArea{
+  display:none!important;
+}
+body.jd-controller-live .controller-shell{
+  width:100vw!important;
+  min-width:0!important;
+  max-width:none!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  padding:0!important;
+}
+body.jd-controller-live #controlScreen{
+  display:block!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:4900!important;
+  width:100vw!important;
+  max-width:none!important;
+  height:100dvh!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active{
+  display:block!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:5000!important;
+  width:100vw!important;
+  max-width:none!important;
+  height:100dvh!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 72% 7%,rgba(93,201,255,.14),transparent 30%),
+    radial-gradient(circle at 10% 78%,rgba(101,242,195,.08),transparent 34%),
+    linear-gradient(180deg,#0d1822 0%,#060b10 72%,#05080c 100%)!important;
+  box-shadow:none!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active .final-dance-hidden-tech,
+body.jd-controller-live #sensorModePanel.dance-session-active .final-dance-permission{
+  display:none!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active #finalDanceSongCard{
+  display:grid!important;
+  position:absolute!important;
+  top:max(12px,env(safe-area-inset-top))!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:min(calc(100vw - 24px),420px)!important;
+  min-height:76px!important;
+  grid-template-columns:58px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:11px!important;
+  margin:0!important;
+  padding:9px 11px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  border-radius:20px!important;
+  background:rgba(5,14,21,.76)!important;
+  backdrop-filter:blur(14px)!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.28)!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active #finalDanceSongCard img{
+  width:58px!important;height:58px!important;border-radius:14px!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active #finalDanceSongTitle{
+  font-size:clamp(.98rem,4.8vw,1.2rem)!important;
+  line-height:1.05!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active #finalDanceSongArtist{
+  display:block!important;
+  margin-top:4px!important;
+  font-size:.69rem!important;
+  color:rgba(236,248,246,.58)!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active .final-mobile-jd-score-column{
+  --jd-mobile-bar-width:clamp(8px,2.35vw,10px)!important;
+  left:max(18px,env(safe-area-inset-left))!important;
+  top:max(108px,calc(env(safe-area-inset-top) + 96px))!important;
+  bottom:max(78px,calc(env(safe-area-inset-bottom) + 64px))!important;
+  width:58px!important;
+  height:auto!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active .final-mobile-jd-scorebar{
+  left:50%!important;top:0!important;bottom:0!important;
+  width:var(--jd-mobile-bar-width)!important;height:100%!important;
+  translate:-50% 0!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active .final-mobile-jd-star{
+  left:50%!important;
+  width:clamp(36px,10.5vw,44px)!important;
+  height:clamp(36px,10.5vw,44px)!important;
+  translate:-50% -50%!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active .final-mobile-jd-feedback{
+  position:absolute!important;
+  left:50%!important;
+  bottom:max(30px,calc(env(safe-area-inset-bottom) + 18px))!important;
+  width:min(74vw,310px)!important;
+  transform:translateX(-50%)!important;
+  gap:2px!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active .mobile-dance-judgement{
+  width:100%!important;
+  min-width:0!important;
+  min-height:54px!important;
+  font-size:clamp(2.25rem,12vw,3.45rem)!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active .final-mobile-jd-score-number{
+  font-size:.82rem!important;
+  letter-spacing:.06em!important;
+  color:rgba(255,255,255,.48)!important;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active::before{
+  content:"";
+  position:absolute;
+  right:-19vw;top:24vh;
+  width:68vw;height:68vw;
+  max-width:330px;max-height:330px;
+  border:1px solid rgba(93,201,255,.08);
+  border-radius:50%;
+  box-shadow:0 0 0 34px rgba(93,201,255,.025),0 0 0 70px rgba(101,242,195,.015);
+  pointer-events:none;
+}
+body.jd-controller-live #sensorModePanel.dance-session-active::after{
+  content:"MOVA-SE COM O RITMO"!important;
+  position:absolute!important;
+  right:max(14px,env(safe-area-inset-right))!important;
+  bottom:max(15px,env(safe-area-inset-bottom))!important;
+  color:rgba(255,255,255,.14)!important;
+  font-size:.5rem!important;
+  font-weight:950!important;
+  letter-spacing:.14em!important;
+  pointer-events:none!important;
+}
+@media(max-width:370px){
+  body.jd-controller-live #sensorModePanel.dance-session-active #finalDanceSongCard{width:calc(100vw - 16px)!important}
+  body.jd-controller-live #sensorModePanel.dance-session-active .final-mobile-jd-score-column{left:max(13px,env(safe-area-inset-left))!important}
+}

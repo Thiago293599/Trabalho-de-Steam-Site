@@ -908,6 +908,9 @@ async function phoneApplyDanceSession(payload){
   phoneDanceSession={...payload};
   const danceSessionEnded=String(payload.reason||"")==="ended";
   sensorModePanel?.classList.toggle("dance-session-active",!danceSessionEnded);
+  // V51: estado explícito no body. Evita que a HUD do Just Dance fique presa
+  // dentro do card normal do controle quando algum modo Party/Online troca classes.
+  document.body.classList.toggle("jd-controller-live",!danceSessionEnded);
 
   if(onlineFullControllerMode){
     const ended=danceSessionEnded;
@@ -1581,7 +1584,10 @@ function applySensorLabState(nextState, me) {
   sensorModePanel?.classList.toggle("hidden", !isSensorLab);
   if (!isSensorLab) {
     sensorModeRequested = false;
-    if(!phoneDanceSession || String(phoneDanceSession?.reason||"")==="ended") sensorModePanel?.classList.remove("dance-session-active");
+    if(!phoneDanceSession || String(phoneDanceSession?.reason||"")==="ended") {
+      sensorModePanel?.classList.remove("dance-session-active");
+      document.body.classList.remove("jd-controller-live");
+    }
     stopSensorStreaming({ keepPermission:true, keepReady:true });
     return false;
   }
