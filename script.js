@@ -2743,12 +2743,6 @@ async function installDanceMediaBlob(key, blob, element) {
   await waitDanceMediaMetadata(element);
 }
 
-function danceRemoteOnlineClient() {
-  // V54: jogadores Online remotos não devem puxar High/Medium/Preview
-  // do computador do host. Isso economiza upload e deixa o Socket.IO livre.
-  return Boolean(onlineRoomCode && !onlineIsHost);
-}
-
 function danceServerLocalVideoUrl(songId, quality) {
   const q = String(quality || "").toLowerCase();
   if (!songId || !["preview", "medium", "high"].includes(q)) return "";
@@ -2759,7 +2753,7 @@ function danceSongPreviewSourceCandidates(song) {
   if (!song) return [];
   const candidates = [];
   const localPreview = danceServerLocalVideoUrl(song.id, "preview");
-  if (localPreview && !danceRemoteOnlineClient()) candidates.push(localPreview);
+  if (localPreview) candidates.push(localPreview);
 
   const rawPreview = resolveDanceSongVideoSource(song, song.previewVideo || song.videos?.low);
   if (isDanceDirectStreamSource(rawPreview)) candidates.push(...danceGoogleDriveStreamCandidates(rawPreview));
@@ -2814,23 +2808,19 @@ function danceGoogleDriveStreamCandidates(source) {
   const encoded = encodeURIComponent(id);
   const candidates = [];
 
+  // V9: caminho principal. O servidor do jogo busca o MP4 no Drive e
+  // retransmite os bytes/Range para o <video>. Assim não dependemos dos
+  // cookies cross-site do Google Drive e nenhuma interface do Drive aparece.
   const proxy = serverEndpoint(`/api/media/gdrive/${encoded}`);
-  const direct = [
+  if (proxy) candidates.push(proxy);
+
+  // Mantemos o acesso direto apenas como segunda tentativa, caso o servidor
+  // esteja em uma versão antiga ou o proxy esteja temporariamente inacessível.
+  candidates.push(
     `https://drive.usercontent.google.com/download?id=${encoded}&export=download&authuser=0&confirm=t&acknowledgeAbuse=true`,
     `https://drive.usercontent.google.com/download?id=${encoded}&export=download&confirm=t`,
     `https://drive.google.com/uc?export=download&id=${encoded}&confirm=t`
-  ];
-
-  // V54: em jogadores Online remotos tentamos o Drive direto primeiro para
-  // que os bytes do vídeo não atravessem o PC do host. Se o Drive direto
-  // recusar o arquivo, o proxy do servidor continua como fallback.
-  if (danceRemoteOnlineClient()) {
-    candidates.push(...direct);
-    if (proxy) candidates.push(proxy);
-  } else {
-    if (proxy) candidates.push(proxy);
-    candidates.push(...direct);
-  }
+  );
   return candidates;
 }
 
@@ -2853,9 +2843,7 @@ async function installDanceDirectVideoStream(source, element) {
       element.muted = false;
       element.volume = Math.max(0, Math.min(1, Number(danceVolume?.value ?? 0.9)));
       element.load();
-      const isServerProxy = String(url).includes("/api/media/gdrive/");
-      const timeoutMs = danceRemoteOnlineClient() && !isServerProxy ? 8000 : 30000;
-      await waitDanceMediaMetadata(element, timeoutMs);
+      await waitDanceMediaMetadata(element, 30000);
       return url;
     } catch (error) {
       lastError = error;
@@ -2983,24 +2971,18 @@ async function prepareDancePlayerAssets(targetQuality, options = {}) {
         let localError = null;
         let driveError = null;
 
-        const allowServerLocal = !danceRemoteOnlineClient();
-        if (allowServerLocal) {
-          setDancePreloadUi(8, `Procurando vídeo ${label} no computador do servidor…`, "Prioridade 1 de 3 • servidor local");
-          try {
-            await installDanceServerLocalVideo(songConfig.id, quality, danceTestVideo);
-            loadedFrom = "server-local";
-            setDancePreloadUi(videoEnd, `${label} pronto • arquivo local do computador.`);
-          } catch (error) {
-            localError = error;
-            try { danceTestVideo?.removeAttribute("src"); danceTestVideo?.load(); } catch {}
-          }
-        } else {
-          localError = new Error("Vídeo local ignorado em jogador Online remoto para preservar o servidor.");
-          setDancePreloadUi(10, `Online remoto: carregando ${label} sem usar o upload do host…`, "Drive direto/CDN primeiro • servidor protegido");
+        setDancePreloadUi(8, `Procurando vídeo ${label} no computador do servidor…`, "Prioridade 1 de 3 • servidor local");
+        try {
+          await installDanceServerLocalVideo(songConfig.id, quality, danceTestVideo);
+          loadedFrom = "server-local";
+          setDancePreloadUi(videoEnd, `${label} pronto • arquivo local do computador.`);
+        } catch (error) {
+          localError = error;
+          try { danceTestVideo?.removeAttribute("src"); danceTestVideo?.load(); } catch {}
         }
 
         if (!loadedFrom) {
-          setDancePreloadUi(14, allowServerLocal ? `Vídeo ${label} não encontrado no PC; tentando Google Drive…` : `Tentando ${label} diretamente do Google Drive…`, allowServerLocal ? "Prioridade 2 de 3 • Google Drive" : "Online remoto • Drive direto");
+          setDancePreloadUi(14, `Vídeo ${label} não encontrado no PC; tentando Google Drive…`, "Prioridade 2 de 3 • Google Drive");
           try {
             if (directStream) {
               await installDanceDirectVideoStream(videoSource, danceTestVideo);
