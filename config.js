@@ -6,5 +6,5 @@
   este servidor responder em /api/status.
 */
 window.GAME_CONFIG = {
-  SERVER_URL: "https://steam-trabalho-de-um-tabuleiro.onrender.com"
+  SERVER_URL: "https://desktop-krmh4mf.taile2c81b.ts.net"
 };
